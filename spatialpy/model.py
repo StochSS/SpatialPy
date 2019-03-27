@@ -1,8 +1,12 @@
-This module defines a model of a well mixed biochemical reaction network.
+This module defines a model that simulates a discrete, stoachastic, mixed biochemical reaction network in python.
     
 """
 import uuid
+from __future__ import division
 from collections import OrderedDict
+#from spatialpy.core.spatialpySolver import SpatialPySolver
+#from spatialpy.core.spatialpyError import *
+import numpy as np
 
 
 class Model():
@@ -84,14 +88,18 @@ class Model():
             Parameter object or a list of Parameter objects.
         """
         # TODO, make sure that you don't overwrite an existing parameter??
-        if type(params).__name__=='list':
+       if isinstance(params,list): 
             for p in params:
-                self.listOfParameters[p.name] = p
+                self.add_parameter(p)
         else:
-            if type(params).__name__=='instance':
+            if isinstance(params, Parameter):
+                problem = self.problem_with_name(params.name)
+                if problem is not None:
+                    raise problem
                 self.listOfParameters[params.name] = params
             else:
-                raise
+                raise ParameterError("Could not resolve Parameter expression {} to a scalar value.".format(params))
+        return params
 
     def delete_parameter(self, obj):
         self.listOfParameters.pop(obj)
@@ -136,7 +144,7 @@ class Model():
             raise
 
     def get_reaction(self, rname):
-        return reactions[rname]
+        return self.listOfReactions[rname]
 
     def get_num_reactions(self):
         return len(self.listOfReactions)
@@ -202,7 +210,7 @@ class Parameter():
         if self.expression == None:
             raise TypeError
     
-        if self.value == None:
+        if self.value is None:
             self.evaluate()
     
     def evaluate(self,namespace={}):
@@ -217,10 +225,10 @@ class Parameter():
         # We allow expression to be passed in as a non-string type. Invalid strings
         # will be caught below. It is perfectly fine to give a scalar value as the expression.
         # This can then be evaluated in an empty namespace to the scalar value.
-        if expression != None:
+        if expression is not None:
             self.expression = str(expression)
                     
-        if self.expression == None:
+        if self.expression is None:
             raise TypeError
     
         self.evaluate()
@@ -305,7 +313,7 @@ class Reaction():
 
         if self.massaction:
             self.type = "mass-action"
-            if rate == None:
+            if rate is None:
                 raise ReactionError("Reaction "+self.name +": A mass-action propensity has to have a rate.")
             self.marate = rate
             self.create_mass_action()
@@ -347,7 +355,7 @@ class Reaction():
             propensity_function += "*vol"
 
 
-        self.propensity_function = "return " + propensity_function + ';'
+        self.propensity_function = propensity_function
             
     def set_type(self,type):
         if type not in {'mass-action','customized'}:
