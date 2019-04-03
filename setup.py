@@ -12,7 +12,9 @@ setup(name="spatialpy",
                           "h5py"],
       
       author="Brian Drawert",
+      author="Evie Hilton",
       author_email=["briandrawert@gmail.com"],
+      author_email=["mhilton@unca.edu"],
       license = "GPL",
       keywords = "spatialpy, spatial stochastic simulation, RDME",
      
