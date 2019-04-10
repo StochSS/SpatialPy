@@ -35,9 +35,9 @@ except:
     raise Exception("PyURDME requires FeniCS/Dolfin.")
 
 try:
-    dolfin.parameters["linear_algebra_backend"] = "uBLAS"
+    #dolfin.parameters["linear_algebra_backend"] = "uBLAS"
 except:
-    dolfin.parameters["linear_algebra_backend"] = "Eigen"
+    #dolfin.parameters["linear_algebra_backend"] = "Eigen"
 
 import pickle
 import json
@@ -610,89 +610,4 @@ class URDMEResult(dict):
                 vec[i] = data[i] # shouldn't we use v2d or d2v here?  But it doesn't work if I do.
         fun.display(opacity=opacity, wireframe=wireframe, width=width, camera=camera)
 
-
-class DolfinFunctionWrapper(dolfin.Function):
-    """ A dolfin.Function extended with methods to visualize it in
-        an IPyhthon notebook using three.js.
-        """
-
-    def __init__(self, function_space):
-        dolfin.Function.__init__(self, function_space)
-
-    def display(self, opacity=1.0, wireframe=True, width=500, camera=[0,0,1]):
-        """ Plot the solution in an IPython notebook.
-            opacity:    controls the degree of transparency
-            wireframe:  toggle display of the wireframe mesh on and off.
-            """
-        u_vec = self.vector()
-        # Need to flatten the array for compatibility across Dolfin 1.4/1.5
-        c = _compute_colors(numpy.array(u_vec).flatten())
-        jstr = URDMEMesh(self.function_space().mesh()).export_to_three_js(colors=c)
-        hstr = None
-        with open(os.path.dirname(os.path.abspath(__file__))+"/data/three.js_templates/solution.html",'r') as fd:
-            hstr = fd.read()
-        if hstr is None:
-            raise Exception("could note open template solution.html")
-        hstr = hstr.replace('###PYURDME_MESH_JSON###',jstr)
-
-        # Create a random id for the display div. This is to avioid multiple plots ending up in the same
-        # div in Ipython notebook
-        displayareaid=str(uuid.uuid4())
-        hstr = hstr.replace('###DISPLAYAREAID###',displayareaid)
-        hstr = hstr.replace('###ALPHA###',str(opacity))
-        if wireframe:
-            hstr = hstr.replace('###WIREFRAME###',"true")
-        else:
-            hstr = hstr.replace('###WIREFRAME###',"false")
-        hstr = hstr.replace('###WIDTH###',str(width))
-        height = int(width * 0.75)
-
-        # ###CAMERA_X###, ###CAMERA_Y###, ###CAMERA_Z###
-        hstr = hstr.replace('###CAMERA_X###',str(camera[0]))
-        hstr = hstr.replace('###CAMERA_Y###',str(camera[1]))
-        hstr = hstr.replace('###CAMERA_Z###',str(camera[2]))
-
-
-        html = '<div style="width: {0}px; height: {1}px;" id="{2}" ></div>'.format(width, height, displayareaid)
-        IPython.display.display(IPython.display.HTML(html+hstr))
-
-#   def vector(self):
-#        "We need to overload this method "
-#        u = super(DolfinFunctionWrapper,self).vector()
-#        u = numpy.array(u).flatten()
-#       return u
-
-
-def get_N_HexCol(N=None):
-    import colorsys
-    HSV_tuples = [(x*1.0/N, 0.5, 0.5) for x in xrange(N)]
-    hex_out = []
-    for rgb in HSV_tuples:
-        rgb = map(lambda x: int(x*255),colorsys.hsv_to_rgb(*rgb))
-        hex_out.append("".join(map(lambda x: chr(x).encode('hex'),rgb)))
-    return ["red","green","blue", "yellow"]
-
-
-def _compute_colors(x):
-    import matplotlib.cm
-
-    # Get RGB color map proportional to the concentration.
-    cm = matplotlib.cm.ScalarMappable()
-    crgba= cm.to_rgba(x, bytes = True)
-    # Convert RGB to HEX
-    colors= []
-    for row in crgba:
-        # get R,G,B of RGBA
-        colors.append(_rgb_to_hex(tuple(list(row[0:3]))))
-
-    # Convert Hex to Decimal
-    for i,c in enumerate(colors):
-        colors[i] = int(c,0)
-
-
-    return colors
-
-
-def _rgb_to_hex(rgb):
-    return '0x%02x%02x%02x' % rgb
 
