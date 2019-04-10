@@ -70,7 +70,8 @@ class Model():
     def delete_species(self, obj):
         """ Remove a Species from model.listOfSpecies. """
         self.listOfSpecies.pop(obj)        
-         
+        
+        
     def delete_all_species(self):
         self.listOfSpecies.clear()
 
