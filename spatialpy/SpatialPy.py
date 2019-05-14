@@ -29,18 +29,7 @@ except:
 try:
     import h5py
 except:
-    raise Exception("PyURDME requires h5py.")
-
-try:
-    #import dolfin
-    import mshr
-except:
-    raise Exception("PyURDME requires FeniCS/Dolfin.")
-
-try:
-    #dolfin.parameters["linear_algebra_backend"] = "uBLAS"
-except:
-    #dolfin.parameters["linear_algebra_backend"] = "Eigen"
+    raise Exception("SpatialPy requires h5py.")
 
 import pickle
 import json
