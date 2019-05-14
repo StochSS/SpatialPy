@@ -86,7 +86,7 @@ def deprecated(func):
 #logging.getLogger('FFC').setLevel(logging.ERROR)
 #logging.getLogger('UFL').setLevel(logging.ERROR)
 
-class URDMEModel(Model):
+class SPATIALPYModel(Model):
     """
         An URDME Model extends Model with spatial information and methods to create URDME solver input.
         TODO: Documentiation.
