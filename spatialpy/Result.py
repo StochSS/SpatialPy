@@ -17,27 +17,6 @@ from model import *
 
 import inspect
 
-try:
-    # This is only needed if we are running in an Ipython Notebook
-    import IPython.display
-except:
-    pass
-
-try:
-    import h5py
-except:
-    raise Exception("PyURDME requires h5py.")
-
-try:
-    import dolfin
-    import mshr
-except:
-    raise Exception("PyURDME requires FeniCS/Dolfin.")
-
-try:
-    #dolfin.parameters["linear_algebra_backend"] = "uBLAS"
-except:
-    #dolfin.parameters["linear_algebra_backend"] = "Eigen"
 
 import pickle
 import json
