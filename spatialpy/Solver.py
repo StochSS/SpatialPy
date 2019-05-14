@@ -26,29 +26,18 @@ except:
 try:
     import h5py
 except:
-    raise Exception("PyURDME requires h5py.")
-
-try:
-    import dolfin
-    import mshr
-except:
-    raise Exception("PyURDME requires FeniCS/Dolfin.")
-
-try:
-    #dolfin.parameters["linear_algebra_backend"] = "uBLAS"
-except:
-    #dolfin.parameters["linear_algebra_backend"] = "Eigen"
+    raise Exception("SpatialPy requires h5py.")
 
 import pickle
 import json
 import functools
 
 # module-level variable to for javascript export in IPython/Jupyter notebooks
-__pyurdme_javascript_libraries_loaded = False
+__spatialpy_javascript_libraries_loaded = False
 def load_pyurdme_javascript_libraries():
-    global __pyurdme_javascript_libraries_loaded
-    if not __pyurdme_javascript_libraries_loaded:
-        __pyurdme_javascript_libraries_loaded = True
+    global __spatialpy_javascript_libraries_loaded
+    if not __spatialpy_javascript_libraries_loaded:
+        __spatialpy_javascript_libraries_loaded = True
         import os.path
         import IPython.display
         with open(os.path.join(os.path.dirname(__file__),'data/three.js_templates/js/three.js')) as fd:
@@ -77,24 +66,17 @@ def deprecated(func):
     return new_func
 
 
-# Set log level to report only errors or worse
-#dolfin.set_log_level(dolfin.ERROR)
-import logging
-logging.getLogger('FFC').setLevel(logging.ERROR)
-logging.getLogger('UFL').setLevel(logging.ERROR)
-
-
-class URDMESolver:
-    """ Abstract class for URDME solvers. """
+class SpatialPySolver:
+    """ Abstract class for spatialpy solvers. """
 
     def __init__(self, model, solver_path=None, report_level=0, model_file=None, sopts=None):
         """ Constructor. """
-        if not isinstance(model, URDMEModel):
-            raise URDMEError("URDMEsolver constructors must take a URDMEModel as an argument.")
+        if not isinstance(model, SpatialPyModel):
+            raise SpatialPyError("URDMEsolver constructors must take a SpatialPyModel as an argument.")
         if not issubclass(self.__class__, URDMESolver):
-            raise URDMEError("Solver classes must be a subclass of URDMESolver.")
+            raise SpatialPyError("Solver classes must be a subclass of SpatialPySolver.")
         if not hasattr(self, 'NAME'):
-            raise URDMEError("Solver classes must implement a NAME attribute.")
+            raise SpatialPyError("Solver classes must implement a NAME attribute.")
 
         self.model = model
         self.is_compiled = False
@@ -112,13 +94,13 @@ class URDMESolver:
         # For the remote execution
         self.temp_urdme_root = None
 
-        self.URDME_ROOT =  os.path.dirname(os.path.abspath(__file__))+"/urdme"
+        self.SpatialPy_ROOT =  os.path.dirname(os.path.abspath(__file__))+"/spatialpy"
 
         #print "solver_path={0}".format(solver_path)
         if solver_path is None or solver_path == "":
-            self.URDME_BUILD = self.URDME_ROOT + '/build/'
+            self.SpatialPy_BUILD = self.SpatialPy_ROOT + '/build/'
         else:
-            self.URDME_BUILD = solver_path + '/build/'
+            self.SpatialPy_BUILD = solver_path + '/build/'
             os.environ['SOLVER_ROOT'] = solver_path
 
     def __getstate__(self):
@@ -179,21 +161,21 @@ class URDMESolver:
         # 0. restore the instance variables
         for key, val in state['vars'].iteritems():
             self.__dict__[key] = val
-        # 1. create temporary directory = URDME_ROOT
-        self.temp_urdme_root = tempfile.mkdtemp(dir=os.environ.get('PYURDME_TMPDIR'))
-        self.URDME_ROOT = self.temp_urdme_root
-        self.URDME_BUILD = self.temp_urdme_root+'/build/'
+        # 1. create temporary directory = SPATIALPY_ROOT
+        self.temp_spatialpy_root = tempfile.mkdtemp(dir=os.environ.get('SPATIALPY_TMPDIR'))
+        self.SPATIALPY_ROOT = self.temp_spatialpy_root
+        self.SPATIALPY_BUILD = self.temp_spatialpy_root+'/build/'
         origwd = os.getcwd()
-        os.chdir(self.temp_urdme_root)
-        tarname = self.temp_urdme_root+'/'+self.NAME+'.tar.gz'
+        os.chdir(self.temp_spatialpy_root)
+        tarname = self.temp_spatialpy_root+'/'+self.NAME+'.tar.gz'
         with open(tarname, 'wd') as f:
             f.write(state['SolverFiles'])
         subprocess.call('tar -zxf '+tarname, shell=True)
         os.chdir(origwd)
         # Model File
-        self.model_file = self.temp_urdme_root+'/'+state['model_file']
+        self.model_file = self.temp_spatialpy_root+'/'+state['model_file']
         # Input File
-        self.infile_name = self.temp_urdme_root+'/'+state['input_file']
+        self.infile_name = self.temp_spatialpy_root+'/'+state['input_file']
 
 
     def __del__(self):
@@ -208,32 +190,32 @@ class URDMESolver:
                 shutil.rmtree(self.solver_base_dir)
             except OSError as e:
                 print "Could not delete '{0}'".format(self.solver_base_dir)
-        if self.temp_urdme_root is not None:
+        if self.temp_spatialpy_root is not None:
             try:
-                shutil.rmtree(self.temp_urdme_root)
+                shutil.rmtree(self.temp_spatialpy_root)
             except OSError as e:
                 print "Could not delete '{0}'".format(self.temp_urdme_root)
 
 
     def serialize(self, filename=None, report_level=0, sopts=None):
         """ Write the datastructures needed by the the core URDME solvers to a .mat input file. """
-        urdme_solver_data = self.model.get_solver_datastructure()
-        urdme_solver_data['report'] = report_level
+        spatialpy_solver_data = self.model.get_solver_datastructure()
+        spatialpy_solver_data['report'] = report_level
         if sopts is None:
-            urdme_solver_data['sopts'] = self.sopts
+            spatialpy_solver_data['sopts'] = self.sopts
         else:
-            urdme_solver_data['sopts'] = sopts
+            spatialpy_solver_data['sopts'] = sopts
 
-        self.model.validate(urdme_solver_data)
-        scipy.io.savemat(filename, urdme_solver_data, oned_as='column')
+        self.model.validate(spatialpy_solver_data)
+        scipy.io.savemat(filename, spatialpy_solver_data, oned_as='column')
 
 
     def compile(self):
         """ Compile the model."""
 
         # Create a unique directory each time call to compile.
-        self.solver_base_dir = tempfile.mkdtemp(dir=os.environ.get('PYURDME_TMPDIR'))
-        self.solver_dir = self.solver_base_dir + '/.urdme/'
+        self.solver_base_dir = tempfile.mkdtemp(dir=os.environ.get('SPATIALPY_TMPDIR'))
+        self.solver_dir = self.solver_base_dir + '/.spatialpy/'
         #print "URDMESolver.compile()  self.solver_dir={0}".format(self.solver_dir)
 
         if self.report_level >= 1:
@@ -457,8 +439,8 @@ class URDMESolver:
 
 
 
-def urdme(model=None, solver='nsm', solver_path="", model_file=None, input_file=None, seed=None, report_level=0):
-    """ URDME solver interface.
+def spatialpy(model=None, solver='nsm', solver_path="", model_file=None, input_file=None, seed=None, report_level=0):
+    """ SPATIALPY solver interface.
         Similar to model.run() the urdme() function provides an interface that is backwards compatiable with the
         previous URDME implementation.
         After sucessful execution, urdme returns a URDMEResults object with the following members:
@@ -483,13 +465,13 @@ def urdme(model=None, solver='nsm', solver_path="", model_file=None, input_file=
         else:
             raise URDMEError("Unknown solver: {0}".format(solver_name))
     else:
-        raise URDMEError("solver argument to urdme() must be a string or a URDMESolver class object.")
+        raise URDMEError("solver argument to spatialpy() must be a string or a spatialpysolver class object.")
 
     sol.compile()
     return sol.run(seed=seed, input_file=input_file)
 
 
-class URDMEDataFunction():
+class SPATIALPYDataFunction():
     """ Abstract class used to constuct the URDME data vector. """
     name = None
     def __init__(self, name=None):
@@ -507,117 +489,6 @@ class URDMEDataFunction():
         """
         raise Exception("URDMEDataFunction.map() not implemented.")
 
-
-class MeshImportError(Exception):
-    """ Exception to raise when encourntering and error importing a mesh. """
-    pass
-
-class URDMEError(Exception):
-    pass
-
-class ModelException(Exception):
-    pass
-
-class InvalidSystemMatrixException(Exception):
-    pass
-
-
-class IntervalMeshPeriodicBoundary(dolfin.SubDomain):
-    """ Subdomain for Periodic boundary conditions on a interval domain. """
-    def __init__(self, a=0.0, b=1.0):
-        """ 1D domain from a to b. """
-        dolfin.SubDomain.__init__(self)
-        self.a = a
-        self.b = b
-
-    def inside(self, x, on_boundary):
-        return not bool((dolfin.near(x[0], self.b)) and on_boundary)
-
-    def map(self, x, y):
-        if dolfin.near(x[0], self.b):
-            y[0] = self.a + (x[0] - self.b)
-
-class SquareMeshPeriodicBoundary(dolfin.SubDomain):
-    """ Subdomain for Periodic boundary conditions on a square domain. """
-    def __init__(self, Lx=1.0, Ly=1.0):
-        dolfin.SubDomain.__init__(self)
-        self.Lx = Lx
-        self.Ly = Ly
-
-    def inside(self, x, on_boundary):
-        """ Left boundary is "target domain" G """
-        # return True if on left or bottom boundary AND NOT on one of the two corners (0, 1) and (1, 0)
-        return bool((dolfin.near(x[0], 0) or dolfin.near(x[1], 0)) and
-                (not ((dolfin.near(x[0], 0) and dolfin.near(x[1], 1)) or
-                        (dolfin.near(x[0], 1) and dolfin.near(x[1], 0)))) and on_boundary)
-
-    def map(self, x, y):
-        ''' # Map right boundary G (x) to left boundary H (y) '''
-        if dolfin.near(x[0], self.Lx) and dolfin.near(x[1], self.Ly):
-            y[0] = x[0] - self.Lx
-            y[1] = x[1] - self.Ly
-        elif dolfin.near(x[0], self.Lx):
-            y[0] = x[0] - self.Lx
-            y[1] = x[1]
-        else:   # near(x[1], 1)
-            y[0] = x[0]
-            y[1] = x[1] - self.Ly
-
-class CubeMeshPeriodicBoundary(dolfin.SubDomain):
-    """ Subdomain for Periodic boundary conditions on a cube domain. """
-    def __init__(self, Lx=1.0, Ly=1.0, Lz=1.0):
-        dolfin.SubDomain.__init__(self)
-        self.Lx = Lx
-        self.Ly = Ly
-        self.Lz = Lz
-
-    def inside(self, x, on_boundary):
-        """ Left boundary is "target domain" G """
-        # return True if on left or bottom boundary AND NOT on one of the two corners (0, 1) and (1, 0)
-        return bool(
-                (dolfin.near(x[0], 0) or dolfin.near(x[1], 0) or dolfin.near(x[2], 0))
-                and (not (
-                        (dolfin.near(x[0], 1) and dolfin.near(x[1], 0) and dolfin.near(x[1], 0)) or
-                        (dolfin.near(x[0], 0) and dolfin.near(x[1], 1) and dolfin.near(x[1], 0)) or
-                        (dolfin.near(x[0], 0) and dolfin.near(x[1], 0) and dolfin.near(x[1], 1))
-                    ))
-                and on_boundary
-               )
-
-    def map(self, x, y):
-        ''' # Map right boundary G (x) to left boundary H (y) '''
-        if dolfin.near(x[0], self.Lx) and dolfin.near(x[1], self.Ly) and dolfin.near(x[2], self.Lz):
-            y[0] = x[0] - self.Lx
-            y[1] = x[1] - self.Ly
-            y[2] = x[2] - self.Lz
-        elif dolfin.near(x[0], self.Lx) and dolfin.near(x[1], self.Ly):
-            y[0] = x[0] - self.Lx
-            y[1] = x[1] - self.Ly
-            y[2] = x[2]
-        elif dolfin.near(x[0], self.Lx) and dolfin.near(x[2], self.Lz):
-            y[0] = x[0] - self.Lx
-            y[1] = x[1]
-            y[2] = x[2] - self.Lz
-        elif dolfin.near(x[1], self.Ly) and dolfin.near(x[2], self.Lz):
-            y[0] = x[0]
-            y[1] = x[1] - self.Ly
-            y[2] = x[2] - self.Lz
-        elif dolfin.near(x[0], self.Lx):
-            y[0] = x[0] - self.Lx
-            y[1] = x[1]
-            y[2] = x[2]
-        elif dolfin.near(x[1], self.Ly):
-            y[0] = x[0]
-            y[1] = x[1] - self.Ly
-            y[2] = x[2]
-        elif dolfin.near(x[2], self.Lz):
-            y[0] = x[0]
-            y[1] = x[1]
-            y[2] = x[2] - self.Lz
-        else:
-            y[0] = x[0]
-            y[1] = x[1]
-            y[2] = x[2]
 
 
 
