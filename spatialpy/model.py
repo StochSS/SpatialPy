@@ -1,4 +1,4 @@
-This module defines a model that simulates a discrete, stoachastic, mixed biochemical reaction network in python.
+#This module defines a model that simulates a discrete, stoachastic, mixed biochemical reaction network in python.
     
 """
 import uuid
