@@ -1,26 +1,22 @@
 #This module defines a model that simulates a discrete, stoachastic, mixed biochemical reaction network in python.
     
-"""
-import uuid
+
 from __future__ import division
+import uuid
 from collections import OrderedDict
 #from spatialpy.core.spatialpySolver import SpatialPySolver
 #from spatialpy.core.spatialpyError import *
-import numpy as np
+import numpy
 
 
 class Model():
-    """ Representation of a well mixed biochemical model. Interfaces to solvers in StochSS
-        should attempt to extend Model. """
+    """ Representation of a spatial biochemical model. """
     
     def __init__(self, name="", volume=1.0):
         """ Create an empty model. """
         
         # The name that the model is referenced by (should be a String)
         self.name = name
-        
-        # Optional decription of the model (string)
-        self.annotation = ""
         
         # Dictionaries with Species, Reactions and Parameter objects.
         # Species,Reactio and Paramter names are used as keys.
@@ -34,6 +30,42 @@ class Model():
         # Dict that holds flattended parameters and species for
         # evaluation of expressions in the scope of the model.
         self.namespace = OrderedDict([])
+
+        ######################
+        self.mesh = None
+        self.sd = None
+        self.listOfSubdomainIDs = set([1])
+        self.has_restrict_been_called = False
+        self.subdomain_diffusion_matrix = None
+
+
+    def add_subdomain(self, subdomain, domain_id):
+        """ Add a subdomain definition to the model.  By default, all regions are set to
+        subdomain 1.
+        Args:
+            subdomain: an instance of a 'spatialpy.SubDomain' subclass.
+            id: an int, the identifier for this subdomain.
+        """
+        if not isinstance(domain_id, int) or domain_id < 1:
+            raise ModelError("domain_id must be a positive integer");
+        if self.mesh is None:
+            raise Exception("SpatialPy models must have a mesh before subdomains can be attached");
+        if domain_id in  self.listOfSubdomainIDs:
+            raise ModelError("Subdomains can not be redefined")
+        self.listOfSubdomainIDs.add(domain_id)
+        if self.sd is None:
+            self.sd = numpy.ones(self.mesh.get_num_voxels())
+        # apply the subdomain to all points, set sd for any points that match
+        for v_ndx in range(self.mesh.get_num_voxels()):
+            if subdomain.inside( self.mesh.coordinates()[v_ndx,:], False):
+                self.sd[v_ndx] = domain_id
+
+    def restrict(self, species, listOfSubDomains):
+        self.has_restrict_been_called = True
+        if self.subdomain_diffusion_matrix is None:
+            self.subdomain_diffusion_matrix = numpy.zeros(( len(self.listOfSpecies), len(self.listOfSubdomainIDs))
+        #TODO 
+        
 
     def update_namespace(self):
         """ Create a dict with flattened parameter and species objects. """
@@ -57,6 +89,8 @@ class Model():
             Add a Species to listOfSpecies. Accepts input either as a single Species object, or
             as a list of Species objects.
         """
+        if self.has_restrict_been_called:
+            raise ModelError("Can not add species after restrict has been called")
         if isinstance(obj, Species):
             if obj.name in self.listOfSpecies:
                 raise ModelError("Can't add species. A species with that name already exists.")
@@ -89,7 +123,7 @@ class Model():
             Parameter object or a list of Parameter objects.
         """
         # TODO, make sure that you don't overwrite an existing parameter??
-       if isinstance(params,list): 
+        if isinstance(params,list): 
             for p in params:
                 self.add_parameter(p)
         else:
