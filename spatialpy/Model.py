@@ -1,19 +1,21 @@
 #This module defines a model that simulates a discrete, stoachastic, mixed biochemical reaction network in python.
     
 
-from __future__ import division
+from __future__ import division # is this still necessary?
 import uuid
 from collections import OrderedDict
-#from spatialpy.core.spatialpySolver import SpatialPySolver
-#from spatialpy.core.spatialpyError import *
+from spatialpy.Solver import Solver
 import numpy
 
 
 class Model():
     """ Representation of a spatial biochemical model. """
+    reserved_names = ['vol']
+    special_characters = ['[', ']', '+', '-', '*', '/', '.', '^']
+
     
     def __init__(self, name="", volume=1.0):
-        """ Create an empty model. """
+        """ Create an empty SpatialPy model. """
         
         # The name that the model is referenced by (should be a String)
         self.name = name
@@ -34,37 +36,109 @@ class Model():
         ######################
         self.mesh = None
         self.sd = None
-        self.listOfSubdomainIDs = set([1])
-        self.has_restrict_been_called = False
-        self.subdomain_diffusion_matrix = None
+        self.listOfSubdomainIDs = [1] # starts with subdomain '1'
+        self.listOfDiffusionRestrictions = {}
+        self.timestep_size = None
+        self.num_timesteps = None
+        self.listOfDataFunctions = OrderedDict()
+
+
+    def run(self, number_of_trajectories=1, solver=None, seed=None, report_level=0):
+        """ Simulate the model.
+        Args:
+            solver: A str or class type that is a subclass of SpatialPy.Solver.  Default: NSM solver.
+            number_of_trajectories: How many trajectories should be run.
+            seed: An int, the random seed given to the solver.
+            report_level: An int, Level of output from the solver: 0, 1, or 2. Default: 0.
+        Returns:
+            A SpatialPY.Result object with the results of the simulation.
+        """
+        if solver is not None:
+            if ((isinstance(solver, type)
+                    and issubclass(solver, Solver))) or issubclass(type(solver), Solver):
+                sol = solver(self, report_level=report_level)
+        else:
+            from spatialpy.nsmsolver import NSMSolver
+            sol = NSMSolver(self, report_level=report_level)
+
+        return sol.run(number_of_trajectories=number_of_trajectories, seed=seed)
+
+
+    def set_timesteps(self, step_size, num_steps):
+        """" Set the simlation time span parameters
+        Args:
+            step_size: float, size of each timestep in seconds
+            num_steps: int, total number of steps to take
+
+        Note: the number of output times will be num_steps+1 as the first
+              output will be at time zero.
+        """
+        #TODO, add checking
+        self.timestep_size = step_size
+        self.num_timesteps = num_steps
+
+    def timespan(self, time_span):
+        """
+        Set the time span of simulation. The SSA-SDPD engine does not support 
+        non-uniform timespans.
+
+        tspan : numpy ndarray
+            Evenly-spaced list of times at which to sample the species
+            populations during the simulation.
+        """
+
+        items_diff = numpy.diff(time_span)
+        items = map(lambda x: round(x, 10), items_diff)
+        isuniform = (len(set(items)) == 1)
+
+        if isuniform:
+            self.timestep_size = items_diff[0]
+            self.num_timesteps = len(items_diff)
+        else:
+            raise InvalidModelError("Only uniform timespans are supported")
+
 
 
     def add_subdomain(self, subdomain, domain_id):
         """ Add a subdomain definition to the model.  By default, all regions are set to
         subdomain 1.
         Args:
-            subdomain: an instance of a 'spatialpy.SubDomain' subclass.
-            id: an int, the identifier for this subdomain.
+            subdomain: an instance of a 'spatialpy.SubDomain' subclass.  The 'inside()' method
+                       of this object will be used to assign domain_id to points.
+            domain_id: the identifier for this subdomain (usually an int).
+        Return values:
+            Number of mesh points that were tagged with this domain_id
         """
-        if not isinstance(domain_id, int) or domain_id < 1:
-            raise ModelError("domain_id must be a positive integer");
         if self.mesh is None:
             raise Exception("SpatialPy models must have a mesh before subdomains can be attached");
-        if domain_id in  self.listOfSubdomainIDs:
-            raise ModelError("Subdomains can not be redefined")
-        self.listOfSubdomainIDs.add(domain_id)
+        if domain_id not in self.listOfSubdomainIDs:
+            # index is the "particle type", value is the "subdomain ID"
+            self.listOfSubdomainIDs.append(domain_id)
         if self.sd is None:
             self.sd = numpy.ones(self.mesh.get_num_voxels())
         # apply the subdomain to all points, set sd for any points that match
+        count =0
         for v_ndx in range(self.mesh.get_num_voxels()):
             if subdomain.inside( self.mesh.coordinates()[v_ndx,:], False):
                 self.sd[v_ndx] = domain_id
+                count +=1
+        return count
 
     def restrict(self, species, listOfSubDomains):
-        self.has_restrict_been_called = True
-        if self.subdomain_diffusion_matrix is None:
-            self.subdomain_diffusion_matrix = numpy.zeros(( len(self.listOfSpecies), len(self.listOfSubdomainIDs))
-        #TODO 
+        """ Set the diffusion coefficient to zero for 'species' in all subdomains not in
+            'listOfSubDomains'. This effectively restricts the movement of 'species' to
+            the subdomains specified in 'listOfSubDomains'.
+        Args:
+            species: an instance of a 'spatialpy.Species'.
+            listOfSubdomains: a list, each object in the list should be a 'domain_id'
+        """
+        x = Species()
+        #if not isinstance(species, Species):
+        if str(type(x)) != str(type(species)):
+            raise ModelError("First argument to restrict() must be a Species object")
+        if not isinstance(listOfSubDomains,list):
+            raise ModelError("First argument to restrict() must be a list of subdomain_id")
+        self.listOfDiffusionRestrictions[species] = listOfSubDomains
         
 
     def update_namespace(self):
@@ -85,21 +159,29 @@ class Model():
         return self.listOfSpecies
 
     def add_species(self, obj):
-        """ 
-            Add a Species to listOfSpecies. Accepts input either as a single Species object, or
-            as a list of Species objects.
         """
-        if self.has_restrict_been_called:
-            raise ModelError("Can not add species after restrict has been called")
-        if isinstance(obj, Species):
-            if obj.name in self.listOfSpecies:
-                raise ModelError("Can't add species. A species with that name already exists.")
-            self.listOfSpecies[obj.name] = obj;
-        else: # obj is a list of species
+        Adds a species, or list of species to the model.
+
+        Attributes
+        ----------
+        obj : Species, or list of Species
+            The species or list of species to be added to the model object.
+        """
+
+        #if isinstance(obj, Species):
+        x = Species()
+        if str(type(x)) == str(type(obj)):
+            problem = self.problem_with_name(obj.name)
+            if problem is not None:
+                raise problem
+            self.listOfSpecies[obj.name] = obj
+        elif isinstance(obj, list):
             for S in obj:
-                if S.name in self.listOfSpecies:
-                    raise ModelError("Can't add species. A species with that name already exists.")
-                self.listOfSpecies[S.name] = S;
+                self.add_species(S)
+        else:
+            raise ModelError("Unexpected parameter for add_species. Parameter must be Species or list of Species.")
+        return obj
+
 
     def delete_species(self, obj):
         """ Remove a Species from model.listOfSpecies. """
@@ -117,23 +199,43 @@ class Model():
 
     def get_all_parameters(self):
         return self.listOfParameters
-    
+
+    def problem_with_name(self, name):
+        if name in Model.reserved_names:
+            return ModelError('Name "{}" is unavailable. It is reserved for internal GillesPy use. Reserved Names: ({}).'.format(name, Model.reserved_names))
+        if name in self.listOfSpecies:
+            return ModelError('Name "{}" is unavailable. A species with that name exists.'.format(name))
+        if name in self.listOfParameters:
+            return ModelError('Name "{}" is unavailable. A parameter with that name exists.'.format(name))
+        if name.isdigit():
+            return ModelError('Name "{}" is unavailable. Names must not be numeric strings.'.format(name))
+        for special_character in Model.special_characters:
+            if special_character in name:
+                return ModelError('Name "{}" is unavailable. Names must not contain special characters: {}.'.format(name, Model.special_characters))
+
+
+
     def add_parameter(self,params):
         """ Add Parameter(s) to model.listOfParameters. Input can be either a single
             Parameter object or a list of Parameter objects.
         """
-        # TODO, make sure that you don't overwrite an existing parameter??
         if isinstance(params,list): 
             for p in params:
                 self.add_parameter(p)
         else:
-            if isinstance(params, Parameter):
+            #if isinstance(params, type(Parameter())):
+            x = Parameter()
+            if str(type(params)) == str(type(x)):
                 problem = self.problem_with_name(params.name)
                 if problem is not None:
                     raise problem
+                # make sure that you don't overwrite an existing parameter??
+                if params.name in self.listOfParameters.keys():
+                    raise ParameterError("Parameter '{0}' has already been added to the model.".format(params.name))
                 self.listOfParameters[params.name] = params
             else:
-                raise ParameterError("Could not resolve Parameter expression {} to a scalar value.".format(params))
+                #raise ParameterError("Could not resolve Parameter expression {} to a scalar value.".format(params))
+                raise ParameterError("Parameter '{0}' needs to be of type '{2}', it is of type '{1}'".format(params.name,str(type(params)),str(type(x))))
         return params
 
     def delete_parameter(self, obj):
@@ -202,6 +304,97 @@ class Model():
             self.listOfReactions == other.listOfReactions and \
             self.name == other.name)
 
+    def create_stoichiometric_matrix(self):
+        """ Generate a stoichiometric matrix in sparse CSC format. """
+
+        if self.get_num_reactions() > 0:
+            ND = numpy.zeros((self.get_num_species(), self.get_num_reactions()))
+            for i, r in enumerate(self.listOfReactions):
+                R = self.listOfReactions[r]
+                reactants = R.reactants
+                products  = R.products
+
+                for s in reactants:
+                    ND[self.species_map[s], i] -= reactants[s]
+                for s in products:
+                    ND[self.species_map[s], i] += products[s]
+
+            N = scipy.sparse.csc_matrix(ND)
+        else:
+            N = numpy.zeros((self.get_num_species(), self.get_num_reactions()))
+
+        return N
+
+
+    def create_dependency_graph(self):
+        """ Construct the sparse dependency graph. """
+        # We cannot safely generate a dependency graph (without attempting to analyze the
+        # propensity string itself) if the model contains custom propensities.
+        mass_action_model = True
+        for name, reaction in self.listOfReactions.items():
+            if not reaction.massaction:
+                GF = numpy.ones((self.get_num_reactions(), 
+                    self.get_num_reactions() + self.get_num_species()))
+                mass_action_model = False
+
+        if mass_action_model:
+            GF = numpy.zeros((self.get_num_reactions(), 
+                self.get_num_reactions() + self.get_num_species()))
+            species_map = self.get_species_map()
+
+            involved_species = []
+            reactants = []
+            for name, reaction in self.listOfReactions.items():
+                temp = []
+                temp2 = []
+                for s in reaction.reactants:
+                    temp.append(species_map[s])
+                    temp2.append(species_map[s])
+                for s in reaction.products:
+                    temp.append(species_map[s])
+                involved_species.append(temp)
+                reactants.append(temp2)
+
+            species_to_reactions = []
+            for species in self.listOfSpecies:
+                temp = []
+                for j, x in enumerate(reactants):
+                    if species_map[species] in x:
+                        temp.append(j)
+                species_to_reactions.append(temp)
+
+            reaction_to_reaction = []
+            for name, reaction in self.listOfReactions.items():
+                temp = []
+                for s in reaction.reactants:
+                    if species_to_reactions[species_map[s]] not in temp:
+                        temp = temp+species_to_reactions[species_map[s]]
+
+                for s in reaction.products:
+                    if species_to_reactions[species_map[s]] not in temp:
+                        temp = temp+ species_to_reactions[species_map[s]]
+
+                temp = list(set(temp))
+                reaction_to_reaction.append(temp)
+
+            # Populate G
+            for j, spec in enumerate(species_to_reactions):
+                for s in spec:
+                    GF[s, j] = 1
+
+            for i,reac in enumerate(reaction_to_reaction):
+                for r in reac:
+                    GF[r, self.get_num_species()+i] = 1
+
+
+        try:
+            G = scipy.sparse.csc_matrix(GF)
+        except Exception as e:
+            G = GF
+
+        return G
+
+
 
 class Species():
     """ Model of a biochemical species. """
@@ -243,7 +436,8 @@ class Parameter():
         # might not be evaluable in the namespace of this parameter, but defined
         # in the context of a model or reaction.
         if self.expression == None:
-            raise TypeError
+            #raise TypeError
+            self.value = 0
     
         if self.value is None:
             self.evaluate()
@@ -364,23 +558,25 @@ class Reaction():
         # There is no theoretical justification for higher order propensities.
         # Users can still create such propensities if they really want to,
         # but should then use a custom propensity.
-        total_stoch=0
+        total_stoch = 0
         for r in self.reactants:
-            total_stoch+=self.reactants[r]
-        if total_stoch>2:
-            raise ReactionError("Reaction: " +self.name + "A mass-action reaction cannot involve more than two species.")
-    
+            total_stoch += self.reactants[r]
+        if total_stoch > 2:
+            raise ReactionError("Reaction: A mass-action reaction cannot involve more than two of one species or one "
+                                "of two species.")
         # Case EmptySet -> Y
-        propensity_function = self.marate.name;
-             
+
+        propensity_function = self.marate.name
+
         # There are only three ways to get 'total_stoch==2':
         for r in self.reactants:
             # Case 1: 2X -> Y
             if self.reactants[r] == 2:
-                propensity_function = "0.5*" +propensity_function+ "*"+r+"*("+r+"-1)/vol"
+                propensity_function = ("0.5*" + propensity_function +
+                                       "*" + str(r) + "*(" + str(r) + "-1)/vol")
             else:
-            # Case 3: X1, X2 -> Y;
-                propensity_function += "*"+r
+                # Case 3: X1, X2 -> Y;
+                propensity_function += "*" + str(r)
 
         # Set the volume dependency based on order.
         order = len(self.reactants)
@@ -388,7 +584,6 @@ class Reaction():
             propensity_function += "/vol"
         elif order == 0:
             propensity_function += "*vol"
-
 
         self.propensity_function = propensity_function
             
@@ -410,6 +605,8 @@ class Reaction():
 
 
 # Module exceptions
+class SimulationError(Exception):
+    pass
 class ModelError(Exception):
     pass
 

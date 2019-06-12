@@ -13,7 +13,7 @@ import numpy
 import scipy.io
 import scipy.sparse
 
-from model import *
+from spatialpy.Model import *
 
 import inspect
 
@@ -23,10 +23,6 @@ try:
 except:
     pass
 
-try:
-    import h5py
-except:
-    raise Exception("SpatialPy requires h5py.")
 
 import pickle
 import json
@@ -34,7 +30,7 @@ import functools
 
 # module-level variable to for javascript export in IPython/Jupyter notebooks
 __spatialpy_javascript_libraries_loaded = False
-def load_pyurdme_javascript_libraries():
+def load_javascript_libraries():
     global __spatialpy_javascript_libraries_loaded
     if not __spatialpy_javascript_libraries_loaded:
         __spatialpy_javascript_libraries_loaded = True
@@ -66,17 +62,18 @@ def deprecated(func):
     return new_func
 
 
-class SpatialPySolver:
+class Solver:
     """ Abstract class for spatialpy solvers. """
 
     def __init__(self, model, solver_path=None, report_level=0, model_file=None, sopts=None):
         """ Constructor. """
-        if not isinstance(model, SpatialPyModel):
-            raise SpatialPyError("URDMEsolver constructors must take a SpatialPyModel as an argument.")
-        if not issubclass(self.__class__, URDMESolver):
-            raise SpatialPyError("Solver classes must be a subclass of SpatialPySolver.")
+        #TODO: fix class checking
+        #if not isinstance(model, Model):
+        #    raise SimulationError("Solver constructors must take a Model as an argument.")
+        #if not issubclass(self.__class__, Solver):
+        #    raise SimulationError("Solver classes must be a subclass of SpatialPy.Solver.")
         if not hasattr(self, 'NAME'):
-            raise SpatialPyError("Solver classes must implement a NAME attribute.")
+            raise SimulationError("Solver classes must implement a NAME attribute.")
 
         self.model = model
         self.is_compiled = False
@@ -86,128 +83,36 @@ class SpatialPySolver:
         self.delete_infile = False
         self.model_name = self.model.name
         self.solver_base_dir = None
-        if sopts is None:
-            self.sopts = [0,0,0]
-        else:
-            self.sopts = sopts
 
         # For the remote execution
         self.temp_urdme_root = None
 
         self.SpatialPy_ROOT =  os.path.dirname(os.path.abspath(__file__))+"/spatialpy"
 
-        #print "solver_path={0}".format(solver_path)
+        #print("solver_path={0}".format(solver_path))
         if solver_path is None or solver_path == "":
             self.SpatialPy_BUILD = self.SpatialPy_ROOT + '/build/'
         else:
             self.SpatialPy_BUILD = solver_path + '/build/'
             os.environ['SOLVER_ROOT'] = solver_path
 
-    def __getstate__(self):
-        """ Save the state of the solver, saves all instance variables
-            and reads all the files necessary to compile the solver off
-            of the file system and stores it in a separate state variable.
-            If the solver model files is specified, it saves that too.
-            This is used by Pickle.
-        """
-        ret = {}
-        # Save the instance variables
-        ret['vars'] = self.__dict__.copy()
-        # The model object is not picklabe due to the Swig-objects from Dolfin
-        #ret['vars']['model'] = None
-        ret['vars']['is_compiled'] = False
-        # Create temp root
-        tmproot = tempfile.mkdtemp(dir=os.environ.get('PYURDME_TMPDIR'))
-        # Get the propensity file
-        model_file = tmproot+'/'+self.model_name + '_pyurdme_generated_model'+ '.c'
-        ret['model_file'] = os.path.basename(model_file)
-        if self.model_file == None:
-            self.create_propensity_file(file_name=model_file)
-        else:
-            subprocess.call('cp '+self.model_file+' '+model_file, shell=True)
-        # Get the solver source files
-        os.mkdir(tmproot+'/include')
-        os.mkdir(tmproot+'/src')
-        os.mkdir(tmproot+'/src/'+self.NAME)
-        #TODO: what if solverdir is not the same as URDME_ROOT ?
-        subprocess.call('cp '+self.URDME_ROOT+'/src/*.c '+tmproot+'/src/', shell=True)
-        subprocess.call('cp '+self.URDME_ROOT+'/src/'+self.NAME+'/*.* '+tmproot+'/src/'+self.NAME+'/', shell=True)
-        subprocess.call('cp '+self.URDME_ROOT+'/include/*.h '+tmproot+'/include/', shell=True)
-        #TODO: get the include files from solvers not in the default path (none currently implement this).
-        # Get the Makefile
-        os.mkdir(tmproot+'/build')
-        subprocess.call('cp '+self.URDME_BUILD+'Makefile.'+self.NAME+' '+tmproot+'/build/Makefile.'+self.NAME, shell=True)
-        # Get the input file
-        input_file = tmproot+'/model_input.mat'
-        ret['input_file'] = os.path.basename(input_file)
-        self.serialize(filename=input_file, report_level=self.report_level)
-        ##
-        origwd = os.getcwd()
-        os.chdir(tmproot)
-        tarname = tmproot+'/'+self.NAME+'.tar.gz'
-        subprocess.call('tar -czf '+tarname+' src include build '+os.path.basename(input_file)+' '+os.path.basename(model_file), shell=True)
-        with open(tarname, 'r') as f:
-            ret['SolverFiles'] = f.read()
-        os.chdir(origwd)
-        shutil.rmtree(tmproot)
-        # return the state
-        return ret
-
-    def __setstate__(self, state):
-        """ Set all instance variables for the object, and create a unique temporary
-            directory to store all the solver files.  URDME_BUILD is set to this dir,
-            and is_compiled is always set to false.  This is used by Pickle.
-        """
-        # 0. restore the instance variables
-        for key, val in state['vars'].iteritems():
-            self.__dict__[key] = val
-        # 1. create temporary directory = SPATIALPY_ROOT
-        self.temp_spatialpy_root = tempfile.mkdtemp(dir=os.environ.get('SPATIALPY_TMPDIR'))
-        self.SPATIALPY_ROOT = self.temp_spatialpy_root
-        self.SPATIALPY_BUILD = self.temp_spatialpy_root+'/build/'
-        origwd = os.getcwd()
-        os.chdir(self.temp_spatialpy_root)
-        tarname = self.temp_spatialpy_root+'/'+self.NAME+'.tar.gz'
-        with open(tarname, 'wd') as f:
-            f.write(state['SolverFiles'])
-        subprocess.call('tar -zxf '+tarname, shell=True)
-        os.chdir(origwd)
-        # Model File
-        self.model_file = self.temp_spatialpy_root+'/'+state['model_file']
-        # Input File
-        self.infile_name = self.temp_spatialpy_root+'/'+state['input_file']
-
 
     def __del__(self):
         """ Deconstructor.  Removes the compiled solver."""
-        if self.delete_infile:
-            try:
-                os.remove(self.infile_name)
-            except OSError as e:
-                print "Could not delete '{0}'".format(self.infile_name)
-        if self.solver_base_dir is not None:
-            try:
-                shutil.rmtree(self.solver_base_dir)
-            except OSError as e:
-                print "Could not delete '{0}'".format(self.solver_base_dir)
-        if self.temp_spatialpy_root is not None:
-            try:
-                shutil.rmtree(self.temp_spatialpy_root)
-            except OSError as e:
-                print "Could not delete '{0}'".format(self.temp_urdme_root)
+        try:
+            if self.solver_base_dir is not None:
+                try:
+                    shutil.rmtree(self.solver_base_dir)
+                except OSError as e:
+                    print("Could not delete '{0}'".format(self.solver_base_dir))
+            if self.temp_spatialpy_root is not None:
+                try:
+                    shutil.rmtree(self.temp_spatialpy_root)
+                except OSError as e:
+                    print("Could not delete '{0}'".format(self.temp_urdme_root))
+        except Exception as e:
+            print("__del__ failed: {0}".format(e))
 
-
-    def serialize(self, filename=None, report_level=0, sopts=None):
-        """ Write the datastructures needed by the the core URDME solvers to a .mat input file. """
-        spatialpy_solver_data = self.model.get_solver_datastructure()
-        spatialpy_solver_data['report'] = report_level
-        if sopts is None:
-            spatialpy_solver_data['sopts'] = self.sopts
-        else:
-            spatialpy_solver_data['sopts'] = sopts
-
-        self.model.validate(spatialpy_solver_data)
-        scipy.io.savemat(filename, spatialpy_solver_data, oned_as='column')
 
 
     def compile(self):
@@ -216,10 +121,9 @@ class SpatialPySolver:
         # Create a unique directory each time call to compile.
         self.solver_base_dir = tempfile.mkdtemp(dir=os.environ.get('SPATIALPY_TMPDIR'))
         self.solver_dir = self.solver_base_dir + '/.spatialpy/'
-        #print "URDMESolver.compile()  self.solver_dir={0}".format(self.solver_dir)
 
         if self.report_level >= 1:
-            print "Compiling Solver"
+            print("Compiling Solver")
 
         if os.path.isdir(self.solver_dir):
             try:
@@ -232,42 +136,42 @@ class SpatialPySolver:
             pass
 
         # Write the propensity file
-        self.propfilename = self.model_name + '_pyurdme_generated_model'
+        self.propfilename = self.model_name + '_generated_model'
         if self.model_file == None:
             prop_file_name = self.solver_dir + self.propfilename + '.c'
             if self.report_level > 1:
-                print "Creating propensity file {0}".format(prop_file_name)
+                print("Creating propensity file {0}".format(prop_file_name))
             self.create_propensity_file(file_name=prop_file_name)
         else:
             cmd = " ".join(['cp', self.model_file, self.solver_dir + self.propfilename + '.c'])
             if self.report_level > 1:
-                print cmd
+                print(cmd)
             subprocess.call(cmd, shell=True)
 
         # Build the solver
         makefile = 'Makefile.' + self.NAME
-        cmd = " ".join([ 'cd', self.solver_base_dir , ';', 'make', '-f', self.URDME_BUILD + makefile, 'URDME_ROOT=' + self.URDME_ROOT, 'URDME_MODEL=' + self.propfilename])
+        cmd = " ".join([ 'cd', self.solver_base_dir , ';', 'make', '-f', self.SpatialPy_BUILD + makefile, 'SpatialPy_ROOT=' + self.SpatialPy_ROOT, 'SpatialPy_MODEL=' + self.propfilename])
         if self.report_level > 1:
-            print "cmd: {0}\n".format(cmd)
+            print("cmd: {0}\n".format(cmd))
         try:
             handle = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             return_code = handle.wait()
         except OSError as e:
-            print "Error, execution of compilation raised an exception: {0}".format(e)
-            print "cmd = {0}".format(cmd)
-            raise URDMEError("Compilation of solver failed")
+            print("Error, execution of compilation raised an exception: {0}".format(e))
+            print("cmd = {0}".format(cmd))
+            raise SimulationError("Compilation of solver failed")
 
         if return_code != 0:
             try:
-                print handle.stdout.read()
-                print handle.stderr.read()
+                print(handle.stdout.read())
+                print(handle.stderr.read())
             except Exception as e:
                 pass
-            raise URDMEError("Compilation of solver failed, return_code={0}".format(return_code))
+            raise SimulationError("Compilation of solver failed, return_code={0}".format(return_code))
 
         if self.report_level > 1:
-            print handle.stdout.read()
-            print handle.stderr.read()
+            print(handle.stdout.read())
+            print(handle.stderr.read())
 
         self.is_compiled = True
 
@@ -279,9 +183,9 @@ class SpatialPySolver:
         input_file: the filename of the solver input data file .
         loaddata: boolean, should the result object load the data into memory on creation.
         Returns:
-            URDMEResult object.
+            Result object.
                 or, if number_of_trajectories > 1
-            a list of URDMEResult objects
+            a list of Result objects
         """
         if number_of_trajectories > 1:
             result_list = []
@@ -289,33 +193,16 @@ class SpatialPySolver:
         if not self.is_compiled:
             self.compile()
 
-        if input_file is None:
-            if self.infile_name is None or not os.path.exists(self.infile_name):
-                # Get temporary input and output files
-                infile = tempfile.NamedTemporaryFile(delete=False, dir=os.environ.get('PYURDME_TMPDIR'))
-
-                # Write the model to an input file in .mat format
-                self.serialize(filename=infile, report_level=self.report_level)
-                infile.close()
-                self.infile_name = infile.name
-                self.delete_infile = True
-        else:
-            self.infile_name = input_file
-            self.delete_infile = False
-
-        if not os.path.exists(self.infile_name):
-            raise URDMEError("input file not found.")
-
         # Execute the solver
         for run_ndx in range(number_of_trajectories):
-            outfile = tempfile.NamedTemporaryFile(delete=False, dir=os.environ.get('PYURDME_TMPDIR'))
+            outfile = tempfile.NamedTemporaryFile(delete=False, dir=os.environ.get('SpatialPy_TMPDIR'))
             outfile.close()
             urdme_solver_cmd = [self.solver_dir + self.propfilename + '.' + self.NAME, self.infile_name, outfile.name]
 
             if seed is not None:
                 urdme_solver_cmd.append(str(seed+run_ndx))
             if self.report_level > 1:
-                print 'cmd: {0}\n'.format(urdme_solver_cmd)
+                print('cmd: {0}\n'.format(urdme_solver_cmd))
             stdout = ''
             stderr = ''
             try:
@@ -326,22 +213,23 @@ class SpatialPySolver:
                     stdout, stderr = handle.communicate()
                 return_code = handle.wait()
             except OSError as e:
-                print "Error, execution of solver raised an exception: {0}".format(e)
-                print "urdme_solver_cmd = {0}".format(urdme_solver_cmd)
+                print("Error, execution of solver raised an exception: {0}".format(e))
+                print("urdme_solver_cmd = {0}".format(urdme_solver_cmd))
 
             if return_code != 0:
                 if self.report_level >= 1:
                     try:
-                        print stderr, stdout
+                        print(stderr)
+                        print(stdout)
                     except Exception as e:
                         pass
-                print "urdme_solver_cmd = {0}".format(urdme_solver_cmd)
-                raise URDMEError("Solver execution failed, return code = {0}".format(return_code))
+                print("urdme_solver_cmd = {0}".format(urdme_solver_cmd))
+                raise SimulationError("Solver execution failed, return code = {0}".format(return_code))
 
 
             #Load the result from the hdf5 output file.
             try:
-                result = URDMEResult(self.model, outfile.name, loaddata=loaddata)
+                result = Result(self.model, outfile.name, loaddata=loaddata)
                 result["Status"] = "Sucess"
                 result.stderr = stderr
                 result.stdout = stdout
@@ -352,13 +240,13 @@ class SpatialPySolver:
             except Exception as e:
                 exc_info = sys.exc_info()
                 os.remove(outfile.name)
-                raise exc_info[1], None, exc_info[2]
+                raise(exc_info[1], None, exc_info[2])
 
         return result_list
 
 
     def create_propensity_file(self, file_name=None):
-        """ Generate the C propensity file that is used to compile the URDME solvers.
+        """ Generate the C propensity file that is used to compile the solvers.
             Only mass action propensities are supported.
         """
 
@@ -370,7 +258,6 @@ class SpatialPySolver:
         i = 0
         for S in self.model.listOfSpecies:
             speciesdef += "#define " + S + " " + "x[" + str(i) + "]" + "\n"
-            speciesdef += "#define " + S + "_INDEX " +  str(i) + "\n"
             i += 1
 
         propfilestr = propfilestr.replace("__DEFINE_SPECIES__", speciesdef)
@@ -384,7 +271,7 @@ class SpatialPySolver:
         i = 0
         for d in self.model.listOfDataFunctions:
             if d.name is None:
-                raise URDMEError("DataFunction {0} does not have a name attributed defined.".format(i))
+                raise SimulationError("DataFunction {0} does not have a name attributed defined.".format(i))
             data_fn_str += "#define " + d.name + " data[" + str(i) + "]\n"
             i += 1
         propfilestr = propfilestr.replace("__DEFINE_DATA_FUNCTIONS__", str(data_fn_str))
@@ -419,7 +306,7 @@ class SpatialPySolver:
                 elif isinstance(self.model.listOfReactions[R].restrict_to, int):
                     func += "sd == " +  str(self.model.listOfReactions[R].restrict_to)
                 else:
-                    raise URDMEError("When restricting reaction to subdomains, you must specify either a list or an int")
+                    raise SimulationError("When restricting reaction to subdomains, you must specify either a list or an int")
                 func += "){\n"
                 func += self.model.listOfReactions[R].propensity_function
 
@@ -439,46 +326,16 @@ class SpatialPySolver:
 
 
 
-def spatialpy(model=None, solver='nsm', solver_path="", model_file=None, input_file=None, seed=None, report_level=0):
-    """ SPATIALPY solver interface.
-        Similar to model.run() the urdme() function provides an interface that is backwards compatiable with the
-        previous URDME implementation.
-        After sucessful execution, urdme returns a URDMEResults object with the following members:
-        U:         the raw copy number output in a matrix with dimension (Ndofs, num_time_points)
-        tspan:     the time span vector containing the time points that corresponds to the columns in U
-        status:    Sucess if the solver executed without error
-        stdout:    the standard ouput stream from the call to the core solver
-        stderr:    the standard error stream from the call to the core solver
-    """
 
 
-    #If solver is a subclass of URDMESolver, use it directly.
-    if isinstance(solver, (type, types.ClassType)) and  issubclass(solver, URDMESolver):
-        sol = solver(model, solver_path, report_level, model_file=model_file)
-    elif type(solver) is str:
-        if solver == 'nsm':
-            from nsmsolver import NSMSolver
-            sol = NSMSolver(model, solver_path, report_level, model_file=model_file)
-        elif solver == 'nem':
-            from nemsolver import NEMSolver
-            sol = NEMSolver(model, solver_path, report_level, model_file=model_file)
-        else:
-            raise URDMEError("Unknown solver: {0}".format(solver_name))
-    else:
-        raise URDMEError("solver argument to spatialpy() must be a string or a spatialpysolver class object.")
-
-    sol.compile()
-    return sol.run(seed=seed, input_file=input_file)
-
-
-class SPATIALPYDataFunction():
-    """ Abstract class used to constuct the URDME data vector. """
+class DataFunction():
+    """ Abstract class used to constuct the data vector. """
     name = None
     def __init__(self, name=None):
         if name is not None:
             self.name = name
         if self.name is None:
-            raise Exception("URDMEDataFunction must have a 'name'")
+            raise Exception("DataFunction must have a 'name'")
 
     def map(self, x):
         """ map() takes the coordinate 'x' and returns a list of doubles.
@@ -487,11 +344,9 @@ class SPATIALPYDataFunction():
         Returns:
             a list of floats.
         """
-        raise Exception("URDMEDataFunction.map() not implemented.")
+        raise Exception("DataFunction.map() not implemented.")
 
 
 
 
 
-if __name__ == '__main__':
-    """ Command line interface to URDME. Execute URDME given a model file. """
