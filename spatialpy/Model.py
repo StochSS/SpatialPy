@@ -6,6 +6,7 @@ import uuid
 from collections import OrderedDict
 from spatialpy.Solver import Solver
 import numpy
+import scipy
 
 
 class Model():
@@ -41,6 +42,8 @@ class Model():
         self.timestep_size = None
         self.num_timesteps = None
         self.listOfDataFunctions = OrderedDict()
+        self.listOfInitialConditions = OrderedDict()
+        self.species_map = {}
 
 
     def run(self, number_of_trajectories=1, solver=None, seed=None, report_level=0):
@@ -174,6 +177,7 @@ class Model():
             problem = self.problem_with_name(obj.name)
             if problem is not None:
                 raise problem
+            self.species_map[obj] = len(self.listOfSpecies)
             self.listOfSpecies[obj.name] = obj
         elif isinstance(obj, list):
             for S in obj:
@@ -340,7 +344,7 @@ class Model():
         if mass_action_model:
             GF = numpy.zeros((self.get_num_reactions(), 
                 self.get_num_reactions() + self.get_num_species()))
-            species_map = self.get_species_map()
+            species_map = self.species_map
 
             involved_species = []
             reactants = []
@@ -356,7 +360,7 @@ class Model():
                 reactants.append(temp2)
 
             species_to_reactions = []
-            for species in self.listOfSpecies:
+            for sname,species in self.listOfSpecies.items():
                 temp = []
                 for j, x in enumerate(reactants):
                     if species_map[species] in x:
@@ -393,6 +397,15 @@ class Model():
             G = GF
 
         return G
+
+    def apply_initial_conditions(self):
+        """ Initalize the u0 matrix (zeros) and then apply each initial condition"""
+        # initalize
+        ns = self.get_num_species()
+        nv = self.mesh.get_num_voxels()
+        self.u0 = numpy.zeros((ns, nv))
+        # apply initial condition functions
+
 
 
 

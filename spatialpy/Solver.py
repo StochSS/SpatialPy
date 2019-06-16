@@ -15,57 +15,12 @@ import scipy.sparse
 
 from spatialpy.Model import *
 
-import inspect
-
-try:
-    # This is only needed if we are running in an Ipython Notebook
-    import IPython.display
-except:
-    pass
-
-
-import pickle
-import json
-import functools
-
-# module-level variable to for javascript export in IPython/Jupyter notebooks
-__spatialpy_javascript_libraries_loaded = False
-def load_javascript_libraries():
-    global __spatialpy_javascript_libraries_loaded
-    if not __spatialpy_javascript_libraries_loaded:
-        __spatialpy_javascript_libraries_loaded = True
-        import os.path
-        import IPython.display
-        with open(os.path.join(os.path.dirname(__file__),'data/three.js_templates/js/three.js')) as fd:
-            bufa = fd.read()
-        with open(os.path.join(os.path.dirname(__file__),'data/three.js_templates/js/render.js')) as fd:
-            bufb = fd.read()
-        with open(os.path.join(os.path.dirname(__file__),'data/three.js_templates/js/OrbitControls.js')) as fd:
-            bufc = fd.read()
-        IPython.display.display(IPython.display.HTML('<script>'+bufa+bufc+bufb+'</script>'))
-
-
-def deprecated(func):
-    '''This is a decorator which can be used to mark functions
-     as deprecated. It will result in a warning being emitted
-     when the function is used.'''
-
-    @functools.wraps(func)
-    def new_func(*args, **kwargs):
-        warnings.warn_explicit(
-             "Call to deprecated function {}.".format(func.__name__),
-             category=DeprecationWarning,
-             filename=func.func_code.co_filename,
-             lineno=func.func_code.co_firstlineno + 1
-         )
-        return func(*args, **kwargs)
-    return new_func
 
 
 class Solver:
     """ Abstract class for spatialpy solvers. """
 
-    def __init__(self, model, solver_path=None, report_level=0, model_file=None, sopts=None):
+    def __init__(self, model, report_level=0):
         """ Constructor. """
         #TODO: fix class checking
         #if not isinstance(model, Model):
@@ -78,40 +33,22 @@ class Solver:
         self.model = model
         self.is_compiled = False
         self.report_level = report_level
-        self.model_file = model_file
-        self.infile_name = None
-        self.delete_infile = False
         self.model_name = self.model.name
-        self.solver_base_dir = None
+        self.build_dir = None
 
-        # For the remote execution
-        self.temp_urdme_root = None
-
-        self.SpatialPy_ROOT =  os.path.dirname(os.path.abspath(__file__))+"/spatialpy"
-
-        #print("solver_path={0}".format(solver_path))
-        if solver_path is None or solver_path == "":
-            self.SpatialPy_BUILD = self.SpatialPy_ROOT + '/build/'
-        else:
-            self.SpatialPy_BUILD = solver_path + '/build/'
-            os.environ['SOLVER_ROOT'] = solver_path
+        self.SpatialPy_ROOT =  os.path.dirname(os.path.abspath(__file__))+"/ssa_sdpd-c-simulation-engine"
 
 
     def __del__(self):
         """ Deconstructor.  Removes the compiled solver."""
         try:
-            if self.solver_base_dir is not None:
+            if self.build_dir is not None:
                 try:
                     shutil.rmtree(self.solver_base_dir)
                 except OSError as e:
                     print("Could not delete '{0}'".format(self.solver_base_dir))
-            if self.temp_spatialpy_root is not None:
-                try:
-                    shutil.rmtree(self.temp_spatialpy_root)
-                except OSError as e:
-                    print("Could not delete '{0}'".format(self.temp_urdme_root))
         except Exception as e:
-            print("__del__ failed: {0}".format(e))
+            pass
 
 
 
@@ -119,38 +56,21 @@ class Solver:
         """ Compile the model."""
 
         # Create a unique directory each time call to compile.
-        self.solver_base_dir = tempfile.mkdtemp(dir=os.environ.get('SPATIALPY_TMPDIR'))
-        self.solver_dir = self.solver_base_dir + '/.spatialpy/'
+        self.build_dir = tempfile.mkdtemp(dir=os.environ.get('SPATIALPY_TMPDIR'))
 
         if self.report_level >= 1:
-            print("Compiling Solver")
-
-        if os.path.isdir(self.solver_dir):
-            try:
-                shutil.rmtree(self.solver_dir)
-            except OSError as e:
-                pass
-        try:
-            os.mkdir(self.solver_dir)
-        except Exception as e:
-            pass
+            print("Compiling Solver.  Build dir: {0}".format(self.build_dir))
 
         # Write the propensity file
         self.propfilename = self.model_name + '_generated_model'
-        if self.model_file == None:
-            prop_file_name = self.solver_dir + self.propfilename + '.c'
-            if self.report_level > 1:
-                print("Creating propensity file {0}".format(prop_file_name))
-            self.create_propensity_file(file_name=prop_file_name)
-        else:
-            cmd = " ".join(['cp', self.model_file, self.solver_dir + self.propfilename + '.c'])
-            if self.report_level > 1:
-                print(cmd)
-            subprocess.call(cmd, shell=True)
+        self.prop_file_name = self.build_dir + '/' + self.propfilename + '.c'
+        if self.report_level > 1:
+            print("Creating propensity file {0}".format(self.prop_file_name))
+        self.create_propensity_file(file_name=self.prop_file_name)
 
         # Build the solver
-        makefile = 'Makefile.' + self.NAME
-        cmd = " ".join([ 'cd', self.solver_base_dir , ';', 'make', '-f', self.SpatialPy_BUILD + makefile, 'SpatialPy_ROOT=' + self.SpatialPy_ROOT, 'SpatialPy_MODEL=' + self.propfilename])
+        makefile = self.SpatialPy_ROOT+'/build/Makefile.'+self.NAME
+        cmd = " ".join([ 'cd', self.build_dir , ';', 'make', '-f', makefile, 'ROOT=' + self.SpatialPy_ROOT, 'MODEL=' + self.prop_file_name,'BUILD='+self.build_dir])
         if self.report_level > 1:
             print("cmd: {0}\n".format(cmd))
         try:
@@ -163,15 +83,15 @@ class Solver:
 
         if return_code != 0:
             try:
-                print(handle.stdout.read())
-                print(handle.stderr.read())
+                print(handle.stdout.read().decode("utf-8"))
+                print(handle.stderr.read().decode("utf-8"))
             except Exception as e:
                 pass
             raise SimulationError("Compilation of solver failed, return_code={0}".format(return_code))
 
         if self.report_level > 1:
-            print(handle.stdout.read())
-            print(handle.stderr.read())
+            print(handle.stdout.read().decode("utf-8"))
+            print(handle.stderr.read().decode("utf-8"))
 
         self.is_compiled = True
 
@@ -250,7 +170,7 @@ class Solver:
             Only mass action propensities are supported.
         """
 
-        template = open(os.path.abspath(os.path.dirname(__file__)) + '/data/propensity_file_template.c', 'r')
+        template = open(os.path.abspath(os.path.dirname(__file__)) + '/ssa_sdpd-c-simulation-engine/propensity_file_template.c', 'r')
         propfile = open(file_name, "w")
         propfilestr = template.read()
 
@@ -296,7 +216,9 @@ class Solver:
             rname = self.model.listOfReactions[R].name
             func += funheader.replace("__NAME__", rname) + "\n{\n"
             if self.model.listOfReactions[R].restrict_to == None or (isinstance(self.model.listOfReactions[R].restrict_to, list) and len(self.model.listOfReactions[R].restrict_to) == 0):
+                func += "return "
                 func += self.model.listOfReactions[R].propensity_function
+                func += ";"
             else:
                 func += "if("
                 if isinstance(self.model.listOfReactions[R].restrict_to, list) and len(self.model.listOfReactions[R].restrict_to) > 0:
@@ -308,43 +230,170 @@ class Solver:
                 else:
                     raise SimulationError("When restricting reaction to subdomains, you must specify either a list or an int")
                 func += "){\n"
+                func += "return "
                 func += self.model.listOfReactions[R].propensity_function
-
+                func += ";"
                 func += "\n}else{"
                 func += "\n\treturn 0.0;}"
 
 
             func += "\n}"
             funcs += func + "\n\n"
-            funcinits += "    ptr[" + str(i) + "] = " + rname + ";\n"
+            funcinits += "    ptr[" + str(i) + "] = (PropensityFun) " + rname + ";\n"
             i += 1
 
         propfilestr = propfilestr.replace("__DEFINE_REACTIONS__", funcs)
         propfilestr = propfilestr.replace("__DEFINE_PROPFUNS__", funcinits)
+        # End of pyurdme replacements
+        # SSA-SDPD values here
+        init_particles = ""
+        for i in range(len(self.model.sd)):
+            init_particles += "    init_create_particle(sys,id++,{0},{1},{2},{3});".format(self.model.mesh.coordinates()[i,0],self.model.mesh.coordinates()[i,1],self.model.mesh.coordinates()[i,2],self.model.sd[i])+ "\n"
+        propfilestr = propfilestr.replace("__INIT_PARTICLES__", init_particles)
+
+
+        # process initial conditions here
+        self.model.apply_initial_conditions()
+        nspecies = self.model.u0.shape[0]
+        ncells = self.model.u0.shape[1]
+        
+        input_constants = ""
+
+        outstr = "static unsigned int input_u0[{0}] = ".format(nspecies*ncells)
+        outstr+="{"
+        for i in range(ncells):
+            for s in range(nspecies):
+                if i+s>0: outstr+=','
+                outstr+= str(self.model.u0[s,i])
+        outstr+="};"
+        input_constants += outstr + "\n"
+        outstr = "static double input_vol[{0}] = ".format(self.model.mesh.get_vol().shape[0])
+        outstr+="{"
+        for i in range(self.model.mesh.get_vol().shape[0]):
+            if i>0: outstr+=','
+            outstr+= str(self.model.mesh.get_vol()[i])
+        outstr+="};"
+        input_constants += outstr + "\n"
+        outstr = "static int input_sd[{0}] = ".format(self.model.sd.shape[0])
+        outstr+="{"
+        for i in range(self.model.sd.shape[0]):
+            if i>0: outstr+=','
+            outstr+= str(self.model.sd[i])
+        outstr+="};"
+        input_constants += outstr + "\n"
+
+        if len(self.model.listOfDataFunctions) == 0:
+            outstr = "static int input_dsize = 1;"
+            input_constants += outstr + "\n"
+            outstr = "static double input_data[{0}] = ".format(ncells)
+            outstr += "{" + ",".join(['0']*80) + "};"
+            input_constants += outstr + "\n"
+        else:
+            outstr = "static int input_dsize = {0};".format(len(self.model.listOfDataFunctions))
+            input_constants += outstr + "\n"
+            outstr = "static double input_data[{0}] = ".format(ncells*len(self.model.listOfDataFunctions))
+            outstr+="{"
+            for v_ndx in range(ncells):
+                for ndf in range(len(self.model.listOfDataFunctions)):
+                    if ndf+v_ndx>0: outstr+=','
+                    outstr+= "{0}".format( self.model.listOfDataFunctions[ndf].map( self.model.mesh.coordinate()[v_ndx,:] ) )
+            outstr+="};"
+            input_constants += outstr + "\n"
+
+
+        N = self.model.create_stoichiometric_matrix()
+        outstr = "static size_t input_irN[{0}] = ".format(len(N.indices))
+        outstr+="{"
+        for i in range(len(N.indices)):
+            if i>0: outstr+=','
+            outstr+= str(N.indices[i])
+        outstr+="};"
+        input_constants += outstr + "\n"
+
+        outstr = "static size_t input_jcN[{0}] = ".format(len(N.indptr))
+        outstr+="{"
+        for i in range(len(N.indptr)):
+            if i>0: outstr+=','
+            outstr+= str(N.indptr[i])
+        outstr+="};"
+        input_constants += outstr + "\n"
+
+        outstr = "static int input_prN[{0}] = ".format(len(N.data))
+        outstr+="{"
+        for i in range(len((N.data))):
+            if i>0: outstr+=','
+            outstr+= str(N.data[i])
+        outstr+="};"
+        input_constants += outstr + "\n"
+
+
+        G = self.model.create_dependency_graph()
+        outstr = "static size_t input_irG[{0}] = ".format(len(G.indices))
+        outstr+="{"
+        for i in range(len(G.indices)):
+            if i>0: outstr+=','
+            outstr+= str(G.indices[i])
+        outstr+="};"
+        input_constants += outstr + "\n"
+
+        outstr = "static size_t input_jcG[{0}] = ".format(len(G.indptr))
+        outstr+="{"
+        for i in range(len(G.indptr)):
+            if i>0: outstr+=','
+            outstr+= str(G.indptr[i])
+        outstr+="};"
+        input_constants += outstr + "\n"
+        outstr = "const char* const input_species_names[] = {"
+        for i,s in enumerate(self.model.listOfSpecies.keys()):
+            if i>0: outstr+=","
+            outstr+='"'+s+'"'
+        outstr+=", 0};"
+        input_constants += outstr + "\n"
+        num_subdomains = len(self.model.listOfSubdomainIDs)
+        outstr = "const int input_num_subdomain = {0};".format(num_subdomains)
+        input_constants += outstr + "\n"
+        outstr = "const double input_subdomain_diffusion_matrix[{0}] = ".format(len(self.model.listOfSpecies)*num_subdomains)
+        outstr+="{"
+        for i, sname in enumerate(self.model.listOfSpecies.keys()):
+            s = self.model.listOfSpecies[sname]
+            #print sname,
+            for j, sd_id in enumerate(range(num_subdomains)):
+                #print sd_ndx,
+                if i+j>0: outstr+=','
+                if sd_id not in self.model.listOfDiffusionRestrictions[s]:
+                    outstr+= "{0}".format(s.diffusion_constant)
+                else:
+                    outstr+= "0.0"
+        outstr+="};"
+        input_constants += outstr + "\n"
+        propfilestr = propfilestr.replace("__INPUT_CONSTANTS__", input_constants)
+
+        system_config = ""
+        system_config +="system->dt = {0};\n".format(self.model.timestep_size)
+        system_config +="system->nt = {0};\n".format(self.model.num_timesteps)
+        system_config +="system->output_freq = 1;\n"
+        system_config +="system->h = {0};\n".format(self.model.mesh.find_h())
+        system_config +="system->rho0 = 1.0;\n"
+        system_config +="system->c0 = 10;\n"
+        system_config +="system->P0 = 10;\n"
+        #// bounding box
+        bounding_box = self.model.mesh.get_bounding_box()
+        system_config +="system->xlo = {0};\n".format(bounding_box[0])
+        system_config +="system->xhi = {0};\n".format(bounding_box[1])
+        system_config +="system->ylo = {0};\n".format(bounding_box[2])
+        system_config +="system->yhi = {0};\n".format(bounding_box[3])
+        system_config +="system->zlo = {0};\n".format(bounding_box[4])
+        system_config +="system->zhi = {0};\n".format(bounding_box[5])
+
+        propfilestr = propfilestr.replace("__SYSTEM_CONFIG__", system_config)
+
+
+        #### Write the data to the file ####
         propfile.write(propfilestr)
         propfile.close()
 
 
 
-
-
-class DataFunction():
-    """ Abstract class used to constuct the data vector. """
-    name = None
-    def __init__(self, name=None):
-        if name is not None:
-            self.name = name
-        if self.name is None:
-            raise Exception("DataFunction must have a 'name'")
-
-    def map(self, x):
-        """ map() takes the coordinate 'x' and returns a list of doubles.
-        Args:
-            x: a list of 3 ints.
-        Returns:
-            a list of floats.
-        """
-        raise Exception("DataFunction.map() not implemented.")
 
 
 

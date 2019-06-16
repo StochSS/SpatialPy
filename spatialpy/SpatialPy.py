@@ -1,6 +1,8 @@
 # pylint: disable-msg=C0301
 # pylint: disable-msg=C0103
 
+raise Exception("This file is depricated")
+
 import os
 import re
 import shutil

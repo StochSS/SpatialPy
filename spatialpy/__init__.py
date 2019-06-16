@@ -8,6 +8,7 @@ if (sys.version_info < (3,0)):
 from spatialpy.Model import *
 from spatialpy.Subdomain import *
 from spatialpy.Mesh import *
+from spatialpy.DataFunction import *
 
 #from spatialpy.core import *
 #import spatialpy.sbml
