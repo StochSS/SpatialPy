@@ -14,6 +14,7 @@ import scipy.io
 import scipy.sparse
 
 from spatialpy.Model import *
+from spatialpy.Result import *
 
 
 
@@ -35,6 +36,7 @@ class Solver:
         self.report_level = report_level
         self.model_name = self.model.name
         self.build_dir = None
+        self.executable_name = 'ssa_sdpd'
 
         self.SpatialPy_ROOT =  os.path.dirname(os.path.abspath(__file__))+"/ssa_sdpd-c-simulation-engine"
 
@@ -115,26 +117,27 @@ class Solver:
 
         # Execute the solver
         for run_ndx in range(number_of_trajectories):
-            outfile = tempfile.NamedTemporaryFile(delete=False, dir=os.environ.get('SpatialPy_TMPDIR'))
-            outfile.close()
-            urdme_solver_cmd = [self.solver_dir + self.propfilename + '.' + self.NAME, self.infile_name, outfile.name]
+            outfile = tempfile.mkdtemp(dir=os.environ.get('SPATIALPY_TMPDIR'))
+            result = Result(self.model, outfile)
+            solver_cmd = 'cd {0}'.format(outfile) + ";" + os.path.join(self.build_dir, self.executable_name)
 
             if seed is not None:
-                urdme_solver_cmd.append(str(seed+run_ndx))
+                solver_cmd += " "+str(seed+run_ndx)
             if self.report_level > 1:
-                print('cmd: {0}\n'.format(urdme_solver_cmd))
+                print('cmd: {0}\n'.format(solver_cmd))
             stdout = ''
             stderr = ''
             try:
                 if self.report_level >= 1:  #stderr & stdout to the terminal
-                    handle = subprocess.Popen(urdme_solver_cmd)
+                    handle = subprocess.Popen(solver_cmd, shell=True)
                 else:
-                    handle = subprocess.Popen(urdme_solver_cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+                    handle = subprocess.Popen(solver_cmd, stderr=subprocess.PIPE,
+                                              stdout=subprocess.PIPE, shell=True)
                     stdout, stderr = handle.communicate()
                 return_code = handle.wait()
             except OSError as e:
                 print("Error, execution of solver raised an exception: {0}".format(e))
-                print("urdme_solver_cmd = {0}".format(urdme_solver_cmd))
+                print("cmd = {0}".format(solver_cmd))
 
             if return_code != 0:
                 if self.report_level >= 1:
@@ -143,14 +146,12 @@ class Solver:
                         print(stdout)
                     except Exception as e:
                         pass
-                print("urdme_solver_cmd = {0}".format(urdme_solver_cmd))
+                print("solver_cmd = {0}".format(solver_cmd))
                 raise SimulationError("Solver execution failed, return code = {0}".format(return_code))
 
 
-            #Load the result from the hdf5 output file.
             try:
-                result = Result(self.model, outfile.name, loaddata=loaddata)
-                result["Status"] = "Sucess"
+                result["Status"] = "Success"
                 result.stderr = stderr
                 result.stdout = stdout
                 if number_of_trajectories > 1:
@@ -159,7 +160,6 @@ class Solver:
                     return result
             except Exception as e:
                 exc_info = sys.exc_info()
-                os.remove(outfile.name)
                 raise(exc_info[1], None, exc_info[2])
 
         return result_list
@@ -372,7 +372,10 @@ class Solver:
         system_config +="system->dt = {0};\n".format(self.model.timestep_size)
         system_config +="system->nt = {0};\n".format(self.model.num_timesteps)
         system_config +="system->output_freq = 1;\n"
-        system_config +="system->h = {0};\n".format(self.model.mesh.find_h())
+        h = self.model.mesh.find_h()
+        if h == 0.0:
+            raise ModelError('h (basis function width) can not be zero.')
+        system_config +="system->h = {0};\n".format(h)
         system_config +="system->rho0 = 1.0;\n"
         system_config +="system->c0 = 10;\n"
         system_config +="system->P0 = 10;\n"

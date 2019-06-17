@@ -18,10 +18,13 @@ class Mesh():
 
     def find_h(self):
         max_dist = None
+        #print("find_h")
         for i in range(self.vertices.shape[0]):
             d = self.dist_to_closest_neighbor(i)
+            #print("\tdist_to_closest_neighbor({0})={1}".format(i,d))
             if max_dist is None or d > max_dist:
                 max_dist = d
+        print("find_h = {0}".format(2.2*max_dist))
         return 2.2*max_dist
 
 
@@ -29,8 +32,8 @@ class Mesh():
         min_dist=None
         for i in range(self.vertices.shape[0]):
             if i==v_ndx: continue
-            d = numpy.linalg.norm( self.vertices[i,:]-self.vertices[i,:] )
-            if min_dist is None or d < min_dist:
+            d = numpy.linalg.norm( self.vertices[i,:]-self.vertices[v_ndx,:] )
+            if d > 0 and (min_dist is None or d < min_dist):
                 min_dist = d
         return min_dist
 
