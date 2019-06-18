@@ -69,7 +69,7 @@ int init_all_particles(system_t* sys){
 
 
 int main(int argc, char**argv){
-    debug_flag = 1;
+    debug_flag = 0;
     system_t* system = create_system();
     // Fix particles in space
     system->static_domain = 1;
