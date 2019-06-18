@@ -327,14 +327,14 @@ void nsm_core__initialize_chem_populations(rdme_t* rdme, const unsigned int*u0){
 /**************************************************************************/
 void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
     //printf("***************** build_diffusion_matrix *****************\n");fflush(stdout);
-	double off_diag_sum,diff_const,dist;
+	double off_diag_sum,diff_const,dist2;
 	node *n,*n2;
     particle_t *p1,*p2;
     int s_ndx;
-    double D_i_j, dW_de,alpha_D,xi;
+    double D_i_j;
+    double ih,ihsq,wfd; 
     double h = system->h;
-    //printf("h=%e\n",h);
-    
+
 	size_t jcD_length = rdme->Ncells + 1;
 	size_t irD_length = 0;
 	size_t prD_length = 0;
@@ -375,17 +375,18 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
                 //printf("p2=%i\n",p2->id);fflush(stdout);
                 diff_const = rdme->subdomain_diffusion_matrix[s_ndx*rdme->num_subdomains + (p2->type-1)];
                 //
-                dist = particle_dist_sqrd(p1,p2);
+                dist2 = particle_dist_sqrd(p1,p2);
                 // Eq (13-14), Drawert et al 2019
-                alpha_D = 105.0/16.0*M_PI*(h*h*h); // 3D  
-                // a correction term of 281 was found (experimental), found emperically
-                // alpha_D = alpha_D * 218;
+                ih = 1.0 / h;
+                ihsq = ih * ih;
+                wfd = h - sqrt(dist2);
+                if(wfd <= 0.0){
+                    continue; // outside support of basis function
+                }
+                wfd = -25.066903536973515383e0 * wfd * wfd * ihsq * ihsq * ihsq * ih; //3D
+                // Eq 28 of Drawert et al 2019, Tartakovsky et. al., 2007, JCP
+                D_i_j = -2.0*(p1->mass*p2->mass)/(p1->mass+p2->mass)*(p1->rho+p2->rho)/(p1->rho*p2->rho) * dist2 * wfd / (dist2+0.01*h*h);
 
-                xi = sqrt(dist)/h;
-                //W = alpha_D*(1+3*xi)*(1-xi)*(1-xi)*(1-xi);
-                dW_de  = alpha_D * -12*xi*(1-xi)*(1-xi);
-                // Eq 28 of Drawert et al 2019
-                D_i_j = -2*(p1->mass*p2->mass)/(p1->mass+p2->mass)*(p1->rho+p2->rho)/(p1->rho*p2->rho)*dist*dist/(dist + 0.01*(h*h))* dW_de;
                 if(diff_const > 0.0){
                     rdme->irD[irD_ndx++] = p2->id*rdme->Mspecies + s_ndx;
                     rdme->prD[prD_ndx++] = diff_const * D_i_j;
