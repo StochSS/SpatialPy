@@ -37,6 +37,7 @@ class Solver:
         self.model_name = self.model.name
         self.build_dir = None
         self.executable_name = 'ssa_sdpd'
+        self.h = None # basis function width
 
         self.SpatialPy_ROOT =  os.path.dirname(os.path.abspath(__file__))+"/ssa_sdpd-c-simulation-engine"
 
@@ -267,6 +268,8 @@ class Solver:
                 outstr+= str(self.model.u0[s,i])
         outstr+="};"
         input_constants += outstr + "\n"
+        # attache the vol to the model as well, for backwards compatablity
+        self.model.vol = self.model.mesh.get_vol()
         outstr = "static double input_vol[{0}] = ".format(self.model.mesh.get_vol().shape[0])
         outstr+="{"
         for i in range(self.model.mesh.get_vol().shape[0]):
@@ -372,10 +375,11 @@ class Solver:
         system_config +="system->dt = {0};\n".format(self.model.timestep_size)
         system_config +="system->nt = {0};\n".format(self.model.num_timesteps)
         system_config +="system->output_freq = 1;\n"
-        h = self.model.mesh.find_h()
-        if h == 0.0:
+        if self.h is None:
+            self.h = self.model.mesh.find_h()
+        if self.h == 0.0:
             raise ModelError('h (basis function width) can not be zero.')
-        system_config +="system->h = {0};\n".format(h)
+        system_config +="system->h = {0};\n".format(self.h)
         system_config +="system->rho0 = 1.0;\n"
         system_config +="system->c0 = 10;\n"
         system_config +="system->P0 = 10;\n"

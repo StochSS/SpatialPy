@@ -375,13 +375,13 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
                 //printf("p2=%i\n",p2->id);fflush(stdout);
                 diff_const = rdme->subdomain_diffusion_matrix[s_ndx*rdme->num_subdomains + (p2->type-1)];
                 //
-                dist = particle_dist(p1,p2);
+                dist = particle_dist_sqrd(p1,p2);
                 // Eq (13-14), Drawert et al 2019
                 alpha_D = 105.0/16.0*M_PI*(h*h*h); // 3D  
                 // a correction term of 281 was found (experimental), found emperically
                 // alpha_D = alpha_D * 218;
 
-                xi = dist/h;
+                xi = sqrt(dist)/h;
                 //W = alpha_D*(1+3*xi)*(1-xi)*(1-xi)*(1-xi);
                 dW_de  = alpha_D * -12*xi*(1-xi)*(1-xi);
                 // Eq 28 of Drawert et al 2019

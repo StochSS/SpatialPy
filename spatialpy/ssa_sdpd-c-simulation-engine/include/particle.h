@@ -51,6 +51,8 @@ system_t* create_system();
 particle_t* create_particle(int id);
 void add_particle(particle_t* me, system_t* system);
 double particle_dist(particle_t* p1, particle_t*p2);
+double particle_dist_sqrd(particle_t* p1, particle_t*p2);
+
 
 // Global flags
 extern int debug_flag;

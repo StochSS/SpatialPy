@@ -17,9 +17,10 @@ from spatialpy.Model import *
 
 import inspect
 
-
 import pickle
 import json
+
+import vtk
 
 # module-level variable to for javascript export in IPython/Jupyter notebooks
 __pyurdme_javascript_libraries_loaded = False
@@ -106,15 +107,34 @@ class Result(dict):
 #            self.__dict__[k] = v
 
 
-    def read_solution(self):
-        """ Read the tspan and U matrix into memory. """
-        raise Exception("todo")
-#        self.U = U
-#        self.tspan = tspan
-#        self.data_is_loaded = True
+    def read_step(self, step_num):
+        """ Read the data for simulation step 'step_num'. """
+        reader = vtk.vtkGenericDataObjectReader()
+        filename = os.path.join(self.result_dir, "output{0}.vtk".format(step_num))
+        #print("read_step({0}) opening '{1}'".format(step_num, filename))
+        reader.SetFileName(filename)
+        reader.Update()
+        data = reader.GetOutput()
+        points = numpy.array( data.GetPoints().GetData() )
+        pd = data.GetPointData()
+        vtk_data = {}
+        for i in range(pd.GetNumberOfArrays()):
+            if pd.GetArrayName(i) is None: break
+            #print(i,pd.GetArrayName(i))
+            vtk_data[ pd.GetArrayName(i)] = numpy.array(pd.GetArray(i))
+        return (points, vtk_data)
+
+
+#    def read_solution(self):
+#        """ Read the tspan and U matrix into memory. """
+#        raise Exception("todo")
+##        self.U = U
+##        self.tspan = tspan
+##        self.data_is_loaded = True
 
     def get_timespan(self):
-        raise Exception("todo")
+        self.tspan = numpy.linspace(0,self.model.num_timesteps,
+                num=self.model.num_timesteps+1) * self.model.timestep_size
         return self.tspan
 
     def get_species(self, species, timepoints="all", concentration=False):
@@ -127,67 +147,59 @@ class Result(dict):
             if set to True, the concentration (=copy_number/volume) is returned.
         """
 
-#        if isinstance(species, Species):
-#            spec_name = species.name
-#        else:
-#            spec_name = species
-#
-#        species_map = self.model.get_species_map()
-#        num_species = self.model.get_num_species()
-#
-#        spec_indx = species_map[spec_name]
-#
-#        resultfile = h5py.File(self.filename, 'r')
-#        #Ncells = self.model.mesh.num_vertices()  # Need dof ordering numVoxels
-#        U = resultfile['U']
-#        Ncells = U.shape[1]/num_species
-#
-#        if timepoints  ==  "all":
-#            Uslice= U[:,(spec_indx*Ncells):(spec_indx*Ncells+Ncells)]
-#        else:
-#            Uslice = U[timepoints,(spec_indx*Ncells):(spec_indx*Ncells+Ncells)]
-#
-#        if concentration:
-#            Uslice = self._copynumber_to_concentration(Uslice)
-#
-#        # Reorder the dof from dof ordering to voxel ordering
-#        Uslice = self._reorder_dof_to_voxel(Uslice, num_species=1)
-#
-#        # Make sure we return 1D slices as flat arrays
-#        dims = numpy.shape(Uslice)
-#        if dims[0] == 1:
-#            Uslice = Uslice.flatten()
-#
-#        resultfile.close()
-#        return Uslice
-        raise Exception("todo")
-
-
-    def __setattr__(self, k, v):
-        if k in self.keys():
-            self[k] = v
-        elif not hasattr(self, k):
-            self[k] = v
+        if isinstance(species,str):
+            spec_name = species
         else:
-            raise AttributeError("Cannot set '%s', cls attribute already exists" % ( k, ))
+            spec_name = species.name
 
-    def __setupitems__(self, k):
-        if (k == 'U' or k == 'tspan') and not self.data_is_loaded:
-            if self.result_dir is None:
-                raise AttributeError("This result object has no data file.")
-            self.read_solution()
+        species_map = self.model.species_map
+        num_species = self.model.get_num_species()
+        num_voxel = self.model.mesh.get_num_voxels()
 
-    def __getitem__(self, k):
-        self.__setupitems__(k)
-        if k in self.keys():
-            return self.get(k)
-        raise KeyError("Object has no attribute {0}".format(k))
+        t_index_arr = numpy.linspace(0,self.model.num_timesteps, 
+                            num=self.model.num_timesteps+1, dtype=int)
 
-    def __getattr__(self, k):
-        self.__setupitems__(k)
-        if k in self.keys():
-            return self.get(k)
-        raise AttributeError("Object has no attribute {0}".format(k))
+        if timepoints != "all":
+            t_index_arr = t_index_arr[timepoints]
+        
+        ret = numpy.zeros( (len(t_index_arr), num_voxel))
+        for ndx, t_ndx in enumerate(t_index_arr):
+            (_, step) = self.read_step(t_ndx)
+            if concentration:
+                # concentration = (copy_number/volume)
+                # volume = (mass/density)
+                ret[ndx,:] = step['C['+spec_name+']'] / (step['mass'] / step['rho'] )
+            else:
+                ret[ndx,:] = step['C['+spec_name+']']
+
+        return ret
+
+
+#    def __setattr__(self, k, v):
+#        if k in self.keys():
+#            self[k] = v
+#        elif not hasattr(self, k):
+#            self[k] = v
+#        else:
+#            raise AttributeError("Cannot set '%s', cls attribute already exists" % ( k, ))
+#
+#    def __setupitems__(self, k):
+#        if (k == 'U' or k == 'tspan') and not self.data_is_loaded:
+#            if self.result_dir is None:
+#                raise AttributeError("This result object has no data file.")
+#            self.read_solution()
+#
+#    def __getitem__(self, k):
+#        self.__setupitems__(k)
+#        if k in self.keys():
+#            return self.get(k)
+#        raise KeyError("Object has no attribute {0}".format(k))
+#
+#    def __getattr__(self, k):
+#        self.__setupitems__(k)
+#        if k in self.keys():
+#            return self.get(k)
+#        raise AttributeError("Object has no attribute {0}".format(k))
 
     def __del__(self):
         """ Deconstructor. """

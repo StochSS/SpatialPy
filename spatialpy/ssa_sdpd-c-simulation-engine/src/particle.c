@@ -168,6 +168,12 @@ double particle_dist(particle_t* p1, particle_t*p2){
     double c = p1->x[2] - p2->x[2];
     return sqrt( a*a + b*b + c*c);
 }
+double particle_dist_sqrd(particle_t* p1, particle_t*p2){
+    double a = p1->x[0] - p2->x[0];
+    double b = p1->x[1] - p2->x[1];
+    double c = p1->x[2] - p2->x[2];
+    return ( a*a + b*b + c*c);
+}
 
 
 

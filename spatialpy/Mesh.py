@@ -24,8 +24,9 @@ class Mesh():
             #print("\tdist_to_closest_neighbor({0})={1}".format(i,d))
             if max_dist is None or d > max_dist:
                 max_dist = d
-        print("find_h = {0}".format(2.2*max_dist))
-        return 2.2*max_dist
+        h = 2.2*max_dist
+        print("find_h = {0}".format(h))
+        return h
 
 
     def dist_to_closest_neighbor(self, v_ndx):
