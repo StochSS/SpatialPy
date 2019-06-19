@@ -25,7 +25,7 @@ class Mesh():
             if max_dist is None or d > max_dist:
                 max_dist = d
         h = 2.2*max_dist
-        print("find_h = {0}".format(h))
+        #print("find_h = {0}".format(h))
         return h
 
 

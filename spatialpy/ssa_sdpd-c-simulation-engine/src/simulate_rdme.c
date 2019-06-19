@@ -403,15 +403,12 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
         printf("irD_ndx (%li) length rdme->irD (%li)\n",irD_ndx,irD_length*rdme->Mspecies);
         printf("jcD_ndx (%li) length rdme->jcD (%li)\n",jcD_ndx,jcD_length*rdme->Mspecies);
         printf("prD_ndx (%li) length rdme->prD (%li)\n",prD_ndx,prD_length*rdme->Mspecies);
-    }
-
-    if( prD_ndx != irD_ndx){
-        printf("Assembly: prD_ndx (%zu) != irD_ndx (%zu)\n",prD_ndx,irD_ndx);
-    }
-    if( irD_ndx != irD_length*rdme->Mspecies ){
-        printf("Assembly: irD_ndx (%zu) != irD_length*Mspecies (%li)\n", irD_ndx, irD_length*rdme->Mspecies);
-    }
-    if(debug_flag){
+        if( prD_ndx != irD_ndx){
+            printf("Assembly: prD_ndx (%zu) != irD_ndx (%zu)\n",prD_ndx,irD_ndx);
+        }
+        if( irD_ndx != irD_length*rdme->Mspecies ){
+            printf("Assembly: irD_ndx (%zu) != irD_length*Mspecies (%li)\n", irD_ndx, irD_length*rdme->Mspecies);
+        }
         char filename[256];
         time_t seconds; 
         size_t i;

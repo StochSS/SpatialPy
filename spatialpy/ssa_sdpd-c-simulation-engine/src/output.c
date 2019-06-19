@@ -84,7 +84,7 @@ void output_vtk__async_step(system_t*system){
     int np = output_buffer_current_num_particles;
     if(output_buffer_current_step == 0){
         sprintf(filename, "output0_boundingBox.vtk");
-        printf("Writing file '%s'\n", filename);
+        if(debug_flag){printf("Writing file '%s'\n", filename);}
         if((fp = fopen(filename,"w+"))==NULL){ 
             perror("Can't write 'output0_boundingBox.vtk'");exit(1);
         }
@@ -102,7 +102,7 @@ void output_vtk__async_step(system_t*system){
         fclose(fp);
     }
     sprintf(filename,"output%u.vtk",output_buffer_current_step);
-    printf("Writing file '%s'\n", filename);
+    if(debug_flag){printf("Writing file '%s'\n", filename);}
     if((fp = fopen(filename,"w+"))==NULL){ 
         perror("Can't write output vtk file");exit(1);
     }

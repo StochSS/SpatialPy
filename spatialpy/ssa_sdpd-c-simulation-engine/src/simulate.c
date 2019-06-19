@@ -209,7 +209,7 @@ void run_simulation(int num_threads, system_t* system){
     if(debug_flag) printf("[%i] Async Output threads finished\n",step);
 
     //clean up
-    printf("Cleaning up RDME\n");
+    if(debug_flag) printf("Cleaning up RDME\n");
     destroy_rdme(system);
 
     // Kill threads and wait for them to finish
@@ -227,7 +227,7 @@ void run_simulation(int num_threads, system_t* system){
     }
     */
     // done
-    printf("Simulation complete\n");;
+    if(debug_flag) printf("Simulation complete\n");;
     return;
 }
 

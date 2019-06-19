@@ -1,17 +1,11 @@
 import os
-import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
-import types
-import warnings
-import uuid
+import time
 
-
-import numpy
-import scipy.io
-import scipy.sparse
 
 from spatialpy.Model import *
 from spatialpy.Result import *
@@ -47,7 +41,7 @@ class Solver:
         try:
             if self.build_dir is not None:
                 try:
-                    shutil.rmtree(self.solver_base_dir)
+                    shutil.rmtree(self.build_dir)
                 except OSError as e:
                     print("Could not delete '{0}'".format(self.solver_base_dir))
         except Exception as e:
@@ -99,12 +93,14 @@ class Solver:
         self.is_compiled = True
 
 
-    def run(self, number_of_trajectories=1, seed=None, input_file=None, loaddata=False):
+    def run(self, number_of_trajectories=1, seed=None, timeout=None):
         """ Run one simulation of the model.
-        number_of_trajectories: How many trajectories should be run.
-        seed: the random number seed (incremented by one for multiple runs).
-        input_file: the filename of the solver input data file .
-        loaddata: boolean, should the result object load the data into memory on creation.
+        Args:
+            number_of_trajectories: (int) How many trajectories should be simulated.
+            seed: (int) the random number seed (incremented by one for multiple runs).
+            timeout: (int) maximum number of seconds the solver can run.
+
+
         Returns:
             Result object.
                 or, if number_of_trajectories > 1
@@ -128,14 +124,37 @@ class Solver:
                 print('cmd: {0}\n'.format(solver_cmd))
             stdout = ''
             stderr = ''
+#            try:
+#                if self.report_level >= 1:  #stderr & stdout to the terminal
+#                    handle = subprocess.Popen(solver_cmd, shell=True)
+#                else:
+#                    handle = subprocess.Popen(solver_cmd, stderr=subprocess.PIPE,
+#                                              stdout=subprocess.PIPE, shell=True)
+#                    stdout, stderr = handle.communicate()
+#                return_code = handle.wait()
+#            except OSError as e:
+#                print("Error, execution of solver raised an exception: {0}".format(e))
+#                print("cmd = {0}".format(solver_cmd))
             try:
-                if self.report_level >= 1:  #stderr & stdout to the terminal
-                    handle = subprocess.Popen(solver_cmd, shell=True)
-                else:
-                    handle = subprocess.Popen(solver_cmd, stderr=subprocess.PIPE,
-                                              stdout=subprocess.PIPE, shell=True)
-                    stdout, stderr = handle.communicate()
-                return_code = handle.wait()
+                start = time.monotonic()
+                with subprocess.Popen(solver_cmd, shell=True, stdout=subprocess.PIPE, preexec_fn=os.setsid) as process:
+                    try:
+                        if timeout is not None:
+                            stdout,stderr = process.communicate(timeout=timeout)
+                        else:
+                            stdout,stderr = process.communicate()
+                        return_code = process.wait()
+                        if self.report_level >= 1:  #stderr & stdout to the terminal
+                            print('Elapsed seconds: {:.2f}'.format(time.monotonic() - start))
+                            if stdout is not None: print(stdout.decode('utf-8'))
+                            if stderr is not None: print(stderr.decode('utf-8'))
+                    except subprocess.TimeoutExpired:
+                        os.killpg(process.pid, signal.SIGINT) # send signal to the process group
+                        stdout,stderr = process.communicate()
+                        message = "SpatialPy solver timeout exceded. "
+                        if stdout is not None: message += stdout.decode('utf-8')
+                        if stderr is not None: message += stderr.decode('utf-8')
+                        raise SimulationTimeout(message)
             except OSError as e:
                 print("Error, execution of solver raised an exception: {0}".format(e))
                 print("cmd = {0}".format(solver_cmd))
@@ -151,17 +170,13 @@ class Solver:
                 raise SimulationError("Solver execution failed, return code = {0}".format(return_code))
 
 
-            try:
-                result["Status"] = "Success"
-                result.stderr = stderr
-                result.stdout = stdout
-                if number_of_trajectories > 1:
-                    result_list.append(result)
-                else:
-                    return result
-            except Exception as e:
-                exc_info = sys.exc_info()
-                raise(exc_info[1], None, exc_info[2])
+            result["Status"] = "Success"
+            if stdout is not None: result.stdout = stdout.decode('utf-8')
+            if stderr is not None: result.stderr = stderr.decode('utf-8')
+            if number_of_trajectories > 1:
+                result_list.append(result)
+            else:
+                return result
 
         return result_list
 

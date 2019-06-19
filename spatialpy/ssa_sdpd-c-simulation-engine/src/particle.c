@@ -75,7 +75,6 @@ linked_list* find_neighbors(particle_t* me, system_t* system){
     */
 
     //search for points backward
-    if(me->id==0){printf("find_neighbors.search backwards\n");}
     for(n = me->x_index->prev; n!=NULL; n=n->prev){
         //if(n->data->x[0] > (me->x[0] + system->h)) break; //stop searching forward
         /*if(me->id == 0){ 

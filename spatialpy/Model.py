@@ -620,6 +620,8 @@ class Reaction():
 # Module exceptions
 class SimulationError(Exception):
     pass
+class SimulationTimeout(SimulationError):
+    pass
 class ModelError(Exception):
     pass
 
