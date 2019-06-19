@@ -270,7 +270,7 @@ epub_publisher = u'Brian Drawert, Evie Hilton'
 epub_copyright = u'2019, Brian Drawert, Evie Hilton'
 
 # The basename for the epub file. It defaults to the project name.
-#epub_basename = u'SpatialPY'
+#epub_basename = u'SpatialPy'
 
 # The HTML theme for the epub output. Since the default themes are not optimized
 # for small screen space, using the same theme for HTML and epub output is
