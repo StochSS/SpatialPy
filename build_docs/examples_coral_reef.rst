@@ -1,4 +1,4 @@
-PyURDME Example:  Coral Reef
+SpatialPy Example:  Coral Reef
 =============================
 
 Introduction

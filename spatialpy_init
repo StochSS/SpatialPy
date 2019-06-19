@@ -16,7 +16,4 @@ else
 fi
 export SPATIALPYHOME=$MY_PATH
 export PYTHONPATH="$SPATIALPYHOME:$PYTHONPATH"
-export C_INCLUDE_PATH=/usr/lib/openmpi/include
-export C_INCLUDE_PATH=/usr/lib/openmpi/include
-export INSTANT_SYSTEM_CALL_METHOD=SUBPROCESS
 
