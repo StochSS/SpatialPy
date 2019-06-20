@@ -420,4 +420,7 @@ class Solver:
 
 
 
-
+class SimulationError(Exception):
+    pass
+class SimulationTimeout(SimulationError):
+    pass
