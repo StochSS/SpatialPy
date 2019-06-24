@@ -41,9 +41,10 @@ class Model():
         self.listOfDiffusionRestrictions = {}
         self.timestep_size = None
         self.num_timesteps = None
-        self.listOfDataFunctions = OrderedDict()
-        self.listOfInitialConditions = OrderedDict()
+        self.listOfDataFunctions = []
+        self.listOfInitialConditions = []
         self.species_map = {}
+        self.tspan = None
 
 
     def run(self, number_of_trajectories=1, solver=None, seed=None, report_level=0):
@@ -90,6 +91,8 @@ class Model():
             populations during the simulation.
         """
 
+        self.tspan = time_span
+
         items_diff = numpy.diff(time_span)
         items = map(lambda x: round(x, 10), items_diff)
         isuniform = (len(set(items)) == 1)
@@ -121,8 +124,9 @@ class Model():
             self.sd = numpy.ones(self.mesh.get_num_voxels())
         # apply the subdomain to all points, set sd for any points that match
         count =0
+        on_boundary = self.mesh.find_boundary_points()
         for v_ndx in range(self.mesh.get_num_voxels()):
-            if subdomain.inside( self.mesh.coordinates()[v_ndx,:], False):
+            if subdomain.inside( self.mesh.coordinates()[v_ndx,:], on_boundary[v_ndx]):
                 self.sd[v_ndx] = domain_id
                 count +=1
         return count
@@ -140,8 +144,23 @@ class Model():
         if str(type(x)) != str(type(species)):
             raise ModelError("First argument to restrict() must be a Species object")
         if not isinstance(listOfSubDomains,list):
-            raise ModelError("First argument to restrict() must be a list of subdomain_id")
-        self.listOfDiffusionRestrictions[species] = listOfSubDomains
+            self.listOfDiffusionRestrictions[species] = [listOfSubDomains]
+        else:
+            self.listOfDiffusionRestrictions[species] = listOfSubDomains
+
+    def add_data_function(self, data_function):
+        """ Add a scalar spatial function to the simulation.  This is useful if you have a 
+            spatially varying in put to your model.  Argument is a instances of subclass of the 
+            spatialpy.DataFunction class. It must implement a function 'map(x)' which takes a 
+            the spatial positon 'x' as an array, and it returns a float value. 
+        """
+        #TODO validate input
+        self.listOfDataFunctions.append(data_function)
+
+    def add_initial_condition(self, ic):
+        """ Add an initial condition object to the initialization of the model."""
+        #TODO: validate model
+        self.listOfInitialConditions.append(ic)
         
 
     def update_namespace(self):
@@ -405,6 +424,9 @@ class Model():
         nv = self.mesh.get_num_voxels()
         self.u0 = numpy.zeros((ns, nv))
         # apply initial condition functions
+        for ic in self.listOfInitialConditions:
+            ic.apply(self)
+            
 
 
 
@@ -516,24 +538,21 @@ class Reaction():
         
         self.massaction = massaction
 
-        self.propensity_function = None
-        if propensity_function is not None:
-            if 'return ' in propensity_function:
-                self.propensity_function = propensity_function
-            else:
-                self.propensity_function = 'return ' +  propensity_function + ';'
+        self.propensity_function = propensity_function
 
-        if self.propensity_function is None and self.massaction is None:
+        if self.propensity_function is None: 
             if rate is None:
                 errmsg = "Reaction "+self.name +": You must either set the reaction to be mass-action or specifiy a propensity function."
                 raise ReactionError(errmsg)
             else:
                 # If they don't give us a propensity function and do give a rate, assume mass-action.
                 self.massaction = True
-
-        if self.propensity_function is not None and self.massaction:
-            errmsg = "Reaction "+self.name +": You cannot set the propensity type to mass-action and simultaneously set a propensity function."
-            raise ReactionError(errmsg)
+        else:
+            if rate is not None:
+                errmsg = "Reaction "+self.name +": You cannot set the propensity type to mass-action and simultaneously set a propensity function."
+                raise ReactionError(errmsg)
+            else:
+                self.massaction = False
         
         self.reactants = {}
         if reactants is not None:

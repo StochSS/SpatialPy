@@ -21,8 +21,8 @@ __DEFINE_SPECIES__
 #define NUM_SPECIES __NUMBER_OF_SPECIES__
 #define NUM_VOXELS __NUMBER_OF_VOXELS__
 
-/* Define DataFunctions */
-__DEFINE_DATA_FUNCTIONS__
+__DATA_FUNCTION_DEFINITIONS__
+
 
 /* Parameter definitions */
 __DEFINE_PARAMETERS__
