@@ -1,85 +1,81 @@
 #!/usr/bin/env python
-import math
-import matplotlib.pyplot as plt
+import os
 import numpy
-import pyurdme
+import sys
+import spatialpy
 
-
-class CoralReef(pyurdme.URDMEModel):
-    """ Model developed by Briggs and Drawert 3/31/2014, based on a 
-        non-spatial model by Briggs and Adam.
-    """
+class CoralReef(spatialpy.Model):
 
     def __init__(self, name="coral_reef", D_c=1.0, D_m=1.0, version=1):
-        pyurdme.URDMEModel.__init__(self, name)
+        spatialpy.Model.__init__(self, name)
 
         # Species
-        Coral = pyurdme.Species(name="Coral",diffusion_constant=0.0)
-        Coral_m = pyurdme.Species(name="Coral_m",diffusion_constant=D_c)
-        MA = pyurdme.Species(name="MA", diffusion_constant=0.0)
-        MA_m = pyurdme.Species(name="MA_m", diffusion_constant=D_m)
-        Turf = pyurdme.Species(name="Turf", diffusion_constant=0.0)
+        Coral = spatialpy.Species(name="Coral",diffusion_constant=0.0)
+        Coral_m = spatialpy.Species(name="Coral_m",diffusion_constant=D_c)
+        MA = spatialpy.Species(name="MA", diffusion_constant=0.0)
+        MA_m = spatialpy.Species(name="MA_m", diffusion_constant=D_m)
+        Turf = spatialpy.Species(name="Turf", diffusion_constant=0.0)
         self.add_species([Coral, MA, Coral_m, MA_m, Turf])
 
         # Parameters
-        phi_c = pyurdme.Parameter(name="phi_c", expression=0.0011) #1/year
-        phi_m = pyurdme.Parameter(name="phi_m", expression=0.001) #1/year
-        g_tc = pyurdme.Parameter(name="g_tc", expression=0.1) #1/year
-        g_tm = pyurdme.Parameter(name="g_tm", expression=0.2) #1/year
-        Gamma = pyurdme.Parameter(name="Gamma", expression=0.05)
-        dc = pyurdme.Parameter(name="dc", expression=0.05) #1/year
-        dm = pyurdme.Parameter(name="dm", expression=1.0) #1/year
-        #dm = pyurdme.Parameter(name="dm", expression=0.2) #1/year
-        phi_g = pyurdme.Parameter(name="psi_g", expression=0.0)
+        phi_c = spatialpy.Parameter(name="phi_c", expression=0.0011) #1/year
+        phi_m = spatialpy.Parameter(name="phi_m", expression=0.001) #1/year
+        g_tc = spatialpy.Parameter(name="g_tc", expression=0.1) #1/year
+        g_tm = spatialpy.Parameter(name="g_tm", expression=0.2) #1/year
+        Gamma = spatialpy.Parameter(name="Gamma", expression=0.05)
+        dc = spatialpy.Parameter(name="dc", expression=0.05) #1/year
+        dm = spatialpy.Parameter(name="dm", expression=1.0) #1/year
+        #dm = spatialpy.Parameter(name="dm", expression=0.2) #1/year
+        phi_g = spatialpy.Parameter(name="psi_g", expression=0.0)
         # Death rate of mobile propgules.  Combine with diffusion to determine spread.
-        mu_c = pyurdme.Parameter(name="mu_c", expression=1.0) #1/year
-        mu_m = pyurdme.Parameter(name="mu_m", expression=1.0) #1/year
+        mu_c = spatialpy.Parameter(name="mu_c", expression=1.0) #1/year
+        mu_m = spatialpy.Parameter(name="mu_m", expression=1.0) #1/year
         # mobile propogules destroyed by estabilished 
-        alpha_c = pyurdme.Parameter(name="alpha_c", expression=0.1) #1/year
-        alpha_m = pyurdme.Parameter(name="alpha_m", expression=0.5) #1/year
+        alpha_c = spatialpy.Parameter(name="alpha_c", expression=0.1) #1/year
+        alpha_m = spatialpy.Parameter(name="alpha_m", expression=0.5) #1/year
         # Production of mobile propogules
-        R_c = pyurdme.Parameter(name="R_c", expression=1.0) #1/year
-        R_m = pyurdme.Parameter(name="R_m", expression=1.0) #1/year
+        R_c = spatialpy.Parameter(name="R_c", expression=1.0) #1/year
+        R_m = spatialpy.Parameter(name="R_m", expression=1.0) #1/year
 
         self.add_parameter([phi_c, phi_m, g_tc, g_tm, Gamma, dc, dm, phi_g, mu_c, mu_m, alpha_c, alpha_m, R_c, R_m])
                 
 
         # Reactions:
         # C -> T : dc
-        self.add_reaction(pyurdme.Reaction(name="R3", reactants={Coral:1}, products={Turf:1}, rate=dc))
+        self.add_reaction(spatialpy.Reaction(name="R3", reactants={Coral:1}, products={Turf:1}, rate=dc))
         # MA -> T : dm
-        self.add_reaction(pyurdme.Reaction(name="R4", reactants={MA:1}, products={Turf:1}, rate=dm))
+        self.add_reaction(spatialpy.Reaction(name="R4", reactants={MA:1}, products={Turf:1}, rate=dm))
         # T + C_m -> C : phi_c
-        self.add_reaction(pyurdme.Reaction(name="R5", reactants={Turf:1, Coral_m:1}, products={Coral:1}, rate=phi_c))
+        self.add_reaction(spatialpy.Reaction(name="R5", reactants={Turf:1, Coral_m:1}, products={Coral:1}, rate=phi_c))
         # T + MA_m -> MA : phi_m
-        self.add_reaction(pyurdme.Reaction(name="R6", reactants={Turf:1, MA_m:1}, products={MA:1}, rate=phi_m))
+        self.add_reaction(spatialpy.Reaction(name="R6", reactants={Turf:1, MA_m:1}, products={MA:1}, rate=phi_m))
         # C + T -> 2C : g_tc * exp(-1.0 * psi_g * MA / 100)
-        self.add_reaction(pyurdme.Reaction(name="R7", reactants={Turf:1, Coral:1}, products={Coral:2}, propensity_function="g_tc*Turf*Coral*exp(-1.0 * psi_g * MA / Space_per_voxel)/vol"))
+        self.add_reaction(spatialpy.Reaction(name="R7", reactants={Turf:1, Coral:1}, products={Coral:2}, propensity_function="g_tc*Turf*Coral*exp(-1.0 * psi_g * MA / Space_per_voxel)/vol"))
         # MA + T -> 2MA : g_tm
-        self.add_reaction(pyurdme.Reaction(name="R8", reactants={Turf:1, MA:1}, products={MA:2}, rate=g_tm))
+        self.add_reaction(spatialpy.Reaction(name="R8", reactants={Turf:1, MA:1}, products={MA:2}, rate=g_tm))
         # C + MA -> 2MA : Gamma * g_tm
-        self.add_reaction(pyurdme.Reaction(name="R9", reactants={Coral:1, MA:1}, products={MA:2}, propensity_function="g_tm*Gamma*Coral*MA/vol"))
+        self.add_reaction(spatialpy.Reaction(name="R9", reactants={Coral:1, MA:1}, products={MA:2}, propensity_function="g_tm*Gamma*Coral*MA/vol"))
         # C -> C + C_m : R_c
-        self.add_reaction(pyurdme.Reaction(name="R10", reactants={Coral:1}, products={Coral:1, Coral_m:1}, rate=R_c))
+        self.add_reaction(spatialpy.Reaction(name="R10", reactants={Coral:1}, products={Coral:1, Coral_m:1}, rate=R_c))
         # MA -> MA + MA_m : R_m
-        self.add_reaction(pyurdme.Reaction(name="R11", reactants={MA:1}, products={MA:1, MA_m:1}, rate=R_m))
+        self.add_reaction(spatialpy.Reaction(name="R11", reactants={MA:1}, products={MA:1, MA_m:1}, rate=R_m))
         # C_m -> 0 : mu_c
-        self.add_reaction(pyurdme.Reaction(name="R12", reactants={Coral_m:1}, products={}, rate=mu_c))
+        self.add_reaction(spatialpy.Reaction(name="R12", reactants={Coral_m:1}, products={}, rate=mu_c))
         # MA_m -> 0 : mu_m
-        self.add_reaction(pyurdme.Reaction(name="R13", reactants={MA_m:1},  products={}, rate=mu_m))
+        self.add_reaction(spatialpy.Reaction(name="R13", reactants={MA_m:1},  products={}, rate=mu_m))
         # MA + C_m -> MA : alpha_c
-        self.add_reaction(pyurdme.Reaction(name="R14", reactants={MA:1, Coral_m:1},  products={MA:1}, rate=alpha_c))
+        self.add_reaction(spatialpy.Reaction(name="R14", reactants={MA:1, Coral_m:1},  products={MA:1}, rate=alpha_c))
         # C + MA_m -> C : alpha_m
-        self.add_reaction(pyurdme.Reaction(name="R15", reactants={Coral:1, MA_m:1},  products={Coral:1}, rate=alpha_m))
+        self.add_reaction(spatialpy.Reaction(name="R15", reactants={Coral:1, MA_m:1},  products={Coral:1}, rate=alpha_m))
  
         
 
         # A unit square
         # each grid point is 10cm x 10cm, domain is 5m x 5m
-        self.mesh = pyurdme.URDMEMesh.generate_square_mesh(L=5, nx=50, ny=50, periodic=True)
+        self.mesh = spatialpy.MODELMesh.generate_square_mesh(L=5, nx=50, ny=50, periodic=True)
 
         Space_per_voxel = 10
-        self.add_parameter(pyurdme.Parameter(name="Space_per_voxel", expression=Space_per_voxel)) #1/year
+        self.add_parameter(spatialpy.Parameter(name="Space_per_voxel", expression=Space_per_voxel)) #1/year
         
                           
         if True:
