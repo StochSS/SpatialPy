@@ -137,7 +137,7 @@ class Result(dict):
                 num=self.model.num_timesteps+1) * self.model.timestep_size
         return self.tspan
 
-    def get_species(self, species, timepoints="all", concentration=False):
+    def get_species(self, species, timepoints=None, concentration=False):
         """ Returns a slice (view) of the output matrix U that contains one species for the timepoints
             specified by the time index array. The default is to return all timepoints.
             Data is loaded by slicing directly in the hdf5 dataset, i.e. it the entire
@@ -159,8 +159,8 @@ class Result(dict):
         t_index_arr = numpy.linspace(0,self.model.num_timesteps, 
                             num=self.model.num_timesteps+1, dtype=int)
 
-        if timepoints != "all":
-            t_index_arr = t_index_arr[timepoints]
+        if timepoints is not None:
+            t_index_arr = [t_index_arr[timepoints]]
         
         ret = numpy.zeros( (len(t_index_arr), num_voxel))
         for ndx, t_ndx in enumerate(t_index_arr):
@@ -171,7 +171,8 @@ class Result(dict):
                 ret[ndx,:] = step['C['+spec_name+']'] / (step['mass'] / step['rho'] )
             else:
                 ret[ndx,:] = step['C['+spec_name+']']
-
+        if ret.shape[0] == 1:
+            ret = ret.flatten()
         return ret
 
 
