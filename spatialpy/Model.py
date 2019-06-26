@@ -190,17 +190,16 @@ class Model():
             The species or list of species to be added to the model object.
         """
 
-        #if isinstance(obj, Species):
-        x = Species()
-        if str(type(x)) == str(type(obj)):
+
+        if isinstance(obj, list):
+            for S in obj:
+                self.add_species(S)
+        elif type(obj).__name__ == 'Species':
             problem = self.problem_with_name(obj.name)
             if problem is not None:
                 raise problem
             self.species_map[obj] = len(self.listOfSpecies)
             self.listOfSpecies[obj.name] = obj
-        elif isinstance(obj, list):
-            for S in obj:
-                self.add_species(S)
         else:
             raise ModelError("Unexpected parameter for add_species. Parameter must be Species or list of Species.")
         return obj
@@ -286,22 +285,17 @@ class Model():
     def add_reaction(self,reacs):
         """ Add Reaction(s) to the model. Input can be single instance, a list of instances
             or a dict with name,instance pairs. """
-        
-        # TODO, make sure that you cannot overwrite an existing parameter
-        param_type = type(reacs).__name__
-        if param_type == 'list':
+        if isinstance(reacs, list): 
             for r in reacs:
                 if r.name is None or r.name == "":
                     r.name = 'rxn' + str(uuid.uuid4()).replace('-', '_')
                 self.listOfReactions[r.name] = r
-        elif param_type == 'dict' or param_type == 'OrderedDict':
-            self.listOfReactions = reacs
-        elif param_type == 'instance':
+        elif type(reacs).__name__ == "Reaction":
                 if reacs.name is None or reacs.name == "":
                     reacs.name = 'rxn' + str(uuid.uuid4()).replace('-', '_')
                 self.listOfReactions[reacs.name] = reacs
         else:
-            raise
+            raise ModelError("add_reaction() takes a spatialpy.Reaction object or list of objects")
 
     def get_reaction(self, rname):
         return self.listOfReactions[rname]
@@ -434,15 +428,21 @@ class Model():
 class Species():
     """ Model of a biochemical species. """
     
-    def __init__(self,name="",diffusion_constant=None,reaction_radius=None,dimension=3):
+    def __init__(self,name=None,diffusion_constant=None,diffusion_coefficient=None,D=None):
         # A species has a name (string) and an initial value (positive integer)
-        self.name = name
-        self.dimension=dimension
-        self.diffusion_constant=diffusion_constant
-        self.reaction_radius=reaction_radius
+        if name is None: 
+            raise ModelError("Species must have a name")
+        else:
+            self.name = name
+        if diffusion_constant is not None:
+            self.diffusion_constant=diffusion_constant
+        elif  diffusion_coefficient is not None:
+            self.diffusion_constant=diffusion_coefficient
+        elif D is not None:
+            self.diffusion_constant=D
+        else:
+            raise ModelError("Species must have a diffusion_constant")
 
-    def dim(self):
-        return self.dimension
 
     def __str__(self):
         return self.name
