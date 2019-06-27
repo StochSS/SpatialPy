@@ -10,9 +10,42 @@ class InitialCondition():
     def apply(self, model):
         raise ModelError("spatialpy.InitialCondition subclasses must implement apply()")
 
-#TODO: implement UniformInitialCondition()
-#TODO: implement PlaceInitialCondition()
 #TODO: implement InitialConditionFromResult()
+
+class PlaceInitialCondition(InitialCondition):
+    def __init__(self, species, count, location):
+        self.species = species
+        self.count = count
+        self.location = location
+
+    def apply(self, model):
+        spec_name = self.species.name
+        for spec_ndx, spec_name in enumerate(model.listOfSpecies.keys()):
+            if model.listOfSpecies[spec_name] == self.species: break
+        vtx = model.mesh.closest_vertex(self.location)
+        model.u0[spec_ndx, vtx] += self.count
+
+class UniformInitialCondition(InitialCondition):
+    def __init__(self, species, count, subdomains=None):
+        self.species = species
+        self.count = count
+        self.subdomains = subdomains
+
+    def apply(self, model):
+        spec_name = self.species.name
+        for spec_ndx, spec_name in enumerate(model.listOfSpecies.keys()):
+            if model.listOfSpecies[spec_name] == self.species: break
+
+        if self.subdomains is None:
+            nvox = model.mesh.get_num_voxels()
+            for vtx in range(nvox):
+                model.u0[spec_ndx, vtx] += self.count
+        else:
+            for i in range(model.mesh.get_num_voxels()):
+                if model.sd[i] in self.subdomains:
+                    model.u0[spec_ndx, i] += self.count
+
+        
 
 class ScatterInitialCondition(InitialCondition):
     
@@ -24,8 +57,6 @@ class ScatterInitialCondition(InitialCondition):
         self.subdomains = subdomains
 
     def apply(self, model):
-        print("self.listOfInitialConditions({0},{1}).apply()".format(self.species.name,self.count))
-
         spec_name = self.species.name
         for spec_ndx, spec_name in enumerate(model.listOfSpecies.keys()):
             if model.listOfSpecies[spec_name] == self.species: break
