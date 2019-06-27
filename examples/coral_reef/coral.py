@@ -2,6 +2,8 @@
 import os
 import numpy
 import sys
+from collections import OrderedDict
+sys.path.append("../..")
 import spatialpy
 
 class CoralReef(spatialpy.Model):
@@ -98,7 +100,7 @@ class CoralReef(spatialpy.Model):
                 tot += self.u0[sndx][vndx]
             if tot > 100:
                 for sndx, sname in enumerate(self.listOfSpecies):
-                    print "u0[{0}][{1}] = {2}".format(sname, vndx, self.u0[sndx][vndx])
+                    print("u0[{0}][{1}] = {2}").format(sname, vndx, self.u0[sndx][vndx])
 
         #self.timespan(numpy.linspace(0,500,501)) #500 years
         #self.timespan(numpy.linspace(0,5,72)) #5 years, by months
@@ -108,8 +110,6 @@ class CoralReef(spatialpy.Model):
 if __name__ == "__main__":
     model = CoralReef()
     result = model.run(report_level=1)
-    print "Writing PavaView compatable output to 'output_coral' directory"
-    result.export_to_vtk(species='Coral',folder_name="output_coral")
 
     x_vals = model.mesh.coordinates()[:, 0]
     y_vals = model.mesh.coordinates()[:, 1]
@@ -118,25 +118,7 @@ if __name__ == "__main__":
     Turf_vals = result.get_species("Turf")
     num_vox = len(x_vals)    
 
-    plt.figure(figsize=(12,6), dpi=100)
-    tndx = -1 #show end timepoint
-    tval = model.tspan[tndx]
-    plt.subplot(1,3,1)
-    heatmap, xedges, yedges = numpy.histogram2d(x=x_vals, y=y_vals, weights=C_vals[tndx,:], bins=int(math.sqrt(num_vox)))
-    plt.imshow(heatmap)
-    cb = plt.colorbar()
-    cb.set_label('Coral population')
-    plt.title('t={0}'.format(tval))
-    plt.subplot(1,3,2)
-    heatmap, xedges, yedges = numpy.histogram2d(x=x_vals, y=y_vals, weights=MA_vals[tndx,:], bins=int(math.sqrt(num_vox)))
-    plt.imshow(heatmap)
-    cb = plt.colorbar()
-    cb.set_label('MA population')
-    plt.title('t={0}'.format(tval))
-    plt.subplot(1,3,3)
-    heatmap, xedges, yedges = numpy.histogram2d(x=x_vals, y=y_vals, weights=Turf_vals[tndx,:], bins=int(math.sqrt(num_vox)))
-    plt.imshow(heatmap)
-    cb = plt.colorbar()
-    cb.set_label('Free Turf')
-    plt.title('t={0}'.format(tval))
-    plt.show()
+    print(C_vals)
+    print(MA_vals)
+    print(Turf_vals)
+  
