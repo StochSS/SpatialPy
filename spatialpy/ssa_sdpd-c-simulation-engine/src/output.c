@@ -112,7 +112,8 @@ void output_vtk__async_step(system_t*system){
     fprintf(fp, "DATASET POLYDATA\n");
     fprintf(fp, "POINTS %i float\n",np);
     for(i=0;i<np;i++){
-        fprintf(fp, "%lf %lf %lf ",output_buffer[i].x[0],output_buffer[i].x[1],output_buffer[i].x[2]);
+        //fprintf(fp, "%lf %lf %lf ",output_buffer[i].x[0],output_buffer[i].x[1],output_buffer[i].x[2]);
+        fprintf(fp, "%.10e %.10e %.10e ",output_buffer[i].x[0],output_buffer[i].x[1],output_buffer[i].x[2]);
         if((i+1)%3==0){ fprintf(fp,"\n"); }
     }
     fprintf(fp,"\n");

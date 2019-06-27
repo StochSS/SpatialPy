@@ -202,15 +202,6 @@ class Solver:
         propfilestr = propfilestr.replace("__NUMBER_OF_SPECIES__", str(self.model.get_num_species()))
         propfilestr = propfilestr.replace("__NUMBER_OF_VOXELS__", str(self.model.mesh.get_num_voxels()))
 
-        # Create defines for the DataFunctions.
-        data_fn_str = ""
-        i = 0
-        for d in self.model.listOfDataFunctions:
-            if d.name is None:
-                raise SimulationError("DataFunction {0} does not have a name attributed defined.".format(i))
-            data_fn_str += "#define " + d.name + " data[" + str(i) + "]\n"
-            i += 1
-        propfilestr = propfilestr.replace("__DEFINE_DATA_FUNCTIONS__", str(data_fn_str))
 
         # Make sure all paramters are evaluated to scalars before we write them to the file.
         self.model.resolve_parameters()
@@ -263,6 +254,8 @@ class Solver:
         # End of pyurdme replacements
         # SSA-SDPD values here
         init_particles = ""
+        if self.model.sd is None:
+            self.model.sd = numpy.ones(self.model.mesh.get_num_voxels())
         for i in range(len(self.model.sd)):
             init_particles += "    init_create_particle(sys,id++,{0},{1},{2},{3});".format(self.model.mesh.coordinates()[i,0],self.model.mesh.coordinates()[i,1],self.model.mesh.coordinates()[i,2],self.model.sd[i])+ "\n"
         propfilestr = propfilestr.replace("__INIT_PARTICLES__", init_particles)
@@ -280,7 +273,7 @@ class Solver:
         for i in range(ncells):
             for s in range(nspecies):
                 if i+s>0: outstr+=','
-                outstr+= str(self.model.u0[s,i])
+                outstr+= str(int(self.model.u0[s,i]))
         outstr+="};"
         input_constants += outstr + "\n"
         # attache the vol to the model as well, for backwards compatablity
@@ -300,6 +293,7 @@ class Solver:
         outstr+="};"
         input_constants += outstr + "\n"
 
+        data_fn_defs = ""
         if len(self.model.listOfDataFunctions) == 0:
             outstr = "static int input_dsize = 1;"
             input_constants += outstr + "\n"
@@ -314,9 +308,13 @@ class Solver:
             for v_ndx in range(ncells):
                 for ndf in range(len(self.model.listOfDataFunctions)):
                     if ndf+v_ndx>0: outstr+=','
-                    outstr+= "{0}".format( self.model.listOfDataFunctions[ndf].map( self.model.mesh.coordinate()[v_ndx,:] ) )
+                    outstr+= "{0}".format( self.model.listOfDataFunctions[ndf].map( self.model.mesh.coordinates()[v_ndx,:] ) )
             outstr+="};"
             input_constants += outstr + "\n"
+
+            for ndf in range(len(self.model.listOfDataFunctions)):
+                data_fn_defs += "#define {0} data[{1}]\n".format(self.model.listOfDataFunctions[ndf].name,ndf)
+        propfilestr = propfilestr.replace("__DATA_FUNCTION_DEFINITIONS__",data_fn_defs )
 
 
         N = self.model.create_stoichiometric_matrix()
@@ -375,13 +373,20 @@ class Solver:
         for i, sname in enumerate(self.model.listOfSpecies.keys()):
             s = self.model.listOfSpecies[sname]
             #print sname,
-            for j, sd_id in enumerate(range(num_subdomains)):
+            for j, sd_id in enumerate(self.model.listOfSubdomainIDs):
                 #print sd_ndx,
                 if i+j>0: outstr+=','
-                if sd_id not in self.model.listOfDiffusionRestrictions[s]:
-                    outstr+= "{0}".format(s.diffusion_constant)
-                else:
-                    outstr+= "0.0"
+                try:
+                    if s not in self.model.listOfDiffusionRestrictions or \
+                       sd_id not in self.model.listOfDiffusionRestrictions[s]:
+                        outstr+= "{0}".format(s.diffusion_constant)
+                    else:
+                        outstr+= "0.0"
+                except KeyError as e:
+                    print("error: {0}".format(e))
+                    print(self.model.listOfDiffusionRestrictions)
+                    raise Exception()
+
         outstr+="};"
         input_constants += outstr + "\n"
         propfilestr = propfilestr.replace("__INPUT_CONSTANTS__", input_constants)

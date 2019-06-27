@@ -10,8 +10,5 @@ from spatialpy.Solver import *
 from spatialpy.Subdomain import *
 from spatialpy.Mesh import *
 from spatialpy.DataFunction import *
+from spatialpy.InitialCondition import *
 
-#from spatialpy.core import *
-#import spatialpy.sbml
-#import spatialpy.solvers
-#import spatialpy.example_models
