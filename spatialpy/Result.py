@@ -138,29 +138,40 @@ class Result(dict):
         return self.tspan
 
     def get_species(self, species, timepoints=None, concentration=False):
-        """ Returns a slice (view) of the output matrix U that contains one species for the timepoints
-            specified by the time index array. The default is to return all timepoints.
-            Data is loaded by slicing directly in the hdf5 dataset, i.e. it the entire
-            content of the file is not loaded in memory and the U matrix
-            is never added to the object.
-            if concentration is False (default), the integer, raw, trajectory data is returned,
+        """ Get the populations/concentration values for a given species in the model for 
+            one or all timepoints.  
+            
+            If 'timepoints' is None (default), a matrix of dimension:
+            (number of timepoints) x (number of voxels) is returned.  If an integer value is
+            given, that value is used to index into the timespan, and that time point is returned
+            as a 1D array with size (number of voxel). 
+
+            If concentration is False (default), the integer, raw, trajectory data is returned,
             if set to True, the concentration (=copy_number/volume) is returned.
         """
+
+
+        species_map = self.model.species_map
+        num_species = self.model.get_num_species()
+        num_voxel = self.model.mesh.get_num_voxels()
 
         if isinstance(species,str):
             spec_name = species
         else:
             spec_name = species.name
 
-        species_map = self.model.species_map
-        num_species = self.model.get_num_species()
-        num_voxel = self.model.mesh.get_num_voxels()
+        if spec_name not in self.model.listOfSpecies.keys():
+            raise ResultError("Species '{0}' not found".format(spec_name))
 
         t_index_arr = numpy.linspace(0,self.model.num_timesteps, 
                             num=self.model.num_timesteps+1, dtype=int)
 
         if timepoints is not None:
-            t_index_arr = [t_index_arr[timepoints]]
+            if isinstance(timepoints,float):
+                raise ResultError("timepoints argument must be an integer, the index of time timespan")
+            t_index_arr = t_index_arr[timepoints]
+        if not isinstance(t_index_arr,list):
+            t_index_arr = [t_index_arr]
         
         ret = numpy.zeros( (len(t_index_arr), num_voxel))
         for ndx, t_ndx in enumerate(t_index_arr):
@@ -469,4 +480,6 @@ class Result(dict):
         raise Exception("TODO")
 
 
+class ResultError(Exception):
+    pass
 
