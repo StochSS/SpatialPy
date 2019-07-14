@@ -210,10 +210,10 @@ class Mesh():
             import pygmsh
         except ImportError as e:
             raise MeshError("The python package 'pygmsh' is not installed.")
-        try:
-            _ = pygmsh.get_gmsh_major_version()
-        except FileNotFoundError as e:
-            raise MeshError("The command line program 'gmsh' is not installed or is not found in the current PATH")
+       # try:
+       #     _ = pygmsh.get_gmsh_major_version()
+       # except FileNotFoundError as e:
+       #     raise MeshError("The command line program 'gmsh' is not installed or is not found in the current PATH")
 
         try:
             import meshio

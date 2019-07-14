@@ -103,6 +103,7 @@ int main(int argc, char**argv){
         srand48((long int)time(NULL)+(long int)(1e9*clock()));
     }
     int num_threads = get_num_processors();
+    if(num_threads>8){ num_threads=8; }
     run_simulation(num_threads, system);
     exit(0);
 }
