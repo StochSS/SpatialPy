@@ -53,7 +53,7 @@ class Solver:
         """ Compile the model."""
 
         # Create a unique directory each time call to compile.
-        self.build_dir = tempfile.mkdtemp(dir=os.environ.get('SPATIALPY_TMPDIR'))
+        self.build_dir = tempfile.mkdtemp(prefix='spatialpy_',dir=os.environ.get('SPATIALPY_TMPDIR'))
 
         if self.report_level >= 1:
             print("Compiling Solver.  Build dir: {0}".format(self.build_dir))
