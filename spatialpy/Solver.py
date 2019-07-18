@@ -53,7 +53,7 @@ class Solver:
         """ Compile the model."""
 
         # Create a unique directory each time call to compile.
-        self.build_dir = tempfile.mkdtemp(dir=os.environ.get('SPATIALPY_TMPDIR'))
+        self.build_dir = tempfile.mkdtemp(prefix='spatialpy_build_',dir=os.environ.get('SPATIALPY_TMPDIR'))
 
         if self.report_level >= 1:
             print("Compiling Solver.  Build dir: {0}".format(self.build_dir))
@@ -114,7 +114,7 @@ class Solver:
 
         # Execute the solver
         for run_ndx in range(number_of_trajectories):
-            outfile = tempfile.mkdtemp(dir=os.environ.get('SPATIALPY_TMPDIR'))
+            outfile = tempfile.mkdtemp(prefix='spatialpy_result_',dir=os.environ.get('SPATIALPY_TMPDIR'))
             result = Result(self.model, outfile)
             solver_cmd = 'cd {0}'.format(outfile) + ";" + os.path.join(self.build_dir, self.executable_name)
 
