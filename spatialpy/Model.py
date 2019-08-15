@@ -139,10 +139,10 @@ class Model():
             species: an instance of a 'spatialpy.Species'.
             listOfSubdomains: a list, each object in the list should be a 'domain_id'
         """
-        x = Species()
+        #x = Species()
         #if not isinstance(species, Species):
-        if str(type(x)) != str(type(species)):
-            raise ModelError("First argument to restrict() must be a Species object")
+        #if str(type(species)) != 'Species':
+        #    raise ModelError("First argument to restrict() must be a Species object, not {0}".format(str(type(species))))
         if not isinstance(listOfSubDomains,list):
             self.listOfDiffusionRestrictions[species] = [listOfSubDomains]
         else:
