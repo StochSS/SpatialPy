@@ -1,7 +1,7 @@
 """ NSM solver. """
 #from pyurdme import pyurdme
-import pyurdme
+import spatialpy
 
-class NSMSolver(pyurdme.URDMESolver):
+class NSMSolver(spatialpy.Solver):
     """ NSM solver class. """
     NAME = 'nsm'

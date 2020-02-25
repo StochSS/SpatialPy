@@ -1,287 +1,110 @@
 import os
-import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
-import types
-import warnings
-import uuid
+import time
 
 
-import numpy
-import scipy.io
-import scipy.sparse
-
-from model import *
-
-import inspect
-
-try:
-    # This is only needed if we are running in an Ipython Notebook
-    import IPython.display
-except:
-    pass
-
-try:
-    import h5py
-except:
-    raise Exception("SpatialPy requires h5py.")
-
-import pickle
-import json
-import functools
-
-# module-level variable to for javascript export in IPython/Jupyter notebooks
-__spatialpy_javascript_libraries_loaded = False
-def load_pyurdme_javascript_libraries():
-    global __spatialpy_javascript_libraries_loaded
-    if not __spatialpy_javascript_libraries_loaded:
-        __spatialpy_javascript_libraries_loaded = True
-        import os.path
-        import IPython.display
-        with open(os.path.join(os.path.dirname(__file__),'data/three.js_templates/js/three.js')) as fd:
-            bufa = fd.read()
-        with open(os.path.join(os.path.dirname(__file__),'data/three.js_templates/js/render.js')) as fd:
-            bufb = fd.read()
-        with open(os.path.join(os.path.dirname(__file__),'data/three.js_templates/js/OrbitControls.js')) as fd:
-            bufc = fd.read()
-        IPython.display.display(IPython.display.HTML('<script>'+bufa+bufc+bufb+'</script>'))
+from spatialpy.Model import *
+from spatialpy.Result import *
 
 
-def deprecated(func):
-    '''This is a decorator which can be used to mark functions
-     as deprecated. It will result in a warning being emitted
-     when the function is used.'''
 
-    @functools.wraps(func)
-    def new_func(*args, **kwargs):
-        warnings.warn_explicit(
-             "Call to deprecated function {}.".format(func.__name__),
-             category=DeprecationWarning,
-             filename=func.func_code.co_filename,
-             lineno=func.func_code.co_firstlineno + 1
-         )
-        return func(*args, **kwargs)
-    return new_func
-
-
-class SpatialPySolver:
+class Solver:
     """ Abstract class for spatialpy solvers. """
 
-    def __init__(self, model, solver_path=None, report_level=0, model_file=None, sopts=None):
+    def __init__(self, model, report_level=0):
         """ Constructor. """
-        if not isinstance(model, SpatialPyModel):
-            raise SpatialPyError("URDMEsolver constructors must take a SpatialPyModel as an argument.")
-        if not issubclass(self.__class__, URDMESolver):
-            raise SpatialPyError("Solver classes must be a subclass of SpatialPySolver.")
+        #TODO: fix class checking
+        #if not isinstance(model, Model):
+        #    raise SimulationError("Solver constructors must take a Model as an argument.")
+        #if not issubclass(self.__class__, Solver):
+        #    raise SimulationError("Solver classes must be a subclass of SpatialPy.Solver.")
         if not hasattr(self, 'NAME'):
-            raise SpatialPyError("Solver classes must implement a NAME attribute.")
+            raise SimulationError("Solver classes must implement a NAME attribute.")
 
         self.model = model
         self.is_compiled = False
         self.report_level = report_level
-        self.model_file = model_file
-        self.infile_name = None
-        self.delete_infile = False
         self.model_name = self.model.name
-        self.solver_base_dir = None
-        if sopts is None:
-            self.sopts = [0,0,0]
-        else:
-            self.sopts = sopts
+        self.build_dir = None
+        self.executable_name = 'ssa_sdpd'
+        self.h = None # basis function width
 
-        # For the remote execution
-        self.temp_urdme_root = None
-
-        self.SpatialPy_ROOT =  os.path.dirname(os.path.abspath(__file__))+"/spatialpy"
-
-        #print "solver_path={0}".format(solver_path)
-        if solver_path is None or solver_path == "":
-            self.SpatialPy_BUILD = self.SpatialPy_ROOT + '/build/'
-        else:
-            self.SpatialPy_BUILD = solver_path + '/build/'
-            os.environ['SOLVER_ROOT'] = solver_path
-
-    def __getstate__(self):
-        """ Save the state of the solver, saves all instance variables
-            and reads all the files necessary to compile the solver off
-            of the file system and stores it in a separate state variable.
-            If the solver model files is specified, it saves that too.
-            This is used by Pickle.
-        """
-        ret = {}
-        # Save the instance variables
-        ret['vars'] = self.__dict__.copy()
-        # The model object is not picklabe due to the Swig-objects from Dolfin
-        #ret['vars']['model'] = None
-        ret['vars']['is_compiled'] = False
-        # Create temp root
-        tmproot = tempfile.mkdtemp(dir=os.environ.get('PYURDME_TMPDIR'))
-        # Get the propensity file
-        model_file = tmproot+'/'+self.model_name + '_pyurdme_generated_model'+ '.c'
-        ret['model_file'] = os.path.basename(model_file)
-        if self.model_file == None:
-            self.create_propensity_file(file_name=model_file)
-        else:
-            subprocess.call('cp '+self.model_file+' '+model_file, shell=True)
-        # Get the solver source files
-        os.mkdir(tmproot+'/include')
-        os.mkdir(tmproot+'/src')
-        os.mkdir(tmproot+'/src/'+self.NAME)
-        #TODO: what if solverdir is not the same as URDME_ROOT ?
-        subprocess.call('cp '+self.URDME_ROOT+'/src/*.c '+tmproot+'/src/', shell=True)
-        subprocess.call('cp '+self.URDME_ROOT+'/src/'+self.NAME+'/*.* '+tmproot+'/src/'+self.NAME+'/', shell=True)
-        subprocess.call('cp '+self.URDME_ROOT+'/include/*.h '+tmproot+'/include/', shell=True)
-        #TODO: get the include files from solvers not in the default path (none currently implement this).
-        # Get the Makefile
-        os.mkdir(tmproot+'/build')
-        subprocess.call('cp '+self.URDME_BUILD+'Makefile.'+self.NAME+' '+tmproot+'/build/Makefile.'+self.NAME, shell=True)
-        # Get the input file
-        input_file = tmproot+'/model_input.mat'
-        ret['input_file'] = os.path.basename(input_file)
-        self.serialize(filename=input_file, report_level=self.report_level)
-        ##
-        origwd = os.getcwd()
-        os.chdir(tmproot)
-        tarname = tmproot+'/'+self.NAME+'.tar.gz'
-        subprocess.call('tar -czf '+tarname+' src include build '+os.path.basename(input_file)+' '+os.path.basename(model_file), shell=True)
-        with open(tarname, 'r') as f:
-            ret['SolverFiles'] = f.read()
-        os.chdir(origwd)
-        shutil.rmtree(tmproot)
-        # return the state
-        return ret
-
-    def __setstate__(self, state):
-        """ Set all instance variables for the object, and create a unique temporary
-            directory to store all the solver files.  URDME_BUILD is set to this dir,
-            and is_compiled is always set to false.  This is used by Pickle.
-        """
-        # 0. restore the instance variables
-        for key, val in state['vars'].iteritems():
-            self.__dict__[key] = val
-        # 1. create temporary directory = SPATIALPY_ROOT
-        self.temp_spatialpy_root = tempfile.mkdtemp(dir=os.environ.get('SPATIALPY_TMPDIR'))
-        self.SPATIALPY_ROOT = self.temp_spatialpy_root
-        self.SPATIALPY_BUILD = self.temp_spatialpy_root+'/build/'
-        origwd = os.getcwd()
-        os.chdir(self.temp_spatialpy_root)
-        tarname = self.temp_spatialpy_root+'/'+self.NAME+'.tar.gz'
-        with open(tarname, 'wd') as f:
-            f.write(state['SolverFiles'])
-        subprocess.call('tar -zxf '+tarname, shell=True)
-        os.chdir(origwd)
-        # Model File
-        self.model_file = self.temp_spatialpy_root+'/'+state['model_file']
-        # Input File
-        self.infile_name = self.temp_spatialpy_root+'/'+state['input_file']
+        self.SpatialPy_ROOT =  os.path.dirname(os.path.abspath(__file__))+"/ssa_sdpd-c-simulation-engine"
 
 
     def __del__(self):
         """ Deconstructor.  Removes the compiled solver."""
-        if self.delete_infile:
-            try:
-                os.remove(self.infile_name)
-            except OSError as e:
-                print "Could not delete '{0}'".format(self.infile_name)
-        if self.solver_base_dir is not None:
-            try:
-                shutil.rmtree(self.solver_base_dir)
-            except OSError as e:
-                print "Could not delete '{0}'".format(self.solver_base_dir)
-        if self.temp_spatialpy_root is not None:
-            try:
-                shutil.rmtree(self.temp_spatialpy_root)
-            except OSError as e:
-                print "Could not delete '{0}'".format(self.temp_urdme_root)
+        try:
+            if self.build_dir is not None:
+                try:
+                    shutil.rmtree(self.build_dir)
+                except OSError as e:
+                    print("Could not delete '{0}'".format(self.solver_base_dir))
+        except Exception as e:
+            pass
 
-
-    def serialize(self, filename=None, report_level=0, sopts=None):
-        """ Write the datastructures needed by the the core URDME solvers to a .mat input file. """
-        spatialpy_solver_data = self.model.get_solver_datastructure()
-        spatialpy_solver_data['report'] = report_level
-        if sopts is None:
-            spatialpy_solver_data['sopts'] = self.sopts
-        else:
-            spatialpy_solver_data['sopts'] = sopts
-
-        self.model.validate(spatialpy_solver_data)
-        scipy.io.savemat(filename, spatialpy_solver_data, oned_as='column')
 
 
     def compile(self):
         """ Compile the model."""
 
         # Create a unique directory each time call to compile.
-        self.solver_base_dir = tempfile.mkdtemp(dir=os.environ.get('SPATIALPY_TMPDIR'))
-        self.solver_dir = self.solver_base_dir + '/.spatialpy/'
-        #print "URDMESolver.compile()  self.solver_dir={0}".format(self.solver_dir)
+        self.build_dir = tempfile.mkdtemp(prefix='spatialpy_build_',dir=os.environ.get('SPATIALPY_TMPDIR'))
 
         if self.report_level >= 1:
-            print "Compiling Solver"
-
-        if os.path.isdir(self.solver_dir):
-            try:
-                shutil.rmtree(self.solver_dir)
-            except OSError as e:
-                pass
-        try:
-            os.mkdir(self.solver_dir)
-        except Exception as e:
-            pass
+            print("Compiling Solver.  Build dir: {0}".format(self.build_dir))
 
         # Write the propensity file
-        self.propfilename = self.model_name + '_pyurdme_generated_model'
-        if self.model_file == None:
-            prop_file_name = self.solver_dir + self.propfilename + '.c'
-            if self.report_level > 1:
-                print "Creating propensity file {0}".format(prop_file_name)
-            self.create_propensity_file(file_name=prop_file_name)
-        else:
-            cmd = " ".join(['cp', self.model_file, self.solver_dir + self.propfilename + '.c'])
-            if self.report_level > 1:
-                print cmd
-            subprocess.call(cmd, shell=True)
+        self.propfilename = self.model_name + '_generated_model'
+        self.prop_file_name = self.build_dir + '/' + self.propfilename + '.c'
+        if self.report_level > 1:
+            print("Creating propensity file {0}".format(self.prop_file_name))
+        self.create_propensity_file(file_name=self.prop_file_name)
 
         # Build the solver
-        makefile = 'Makefile.' + self.NAME
-        cmd = " ".join([ 'cd', self.solver_base_dir , ';', 'make', '-f', self.URDME_BUILD + makefile, 'URDME_ROOT=' + self.URDME_ROOT, 'URDME_MODEL=' + self.propfilename])
+        makefile = self.SpatialPy_ROOT+'/build/Makefile.'+self.NAME
+        cmd = " ".join([ 'cd', self.build_dir , ';', 'make', '-f', makefile, 'ROOT=' + self.SpatialPy_ROOT, 'MODEL=' + self.prop_file_name,'BUILD='+self.build_dir])
         if self.report_level > 1:
-            print "cmd: {0}\n".format(cmd)
+            print("cmd: {0}\n".format(cmd))
         try:
             handle = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             return_code = handle.wait()
         except OSError as e:
-            print "Error, execution of compilation raised an exception: {0}".format(e)
-            print "cmd = {0}".format(cmd)
-            raise URDMEError("Compilation of solver failed")
+            print("Error, execution of compilation raised an exception: {0}".format(e))
+            print("cmd = {0}".format(cmd))
+            raise SimulationError("Compilation of solver failed")
 
         if return_code != 0:
             try:
-                print handle.stdout.read()
-                print handle.stderr.read()
+                print(handle.stdout.read().decode("utf-8"))
+                print(handle.stderr.read().decode("utf-8"))
             except Exception as e:
                 pass
-            raise URDMEError("Compilation of solver failed, return_code={0}".format(return_code))
+            raise SimulationError("Compilation of solver failed, return_code={0}".format(return_code))
 
         if self.report_level > 1:
-            print handle.stdout.read()
-            print handle.stderr.read()
+            print(handle.stdout.read().decode("utf-8"))
+            print(handle.stderr.read().decode("utf-8"))
 
         self.is_compiled = True
 
 
-    def run(self, number_of_trajectories=1, seed=None, input_file=None, loaddata=False):
+    def run(self, number_of_trajectories=1, seed=None, timeout=None):
         """ Run one simulation of the model.
-        number_of_trajectories: How many trajectories should be run.
-        seed: the random number seed (incremented by one for multiple runs).
-        input_file: the filename of the solver input data file .
-        loaddata: boolean, should the result object load the data into memory on creation.
+        Args:
+            number_of_trajectories: (int) How many trajectories should be simulated.
+            seed: (int) the random number seed (incremented by one for multiple runs).
+            timeout: (int) maximum number of seconds the solver can run.
+
+
         Returns:
-            URDMEResult object.
+            Result object.
                 or, if number_of_trajectories > 1
-            a list of URDMEResult objects
+            a list of Result objects
         """
         if number_of_trajectories > 1:
             result_list = []
@@ -289,80 +112,81 @@ class SpatialPySolver:
         if not self.is_compiled:
             self.compile()
 
-        if input_file is None:
-            if self.infile_name is None or not os.path.exists(self.infile_name):
-                # Get temporary input and output files
-                infile = tempfile.NamedTemporaryFile(delete=False, dir=os.environ.get('PYURDME_TMPDIR'))
-
-                # Write the model to an input file in .mat format
-                self.serialize(filename=infile, report_level=self.report_level)
-                infile.close()
-                self.infile_name = infile.name
-                self.delete_infile = True
-        else:
-            self.infile_name = input_file
-            self.delete_infile = False
-
-        if not os.path.exists(self.infile_name):
-            raise URDMEError("input file not found.")
-
         # Execute the solver
         for run_ndx in range(number_of_trajectories):
-            outfile = tempfile.NamedTemporaryFile(delete=False, dir=os.environ.get('PYURDME_TMPDIR'))
-            outfile.close()
-            urdme_solver_cmd = [self.solver_dir + self.propfilename + '.' + self.NAME, self.infile_name, outfile.name]
+            outfile = tempfile.mkdtemp(prefix='spatialpy_result_',dir=os.environ.get('SPATIALPY_TMPDIR'))
+            result = Result(self.model, outfile)
+            solver_cmd = 'cd {0}'.format(outfile) + ";" + os.path.join(self.build_dir, self.executable_name)
 
             if seed is not None:
-                urdme_solver_cmd.append(str(seed+run_ndx))
+                solver_cmd += " "+str(seed+run_ndx)
             if self.report_level > 1:
-                print 'cmd: {0}\n'.format(urdme_solver_cmd)
+                print('cmd: {0}\n'.format(solver_cmd))
             stdout = ''
             stderr = ''
+#            try:
+#                if self.report_level >= 1:  #stderr & stdout to the terminal
+#                    handle = subprocess.Popen(solver_cmd, shell=True)
+#                else:
+#                    handle = subprocess.Popen(solver_cmd, stderr=subprocess.PIPE,
+#                                              stdout=subprocess.PIPE, shell=True)
+#                    stdout, stderr = handle.communicate()
+#                return_code = handle.wait()
+#            except OSError as e:
+#                print("Error, execution of solver raised an exception: {0}".format(e))
+#                print("cmd = {0}".format(solver_cmd))
             try:
-                if self.report_level >= 1:  #stderr & stdout to the terminal
-                    handle = subprocess.Popen(urdme_solver_cmd)
-                else:
-                    handle = subprocess.Popen(urdme_solver_cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-                    stdout, stderr = handle.communicate()
-                return_code = handle.wait()
+                start = time.monotonic()
+                with subprocess.Popen(solver_cmd, shell=True, stdout=subprocess.PIPE, preexec_fn=os.setsid) as process:
+                    try:
+                        if timeout is not None:
+                            stdout,stderr = process.communicate(timeout=timeout)
+                        else:
+                            stdout,stderr = process.communicate()
+                        return_code = process.wait()
+                        if self.report_level >= 1:  #stderr & stdout to the terminal
+                            print('Elapsed seconds: {:.2f}'.format(time.monotonic() - start))
+                            if stdout is not None: print(stdout.decode('utf-8'))
+                            if stderr is not None: print(stderr.decode('utf-8'))
+                    except subprocess.TimeoutExpired:
+                        os.killpg(process.pid, signal.SIGINT) # send signal to the process group
+                        stdout,stderr = process.communicate()
+                        message = "SpatialPy solver timeout exceded. "
+                        if stdout is not None: message += stdout.decode('utf-8')
+                        if stderr is not None: message += stderr.decode('utf-8')
+                        raise SimulationTimeout(message)
             except OSError as e:
-                print "Error, execution of solver raised an exception: {0}".format(e)
-                print "urdme_solver_cmd = {0}".format(urdme_solver_cmd)
+                print("Error, execution of solver raised an exception: {0}".format(e))
+                print("cmd = {0}".format(solver_cmd))
 
             if return_code != 0:
                 if self.report_level >= 1:
                     try:
-                        print stderr, stdout
+                        print(stderr)
+                        print(stdout)
                     except Exception as e:
                         pass
-                print "urdme_solver_cmd = {0}".format(urdme_solver_cmd)
-                raise URDMEError("Solver execution failed, return code = {0}".format(return_code))
+                print("solver_cmd = {0}".format(solver_cmd))
+                raise SimulationError("Solver execution failed, return code = {0}".format(return_code))
 
 
-            #Load the result from the hdf5 output file.
-            try:
-                result = URDMEResult(self.model, outfile.name, loaddata=loaddata)
-                result["Status"] = "Sucess"
-                result.stderr = stderr
-                result.stdout = stdout
-                if number_of_trajectories > 1:
-                    result_list.append(result)
-                else:
-                    return result
-            except Exception as e:
-                exc_info = sys.exc_info()
-                os.remove(outfile.name)
-                raise exc_info[1], None, exc_info[2]
+            result["Status"] = "Success"
+            if stdout is not None: result.stdout = stdout.decode('utf-8')
+            if stderr is not None: result.stderr = stderr.decode('utf-8')
+            if number_of_trajectories > 1:
+                result_list.append(result)
+            else:
+                return result
 
         return result_list
 
 
     def create_propensity_file(self, file_name=None):
-        """ Generate the C propensity file that is used to compile the URDME solvers.
+        """ Generate the C propensity file that is used to compile the solvers.
             Only mass action propensities are supported.
         """
 
-        template = open(os.path.abspath(os.path.dirname(__file__)) + '/data/propensity_file_template.c', 'r')
+        template = open(os.path.abspath(os.path.dirname(__file__)) + '/ssa_sdpd-c-simulation-engine/propensity_file_template.c', 'r')
         propfile = open(file_name, "w")
         propfilestr = template.read()
 
@@ -370,7 +194,6 @@ class SpatialPySolver:
         i = 0
         for S in self.model.listOfSpecies:
             speciesdef += "#define " + S + " " + "x[" + str(i) + "]" + "\n"
-            speciesdef += "#define " + S + "_INDEX " +  str(i) + "\n"
             i += 1
 
         propfilestr = propfilestr.replace("__DEFINE_SPECIES__", speciesdef)
@@ -379,15 +202,6 @@ class SpatialPySolver:
         propfilestr = propfilestr.replace("__NUMBER_OF_SPECIES__", str(self.model.get_num_species()))
         propfilestr = propfilestr.replace("__NUMBER_OF_VOXELS__", str(self.model.mesh.get_num_voxels()))
 
-        # Create defines for the DataFunctions.
-        data_fn_str = ""
-        i = 0
-        for d in self.model.listOfDataFunctions:
-            if d.name is None:
-                raise URDMEError("DataFunction {0} does not have a name attributed defined.".format(i))
-            data_fn_str += "#define " + d.name + " data[" + str(i) + "]\n"
-            i += 1
-        propfilestr = propfilestr.replace("__DEFINE_DATA_FUNCTIONS__", str(data_fn_str))
 
         # Make sure all paramters are evaluated to scalars before we write them to the file.
         self.model.resolve_parameters()
@@ -409,7 +223,9 @@ class SpatialPySolver:
             rname = self.model.listOfReactions[R].name
             func += funheader.replace("__NAME__", rname) + "\n{\n"
             if self.model.listOfReactions[R].restrict_to == None or (isinstance(self.model.listOfReactions[R].restrict_to, list) and len(self.model.listOfReactions[R].restrict_to) == 0):
+                func += "return "
                 func += self.model.listOfReactions[R].propensity_function
+                func += ";"
             else:
                 func += "if("
                 if isinstance(self.model.listOfReactions[R].restrict_to, list) and len(self.model.listOfReactions[R].restrict_to) > 0:
@@ -419,79 +235,197 @@ class SpatialPySolver:
                 elif isinstance(self.model.listOfReactions[R].restrict_to, int):
                     func += "sd == " +  str(self.model.listOfReactions[R].restrict_to)
                 else:
-                    raise URDMEError("When restricting reaction to subdomains, you must specify either a list or an int")
+                    raise SimulationError("When restricting reaction to subdomains, you must specify either a list or an int")
                 func += "){\n"
+                func += "return "
                 func += self.model.listOfReactions[R].propensity_function
-
+                func += ";"
                 func += "\n}else{"
                 func += "\n\treturn 0.0;}"
 
 
             func += "\n}"
             funcs += func + "\n\n"
-            funcinits += "    ptr[" + str(i) + "] = " + rname + ";\n"
+            funcinits += "    ptr[" + str(i) + "] = (PropensityFun) " + rname + ";\n"
             i += 1
 
         propfilestr = propfilestr.replace("__DEFINE_REACTIONS__", funcs)
         propfilestr = propfilestr.replace("__DEFINE_PROPFUNS__", funcinits)
+        # End of pyurdme replacements
+        # SSA-SDPD values here
+        init_particles = ""
+        if self.model.sd is None:
+            self.model.sd = numpy.ones(self.model.mesh.get_num_voxels())
+        for i in range(len(self.model.sd)):
+            init_particles += "    init_create_particle(sys,id++,{0},{1},{2},{3});".format(self.model.mesh.coordinates()[i,0],self.model.mesh.coordinates()[i,1],self.model.mesh.coordinates()[i,2],self.model.sd[i])+ "\n"
+        propfilestr = propfilestr.replace("__INIT_PARTICLES__", init_particles)
+
+
+        # process initial conditions here
+        self.model.apply_initial_conditions()
+        nspecies = self.model.u0.shape[0]
+        ncells = self.model.u0.shape[1]
+        
+        input_constants = ""
+
+        outstr = "static unsigned int input_u0[{0}] = ".format(nspecies*ncells)
+        outstr+="{"
+        for i in range(ncells):
+            for s in range(nspecies):
+                if i+s>0: outstr+=','
+                outstr+= str(int(self.model.u0[s,i]))
+        outstr+="};"
+        input_constants += outstr + "\n"
+        # attache the vol to the model as well, for backwards compatablity
+        self.model.vol = self.model.mesh.get_vol()
+        outstr = "static double input_vol[{0}] = ".format(self.model.mesh.get_vol().shape[0])
+        outstr+="{"
+        for i in range(self.model.mesh.get_vol().shape[0]):
+            if i>0: outstr+=','
+            outstr+= str(self.model.mesh.get_vol()[i])
+        outstr+="};"
+        input_constants += outstr + "\n"
+        outstr = "static int input_sd[{0}] = ".format(self.model.sd.shape[0])
+        outstr+="{"
+        for i in range(self.model.sd.shape[0]):
+            if i>0: outstr+=','
+            outstr+= str(self.model.sd[i])
+        outstr+="};"
+        input_constants += outstr + "\n"
+
+        data_fn_defs = ""
+        if len(self.model.listOfDataFunctions) == 0:
+            outstr = "static int input_dsize = 1;"
+            input_constants += outstr + "\n"
+            outstr = "static double input_data[{0}] = ".format(ncells)
+            outstr += "{" + ",".join(['0']*80) + "};"
+            input_constants += outstr + "\n"
+        else:
+            outstr = "static int input_dsize = {0};".format(len(self.model.listOfDataFunctions))
+            input_constants += outstr + "\n"
+            outstr = "static double input_data[{0}] = ".format(ncells*len(self.model.listOfDataFunctions))
+            outstr+="{"
+            for v_ndx in range(ncells):
+                for ndf in range(len(self.model.listOfDataFunctions)):
+                    if ndf+v_ndx>0: outstr+=','
+                    outstr+= "{0}".format( self.model.listOfDataFunctions[ndf].map( self.model.mesh.coordinates()[v_ndx,:] ) )
+            outstr+="};"
+            input_constants += outstr + "\n"
+
+            for ndf in range(len(self.model.listOfDataFunctions)):
+                data_fn_defs += "#define {0} data[{1}]\n".format(self.model.listOfDataFunctions[ndf].name,ndf)
+        propfilestr = propfilestr.replace("__DATA_FUNCTION_DEFINITIONS__",data_fn_defs )
+
+
+        N = self.model.create_stoichiometric_matrix()
+        outstr = "static size_t input_irN[{0}] = ".format(len(N.indices))
+        outstr+="{"
+        for i in range(len(N.indices)):
+            if i>0: outstr+=','
+            outstr+= str(N.indices[i])
+        outstr+="};"
+        input_constants += outstr + "\n"
+
+        outstr = "static size_t input_jcN[{0}] = ".format(len(N.indptr))
+        outstr+="{"
+        for i in range(len(N.indptr)):
+            if i>0: outstr+=','
+            outstr+= str(N.indptr[i])
+        outstr+="};"
+        input_constants += outstr + "\n"
+
+        outstr = "static int input_prN[{0}] = ".format(len(N.data))
+        outstr+="{"
+        for i in range(len((N.data))):
+            if i>0: outstr+=','
+            outstr+= str(N.data[i])
+        outstr+="};"
+        input_constants += outstr + "\n"
+
+
+        G = self.model.create_dependency_graph()
+        outstr = "static size_t input_irG[{0}] = ".format(len(G.indices))
+        outstr+="{"
+        for i in range(len(G.indices)):
+            if i>0: outstr+=','
+            outstr+= str(G.indices[i])
+        outstr+="};"
+        input_constants += outstr + "\n"
+
+        outstr = "static size_t input_jcG[{0}] = ".format(len(G.indptr))
+        outstr+="{"
+        for i in range(len(G.indptr)):
+            if i>0: outstr+=','
+            outstr+= str(G.indptr[i])
+        outstr+="};"
+        input_constants += outstr + "\n"
+        outstr = "const char* const input_species_names[] = {"
+        for i,s in enumerate(self.model.listOfSpecies.keys()):
+            if i>0: outstr+=","
+            outstr+='"'+s+'"'
+        outstr+=", 0};"
+        input_constants += outstr + "\n"
+        num_subdomains = len(self.model.listOfSubdomainIDs)
+        outstr = "const int input_num_subdomain = {0};".format(num_subdomains)
+        input_constants += outstr + "\n"
+        outstr = "const double input_subdomain_diffusion_matrix[{0}] = ".format(len(self.model.listOfSpecies)*num_subdomains)
+        outstr+="{"
+        for i, sname in enumerate(self.model.listOfSpecies.keys()):
+            s = self.model.listOfSpecies[sname]
+            #print sname,
+            for j, sd_id in enumerate(self.model.listOfSubdomainIDs):
+                #print sd_ndx,
+                if i+j>0: outstr+=','
+                try:
+                    if s not in self.model.listOfDiffusionRestrictions or \
+                       sd_id not in self.model.listOfDiffusionRestrictions[s]:
+                        outstr+= "{0}".format(s.diffusion_constant)
+                    else:
+                        outstr+= "0.0"
+                except KeyError as e:
+                    print("error: {0}".format(e))
+                    print(self.model.listOfDiffusionRestrictions)
+                    raise Exception()
+
+        outstr+="};"
+        input_constants += outstr + "\n"
+        propfilestr = propfilestr.replace("__INPUT_CONSTANTS__", input_constants)
+
+        system_config = ""
+        system_config +="system->dt = {0};\n".format(self.model.timestep_size)
+        system_config +="system->nt = {0};\n".format(self.model.num_timesteps)
+        system_config +="system->output_freq = 1;\n"
+        if self.h is None:
+            self.h = self.model.mesh.find_h()
+        if self.h == 0.0:
+            raise ModelError('h (basis function width) can not be zero.')
+        system_config +="system->h = {0};\n".format(self.h)
+        system_config +="system->rho0 = 1.0;\n"
+        system_config +="system->c0 = 10;\n"
+        system_config +="system->P0 = 10;\n"
+        #// bounding box
+        bounding_box = self.model.mesh.get_bounding_box()
+        system_config +="system->xlo = {0};\n".format(bounding_box[0])
+        system_config +="system->xhi = {0};\n".format(bounding_box[1])
+        system_config +="system->ylo = {0};\n".format(bounding_box[2])
+        system_config +="system->yhi = {0};\n".format(bounding_box[3])
+        system_config +="system->zlo = {0};\n".format(bounding_box[4])
+        system_config +="system->zhi = {0};\n".format(bounding_box[5])
+
+        propfilestr = propfilestr.replace("__SYSTEM_CONFIG__", system_config)
+
+
+        #### Write the data to the file ####
         propfile.write(propfilestr)
         propfile.close()
 
 
 
-def spatialpy(model=None, solver='nsm', solver_path="", model_file=None, input_file=None, seed=None, report_level=0):
-    """ SPATIALPY solver interface.
-        Similar to model.run() the urdme() function provides an interface that is backwards compatiable with the
-        previous URDME implementation.
-        After sucessful execution, urdme returns a URDMEResults object with the following members:
-        U:         the raw copy number output in a matrix with dimension (Ndofs, num_time_points)
-        tspan:     the time span vector containing the time points that corresponds to the columns in U
-        status:    Sucess if the solver executed without error
-        stdout:    the standard ouput stream from the call to the core solver
-        stderr:    the standard error stream from the call to the core solver
-    """
-
-
-    #If solver is a subclass of URDMESolver, use it directly.
-    if isinstance(solver, (type, types.ClassType)) and  issubclass(solver, URDMESolver):
-        sol = solver(model, solver_path, report_level, model_file=model_file)
-    elif type(solver) is str:
-        if solver == 'nsm':
-            from nsmsolver import NSMSolver
-            sol = NSMSolver(model, solver_path, report_level, model_file=model_file)
-        elif solver == 'nem':
-            from nemsolver import NEMSolver
-            sol = NEMSolver(model, solver_path, report_level, model_file=model_file)
-        else:
-            raise URDMEError("Unknown solver: {0}".format(solver_name))
-    else:
-        raise URDMEError("solver argument to spatialpy() must be a string or a spatialpysolver class object.")
-
-    sol.compile()
-    return sol.run(seed=seed, input_file=input_file)
-
-
-class SPATIALPYDataFunction():
-    """ Abstract class used to constuct the URDME data vector. """
-    name = None
-    def __init__(self, name=None):
-        if name is not None:
-            self.name = name
-        if self.name is None:
-            raise Exception("URDMEDataFunction must have a 'name'")
-
-    def map(self, x):
-        """ map() takes the coordinate 'x' and returns a list of doubles.
-        Args:
-            x: a list of 3 ints.
-        Returns:
-            a list of floats.
-        """
-        raise Exception("URDMEDataFunction.map() not implemented.")
 
 
 
 
-
-if __name__ == '__main__':
-    """ Command line interface to URDME. Execute URDME given a model file. """
+class SimulationError(Exception):
+    pass
+class SimulationTimeout(SimulationError):
+    pass
