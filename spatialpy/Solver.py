@@ -318,29 +318,34 @@ class Solver:
 
 
         N = self.model.create_stoichiometric_matrix()
-        outstr = "static size_t input_irN[{0}] = ".format(len(N.indices))
-        outstr+="{"
-        for i in range(len(N.indices)):
-            if i>0: outstr+=','
-            outstr+= str(N.indices[i])
-        outstr+="};"
-        input_constants += outstr + "\n"
+        if(min(N.shape)>0):
+            outstr = "static size_t input_irN[{0}] = ".format(len(N.indices))
+            outstr+="{"
+            for i in range(len(N.indices)):
+                if i>0: outstr+=','
+                outstr+= str(N.indices[i])
+            outstr+="};"
+            input_constants += outstr + "\n"
+            outstr = "static size_t input_jcN[{0}] = ".format(len(N.indptr))
+            outstr+="{"
+            for i in range(len(N.indptr)):
+                if i>0: outstr+=','
+                outstr+= str(N.indptr[i])
+            outstr+="};"
+            input_constants += outstr + "\n"
+            outstr = "static int input_prN[{0}] = ".format(len(N.data))
+            outstr+="{"
+            for i in range(len((N.data))):
+                if i>0: outstr+=','
+                outstr+= str(N.data[i])
+            outstr+="};"
+            input_constants += outstr + "\n"
+        else:
+            input_constants += "static size_t input_irN[0] = {};\n"
+            input_constants += "static size_t input_jcN[0] = {};\n"
+            input_constants += "static int input_prN[0] = {};\n"
 
-        outstr = "static size_t input_jcN[{0}] = ".format(len(N.indptr))
-        outstr+="{"
-        for i in range(len(N.indptr)):
-            if i>0: outstr+=','
-            outstr+= str(N.indptr[i])
-        outstr+="};"
-        input_constants += outstr + "\n"
 
-        outstr = "static int input_prN[{0}] = ".format(len(N.data))
-        outstr+="{"
-        for i in range(len((N.data))):
-            if i>0: outstr+=','
-            outstr+= str(N.data[i])
-        outstr+="};"
-        input_constants += outstr + "\n"
 
 
         G = self.model.create_dependency_graph()

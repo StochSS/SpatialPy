@@ -155,6 +155,28 @@ class Mesh():
 
 
     @classmethod
+    def generate_unit_square_mesh(cls, nx, ny, periodic=False):
+        #if periodic:
+        #    raise Exception("TODO: periodic not working yet");
+        """ Import a python meshio mesh object. """
+        # create mesh object
+        obj = Mesh()
+        #vertices
+        obj.vertices = numpy.zeros(( int(nx)*int(ny), 3), dtype=float)
+        x_list = numpy.linspace(0,1,nx)
+        y_list = numpy.linspace(0,1,ny)
+        ndx=0
+        for x in x_list:
+            for y in y_list:
+                obj.vertices[ndx,0] = x        
+                obj.vertices[ndx,1] = y
+                obj.vertices[ndx,2] = 0.0
+                ndx+=1
+        # return model ref
+        return obj
+
+
+    @classmethod
     def read_xml_mesh(cls, filename):
         """ Read a FEniCS/dolfin style XML mesh file"""
         import xml.etree.ElementTree as ET
