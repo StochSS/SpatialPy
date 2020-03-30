@@ -41,7 +41,7 @@ with open(path.join(SETUP_DIR, 'README.md'), 'r', errors = 'ignore') as f:
 # we're using setup() in the first place.  This code avoids eval, for security.
 
 version = {}
-with open(path.join(SETUP_DIR, 'gillespy2/__version__.py')) as f:
+with open(path.join(SETUP_DIR, 'spatialpy/__version__.py')) as f:
     text = f.read().rstrip().splitlines()
     vars = [line for line in text if line.startswith('__') and '=' in line]
     for v in vars:
