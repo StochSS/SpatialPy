@@ -53,7 +53,6 @@ with open(path.join(SETUP_DIR, 'gillespy2/__version__.py')) as f:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-      keywords = "spatialpy, ",
 setup(name                 = version['__title__'].lower(),
       version              = version['__version__'],
       author               = version['__author__'],
