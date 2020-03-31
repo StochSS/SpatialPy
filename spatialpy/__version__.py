@@ -14,4 +14,4 @@ __author__       = 'See AUTHORS'
 __email__        = 'bdrawert@unca.edu'
 __license__      = 'GPL'
 __copyright__    = 'Copyright (C) 2017-2020'
-~                                                  
+
