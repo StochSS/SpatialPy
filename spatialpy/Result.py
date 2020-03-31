@@ -174,8 +174,13 @@ class Result(dict):
             t_index_arr = t_index_arr[timepoints]
         #if not isinstance(t_index_arr,list):
         #    t_index_arr = [t_index_arr]
-        
-        ret = numpy.zeros( (len(t_index_arr), num_voxel))
+        try:
+            num_timepoints = len(t_index_arr)
+        except Exception as e:
+            t_index_arr = [t_index_arr]
+            num_timepoints = 1
+
+        ret = numpy.zeros( (num_timepoints, num_voxel))
         for ndx, t_ndx in enumerate(t_index_arr):
             (_, step) = self.read_step(t_ndx)
             if concentration:
