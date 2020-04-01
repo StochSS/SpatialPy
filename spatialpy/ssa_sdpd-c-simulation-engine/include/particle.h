@@ -30,6 +30,9 @@ struct __particle_t {
     double F[3];
     double Frho;
     double Fbp[3];
+    // chem_rxn_system
+    double *C;  // concentration of chem species
+    double *Q;  // flux of chem species
     // below here for simulation
     node* x_index;
     linked_list*neighbors;
@@ -52,6 +55,13 @@ struct __system_t {
     char boundary_conditions[3];
     rdme_t*rdme;
     int static_domain;
+    int num_chem_species;
+    int num_chem_rxns;
+    int num_types;
+    double *subdomain_diffusion_matrix;
+    ChemRxnFun* chem_rxn_rhs_functions;
+    int *stochic_matrix;
+
 };
 
 struct __bond_t {
@@ -64,7 +74,7 @@ struct __bond_t {
 
 
 void find_neighbors(particle_t* me, system_t* system);
-system_t* create_system();
+system_t* create_system(int num_types, int num_chem_species, int num_chem_rxns){
 particle_t* create_particle(int id);
 void add_particle(particle_t* me, system_t* system);
 double particle_dist(particle_t* p1, particle_t*p2);

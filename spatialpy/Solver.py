@@ -318,8 +318,16 @@ class Solver:
 
 
         N = self.model.create_stoichiometric_matrix()
+        Nd = N.todense();
         if(min(N.shape)>0):
-            outstr = "static size_t input_irN[{0}] = ".format(len(N.indices))
+            outstr += "static int input_N_dense[{0}] = ".format( Nd.shape[0] * Nd.shape[1] ) ;
+            outstr += "{";
+            for i in range(Nd.shape[0]):
+                for j in range(Nd.shape[1]):
+                    if i>0: outstr+=','
+                    outstr += "{0}".format( Nd[i,j] );
+            outstr += "}";
+            outstr += "static size_t input_irN[{0}] = ".format(len(N.indices))
             outstr+="{"
             for i in range(len(N.indices)):
                 if i>0: outstr+=','
@@ -341,6 +349,7 @@ class Solver:
             outstr+="};"
             input_constants += outstr + "\n"
         else:
+            input_constants += "static int input_N_dense[0] = {};\n"
             input_constants += "static size_t input_irN[0] = {};\n"
             input_constants += "static size_t input_jcN[0] = {};\n"
             input_constants += "static int input_prN[0] = {};\n"

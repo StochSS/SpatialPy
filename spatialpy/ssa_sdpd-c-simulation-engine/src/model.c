@@ -14,6 +14,10 @@ See the file LICENSE.txt for details.
 #include <stdlib.h>
 #include <math.h>
 
+
+
+
+
 void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
 {
     // F, Frho and Fbp are output
@@ -28,7 +32,7 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
     double P0 = system->P0;
     double c0 = system->c0;
     double Pi = P0 * (me->rho / rho0 - 1.0);
-    int i, j;
+    int i, j, s, rnx;
     particle_t* pt_j;
     node* n;
 
@@ -110,7 +114,28 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
                       - 0.0 * h * me->rho * c0 * pt_j->mass * 2.0 * (pt_j->rho / me->rho - 1.0) * (r * r / (r * r + 0.01 * h * h)) * (1.0 / (r + 0.001 * h)) * dWdr / pt_j->rho 
                       - (pt_j->mass / pt_j->rho) * (me->rho * ((me->v[0] - me->vt[0]) * dx[0] + (me->v[1] - me->vt[1]) * dx[1] + (me->v[2] - me->vt[2]) * dx[2]) 
                       + pt_j->rho * ((pt_j->v[0] - pt_j->vt[0]) * dx[0] + (pt_j->v[1] - pt_j->vt[1]) * dx[1] + (pt_j->v[2] - pt_j->vt[2]) * dx[2])) * (1.0 / (r + 0.001 * h)) * dWdr;
+
+        // Compute Chem Rxn Flux (diffusion part)
+        double wfd = (1.0 / (r + 0.001 * h)) * dWdr;
+        double dQc_base = 2.0* ((me->mass*pt_j->mass)/(me->mass+pt_j->mass)) * ((me->rho+pt_j->rho)/(me->rho*pt_j->rho)) * (r*r) * wfd / ((r*r) + 0.01*h*h); // (Tartakovsky et. al., 2007, JCP)
+        for(s=0; s < system->num_chem_species; s++){
+            // Note about below:  do species types start at  1
+            int k = system->num_types * (me->type - 1) + s;
+            double dQc = system->subdomain_diffusion_matrix[k] * (me->C[s] - pt_j->C[s]) * dQc_base;
+            me->Q[s] += dQc;
+        }
     }
+    // after processing all neighbors
+    for(rnx=0; rnx < system->num_chem_rxns; rxn++){
+        //TODO, vol (3rd arg) set to zero, fix
+        //TODO: data (4th arg) set to NULL, fix
+        double flux = (*system->chem_rxn_rhs_functions[rnx])(me->C,0.0, 0.0, NULL, me->type);
+        for(s=0; s< system->num_chem_speces; s++){
+            int k = system->num_chem_rxn * rnx + s;
+            me->Q[s] += system->stochic_matrix[k] * flux;
+        }
+    }
+
 }
 
 

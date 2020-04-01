@@ -26,15 +26,21 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
     if (me -> solidTag == 0) {
         for (i = 0; i < 3; i++) {
             // Update velocity using forces
-            me -> v[i] = me -> v[i] + 0.5 * system -> dt * me -> F[i];
+            me->v[i] = me->v[i] + 0.5 * system->dt * me->F[i];
             // Update transport velocity using background pressure force
-            me -> vt[i] = me -> v[i] + 0.5 * system -> dt * me -> Fbp[i];
+            me->vt[i] = me->v[i] + 0.5 * system->dt * me->Fbp[i];
             // Update position using previous velocity
-            me -> x[i] = me -> x[i] + system -> dt * me -> vt[i];
+            me->x[i] = me->x[i] + system->dt * me->vt[i];
         }
         // Update density using continuity equation 
-        me -> rho = me -> rho + 0.5 * system -> dt * me -> Frho;
+        me->rho = me->rho + 0.5 * system->dt * me->Frho;
     }
+    // update half-state of chem rxn
+    for(i=0; i< system->num_chem_species; i++){
+        me->C[i] += me->Q[i] * system->dt * 0.5;
+    }
+
+
 
     // Step 1.3: Clean forces
     for (i = 0; i < 3; i++) {
@@ -45,6 +51,10 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
     }
     // Clean mass flux term
     me -> Frho = 0.0;
+    // Clean chem rxn flux
+    for(i=0; i< system->num_chem_species; i++){
+        me->Q[i] = 0.0;
+    }
 
 }
 
@@ -68,7 +78,10 @@ void compute_forces(particle_t* me, system_t* system, unsigned int step)
     find_neighbors(me, system);
 
     // Step 2.3: Compute forces
-    pairwiseForce(me, me -> neighbors, system);
+    pairwiseForce(me, me->neighbors, system);
+
+    // setp 2.4: Compute chem rxn flux
+    chemRxnFlux(me, me->neighbors, system);
 }
 
 
@@ -107,7 +120,9 @@ void take_step2(particle_t* me, system_t* system, unsigned int step)
         applyBoundaryCondition(me, system);
     }
 
-    // TODO: Pressure equilibration iteration
-
-    // TODO: Solve deterministic/stochastic reaction-diffusion system
+    //  Solve deterministic/stochastic reaction-diffusion system
+    // update half-state of chem rxn
+    for(i=0; i< system->num_chem_species; i++){
+        me->C[i] += me->Q[i] * system->dt * 0.5;
+    }
 }

@@ -15,7 +15,8 @@ See the file LICENSE.txt for details.
 void filterDensity(particle_t* me, linked_list* neighbors, system_t* system);
 
 void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system);
-    // F, Frho, Fbp are output
+
+void chemRxnFlux(particle_t* me, linked_list* neighbors, system_t* system);
 
 void computeBoundaryVolumeFraction(particle_t* me, linked_list* neighbors, system_t* system);
 

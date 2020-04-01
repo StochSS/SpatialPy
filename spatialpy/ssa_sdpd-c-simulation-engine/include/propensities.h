@@ -18,9 +18,11 @@ extern double *parameters;
 //typedef double (*PropensityFun)(const int *, double, double, const double *, int, int, int *, const size_t *, const size_t *, const double *);
 // double rfun(const int *x, double t, const double vol, const double *data, int sd)
 typedef double (*PropensityFun)(const unsigned int *, double, double, const double *, int);
+typedef double (*ChemRxnFun)(const double *, double, double, const double *, int);
 
 /* Declaration of allocation and deallocation of propensity list. */
 PropensityFun *ALLOC_propensities(void);
+ChemRxnFun *ALLOC_ChemRxnFun(void);
 void FREE_propensities(PropensityFun* ptr);
 
 
