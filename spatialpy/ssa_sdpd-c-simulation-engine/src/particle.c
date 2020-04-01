@@ -12,7 +12,7 @@ See the file LICENSE.txt for details.
 #include <math.h>
 
 
-linked_list* find_neighbors(particle_t* me, system_t* system){
+void find_neighbors(particle_t* me, system_t* system){
     node*n;
     //clean out previous neighbors
     //printf("find_neighbors.empty_linked_list\n");
@@ -24,7 +24,7 @@ linked_list* find_neighbors(particle_t* me, system_t* system){
         if( (n->data->x[1] > (me->x[1] + system->h)) || (n->data->x[1] < (me->x[1] - system->h) ) ) continue;
         if( (n->data->x[2] > (me->x[2] + system->h)) || (n->data->x[2] < (me->x[2] - system->h) ) ) continue;
         linked_list_add(me->neighbors, n->data);
-        if(debug_flag){ 
+        if(debug_flag>2){ 
             printf("find_neighbors(%i) forward found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
             me->id,n->data->id, particle_dist(me,n->data),
             me->x[0] - n->data->x[0],
@@ -97,7 +97,7 @@ linked_list* find_neighbors(particle_t* me, system_t* system){
             continue;
         }
         linked_list_add(me->neighbors, n->data);
-        if(debug_flag){ 
+        if(debug_flag>2){ 
             printf("find_neighbors(%i) backwards found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
             me->id,n->data->id, particle_dist(me,n->data),
             me->x[0] - n->data->x[0],
@@ -122,7 +122,7 @@ linked_list* find_neighbors(particle_t* me, system_t* system){
         }
     }*/
     // return the neighbor list
-    return me->neighbors;
+    //return me->neighbors;
 }
 
 
@@ -144,7 +144,7 @@ system_t* create_system(){
 particle_t* create_particle(int id){
     particle_t* me = malloc(sizeof(particle_t));
     me->id = id;
-    me->nu = 1e-6; 
+    me->nu = 0.01; 
     me->mass = 1;
     me->rho = 1;
     me->solidTag = 0;
@@ -173,6 +173,16 @@ double particle_dist_sqrd(particle_t* p1, particle_t*p2){
     double c = p1->x[2] - p2->x[2];
     return ( a*a + b*b + c*c);
 }
+
+bond_t* create_bond(particle_t*p1, particle_t*p2, double k, double rest_distance){
+    bond_t* me = malloc(sizeof(bond_t));
+    me->p1 = p1;
+    me->p2 = p2;
+    me->param_k = k;
+    me->rest_distance = rest_distance;
+    return me;
+}
+
 
 
 

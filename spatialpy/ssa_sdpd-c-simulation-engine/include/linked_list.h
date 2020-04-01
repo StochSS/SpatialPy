@@ -26,7 +26,7 @@ struct linked_list_t {
     node* head;
     node* tail;
     int count;
-    pthread_mutex_t mutex;
+    //pthread_mutex_t mutex; // not used
 };
 
 // Functions to manipulate the linked list
