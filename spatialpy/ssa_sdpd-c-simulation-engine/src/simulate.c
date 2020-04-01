@@ -3,7 +3,8 @@
 #include "particle.h"
 #include "simulate_rdme.h"
 #include <errno.h>
-#include <pthread.h>
+//#include <pthread.h>
+#include "pthread_barrier.h"
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
