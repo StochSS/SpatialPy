@@ -115,6 +115,8 @@ class Result(dict):
         reader.SetFileName(filename)
         reader.Update()
         data = reader.GetOutput()
+        if data is None:
+            raise ResultError("read_step(step_num={0}): got data = None".format(step_num))
         points = numpy.array( data.GetPoints().GetData() )
         pd = data.GetPointData()
         vtk_data = {}
@@ -170,10 +172,15 @@ class Result(dict):
             if isinstance(timepoints,float):
                 raise ResultError("timepoints argument must be an integer, the index of time timespan")
             t_index_arr = t_index_arr[timepoints]
-        if not isinstance(t_index_arr,list):
+        #if not isinstance(t_index_arr,list):
+        #    t_index_arr = [t_index_arr]
+        try:
+            num_timepoints = len(t_index_arr)
+        except Exception as e:
             t_index_arr = [t_index_arr]
-        
-        ret = numpy.zeros( (len(t_index_arr), num_voxel))
+            num_timepoints = 1
+
+        ret = numpy.zeros( (num_timepoints, num_voxel))
         for ndx, t_ndx in enumerate(t_index_arr):
             (_, step) = self.read_step(t_ndx)
             if concentration:

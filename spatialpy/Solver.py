@@ -377,13 +377,11 @@ class Solver:
         outstr+="{"
         for i, sname in enumerate(self.model.listOfSpecies.keys()):
             s = self.model.listOfSpecies[sname]
-            #print sname,
             for j, sd_id in enumerate(self.model.listOfSubdomainIDs):
-                #print sd_ndx,
                 if i+j>0: outstr+=','
                 try:
                     if s not in self.model.listOfDiffusionRestrictions or \
-                       sd_id not in self.model.listOfDiffusionRestrictions[s]:
+                       sd_id in self.model.listOfDiffusionRestrictions[s]:
                         outstr+= "{0}".format(s.diffusion_constant)
                     else:
                         outstr+= "0.0"
