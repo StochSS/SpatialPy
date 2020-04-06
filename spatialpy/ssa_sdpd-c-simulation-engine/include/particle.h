@@ -74,7 +74,7 @@ struct __bond_t {
 
 
 void find_neighbors(particle_t* me, system_t* system);
-system_t* create_system(int num_types, int num_chem_species, int num_chem_rxns){
+system_t* create_system(int num_types, int num_chem_species, int num_chem_rxns);
 particle_t* create_particle(int id);
 void add_particle(particle_t* me, system_t* system);
 double particle_dist(particle_t* p1, particle_t*p2);

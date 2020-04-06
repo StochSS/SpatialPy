@@ -16,8 +16,6 @@ void filterDensity(particle_t* me, linked_list* neighbors, system_t* system);
 
 void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system);
 
-void chemRxnFlux(particle_t* me, linked_list* neighbors, system_t* system);
-
 void computeBoundaryVolumeFraction(particle_t* me, linked_list* neighbors, system_t* system);
 
 void applyBoundaryCondition(particle_t* me, system_t* system);

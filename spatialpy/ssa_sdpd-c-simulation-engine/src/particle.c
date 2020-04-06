@@ -139,9 +139,8 @@ system_t* create_system(int num_types, int num_chem_species, int num_chem_rxns){
     s->rdme = NULL;
     s->static_domain = 0;
     s->num_chem_species = num_chem_species;
-    s->num_chem_rxn = num_chem_rxn;
-    s->num_types = num_types
-    s->chem_rxn_rhs_functions = ALLOC_ChemRxnFun();
+    s->num_chem_rxns = num_chem_rxns;
+    s->num_types = num_types;
     return s;
 }
 
@@ -163,8 +162,8 @@ void add_particle(particle_t* me, system_t* system){
     //me->y_index = linked_list_add(system->y_index, me);
     //me->z_index = linked_list_add(system->z_index, me);
     me->neighbors = create_linked_list();
-    me->Q = (double) calloc(sizeof(double)*system->num_chem_species);
-    me->C = (double) calloc(sizeof(double)*system->num_chem_species);
+    me->Q = (double*) calloc(system->num_chem_species, sizeof(double));
+    me->C = (double*) calloc(system->num_chem_species, sizeof(double));
 }
 
 double particle_dist(particle_t* p1, particle_t*p2){

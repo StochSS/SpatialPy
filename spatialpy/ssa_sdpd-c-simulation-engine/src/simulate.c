@@ -80,8 +80,6 @@ void compute_forces(particle_t* me, system_t* system, unsigned int step)
     // Step 2.3: Compute forces
     pairwiseForce(me, me->neighbors, system);
 
-    // setp 2.4: Compute chem rxn flux
-    chemRxnFlux(me, me->neighbors, system);
 }
 
 
