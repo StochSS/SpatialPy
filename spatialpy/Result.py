@@ -9,6 +9,7 @@ import warnings
 import uuid
 
 
+# These imports might be wrong
 import numpy
 import scipy.io
 import scipy.sparse
@@ -109,9 +110,13 @@ class Result(dict):
 
     def read_step(self, step_num):
         """ Read the data for simulation step 'step_num'. """
+        # This is the start of our VTK usage
+        # Write a new VTK parser. Check functions below for readstep returns
+        # Check vtk_data dict with numpy arrays to see what VTK is doing
+        # Eventually remove VTK as a dep, its bad
         reader = vtk.vtkGenericDataObjectReader()
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(step_num))
-        #print("read_step({0}) opening '{1}'".format(step_num, filename))
+        print("read_step({0}) opening '{1}'".format(step_num, filename))
         reader.SetFileName(filename)
         reader.Update()
         data = reader.GetOutput()
@@ -122,7 +127,7 @@ class Result(dict):
         vtk_data = {}
         for i in range(pd.GetNumberOfArrays()):
             if pd.GetArrayName(i) is None: break
-            #print(i,pd.GetArrayName(i))
+            print(i,pd.GetArrayName(i))
             vtk_data[ pd.GetArrayName(i)] = numpy.array(pd.GetArray(i))
         return (points, vtk_data)
 

@@ -164,6 +164,11 @@ void output_vtk__async_step(system_t*system){
         if((i+1)%9==0){ fprintf(fp,"\n"); }
     } 
     fprintf(fp,"\n");
+    // add in loop here to check for continous? species
+    // if num_chem_species > 0 then ... everything below in loop until done
+    // somewhere there are references to a value d or c? 
+    // change c - concentration or continous? clarify at meeting
+    // change d - discrete
     if(system->rdme != NULL){
         int s;
         for(s=0;s<system->rdme->Mspecies;s++){
