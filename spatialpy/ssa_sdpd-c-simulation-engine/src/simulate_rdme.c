@@ -41,18 +41,21 @@ void initialize_rdme(system_t*system, const int Ncells, const int Mspecies,
 /**************************************************************************/
 void simulate_rdme(system_t*system,unsigned int step){
     rdme_t*rdme = system->rdme;
+    if(rdme == NULL){
+        return;
+    }
     if(!system->static_domain || !rdme->initialized){
             // if the  domain is not static, rebuild the diffusion matrix after movement
         if(!rdme->initialized){
             if(debug_flag) printf("Building diffusion matrix\n");
-            if(debug_flag) printf("\tsm_core__build_diffusion_matrixn");
+            if(debug_flag) printf("\tnsm_core__build_diffusion_matrix\n");
             nsm_core__build_diffusion_matrix(rdme,system);
             rdme->initialized=1;
         }else{
             if(debug_flag) printf("Rebuilding diffusion matrix\n");
             if(debug_flag) printf("\tnsm_core__destroy_diffusion_matrix\n");
             nsm_core__destroy_diffusion_matrix(rdme);
-            if(debug_flag) printf("\tsm_core__build_diffusion_matrixn");
+            if(debug_flag) printf("\tnsm_core__build_diffusion_matrix\n");
             nsm_core__build_diffusion_matrix(rdme,system);
         }
         if(debug_flag) printf("\tnsm_core__initialize_rxn_propensities\n");
@@ -67,6 +70,9 @@ void simulate_rdme(system_t*system,unsigned int step){
 }
 /**************************************************************************/
 void destroy_rdme(system_t*system){
+    if(system->rdme == NULL){
+        return;
+    }
     if(debug_flag) printf("NSM: total # reacton events %lu\n",system->rdme->total_reactions);
     if(debug_flag) printf("NSM: total # diffusion events %lu\n",system->rdme->total_diffusion);
     nsm_core__destroy(system->rdme);

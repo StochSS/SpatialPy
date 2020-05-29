@@ -10,18 +10,29 @@ See the file LICENSE.txt for details.
 
 typedef struct __particle_t particle_t;
 typedef struct __system_t system_t;
+typedef struct __bond_t bond_t;
+
 #include "linked_list.h"
 #include "simulate_rdme.h"
 
 struct __particle_t {
     unsigned int id;
+    int type;
     double x[3];
     double v[3];
-    int type;
+    double vt[3];
     double mass;
     double rho;
     double nu;
     int solidTag;
+    double bvf_phi;
+    double normal[3];
+    double F[3];
+    double Frho;
+    double Fbp[3];
+    // chem_rxn_system
+    double *C;  // concentration of chem species
+    double *Q;  // flux of chem species
     // below here for simulation
     node* x_index;
     linked_list*neighbors;
@@ -39,19 +50,37 @@ struct __system_t {
     double rho0;
     double P0;
     linked_list* particle_list;
+    linked_list* bond_list;
     linked_list* x_index;
     char boundary_conditions[3];
     rdme_t*rdme;
     int static_domain;
+    int num_chem_species;
+    int num_chem_rxns;
+    int num_types;
+    double *subdomain_diffusion_matrix;
+    ChemRxnFun* chem_rxn_rhs_functions;
+    int *stochic_matrix;
+
+};
+
+struct __bond_t {
+    unsigned int id;
+    particle_t* p1;
+    particle_t* p2;
+    double param_k;
+    double rest_distance;
 };
 
 
-linked_list* find_neighbors(particle_t* me, system_t* system);
-system_t* create_system();
+void find_neighbors(particle_t* me, system_t* system);
+system_t* create_system(int num_types, int num_chem_species, int num_chem_rxns);
 particle_t* create_particle(int id);
 void add_particle(particle_t* me, system_t* system);
 double particle_dist(particle_t* p1, particle_t*p2);
 double particle_dist_sqrd(particle_t* p1, particle_t*p2);
+
+bond_t* create_bond(particle_t*p1, particle_t*p2, double k, double rest_distance);
 
 
 // Global flags
