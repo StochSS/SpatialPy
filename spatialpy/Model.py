@@ -45,6 +45,7 @@ class Model():
         self.listOfInitialConditions = []
         self.species_map = {}
         self.tspan = None
+        self.staticDomain = True;
 
 
     def run(self, number_of_trajectories=1, solver=None, seed=None, report_level=0):
