@@ -4,19 +4,23 @@ class Mesh():
     """ Mesh class for spatial py """
 
 
-    def __init__(self):
-        self.vertices = numpy.zeros((0))
-        self.triangles = numpy.zeros((0),dtype=int)
-        self.tetrahedrons = numpy.zeros((0,),dtype=int)
+    def __init__(self, numpoints):
+        self.vertices = numpy.zeros((numpoints, 3), dtype=float)
+        self.triangles = numpy.zeros((0), dtype=int)
+        self.tetrahedrons = numpy.zeros((0), dtype=int)
         self.on_boundary = None
-        self.vol = None
+        self.vol = numpy.zeros((numpoints), dtype=float)
         self.mesh_size = None
         self.tetrahedron_vol = None
+        self.mass = numpy.zeros((numpoints), dtype=float)
+        self.sd = numpy.zeros((numpoints), dtype=int)
 
     def find_boundary_points(self):
         if self.on_boundary is None:
-            self.on_boundary = numpy.zeros((self.get_num_voxels()),dtype=bool)
+            self.on_boundary = numpy.zeros((self.get_num_voxels()), dtype=bool)
             # exterior triangles are part of one-and-only-one tetrahedron
+            if len(self.triangles) == 0 or len(self.tetrahedrons) == 0:
+                return self.on_boundary
             from itertools import combinations 
             triangle_in_tetrahedrons_count = {}
             for i in range(self.get_num_voxels()):

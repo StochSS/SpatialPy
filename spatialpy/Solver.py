@@ -254,10 +254,10 @@ class Solver:
         # End of pyurdme replacements
         # SSA-SDPD values here
         init_particles = ""
-        if self.model.sd is None:
-            self.model.sd = numpy.ones(self.model.mesh.get_num_voxels())
-        for i in range(len(self.model.sd)):
-            init_particles += "    init_create_particle(sys,id++,{0},{1},{2},{3});".format(self.model.mesh.coordinates()[i,0],self.model.mesh.coordinates()[i,1],self.model.mesh.coordinates()[i,2],self.model.sd[i])+ "\n"
+        if self.model.mesh.sd is None:
+            self.model.mesh.sd = numpy.ones(self.model.mesh.get_num_voxels())
+        for i in range(len(self.model.mesh.sd)):
+            init_particles += "    init_create_particle(sys,id++,{0},{1},{2},{3});".format(self.model.mesh.coordinates()[i,0],self.model.mesh.coordinates()[i,1],self.model.mesh.coordinates()[i,2],self.model.mesh.sd[i])+ "\n"
         propfilestr = propfilestr.replace("__INIT_PARTICLES__", init_particles)
 
 
@@ -285,11 +285,11 @@ class Solver:
             outstr+= str(self.model.mesh.get_vol()[i])
         outstr+="};"
         input_constants += outstr + "\n"
-        outstr = "static int input_sd[{0}] = ".format(self.model.sd.shape[0])
+        outstr = "static int input_sd[{0}] = ".format(self.model.mesh.sd.shape[0])
         outstr+="{"
-        for i in range(self.model.sd.shape[0]):
+        for i in range(self.model.mesh.sd.shape[0]):
             if i>0: outstr+=','
-            outstr+= str(self.model.sd[i])
+            outstr+= str(self.model.mesh.sd[i])
         outstr+="};"
         input_constants += outstr + "\n"
 

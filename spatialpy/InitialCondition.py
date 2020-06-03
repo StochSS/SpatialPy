@@ -42,7 +42,7 @@ class UniformInitialCondition(InitialCondition):
                 model.u0[spec_ndx, vtx] += self.count
         else:
             for i in range(model.mesh.get_num_voxels()):
-                if model.sd[i] in self.subdomains:
+                if model.mesh.sd[i] in self.subdomains:
                     model.u0[spec_ndx, i] += self.count
 
         
@@ -69,7 +69,7 @@ class ScatterInitialCondition(InitialCondition):
         else:
             allowed_voxels = []
             for i in range(model.mesh.get_num_voxels()):
-                if model.sd[i] in self.subdomains:
+                if model.mesh.sd[i] in self.subdomains:
                     allowed_voxels.append(i)
             nvox = len(alowed_voxels)
             if nvox==0: raise ModelError("ScatterInitialCondition has zero voxels to scatter in")
