@@ -253,7 +253,7 @@ class Result(dict):
             writer.writerow(['Voxel ID', 'X', 'Y', 'Z', 'Volume', 'Subdomain'])
             vol = self.model.get_solver_datastructure()['vol']
             for ndx in range(self.model.mesh.get_num_voxels()):
-                row = [ndx]+self.model.mesh.coordinates()[ndx,:].tolist()+[vol[ndx]]+[self.model.sd[ndx]]
+                row = [ndx]+self.model.mesh.coordinates()[ndx,:].tolist()+[vol[ndx]]+[self.model.mesh.sd[ndx]]
                 writer.writerow(row)
 
         for spec in self.model.listOfSpecies:
