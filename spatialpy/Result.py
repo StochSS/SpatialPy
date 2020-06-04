@@ -14,6 +14,7 @@ import numpy
 import scipy.io
 import scipy.sparse
 
+from spatialpy import VTKReader
 from spatialpy.Model import *
 
 import inspect
@@ -21,7 +22,6 @@ import inspect
 import pickle
 import json
 
-import vtk
 
 # module-level variable to for javascript export in IPython/Jupyter notebooks
 __pyurdme_javascript_libraries_loaded = False
@@ -110,25 +110,15 @@ class Result(dict):
 
     def read_step(self, step_num):
         """ Read the data for simulation step 'step_num'. """
-        # This is the start of our VTK usage
-        # Write a new VTK parser. Check functions below for readstep returns
-        # Check vtk_data dict with numpy arrays to see what VTK is doing
-        # Eventually remove VTK as a dep, its bad
-        reader = vtk.vtkGenericDataObjectReader()
+        reader = VTKReader()
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(step_num))
         print("read_step({0}) opening '{1}'".format(step_num, filename))
-        reader.SetFileName(filename)
-        reader.Update()
-        data = reader.GetOutput()
-        if data is None:
+        reader.setfilename(filename)
+        reader.readfile()
+        if reader.getpoints() is None or reader.getarrays() is None:
             raise ResultError("read_step(step_num={0}): got data = None".format(step_num))
-        points = numpy.array( data.GetPoints().GetData() )
-        pd = data.GetPointData()
-        vtk_data = {}
-        for i in range(pd.GetNumberOfArrays()):
-            if pd.GetArrayName(i) is None: break
-            print(i,pd.GetArrayName(i))
-            vtk_data[ pd.GetArrayName(i)] = numpy.array(pd.GetArray(i))
+        points = reader.getpoints()
+        vtk_data = reader.getarrays()
         return (points, vtk_data)
 
 
