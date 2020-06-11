@@ -223,7 +223,7 @@ class Model():
 
     def problem_with_name(self, name):
         if name in Model.reserved_names:
-            return ModelError('Name "{}" is unavailable. It is reserved for internal GillesPy use. Reserved Names: ({}).'.format(name, Model.reserved_names))
+            return ModelError('Name "{}" is unavailable. It is reserved for internal SpatialPy use. Reserved Names: ({}).'.format(name, Model.reserved_names))
         if name in self.listOfSpecies:
             return ModelError('Name "{}" is unavailable. A species with that name exists.'.format(name))
         if name in self.listOfParameters:

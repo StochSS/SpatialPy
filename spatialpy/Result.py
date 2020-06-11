@@ -9,7 +9,6 @@ import warnings
 import uuid
 
 
-# These imports might be wrong
 import numpy
 import scipy.io
 import scipy.sparse
@@ -112,7 +111,7 @@ class Result(dict):
         """ Read the data for simulation step 'step_num'. """
         reader = VTKReader()
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(step_num))
-        print("read_step({0}) opening '{1}'".format(step_num, filename))
+        #print("read_step({0}) opening '{1}'".format(step_num, filename))
         reader.setfilename(filename)
         reader.readfile()
         if reader.getpoints() is None or reader.getarrays() is None:
