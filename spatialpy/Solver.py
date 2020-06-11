@@ -251,6 +251,12 @@ class Solver:
 
         propfilestr = propfilestr.replace("__DEFINE_REACTIONS__", funcs)
         propfilestr = propfilestr.replace("__DEFINE_PROPFUNS__", funcinits)
+
+        #TODO make deterministic chemical reaction functions work
+        deterministic_chem_rxn_functions = ""
+        propfilestr = propfilestr.replace("__DEFINE_CHEM_FUNS__", deterministic_chem_rxn_functions)
+
+
         # End of pyurdme replacements
         # SSA-SDPD values here
         init_particles = ""
