@@ -32,7 +32,7 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
     double P0 = system->P0;
     double c0 = system->c0;
     double Pi = P0 * (me->rho / rho0 - 1.0);
-    int i, j, s, rnx;
+    int i, j, s, rxn;
     particle_t* pt_j;
     node* n;
 
@@ -126,12 +126,12 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
         }
     }
     // after processing all neighbors
-    for(rnx=0; rnx < system->num_chem_rxns; rxn++){
+    for(rxn=0; rxn < system->num_chem_rxns; rxn++){
         //TODO, vol (3rd arg) set to zero, fix
         //TODO: data (4th arg) set to NULL, fix
-        double flux = (*system->chem_rxn_rhs_functions[rnx])(me->C,0.0, 0.0, NULL, me->type);
-        for(s=0; s< system->num_chem_speces; s++){
-            int k = system->num_chem_rxn * rnx + s;
+        double flux = (*system->chem_rxn_rhs_functions[rxn])(me->C,0.0, 0.0, NULL, me->type);
+        for(s=0; s< system->num_chem_species; s++){
+            int k = system->num_chem_rxns * rxn + s;
             me->Q[s] += system->stochic_matrix[k] * flux;
         }
     }
