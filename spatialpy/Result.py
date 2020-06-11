@@ -14,7 +14,7 @@ import numpy
 import scipy.io
 import scipy.sparse
 
-from spatialpy import VTKReader
+from spatialpy.VTKReader import VTKReader
 from spatialpy.Model import *
 
 import inspect

@@ -139,23 +139,26 @@ class Mesh():
 
     def get_vol(self):
         if self.vol is None:
-            self.vol = numpy.zeros((self.vertices.shape[0]),dtype=float)
-            self.tetrahedron_vol = numpy.zeros((self.tetrahedrons.shape[0]),dtype=float)
-            for t_ndx in range(self.tetrahedrons.shape[0]):
-                v1,v2,v3,v4 = self.tetrahedrons[t_ndx]
-                a = self.vertices[v1,:]
-                b = self.vertices[v2,:]
-                c = self.vertices[v3,:]
-                d = self.vertices[v4,:]
-                #https://en.wikipedia.org/wiki/Tetrahedron#Volume
-                t_vol = numpy.abs(numpy.dot( (a-d), numpy.cross( (b-d),(c-d)   ) )/6 )
-                self.tetrahedron_vol[t_ndx] = t_vol
-                self.vol[v1] += t_vol/4
-                self.vol[v2] += t_vol/4
-                self.vol[v3] += t_vol/4
-                self.vol[v4] += t_vol/4
-                
+               self.calculate_vol() 
         return self.vol            
+
+    def calculate_vol(self):
+        self.vol = numpy.zeros((self.vertices.shape[0]),dtype=float)
+        self.tetrahedron_vol = numpy.zeros((self.tetrahedrons.shape[0]),dtype=float)
+        for t_ndx in range(self.tetrahedrons.shape[0]):
+            v1,v2,v3,v4 = self.tetrahedrons[t_ndx]
+            a = self.vertices[v1,:]
+            b = self.vertices[v2,:]
+            c = self.vertices[v3,:]
+            d = self.vertices[v4,:]
+            #https://en.wikipedia.org/wiki/Tetrahedron#Volume
+            t_vol = numpy.abs(numpy.dot( (a-d), numpy.cross( (b-d),(c-d)   ) )/6 )
+            self.tetrahedron_vol[t_ndx] = t_vol
+            self.vol[v1] += t_vol/4
+            self.vol[v2] += t_vol/4
+            self.vol[v3] += t_vol/4
+            self.vol[v4] += t_vol/4
+
 
 
     @classmethod
@@ -195,9 +198,9 @@ class Mesh():
         vertices = mesh[0]
         cells = mesh[1]
         # create mesh object
-        obj = Mesh()
+        obj = Mesh(len(vertices))
         #vertices
-        obj.vertices = numpy.zeros(( len(vertices), 3), dtype=float)
+        #obj.vertices = numpy.zeros(( len(vertices), 3), dtype=float)
         for v in vertices:
             obj.vertices[ int(v.attrib['index']),0] = float(v.attrib['x'])
             obj.vertices[ int(v.attrib['index']),1] = float(v.attrib['y'])
@@ -209,6 +212,8 @@ class Mesh():
             obj.tetrahedrons[ int(c.attrib['index']),1] = int(c.attrib['v1'])
             obj.tetrahedrons[ int(c.attrib['index']),2] = int(c.attrib['v2'])
             obj.tetrahedrons[ int(c.attrib['index']),3] = int(c.attrib['v3'])
+        # volume
+        obj.calculate_vol()
         # return model ref
         return obj
 
@@ -226,6 +231,8 @@ class Mesh():
         #tetrahedrons
         if 'tetra' in mesh_obj.cells:
             obj.tetrahedrons = mesh_obj.cells['tetra']
+        # volume
+        obj.calculate_vol()
         # return model ref
         return obj
 
