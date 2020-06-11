@@ -43,6 +43,15 @@ void FREE_propensities(PropensityFun* ptr)
     free(ptr);
 }
 
+ChemRxnFun* ALLOC_ChemRxnFun(void){
+    ChemRxnFun*ptr = (ChemRxnFun*)malloc(sizeof(ChemRxnFun)*NUM_REACTIONS);
+__DEFINE_CHEM_FUNS__
+    return ptr;
+}
+void FREE_ChemRxnFun(ChemRxnFun* ptr){
+    free(ptr);
+}
+
 
 __INPUT_CONSTANTS__
 
@@ -70,9 +79,9 @@ int init_all_particles(system_t* sys){
 
 int main(int argc, char**argv){
     debug_flag = 0;
-    system_t* system = create_system();
+    //system_t* system = create_system();
     // Fix particles in space
-    system->static_domain = 1;
+    //system->static_domain = 1;
     //CONFIG = 
     //system->dt = 1;
     //system->nt = 101;

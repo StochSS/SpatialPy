@@ -4,19 +4,23 @@ class Mesh():
     """ Mesh class for spatial py """
 
 
-    def __init__(self):
-        self.vertices = numpy.zeros((0))
-        self.triangles = numpy.zeros((0),dtype=int)
-        self.tetrahedrons = numpy.zeros((0,),dtype=int)
+    def __init__(self, numpoints):
+        self.vertices = numpy.zeros((numpoints, 3), dtype=float)
+        self.triangles = numpy.zeros((0), dtype=int)
+        self.tetrahedrons = numpy.zeros((0), dtype=int)
         self.on_boundary = None
-        self.vol = None
+        self.vol = numpy.zeros((numpoints), dtype=float)
         self.mesh_size = None
         self.tetrahedron_vol = None
+        self.mass = numpy.zeros((numpoints), dtype=float)
+        self.sd = numpy.zeros((numpoints), dtype=int)
 
     def find_boundary_points(self):
         if self.on_boundary is None:
-            self.on_boundary = numpy.zeros((self.get_num_voxels()),dtype=bool)
+            self.on_boundary = numpy.zeros((self.get_num_voxels()), dtype=bool)
             # exterior triangles are part of one-and-only-one tetrahedron
+            if len(self.triangles) == 0 or len(self.tetrahedrons) == 0:
+                return self.on_boundary
             from itertools import combinations 
             triangle_in_tetrahedrons_count = {}
             for i in range(self.get_num_voxels()):
@@ -152,6 +156,28 @@ class Mesh():
                 self.vol[v4] += t_vol/4
                 
         return self.vol            
+
+
+    @classmethod
+    def generate_unit_square_mesh(cls, nx, ny, periodic=False):
+        #if periodic:
+        #    raise Exception("TODO: periodic not working yet");
+        """ Import a python meshio mesh object. """
+        # create mesh object
+        obj = Mesh()
+        #vertices
+        obj.vertices = numpy.zeros(( int(nx)*int(ny), 3), dtype=float)
+        x_list = numpy.linspace(0,1,nx)
+        y_list = numpy.linspace(0,1,ny)
+        ndx=0
+        for x in x_list:
+            for y in y_list:
+                obj.vertices[ndx,0] = x        
+                obj.vertices[ndx,1] = y
+                obj.vertices[ndx,2] = 0.0
+                ndx+=1
+        # return model ref
+        return obj
 
 
     @classmethod

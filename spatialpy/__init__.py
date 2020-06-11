@@ -11,4 +11,4 @@ from spatialpy.Subdomain import *
 from spatialpy.Mesh import *
 from spatialpy.DataFunction import *
 from spatialpy.InitialCondition import *
-
+from spatialpy.VTKReader import *

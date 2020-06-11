@@ -9,10 +9,12 @@ import warnings
 import uuid
 
 
+# These imports might be wrong
 import numpy
 import scipy.io
 import scipy.sparse
 
+from spatialpy import VTKReader
 from spatialpy.Model import *
 
 import inspect
@@ -20,7 +22,6 @@ import inspect
 import pickle
 import json
 
-import vtk
 
 # module-level variable to for javascript export in IPython/Jupyter notebooks
 __pyurdme_javascript_libraries_loaded = False
@@ -109,21 +110,15 @@ class Result(dict):
 
     def read_step(self, step_num):
         """ Read the data for simulation step 'step_num'. """
-        reader = vtk.vtkGenericDataObjectReader()
+        reader = VTKReader()
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(step_num))
-        #print("read_step({0}) opening '{1}'".format(step_num, filename))
-        reader.SetFileName(filename)
-        reader.Update()
-        data = reader.GetOutput()
-        if data is None:
+        print("read_step({0}) opening '{1}'".format(step_num, filename))
+        reader.setfilename(filename)
+        reader.readfile()
+        if reader.getpoints() is None or reader.getarrays() is None:
             raise ResultError("read_step(step_num={0}): got data = None".format(step_num))
-        points = numpy.array( data.GetPoints().GetData() )
-        pd = data.GetPointData()
-        vtk_data = {}
-        for i in range(pd.GetNumberOfArrays()):
-            if pd.GetArrayName(i) is None: break
-            #print(i,pd.GetArrayName(i))
-            vtk_data[ pd.GetArrayName(i)] = numpy.array(pd.GetArray(i))
+        points = reader.getpoints()
+        vtk_data = reader.getarrays()
         return (points, vtk_data)
 
 
@@ -248,7 +243,7 @@ class Result(dict):
             writer.writerow(['Voxel ID', 'X', 'Y', 'Z', 'Volume', 'Subdomain'])
             vol = self.model.get_solver_datastructure()['vol']
             for ndx in range(self.model.mesh.get_num_voxels()):
-                row = [ndx]+self.model.mesh.coordinates()[ndx,:].tolist()+[vol[ndx]]+[self.model.sd[ndx]]
+                row = [ndx]+self.model.mesh.coordinates()[ndx,:].tolist()+[vol[ndx]]+[self.model.mesh.sd[ndx]]
                 writer.writerow(row)
 
         for spec in self.model.listOfSpecies:

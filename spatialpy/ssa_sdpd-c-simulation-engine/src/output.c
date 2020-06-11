@@ -12,12 +12,12 @@ void output_csv(system_t*system, int current_step){
     particle_t* p;
     sprintf(filename,"output_%u.csv",current_step);
     FILE*fp = fopen(filename,"w+");
-    fprintf(fp, "id, x, y, z, vx, vy, vz, type, mass, rho\n");
+    fprintf(fp, "id, x, y, z, vx, vy, vz, type, mass, rho, bvf_phi\n");
     for(n=system->particle_list->head; n!=NULL; n=n->next){
         p = n->data;
-        fprintf(fp,"%u, %lf, %lf, %lf, %lf, %lf, %lf, %i, %lf, %lf\n",
+        fprintf(fp,"%u, %lf, %lf, %lf, %lf, %lf, %lf, %i, %lf, %lf, %lf\n",
             p->id, p->x[0], p->x[1], p->x[2], p->v[0], p->v[1], p->v[2],
-            p->type, p->mass, p->rho);
+            p->type, p->mass, p->rho, p->bvf_phi);
     }
     fclose(fp);
 }
@@ -123,7 +123,7 @@ void output_vtk__async_step(system_t*system){
     }
     fprintf(fp,"\n");
     fprintf(fp,"POINT_DATA %i\n", np);
-    int num_fields = 5;
+    int num_fields = 6;
     if(system->rdme != NULL){
         num_fields += system->rdme->Mspecies;
     }
@@ -158,6 +158,17 @@ void output_vtk__async_step(system_t*system){
         if((i+1)%9==0){ fprintf(fp,"\n"); }
     }
     fprintf(fp,"\n");
+    fprintf(fp,"bvf_phi 1 %i double\n", np);
+    for(i=0;i<np;i++){
+        fprintf(fp, "%lf ",output_buffer[i].bvf_phi);
+        if((i+1)%9==0){ fprintf(fp,"\n"); }
+    } 
+    fprintf(fp,"\n");
+    // add in loop here to check for continous? species
+    // if num_chem_species > 0 then ... everything below in loop until done
+    // somewhere there are references to a value d or c? 
+    // change c - concentration or continous? clarify at meeting
+    // change d - discrete
     if(system->rdme != NULL){
         int s;
         for(s=0;s<system->rdme->Mspecies;s++){
