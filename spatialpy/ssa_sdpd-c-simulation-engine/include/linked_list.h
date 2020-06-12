@@ -7,7 +7,8 @@ See the file LICENSE.txt for details.
 ***************************************************************************** */
 #ifndef linked_list_h
 #define linked_list_h
-#include <pthread.h>
+//#include <pthread.h>
+#include "pthread_barrier.h"
 
 typedef struct linked_list_t linked_list;
 typedef struct node_t node;
