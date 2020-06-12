@@ -1,4 +1,5 @@
 import numpy
+from spatialpy.Model import ModelError
 
 
 class InitialCondition():
@@ -71,8 +72,8 @@ class ScatterInitialCondition(InitialCondition):
             for i in range(model.mesh.get_num_voxels()):
                 if model.mesh.sd[i] in self.subdomains:
                     allowed_voxels.append(i)
-            nvox = len(alowed_voxels)
-            if nvox==0: raise ModelError("ScatterInitialCondition has zero voxels to scatter in")
+            nvox = len(allowed_voxels)
+            if nvox==0: raise ModelError("ScatterInitialCondition has zero voxels to scatter in. Species={0} count={1} subdomains={2}".format(self.species.name, self.count, self.subdomains))
             for mol in range(self.count):
                 v_ndx = numpy.random.randint(0, nvox)
                 vtx = allowed_voxels[v_ndx]
