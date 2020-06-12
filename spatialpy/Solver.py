@@ -251,13 +251,19 @@ class Solver:
 
         propfilestr = propfilestr.replace("__DEFINE_REACTIONS__", funcs)
         propfilestr = propfilestr.replace("__DEFINE_PROPFUNS__", funcinits)
+
+        #TODO make deterministic chemical reaction functions work
+        deterministic_chem_rxn_functions = ""
+        propfilestr = propfilestr.replace("__DEFINE_CHEM_FUNS__", deterministic_chem_rxn_functions)
+
+
         # End of pyurdme replacements
         # SSA-SDPD values here
         init_particles = ""
-        if self.model.sd is None:
-            self.model.sd = numpy.ones(self.model.mesh.get_num_voxels())
-        for i in range(len(self.model.sd)):
-            init_particles += "    init_create_particle(sys,id++,{0},{1},{2},{3});".format(self.model.mesh.coordinates()[i,0],self.model.mesh.coordinates()[i,1],self.model.mesh.coordinates()[i,2],self.model.sd[i])+ "\n"
+        if self.model.mesh.sd is None:
+            self.model.mesh.sd = numpy.ones(self.model.mesh.get_num_voxels())
+        for i in range(len(self.model.mesh.sd)):
+            init_particles += "    init_create_particle(sys,id++,{0},{1},{2},{3});".format(self.model.mesh.coordinates()[i,0],self.model.mesh.coordinates()[i,1],self.model.mesh.coordinates()[i,2],self.model.mesh.sd[i])+ "\n"
         propfilestr = propfilestr.replace("__INIT_PARTICLES__", init_particles)
 
 
@@ -285,11 +291,11 @@ class Solver:
             outstr+= str(self.model.mesh.get_vol()[i])
         outstr+="};"
         input_constants += outstr + "\n"
-        outstr = "static int input_sd[{0}] = ".format(self.model.sd.shape[0])
+        outstr = "static int input_sd[{0}] = ".format(self.model.mesh.sd.shape[0])
         outstr+="{"
-        for i in range(self.model.sd.shape[0]):
+        for i in range(self.model.mesh.sd.shape[0]):
             if i>0: outstr+=','
-            outstr+= str(self.model.sd[i])
+            outstr+= str(self.model.mesh.sd[i])
         outstr+="};"
         input_constants += outstr + "\n"
 
@@ -318,29 +324,43 @@ class Solver:
 
 
         N = self.model.create_stoichiometric_matrix()
-        outstr = "static size_t input_irN[{0}] = ".format(len(N.indices))
-        outstr+="{"
-        for i in range(len(N.indices)):
-            if i>0: outstr+=','
-            outstr+= str(N.indices[i])
-        outstr+="};"
-        input_constants += outstr + "\n"
+        Nd = N.todense();
+        if(min(N.shape)>0):
+            outstr = "static int input_N_dense[{0}] = ".format( Nd.shape[0] * Nd.shape[1] ) ;
+            outstr += "{";
+            for i in range(Nd.shape[0]):
+                for j in range(Nd.shape[1]):
+                    if j+i>0: outstr+=','
+                    outstr += "{0}".format( Nd[i,j] );
+            outstr += "};\n";
+            outstr += "static size_t input_irN[{0}] = ".format(len(N.indices))
+            outstr+="{"
+            for i in range(len(N.indices)):
+                if i>0: outstr+=','
+                outstr+= str(N.indices[i])
+            outstr+="};"
+            input_constants += outstr + "\n"
+            outstr = "static size_t input_jcN[{0}] = ".format(len(N.indptr))
+            outstr+="{"
+            for i in range(len(N.indptr)):
+                if i>0: outstr+=','
+                outstr+= str(N.indptr[i])
+            outstr+="};"
+            input_constants += outstr + "\n"
+            outstr = "static int input_prN[{0}] = ".format(len(N.data))
+            outstr+="{"
+            for i in range(len((N.data))):
+                if i>0: outstr+=','
+                outstr+= str(N.data[i])
+            outstr+="};"
+            input_constants += outstr + "\n"
+        else:
+            input_constants += "static int input_N_dense[0] = {};\n"
+            input_constants += "static size_t input_irN[0] = {};\n"
+            input_constants += "static size_t input_jcN[0] = {};\n"
+            input_constants += "static int input_prN[0] = {};\n"
 
-        outstr = "static size_t input_jcN[{0}] = ".format(len(N.indptr))
-        outstr+="{"
-        for i in range(len(N.indptr)):
-            if i>0: outstr+=','
-            outstr+= str(N.indptr[i])
-        outstr+="};"
-        input_constants += outstr + "\n"
 
-        outstr = "static int input_prN[{0}] = ".format(len(N.data))
-        outstr+="{"
-        for i in range(len((N.data))):
-            if i>0: outstr+=','
-            outstr+= str(N.data[i])
-        outstr+="};"
-        input_constants += outstr + "\n"
 
 
         G = self.model.create_dependency_graph()
@@ -372,13 +392,11 @@ class Solver:
         outstr+="{"
         for i, sname in enumerate(self.model.listOfSpecies.keys()):
             s = self.model.listOfSpecies[sname]
-            #print sname,
             for j, sd_id in enumerate(self.model.listOfSubdomainIDs):
-                #print sd_ndx,
                 if i+j>0: outstr+=','
                 try:
                     if s not in self.model.listOfDiffusionRestrictions or \
-                       sd_id not in self.model.listOfDiffusionRestrictions[s]:
+                       sd_id in self.model.listOfDiffusionRestrictions[s]:
                         outstr+= "{0}".format(s.diffusion_constant)
                     else:
                         outstr+= "0.0"
@@ -392,6 +410,13 @@ class Solver:
         propfilestr = propfilestr.replace("__INPUT_CONSTANTS__", input_constants)
 
         system_config = ""
+        system_config +="system_t* system = create_system({0},{1},{2});\n".format(len(self.model.listOfSubdomainIDs),len(self.model.listOfSpecies),len(self.model.listOfReactions))
+        system_config +="system->static_domain = {0};\n".format(int(self.model.staticDomain))
+        if(len(self.model.listOfReactions)>0):
+            system_config += "system->stochic_matrix = input_N_dense;\n";
+            system_config += "system->chem_rxn_rhs_functions = ALLOC_ChemRxnFun();\n";
+
+
         system_config +="system->dt = {0};\n".format(self.model.timestep_size)
         system_config +="system->nt = {0};\n".format(self.model.num_timesteps)
         system_config +="system->output_freq = 1;\n"

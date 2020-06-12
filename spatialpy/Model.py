@@ -36,7 +36,6 @@ class Model():
 
         ######################
         self.mesh = None
-        self.sd = None
         self.listOfSubdomainIDs = [1] # starts with subdomain '1'
         self.listOfDiffusionRestrictions = {}
         self.timestep_size = None
@@ -45,6 +44,7 @@ class Model():
         self.listOfInitialConditions = []
         self.species_map = {}
         self.tspan = None
+        self.staticDomain = True;
 
 
     def run(self, number_of_trajectories=1, solver=None, seed=None, report_level=0):
@@ -105,7 +105,7 @@ class Model():
 
 
 
-    def add_subdomain(self, subdomain, domain_id):
+    def add_subdomain(self, subdomain, domain_id, mass=1.0):
         """ Add a subdomain definition to the model.  By default, all regions are set to
         subdomain 1.
         Args:
@@ -120,14 +120,13 @@ class Model():
         if domain_id not in self.listOfSubdomainIDs:
             # index is the "particle type", value is the "subdomain ID"
             self.listOfSubdomainIDs.append(domain_id)
-        if self.sd is None:
-            self.sd = numpy.ones(self.mesh.get_num_voxels())
         # apply the subdomain to all points, set sd for any points that match
         count =0
         on_boundary = self.mesh.find_boundary_points()
         for v_ndx in range(self.mesh.get_num_voxels()):
             if subdomain.inside( self.mesh.coordinates()[v_ndx,:], on_boundary[v_ndx]):
-                self.sd[v_ndx] = domain_id
+                self.mesh.sd[v_ndx] = domain_id
+                self.mesh.mass[v_ndx] = mass
                 count +=1
         return count
 
