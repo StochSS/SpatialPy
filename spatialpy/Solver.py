@@ -15,7 +15,7 @@ from spatialpy.Result import *
 class Solver:
     """ Abstract class for spatialpy solvers. """
 
-    def __init__(self, model, report_level=0):
+    def __init__(self, model, debug_level=0):
         """ Constructor. """
         #TODO: fix class checking
         #if not isinstance(model, Model):
@@ -27,7 +27,7 @@ class Solver:
 
         self.model = model
         self.is_compiled = False
-        self.report_level = report_level
+        self.debug_level = debug_level
         self.model_name = self.model.name
         self.build_dir = None
         self.executable_name = 'ssa_sdpd'
@@ -55,20 +55,20 @@ class Solver:
         # Create a unique directory each time call to compile.
         self.build_dir = tempfile.mkdtemp(prefix='spatialpy_build_',dir=os.environ.get('SPATIALPY_TMPDIR'))
 
-        if self.report_level >= 1:
+        if self.debug_level >= 1:
             print("Compiling Solver.  Build dir: {0}".format(self.build_dir))
 
         # Write the propensity file
         self.propfilename = self.model_name + '_generated_model'
         self.prop_file_name = self.build_dir + '/' + self.propfilename + '.c'
-        if self.report_level > 1:
+        if self.debug_level > 1:
             print("Creating propensity file {0}".format(self.prop_file_name))
         self.create_propensity_file(file_name=self.prop_file_name)
 
         # Build the solver
         makefile = self.SpatialPy_ROOT+'/build/Makefile.'+self.NAME
         cmd = " ".join([ 'cd', self.build_dir , ';', 'make', '-f', makefile, 'ROOT=' + self.SpatialPy_ROOT, 'MODEL=' + self.prop_file_name,'BUILD='+self.build_dir])
-        if self.report_level > 1:
+        if self.debug_level > 1:
             print("cmd: {0}\n".format(cmd))
         try:
             handle = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -86,7 +86,7 @@ class Solver:
                 pass
             raise SimulationError("Compilation of solver failed, return_code={0}".format(return_code))
 
-        if self.report_level > 1:
+        if self.debug_level > 1:
             print(handle.stdout.read().decode("utf-8"))
             print(handle.stderr.read().decode("utf-8"))
 
@@ -120,12 +120,12 @@ class Solver:
 
             if seed is not None:
                 solver_cmd += " "+str(seed+run_ndx)
-            if self.report_level > 1:
+            if self.debug_level > 1:
                 print('cmd: {0}\n'.format(solver_cmd))
             stdout = ''
             stderr = ''
 #            try:
-#                if self.report_level >= 1:  #stderr & stdout to the terminal
+#                if self.debug_level >= 1:  #stderr & stdout to the terminal
 #                    handle = subprocess.Popen(solver_cmd, shell=True)
 #                else:
 #                    handle = subprocess.Popen(solver_cmd, stderr=subprocess.PIPE,
@@ -144,7 +144,7 @@ class Solver:
                         else:
                             stdout,stderr = process.communicate()
                         return_code = process.wait()
-                        if self.report_level >= 1:  #stderr & stdout to the terminal
+                        if self.debug_level >= 1:  #stderr & stdout to the terminal
                             print('Elapsed seconds: {:.2f}'.format(time.monotonic() - start))
                             if stdout is not None: print(stdout.decode('utf-8'))
                             if stderr is not None: print(stderr.decode('utf-8'))
@@ -160,7 +160,7 @@ class Solver:
                 print("cmd = {0}".format(solver_cmd))
 
             if return_code != 0:
-                if self.report_level >= 1:
+                if self.debug_level >= 1:
                     try:
                         print(stderr)
                         print(stdout)
@@ -409,7 +409,7 @@ class Solver:
         input_constants += outstr + "\n"
         propfilestr = propfilestr.replace("__INPUT_CONSTANTS__", input_constants)
 
-        system_config = ""
+        system_config = "debug_flag = {0};".format(self.debug_level)
         system_config +="system_t* system = create_system({0},{1},{2});\n".format(len(self.model.listOfSubdomainIDs),len(self.model.listOfSpecies),len(self.model.listOfReactions))
         system_config +="system->static_domain = {0};\n".format(int(self.model.staticDomain))
         if(len(self.model.listOfReactions)>0):

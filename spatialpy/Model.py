@@ -47,23 +47,23 @@ class Model():
         self.staticDomain = True;
 
 
-    def run(self, number_of_trajectories=1, solver=None, seed=None, report_level=0):
+    def run(self, number_of_trajectories=1, solver=None, seed=None, debug_level=0):
         """ Simulate the model.
         Args:
             solver: A str or class type that is a subclass of SpatialPy.Solver.  Default: NSM solver.
             number_of_trajectories: How many trajectories should be run.
             seed: An int, the random seed given to the solver.
-            report_level: An int, Level of output from the solver: 0, 1, or 2. Default: 0.
+            debug_level: An int, Level of output from the solver: 0, 1, or 2. Default: 0.
         Returns:
             A SpatialPY.Result object with the results of the simulation.
         """
         if solver is not None:
             if ((isinstance(solver, type)
                     and issubclass(solver, Solver))) or issubclass(type(solver), Solver):
-                sol = solver(self, report_level=report_level)
+                sol = solver(self, debug_level=debug_level)
         else:
             from spatialpy.nsmsolver import NSMSolver
-            sol = NSMSolver(self, report_level=report_level)
+            sol = NSMSolver(self, debug_level=debug_level)
 
         return sol.run(number_of_trajectories=number_of_trajectories, seed=seed)
 
