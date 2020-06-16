@@ -34,31 +34,31 @@ class cylinderDemo3D(spatialpy.Model):
         # Define Subdomains
         self.add_subdomain(Edge1(), 2)
         self.add_subdomain(Edge2(), 3)
-        
+
         # Restrict the movement of Chemical Species
         self.restrict(A,[1,2])
         self.restrict(B,[1,3])
 
         vol = self.mesh.get_vol()
-        sd = self.sd
+        sd = self.mesh.sd
         left = numpy.sum(vol[sd == 2])
         right = numpy.sum(vol[sd == 3])
         print("left "+str(left)+" right "+str(right))
-        
+
         k_react = spatialpy.Parameter(name="k_react", expression=1.0)
-        k_creat1 = spatialpy.Parameter(name="k_creat1", 
+        k_creat1 = spatialpy.Parameter(name="k_creat1",
                                      expression=100/left)
-        k_creat2 = spatialpy.Parameter(name="k_creat2", 
+        k_creat2 = spatialpy.Parameter(name="k_creat2",
                                      expression=100/right)
         self.add_parameter([k_react, k_creat1,k_creat2])
 
 
         # Define Reactions
-        R1 = spatialpy.Reaction(reactants=None, products={A:1}, 
+        R1 = spatialpy.Reaction(reactants=None, products={A:1},
                                 rate=k_creat1, restrict_to=2)
-        R2 = spatialpy.Reaction(reactants=None, products={B:1}, 
+        R2 = spatialpy.Reaction(reactants=None, products={B:1},
                               rate=k_creat2, restrict_to=3)
-        R3 = spatialpy.Reaction(reactants={A:1, B:1}, products=None, 
+        R3 = spatialpy.Reaction(reactants={A:1, B:1}, products=None,
                               rate=k_react)
         self.add_reaction([R1, R2, R3])
 
