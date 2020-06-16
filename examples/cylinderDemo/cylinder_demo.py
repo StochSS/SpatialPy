@@ -15,7 +15,9 @@ class Edge1(spatialpy.SubDomain):
 class Edge2(spatialpy.SubDomain):
     def inside(self, x, on_boundary):
         return abs(x[0] - MIN_X_DIM) < 0.05
-
+class Middle(spatialpy.SubDomain):
+    def inside(self, x, on_boundary):
+        return abs(x[0] - MIN_X_DIM) >= 0.05
 class cylinderDemo3D(spatialpy.Model):
     def __init__(self, model_name="cylinder_demo3d"):
         spatialpy.Model.__init__(self, model_name)
@@ -32,6 +34,7 @@ class cylinderDemo3D(spatialpy.Model):
         self.mesh = spatialpy.Mesh.read_xml_mesh('cylinder.xml')
 
         # Define Subdomains
+        self.add_subdomain(Middle(), 1)
         self.add_subdomain(Edge1(), 2)
         self.add_subdomain(Edge2(), 3)
 

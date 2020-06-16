@@ -263,6 +263,9 @@ class Solver:
         if self.model.mesh.sd is None:
             self.model.mesh.sd = numpy.ones(self.model.mesh.get_num_voxels())
         for i in range(len(self.model.mesh.sd)):
+            # This needs a better message in the future
+            if self.model.mesh.sd[i] == 0:
+                raise SimulationError("Not all particles have been defined in a subdomain. Mass and other properties must be defined")
             init_particles += "    init_create_particle(sys,id++,{0},{1},{2},{3});".format(self.model.mesh.coordinates()[i,0],self.model.mesh.coordinates()[i,1],self.model.mesh.coordinates()[i,2],self.model.mesh.sd[i])+ "\n"
         propfilestr = propfilestr.replace("__INIT_PARTICLES__", init_particles)
 

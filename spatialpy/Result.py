@@ -133,6 +133,8 @@ class Result(dict):
                 num=self.model.num_timesteps+1) * self.model.timestep_size
         return self.tspan
 
+    # This function should be renamed to something else more in line with what it does
+    # Prior to a beta release
     def get_species(self, species, timepoints=None, concentration=False):
         """ Get the populations/concentration values for a given species in the model for 
             one or all timepoints.  
@@ -145,7 +147,6 @@ class Result(dict):
             If concentration is False (default), the integer, raw, trajectory data is returned,
             if set to True, the concentration (=copy_number/volume) is returned.
         """
-
 
         species_map = self.model.species_map
         num_species = self.model.get_num_species()
