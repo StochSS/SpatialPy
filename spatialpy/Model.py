@@ -1,5 +1,4 @@
 #This module defines a model that simulates a discrete, stoachastic, mixed biochemical reaction network in python.
-    
 
 from __future__ import division # is this still necessary?
 import uuid
@@ -14,22 +13,22 @@ class Model():
     reserved_names = ['vol']
     special_characters = ['[', ']', '+', '-', '*', '/', '.', '^']
 
-    
+
     def __init__(self, name="", volume=1.0):
         """ Create an empty SpatialPy model. """
-        
+
         # The name that the model is referenced by (should be a String)
         self.name = name
-        
+
         # Dictionaries with Species, Reactions and Parameter objects.
         # Species,Reactio and Paramter names are used as keys.
         self.listOfParameters = OrderedDict()
         self.listOfSpecies    = OrderedDict()
         self.listOfReactions  = OrderedDict()
-        
+
         # A well mixed model has an optional volume parameter
         self.volume = volume;
-        
+
         # Dict that holds flattended parameters and species for
         # evaluation of expressions in the scope of the model.
         self.namespace = OrderedDict([])
@@ -83,7 +82,7 @@ class Model():
 
     def timespan(self, time_span):
         """
-        Set the time span of simulation. The SSA-SDPD engine does not support 
+        Set the time span of simulation. The SSA-SDPD engine does not support
         non-uniform timespans.
 
         tspan : numpy ndarray
@@ -107,7 +106,7 @@ class Model():
 
     def add_subdomain(self, subdomain, domain_id, mass=1.0):
         """ Add a subdomain definition to the model.  By default, all regions are set to
-        subdomain 1.
+        subdomain 0.
         Args:
             subdomain: an instance of a 'spatialpy.SubDomain' subclass.  The 'inside()' method
                        of this object will be used to assign domain_id to points.
@@ -148,10 +147,10 @@ class Model():
             self.listOfDiffusionRestrictions[species] = listOfSubDomains
 
     def add_data_function(self, data_function):
-        """ Add a scalar spatial function to the simulation.  This is useful if you have a 
-            spatially varying in put to your model.  Argument is a instances of subclass of the 
-            spatialpy.DataFunction class. It must implement a function 'map(x)' which takes a 
-            the spatial positon 'x' as an array, and it returns a float value. 
+        """ Add a scalar spatial function to the simulation.  This is useful if you have a
+            spatially varying in put to your model.  Argument is a instances of subclass of the
+            spatialpy.DataFunction class. It must implement a function 'map(x)' which takes a
+            the spatial positon 'x' as an array, and it returns a float value.
         """
         #TODO validate input
         self.listOfDataFunctions.append(data_function)
@@ -160,22 +159,22 @@ class Model():
         """ Add an initial condition object to the initialization of the model."""
         #TODO: validate model
         self.listOfInitialConditions.append(ic)
-        
+
 
     def update_namespace(self):
         """ Create a dict with flattened parameter and species objects. """
-        
+
         for param in self.listOfParameters:
             self.namespace[param]=self.listOfParameters[param].value
         # Dictionary of expressions that can be evaluated in the scope of this model.
         self.expressions = {}
-    
+
     def get_species(self, sname):
         return self.listOfSpecies[sname]
-    
+
     def get_num_species(self):
         return len(self.listOfSpecies)
-    
+
     def get_all_species(self):
         return self.listOfSpecies
 
@@ -206,9 +205,8 @@ class Model():
 
     def delete_species(self, obj):
         """ Remove a Species from model.listOfSpecies. """
-        self.listOfSpecies.pop(obj)        
-        
-        
+        self.listOfSpecies.pop(obj)
+
     def delete_all_species(self):
         self.listOfSpecies.clear()
 
@@ -240,7 +238,7 @@ class Model():
         """ Add Parameter(s) to model.listOfParameters. Input can be either a single
             Parameter object or a list of Parameter objects.
         """
-        if isinstance(params,list): 
+        if isinstance(params,list):
             for p in params:
                 self.add_parameter(p)
         else:
@@ -267,9 +265,9 @@ class Model():
         p = self.listOfParameters[pname]
         p.expression = expression
         p.evaluate()
-        
+
     def resolve_parameters(self):
-        """ Attempt to resolve all parameter expressions to scalar floating point values. 
+        """ Attempt to resolve all parameter expressions to scalar floating point values.
             Must be called prior to exporting the model.  """
         self.update_namespace()
         for param in self.listOfParameters:
@@ -277,14 +275,14 @@ class Model():
                 self.listOfParameters[param].evaluate(self.namespace)
             except:
                 raise ParameterError("Could not resolve Parameter expression "+param + "to a scalar value.")
-    
+
     def delete_all_parameters(self):
         self.listOfParameters.clear()
 
     def add_reaction(self,reacs):
         """ Add Reaction(s) to the model. Input can be single instance, a list of instances
             or a dict with name,instance pairs. """
-        if isinstance(reacs, list): 
+        if isinstance(reacs, list):
             for r in reacs:
                 if r.name is None or r.name == "":
                     r.name = 'rxn' + str(uuid.uuid4()).replace('-', '_')
@@ -304,10 +302,10 @@ class Model():
 
     def get_all_reactions(self):
         return self.listOfReactions
-    
+
     def delete_reaction(self, obj):
         self.listOfReactions.pop(obj)
-        
+
     def delete_all_reactions(self):
         self.listOfReactions.clear()
 
@@ -349,12 +347,12 @@ class Model():
         mass_action_model = True
         for name, reaction in self.listOfReactions.items():
             if not reaction.massaction:
-                GF = numpy.ones((self.get_num_reactions(), 
+                GF = numpy.ones((self.get_num_reactions(),
                     self.get_num_reactions() + self.get_num_species()))
                 mass_action_model = False
 
         if mass_action_model:
-            GF = numpy.zeros((self.get_num_reactions(), 
+            GF = numpy.zeros((self.get_num_reactions(),
                 self.get_num_reactions() + self.get_num_species()))
             species_map = self.species_map
 
@@ -419,17 +417,17 @@ class Model():
         # apply initial condition functions
         for ic in self.listOfInitialConditions:
             ic.apply(self)
-            
+
 
 
 
 
 class Species():
     """ Model of a biochemical species. """
-    
+
     def __init__(self,name=None,diffusion_constant=None,diffusion_coefficient=None,D=None):
         # A species has a name (string) and an initial value (positive integer)
-        if name is None: 
+        if name is None:
             raise ModelError("Species must have a name")
         else:
             self.name = name
@@ -447,42 +445,42 @@ class Species():
         return self.name
 
 class Parameter():
-    """ 
-        Model of a rate paramter. 
+    """
+        Model of a rate paramter.
         A parameter can be given as a String expression (function) or directly as a scalar value.
         If given a String expression, it should be evaluable in the namespace of a parent Model.
-        
+
     """
-    
+
     def __init__(self,name="",expression=None,value=None):
 
-        self.name = name        
+        self.name = name
         # We allow expression to be passed in as a non-string type. Invalid strings
         # will be caught below. It is perfectly fine to give a scalar value as the expression.
         # This can then be evaluated in an empty namespace to the scalar value.
         self.expression = expression
         if expression != None:
             self.expression = str(expression)
-        
+
         self.value = value
-            
+
         # self.value is allowed to be None, but not self.expression. self.value
         # might not be evaluable in the namespace of this parameter, but defined
         # in the context of a model or reaction.
         if self.expression == None:
             #raise TypeError
             self.value = 0
-    
+
         if self.value is None:
             self.evaluate()
-    
+
     def evaluate(self,namespace={}):
         """ Evaluate the expression and return the (scalar) value """
         try:
             self.value = (float(eval(self.expression, namespace)))
         except:
             self.value = None
-            
+
     def set_expression(self,expression):
         self.expression = expression
         # We allow expression to be passed in as a non-string type. Invalid strings
@@ -490,56 +488,56 @@ class Parameter():
         # This can then be evaluated in an empty namespace to the scalar value.
         if expression is not None:
             self.expression = str(expression)
-                    
+
         if self.expression is None:
             raise TypeError
-    
+
         self.evaluate()
-        
+
     def __str__(self):
         return str(self.value)
-        
+
 
 class Reaction():
-    """ 
+    """
         Models a biochemical reaction. A reaction conatains dictinaries of species (reactants and products) and parameters.
         The reaction's propensity function needs to be evaluable and result in a non-negative scalar value
         in the namespace defined by the union of its Reactant, Product and Parameter dictionaries.
-        
+
     """
 
     def __init__(self, name = "", reactants = {}, products = {}, propensity_function=None, massaction=None, rate=None, annotation=None,restrict_to=None):
-        """ 
-            Initializes the reaction using short-hand notation. 
-            
-            Input: 
+        """
+            Initializes the reaction using short-hand notation.
+
+            Input:
                 name:                       string that the model is referenced by
                 parameters:                 a list of parameter instances
                 propensity_function:        String with the expression for the reaction's propensity
                 reactants:                  List of (species,stoichiometry) tuples
                 product:                    List of (species,stoichiometry) tuples
                 annotation:                 Description of the reaction (meta)
-            
+
                 massaction True,{False}     is the reaction of mass action type or not?
                 rate                        if mass action, rate is a reference to a parameter instance.
-            
-            If massaction is set to true, propensity_function is not a valid argument. Instead, the 
+
+            If massaction is set to true, propensity_function is not a valid argument. Instead, the
             propensity function is constructed automatically. For mass-action, zeroth, first and second
             order reactions are supported, appemting to used higher orders will result in an error.
-            
+
             Raises: ReactionError
-            
+
         """
-            
+
         # Metadata
         self.name = name
         self.annotation = ""
-        
+
         self.massaction = massaction
 
         self.propensity_function = propensity_function
 
-        if self.propensity_function is None: 
+        if self.propensity_function is None:
             if rate is None:
                 errmsg = "Reaction "+self.name +": You must either set the reaction to be mass-action or specifiy a propensity function."
                 raise ReactionError(errmsg)
@@ -552,7 +550,7 @@ class Reaction():
                 raise ReactionError(errmsg)
             else:
                 self.massaction = False
-        
+
         self.reactants = {}
         if reactants is not None:
             for r in reactants:
@@ -561,7 +559,7 @@ class Reaction():
                     self.reactants[r.name] = reactants[r]
                 else:
                     self.reactants[r]=reactants[r]
-    
+
         self.products = {}
         if products is not None:
             for p in products:
@@ -581,7 +579,7 @@ class Reaction():
             self.type = "customized"
 
         self.restrict_to = restrict_to
-                
+
     def create_mass_action(self):
         """ Create a mass action propensity function given self.reactants and a single parameter value.
         """
@@ -617,12 +615,12 @@ class Reaction():
             propensity_function += "*vol"
 
         self.propensity_function = propensity_function
-            
+
     def set_type(self,type):
         if type not in {'mass-action','customized'}:
             raise ReactionError("Invalid reaction type.")
         self.type = type
-    
+
     def add_reactant(self,S,stoichiometry):
         if stoichiometry <= 0:
             raise ReactionError("Reaction "+self.name+"Stoichiometry must be a positive integer.")
