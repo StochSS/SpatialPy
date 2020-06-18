@@ -107,7 +107,7 @@ class Model():
 
     def add_subdomain(self, subdomain, domain_id, mass=1.0):
         """ Add a subdomain definition to the model.  By default, all regions are set to
-        subdomain 1.
+        subdomain 0.
         Args:
             subdomain: an instance of a 'spatialpy.SubDomain' subclass.  The 'inside()' method
                        of this object will be used to assign domain_id to points.
