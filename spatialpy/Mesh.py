@@ -14,6 +14,8 @@ class Mesh():
         self.tetrahedron_vol = None
         self.mass = numpy.zeros((numpoints), dtype=float)
         self.sd = numpy.zeros((numpoints), dtype=int)
+        self.nu = numpy.zeros((numpoints), dtype=float)
+        self.fixed = numpy.zeros((numpoints), dtype=bool)
 
     def find_boundary_points(self):
         if self.on_boundary is None:
@@ -257,7 +259,56 @@ class Mesh():
 
 
 
-
+    @classmethod
+    def create_3D_domain(cls, xlim, ylim, zlim, nx, ny, nz):
+        """ Create a filled 3D domain  """
+        # Create mesh object
+        numberparticles = nx*ny*nz
+        obj = Mesh(numberparticles)
+        # Vertices
+        obj.vertices = numpy.zeros(( numberparticles, 3), dtype=float)
+        x_list = numpy.linspace(xlim[0],xlim[1],nx)
+        y_list = numpy.linspace(ylim[0],ylim[1],ny)
+        z_list = numpy.linspace(zlim[0],zlim[1],nz)
+        ndx = 0
+        totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0]) * (zlim[1] - zlim[0])
+        for x in x_list:
+            for y in y_list:
+                for z in z_list:
+                    obj.vol[ndx] = totalvolume / numberparticles
+                    obj.mass[ndx] = 1.0  # default
+                    obj.nu[ndx] = 1.0  # default
+                    obj.vertices[ndx,0] = x        
+                    obj.vertices[ndx,1] = y
+                    obj.vertices[ndx,2] = z
+                    ndx+=1
+                
+        # return model ref
+        return obj
+    @classmethod
+    def create_2D_domain(cls, xlim, ylim, nx, ny):
+        """ Create a filled 2D domain  """
+        # Create mesh object
+        numberparticles = nx*ny
+        obj = Mesh(numberparticles)
+        # Vertices
+        obj.vertices = numpy.zeros(( int(nx)*int(ny), 3), dtype=float)
+        x_list = numpy.linspace(xlim[0],xlim[1],nx)
+        y_list = numpy.linspace(ylim[0],ylim[1],ny)
+        ndx = 0
+        totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0])
+        for x in x_list:
+            for y in y_list:
+                obj.vol[ndx] = totalvolume / numberparticles
+                obj.mass[ndx] = 1.0  # default
+                obj.nu[ndx] = 1.0  # default
+                obj.vertices[ndx,0] = x        
+                obj.vertices[ndx,1] = y
+                obj.vertices[ndx,2] = 0.0
+                ndx+=1
+                
+        # return model ref
+        return obj
 
 
 
