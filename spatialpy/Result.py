@@ -134,7 +134,7 @@ class Result(dict):
                 num=self.model.num_timesteps+1) * self.model.timestep_size
         return self.tspan
 
-    def get_species(self, species, timepoints=None, concentration=False):
+    def get_species(self, species, timepoints=None, concentration=False, deterministic=False):
         """ Get the populations/concentration values for a given species in the model for 
             one or all timepoints.  
             
@@ -145,6 +145,8 @@ class Result(dict):
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
             if set to True, the concentration (=copy_number/volume) is returned.
+
+            If deterministic is True, show results for determinstic (instead of stochastic) values
         """
 
 
@@ -178,12 +180,14 @@ class Result(dict):
         ret = numpy.zeros( (num_timepoints, num_voxel))
         for ndx, t_ndx in enumerate(t_index_arr):
             (_, step) = self.read_step(t_ndx)
-            if concentration:
+            if deterministic: 
+                ret[ndx,:] = step['C['+spec_name+']']
+            elif concentration:
                 # concentration = (copy_number/volume)
                 # volume = (mass/density)
-                ret[ndx,:] = step['C['+spec_name+']'] / (step['mass'] / step['rho'] )
+                ret[ndx,:] = step['D['+spec_name+']'] / (step['mass'] / step['rho'] )
             else:
-                ret[ndx,:] = step['C['+spec_name+']']
+                ret[ndx,:] = step['D['+spec_name+']']
         if ret.shape[0] == 1:
             ret = ret.flatten()
         return ret
