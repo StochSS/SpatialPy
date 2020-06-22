@@ -103,12 +103,12 @@ node* linked_list_get( linked_list* ll, int index){
     int count = 0;
     node* n = ll->head;
     if( ll->head == NULL){
-        printf("error, linked_list_get() empty list\n");
+        printf("Error, linked_list_get() empty list\n");
         return NULL;
     }
     while( count < index ){
         if(n->next == NULL){
-            printf("Error, linked_list_get() list shorted than %i \n", index);
+            printf("Error, linked_list_get() list shorter than %i \n", index);
             return NULL;
         }
         n = n->next;

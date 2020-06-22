@@ -9,7 +9,6 @@ import warnings
 import uuid
 
 
-# These imports might be wrong
 import numpy
 import scipy.io
 import scipy.sparse
@@ -112,7 +111,7 @@ class Result(dict):
         """ Read the data for simulation step 'step_num'. """
         reader = VTKReader(debug=debug)
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(step_num))
-        print("read_step({0}) opening '{1}'".format(step_num, filename))
+        #print("read_step({0}) opening '{1}'".format(step_num, filename))
         reader.setfilename(filename)
         reader.readfile()
         if reader.getpoints() is None or reader.getarrays() is None:
@@ -134,6 +133,8 @@ class Result(dict):
                 num=self.model.num_timesteps+1) * self.model.timestep_size
         return self.tspan
 
+    # This function should be renamed to something else more in line with what it does
+    # Prior to a beta release
     def get_species(self, species, timepoints=None, concentration=False, deterministic=False, debug=False):
         """ Get the populations/concentration values for a given species in the model for 
             one or all timepoints.  
@@ -148,7 +149,6 @@ class Result(dict):
 
             If deterministic is True, show results for determinstic (instead of stochastic) values
         """
-
 
         species_map = self.model.species_map
         num_species = self.model.get_num_species()
