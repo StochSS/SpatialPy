@@ -162,7 +162,7 @@ void output_vtk__async_step(system_t*system){
         fprintf(fp, "%lf %lf %lf ",output_buffer[i].v[0],output_buffer[i].v[1],output_buffer[i].v[2]);
         if((i+1)%3==0){ fprintf(fp,"\n"); }
     }
-    //fprintf(fp,"\n");
+    fprintf(fp,"\n");
     fprintf(fp,"rho 1 %i double\n", np);
     for(i=0;i<np;i++){
         fprintf(fp, "%lf ",output_buffer[i].rho);
