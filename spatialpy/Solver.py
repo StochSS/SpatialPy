@@ -69,7 +69,7 @@ class Solver:
         makefile = self.SpatialPy_ROOT+'/build/Makefile.'+self.NAME
         cmd = " ".join(['cd', self.build_dir, ';', 'make', '-f', makefile, 'ROOT=' +
                         self.SpatialPy_ROOT, 'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir])
-        if self.report_level > 1:
+        if self.debug_level > 1:
             print("cmd: {0}\n".format(cmd))
         try:
             handle = subprocess.Popen(
@@ -151,7 +151,7 @@ class Solver:
                         else:
                             stdout, stderr = process.communicate()
                         return_code = process.wait()
-                        if self.report_level >= 1:  # stderr & stdout to the terminal
+                        if self.debug_level >= 1:  # stderr & stdout to the terminal
                             print('Elapsed seconds: {:.2f}'.format(
                                 time.monotonic() - start))
                             if stdout is not None:
