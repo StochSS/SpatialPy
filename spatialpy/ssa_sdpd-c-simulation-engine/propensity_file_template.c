@@ -57,15 +57,17 @@ __INPUT_CONSTANTS__
 
 int debug_flag;
 
-void init_create_particle(system_t* sys, int id, double x, double y, double z, int type){
+void init_create_particle(system_t* sys, int id, double x, double y, double z, int type, double nu, double mass, double rho, int solidTag){
     particle_t* p = create_particle(id);
     p->x[0] = x;
     p->x[1] = y;
     p->x[2] = z;
     p->id = id;
     p->type = type;
-    p->rho = sys->rho0;
-    p->mass = input_vol[id];
+    p->nu = nu;
+    p->mass = mass;
+    p->rho = rho;
+    p->solidTag = solidTag;
     add_particle(p, sys);
 }
 

@@ -108,9 +108,9 @@ class Result(dict):
 #            self.__dict__[k] = v
 
 
-    def read_step(self, step_num):
+    def read_step(self, step_num, debug=False):
         """ Read the data for simulation step 'step_num'. """
-        reader = VTKReader()
+        reader = VTKReader(debug=debug)
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(step_num))
         print("read_step({0}) opening '{1}'".format(step_num, filename))
         reader.setfilename(filename)
@@ -134,7 +134,7 @@ class Result(dict):
                 num=self.model.num_timesteps+1) * self.model.timestep_size
         return self.tspan
 
-    def get_species(self, species, timepoints=None, concentration=False, deterministic=False):
+    def get_species(self, species, timepoints=None, concentration=False, deterministic=False, debug=False):
         """ Get the populations/concentration values for a given species in the model for 
             one or all timepoints.  
             
@@ -179,7 +179,7 @@ class Result(dict):
 
         ret = numpy.zeros( (num_timepoints, num_voxel))
         for ndx, t_ndx in enumerate(t_index_arr):
-            (_, step) = self.read_step(t_ndx)
+            (_, step) = self.read_step(t_ndx, debug=debug)
             if deterministic: 
                 ret[ndx,:] = step['C['+spec_name+']']
             elif concentration:
