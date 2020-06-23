@@ -4,6 +4,10 @@
 #include "simulate_rdme.h"
 #include "model.h"
 #include <errno.h>
+<<<<<<< HEAD
+=======
+//#include <pthread.h>
+>>>>>>> e8fb2ec56b2030db21618a705bce37fa637c13d5
 #include "pthread_barrier.h"
 #include <signal.h>
 #include <stdio.h>

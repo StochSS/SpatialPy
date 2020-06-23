@@ -7,7 +7,11 @@ See the file LICENSE.txt for details.
 ***************************************************************************** */
 #ifndef linked_list_h
 #define linked_list_h
+<<<<<<< HEAD
 //include <pthread.h>
+=======
+//#include <pthread.h>
+>>>>>>> e8fb2ec56b2030db21618a705bce37fa637c13d5
 #include "pthread_barrier.h"
 
 typedef struct linked_list_t linked_list;

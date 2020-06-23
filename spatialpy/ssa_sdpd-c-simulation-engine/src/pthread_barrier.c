@@ -100,4 +100,7 @@ int pthread_barrierattr_setpshared(pthread_barrierattr_t *attr, int pshared) {
 }
 
 #endif  /* __APPLE */
+<<<<<<< HEAD
 
+=======
+>>>>>>> e8fb2ec56b2030db21618a705bce37fa637c13d5

@@ -188,6 +188,37 @@ class Result(dict):
             ret = ret.flatten()
         return ret
 
+    def get_property(self, property_name, timepoints=None):
+        """ Get the property values for a given species in the model for 
+            one or all timepoints.  
+            
+            If 'timepoints' is None (default), a matrix of dimension:
+            (number of timepoints) x (number of voxels) is returned.  If an integer value is
+            given, that value is used to index into the timespan, and that time point is returned
+            as a 1D array with size (number of voxel). 
+        """
+
+        t_index_arr = numpy.linspace(0,self.model.num_timesteps, 
+                            num=self.model.num_timesteps+1, dtype=int)
+        num_voxel = self.model.mesh.get_num_voxels()
+
+        if timepoints is not None:
+            if isinstance(timepoints,float):
+                raise ResultError("timepoints argument must be an integer, the index of time timespan")
+            t_index_arr = t_index_arr[timepoints]
+        try:
+            num_timepoints = len(t_index_arr)
+        except Exception as e:
+            t_index_arr = [t_index_arr]
+            num_timepoints = 1
+
+        ret = numpy.zeros( (num_timepoints, num_voxel))
+        for ndx, t_ndx in enumerate(t_index_arr):
+            (_, step) = self.read_step(t_ndx)
+            ret[ndx,:] = step[property_name]
+        if ret.shape[0] == 1:
+            ret = ret.flatten()
+        return ret
 
 #    def __setattr__(self, k, v):
 #        if k in self.keys():

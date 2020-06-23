@@ -14,7 +14,7 @@ from spatialpy.Result import *
 class Solver:
     """ Abstract class for spatialpy solvers. """
 
-    def __init__(self, model, report_level=0):
+    def __init__(self, model, debug_level=0):
         """ Constructor. """
         # TODO: fix class checking
         # if not isinstance(model, Model):
@@ -27,7 +27,7 @@ class Solver:
 
         self.model = model
         self.is_compiled = False
-        self.report_level = report_level
+        self.debug_level = debug_level
         self.model_name = self.model.name
         self.build_dir = None
         self.executable_name = 'ssa_sdpd'
@@ -55,21 +55,26 @@ class Solver:
         self.build_dir = tempfile.mkdtemp(
             prefix='spatialpy_build_', dir=os.environ.get('SPATIALPY_TMPDIR'))
 
-        if self.report_level >= 1:
+        if self.debug_level >= 1:
             print("Compiling Solver.  Build dir: {0}".format(self.build_dir))
 
         # Write the propensity file
         self.propfilename = self.model_name + '_generated_model'
         self.prop_file_name = self.build_dir + '/' + self.propfilename + '.c'
-        if self.report_level > 1:
+        if self.debug_level > 1:
             print("Creating propensity file {0}".format(self.prop_file_name))
         self.create_propensity_file(file_name=self.prop_file_name)
 
         # Build the solver
         makefile = self.SpatialPy_ROOT+'/build/Makefile.'+self.NAME
+<<<<<<< HEAD
         cmd = " ".join(['cd', self.build_dir, ';', 'make', '-f', makefile, 'ROOT=' +
                         self.SpatialPy_ROOT, 'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir])
         if self.report_level > 1:
+=======
+        cmd = " ".join([ 'cd', self.build_dir , ';', 'make', '-f', makefile, 'ROOT=' + self.SpatialPy_ROOT, 'MODEL=' + self.prop_file_name,'BUILD='+self.build_dir])
+        if self.debug_level > 1:
+>>>>>>> e8fb2ec56b2030db21618a705bce37fa637c13d5
             print("cmd: {0}\n".format(cmd))
         try:
             handle = subprocess.Popen(
@@ -90,7 +95,7 @@ class Solver:
             raise SimulationError(
                 "Compilation of solver failed, return_code={0}".format(return_code))
 
-        if self.report_level > 1:
+        if self.debug_level > 1:
             print(handle.stdout.read().decode("utf-8"))
             print(handle.stderr.read().decode("utf-8"))
 
@@ -125,12 +130,12 @@ class Solver:
 
             if seed is not None:
                 solver_cmd += " "+str(seed+run_ndx)
-            if self.report_level > 1:
+            if self.debug_level > 1:
                 print('cmd: {0}\n'.format(solver_cmd))
             stdout = ''
             stderr = ''
 #            try:
-#                if self.report_level >= 1:  #stderr & stdout to the terminal
+#                if self.debug_level >= 1:  #stderr & stdout to the terminal
 #                    handle = subprocess.Popen(solver_cmd, shell=True)
 #                else:
 #                    handle = subprocess.Popen(solver_cmd, stderr=subprocess.PIPE,
@@ -150,6 +155,7 @@ class Solver:
                         else:
                             stdout, stderr = process.communicate()
                         return_code = process.wait()
+<<<<<<< HEAD
                         if self.report_level >= 1:  # stderr & stdout to the terminal
                             print('Elapsed seconds: {:.2f}'.format(
                                 time.monotonic() - start))
@@ -157,6 +163,12 @@ class Solver:
                                 print(stdout.decode('utf-8'))
                             if stderr is not None:
                                 print(stderr.decode('utf-8'))
+=======
+                        if self.debug_level >= 1:  #stderr & stdout to the terminal
+                            print('Elapsed seconds: {:.2f}'.format(time.monotonic() - start))
+                            if stdout is not None: print(stdout.decode('utf-8'))
+                            if stderr is not None: print(stderr.decode('utf-8'))
+>>>>>>> e8fb2ec56b2030db21618a705bce37fa637c13d5
                     except subprocess.TimeoutExpired:
                         # send signal to the process group
                         os.killpg(process.pid, signal.SIGINT)
@@ -173,7 +185,7 @@ class Solver:
                 print("cmd = {0}".format(solver_cmd))
 
             if return_code != 0:
-                if self.report_level >= 1:
+                if self.debug_level >= 1:
                     try:
                         print(stderr)
                         print(stdout)
@@ -451,6 +463,7 @@ class Solver:
         propfilestr = propfilestr.replace(
             "__INPUT_CONSTANTS__", input_constants)
 
+<<<<<<< HEAD
         system_config = ""
         system_config += "system_t* system = create_system({0},{1},{2});\n".format(len(
             self.model.listOfSubdomainIDs), len(self.model.listOfSpecies), len(self.model.listOfReactions))
@@ -463,6 +476,19 @@ class Solver:
         system_config += "system->dt = {0};\n".format(self.model.timestep_size)
         system_config += "system->nt = {0};\n".format(self.model.num_timesteps)
         system_config += "system->output_freq = 1;\n"
+=======
+        system_config = "debug_flag = {0};".format(self.debug_level)
+        system_config +="system_t* system = create_system({0},{1},{2});\n".format(len(self.model.listOfSubdomainIDs),len(self.model.listOfSpecies),len(self.model.listOfReactions))
+        system_config +="system->static_domain = {0};\n".format(int(self.model.staticDomain))
+        if(len(self.model.listOfReactions)>0):
+            system_config += "system->stochic_matrix = input_N_dense;\n";
+            system_config += "system->chem_rxn_rhs_functions = ALLOC_ChemRxnFun();\n";
+
+
+        system_config +="system->dt = {0};\n".format(self.model.timestep_size)
+        system_config +="system->nt = {0};\n".format(self.model.num_timesteps)
+        system_config +="system->output_freq = 1;\n"
+>>>>>>> e8fb2ec56b2030db21618a705bce37fa637c13d5
         if self.h is None:
             self.h = self.model.mesh.find_h()
         if self.h == 0.0:
