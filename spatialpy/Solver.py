@@ -69,7 +69,7 @@ class Solver:
         makefile = self.SpatialPy_ROOT+'/build/Makefile.'+self.NAME
         cmd = " ".join(['cd', self.build_dir, ';', 'make', '-f', makefile, 'ROOT=' +
                         self.SpatialPy_ROOT, 'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir])
-        if self.report_level > 1:
+        if self.debug_level > 1:
             print("cmd: {0}\n".format(cmd))
         try:
             handle = subprocess.Popen(
@@ -358,8 +358,8 @@ class Solver:
             "__DATA_FUNCTION_DEFINITIONS__", data_fn_defs)
 
         N = self.model.create_stoichiometric_matrix()
-        #Nd = N.todense() # There's something wrong here...
         if(min(N.shape) > 0):
+            Nd = N.todense() # this will not work if Nrxn or Nspecies is zero
             outstr = "static int input_N_dense[{0}] = ".format(
                 Nd.shape[0] * Nd.shape[1])
             outstr += "{"
