@@ -150,7 +150,7 @@ class Solver:
                         else:
                             stdout, stderr = process.communicate()
                         return_code = process.wait()
-                        if self.report_level >= 1:  # stderr & stdout to the terminal
+                        if self.debug_level >= 1:  # stderr & stdout to the terminal
                             print('Elapsed seconds: {:.2f}'.format(
                                 time.monotonic() - start))
                             if stdout is not None:
