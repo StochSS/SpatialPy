@@ -24,7 +24,7 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
     // Step 1.2: Predictor step
     
     // Update half-state
-    if (me -> solidTag == 0) {
+    if (me->solidTag == 0 && system->static_domain == 0) {
         for (i = 0; i < 3; i++) {
             // Update velocity using forces
             me->v[i] = me->v[i] + 0.5 * system->dt * me->F[i];
@@ -68,7 +68,7 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
 void compute_forces(particle_t* me, system_t* system, unsigned int step)
 {
     // Step 2.1: Build neighbor list at first step
-    if (system -> static_domain) {
+    if (system->static_domain) {
         if (step == 0) {
             find_neighbors(me, system);
         }
@@ -90,29 +90,29 @@ void take_step2(particle_t* me, system_t* system, unsigned int step)
     int i;
 
     // Step 3.1: Corrector step
-    if (me -> solidTag == 0) {
+    if (me->solidTag == 0 && system->static_domain == 0) {
         for (i = 0; i < 3; i++) {
             // Update velocity using forces
-            me -> v[i] = me -> v[i] + 0.5 * system -> dt * me -> F[i];
+            me->v[i] = me->v[i] + 0.5 * system->dt * me->F[i];
         }
 
         // Update density using continuity equation and Shepard filter 
         if (step % 20 == 0) {
-            filterDensity(me, me -> neighbors, system);
-            me -> rho = me -> rho + 0.5 * system -> dt * me -> Frho;
+            filterDensity(me, me->neighbors, system);
+            me->rho = me->rho + 0.5 * system->dt * me->Frho;
         }
         else
-            me -> rho = me -> rho + 0.5 * system -> dt * me -> Frho;
+            me->rho = me->rho + 0.5 * system->dt * me->Frho;
     }
     else {
         // Filter density field (for fixed solid particles)
         if (step % 20 == 0)
-            filterDensity(me, me -> neighbors, system);
+            filterDensity(me, me->neighbors, system);
     }
 
 
     // Step 3.2: Compute boundary volume fractions (bvf)
-    computeBoundaryVolumeFraction(me, me -> neighbors, system);
+    computeBoundaryVolumeFraction(me, me->neighbors, system);
 
     // Step 3.3: Apply Boundary Conditions
     if (me -> solidTag == 0) {

@@ -332,7 +332,7 @@ void nsm_core__initialize_chem_populations(rdme_t* rdme, const unsigned int*u0){
 
 /**************************************************************************/
 void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
-    //printf("***************** build_diffusion_matrix *****************\n");fflush(stdout);
+    if(debug_flag){ printf("*************** build_diffusion_matrix ***************\n");fflush(stdout);}
 	double off_diag_sum,diff_const,dist2;
 	node *n,*n2;
     particle_t *p1,*p2;
@@ -347,14 +347,18 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
 	// find total length of jc & pr arrays: O(n)
     for(n=system->particle_list->head; n!=NULL; n=n->next){
 		p1 = n->data;
+        if(p1->neighbors->count == 0){
+            if(debug_flag){printf("find_neighbors(%i)\n",p1->id);}
+            find_neighbors(p1, system);
+        }
+        if(debug_flag){printf("node %i # neighbors %i\n",p1->id,p1->neighbors->count);}
 		irD_length += (p1->neighbors->count + 1);
-        //printf("node %i # neighbors %i\n",p1->id,p1->neighbors->count);
         // update the volume
         rdme->vol[p1->id] = p1->mass / p1->rho;
 	}
 	prD_length = irD_length;
-    //printf("irD_length= %i\n",irD_length);fflush(stdout);
-    //printf("jcD_length= %i\n",jcD_length);fflush(stdout);
+    if(debug_flag){printf("irD_length= %i\n",irD_length);fflush(stdout);}
+    if(debug_flag){printf("jcD_length= %i\n",jcD_length);fflush(stdout);}
 	// allocate space for each array
     //printf("MALLOC rdme->irD [%i]\n",irD_length*rdme->Mspecies);
 	rdme->irD = (size_t*) malloc(sizeof(size_t)*irD_length*rdme->Mspecies);
@@ -479,7 +483,7 @@ void nsm_core__take_step(rdme_t* rdme, double current_time, double step_size){
         //told = tt;
         tt   = rdme->rtimes[0];
         subvol = rdme->node[0];
-        //if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol);}
+        if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol);}
         /* First check if it is a reaction or a diffusion event. */
         totrate = rdme->srrate[subvol]+rdme->sdrate[subvol];
 
