@@ -107,9 +107,9 @@ class Result(dict):
 #            self.__dict__[k] = v
 
 
-    def read_step(self, step_num):
+    def read_step(self, step_num, debug=False):
         """ Read the data for simulation step 'step_num'. """
-        reader = VTKReader()
+        reader = VTKReader(debug=debug)
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(step_num))
         #print("read_step({0}) opening '{1}'".format(step_num, filename))
         reader.setfilename(filename)
@@ -135,7 +135,7 @@ class Result(dict):
 
     # This function should be renamed to something else more in line with what it does
     # Prior to a beta release
-    def get_species(self, species, timepoints=None, concentration=False):
+    def get_species(self, species, timepoints=None, concentration=False, deterministic=False, debug=False):
         """ Get the populations/concentration values for a given species in the model for 
             one or all timepoints.  
             
@@ -146,6 +146,8 @@ class Result(dict):
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
             if set to True, the concentration (=copy_number/volume) is returned.
+
+            If deterministic is True, show results for determinstic (instead of stochastic) values
         """
 
         species_map = self.model.species_map
@@ -177,13 +179,15 @@ class Result(dict):
 
         ret = numpy.zeros( (num_timepoints, num_voxel))
         for ndx, t_ndx in enumerate(t_index_arr):
-            (_, step) = self.read_step(t_ndx)
-            if concentration:
+            (_, step) = self.read_step(t_ndx, debug=debug)
+            if deterministic: 
+                ret[ndx,:] = step['C['+spec_name+']']
+            elif concentration:
                 # concentration = (copy_number/volume)
                 # volume = (mass/density)
-                ret[ndx,:] = step['C['+spec_name+']'] / (step['mass'] / step['rho'] )
+                ret[ndx,:] = step['D['+spec_name+']'] / (step['mass'] / step['rho'] )
             else:
-                ret[ndx,:] = step['C['+spec_name+']']
+                ret[ndx,:] = step['D['+spec_name+']']
         if ret.shape[0] == 1:
             ret = ret.flatten()
         return ret

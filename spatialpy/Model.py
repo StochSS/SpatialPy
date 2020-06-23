@@ -1,11 +1,12 @@
 #This module defines a model that simulates a discrete, stoachastic, mixed biochemical reaction network in python.
 
-from __future__ import division # is this still necessary?
 import uuid
 from collections import OrderedDict
 from spatialpy.Solver import Solver
 import numpy
 import scipy
+import warnings
+
 
 
 class Model():
@@ -104,29 +105,36 @@ class Model():
 
 
 
-    def add_subdomain(self, subdomain, domain_id, mass=1.0):
+    def add_subdomain(self, subdomain, type_id, mass=1.0, nu=1.0, fixed=False):
         """ Add a subdomain definition to the model.  By default, all regions are set to
         subdomain 0.
         Args:
             subdomain: an instance of a 'spatialpy.SubDomain' subclass.  The 'inside()' method
                        of this object will be used to assign domain_id to points.
-            domain_id: the identifier for this subdomain (usually an int).
+            type_id: the identifier for this subdomain (usually an int).
+            mass: the mass of each particle in the subdomain
+            nu: the viscosity of each particle in the subdomain
+            fixed: (bool) are the particles in this subdomain immobile
         Return values:
             Number of mesh points that were tagged with this domain_id
         """
         if self.mesh is None:
             raise Exception("SpatialPy models must have a mesh before subdomains can be attached");
-        if domain_id not in self.listOfSubdomainIDs:
+        if type_id not in self.listOfSubdomainIDs:
             # index is the "particle type", value is the "subdomain ID"
-            self.listOfSubdomainIDs.append(domain_id)
+            self.listOfSubdomainIDs.append(type_id)
         # apply the subdomain to all points, set sd for any points that match
-        count =0
+        count = 0
         on_boundary = self.mesh.find_boundary_points()
         for v_ndx in range(self.mesh.get_num_voxels()):
             if subdomain.inside( self.mesh.coordinates()[v_ndx,:], on_boundary[v_ndx]):
-                self.mesh.sd[v_ndx] = domain_id
+                self.mesh.sd[v_ndx] = type_id
                 self.mesh.mass[v_ndx] = mass
+                self.mesh.nu[v_ndx] = nu
+                self.mesh.fixed[v_ndx] = fixed
                 count +=1
+        if count == 0:
+            warnings.warn("Subdomain with type_id={0} has zero particles in it".format(type_id))
         return count
 
     def restrict(self, species, listOfSubDomains):

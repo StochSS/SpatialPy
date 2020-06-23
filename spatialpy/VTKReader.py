@@ -5,13 +5,14 @@ class VTKReader:
     """VTKReader.py: SpatialPy minimal VTK legacy file reader."""
     """Reference: https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf"""
 
-    def __init__(self):
+    def __init__(self, debug=False):
 
         self.filename = None
         self.pointdatatype = None
         self.numpoints = None
         self.points = None
         self.arrays = None
+        self.debug = debug
         self.datatypes = {
             "int": "int32",
             "float": "float32",
@@ -124,29 +125,65 @@ class VTKReader:
         vtkdata = {}
         arraydata = []
 
-        name, col, row, datatype = fd.readline().strip().split()
-        col = int(col)
-        row = int(row)
+        #line = fd.readline()
+        #print("line={0}".format(line),end='')
+        #name, col, row, datatype = line.strip().split()
+        #col = int(col)
+        #row = int(row)
+
 
         for line in fd:
-
-            # Array names MUST begin with a letter
-            if line[:1].isalpha():
-
-                self.populatearrays(vtkdata, arraydata, col, row, name, datatype)
-                arraydata = []
-
+            if self.debug: print("line={0}".format(line),end='')
+            if line.isspace():
+                continue
+            try:
                 name, col, row, datatype = line.strip().split()
-                col = int(col)
-                row = int(row)
+                # got another PointData section
+            except Exception as e:
+                print("Error: {1}".format(e))
+                print("on line >>>")
+                print(line, end='')
+                print("<<< {0}".format(fd.tell()))
+                raise e
+            col = int(col)
+            row = int(row)
 
-            elif line.lstrip("-")[:1].isnumeric():
+            # now read row*col number of values
+            arraydata = []
+            while len(arraydata) < row*col:
+                line = fd.readline()
                 arraydata.extend(line.strip().split())
 
-            elif line.isspace():
-                continue
+            if self.debug: print("populatearrays(name={0})".format(name))
+            self.populatearrays(vtkdata, arraydata, col, row, name, datatype)
+                
 
-        self.populatearrays(vtkdata, arraydata, col, row, name, datatype)
+#
+#            #
+#
+#            # Array names MUST begin with a letter, but 'nan' is a letter, and strings are a valid value
+#            if line[:1].isalpha():
+#                print("populatearrays(name={0})".format(name))
+#                self.populatearrays(vtkdata, arraydata, col, row, name, datatype)
+#                arraydata = []
+#                try:
+#                    name, col, row, datatype = line.strip().split()
+#                except Exception as e:
+#                    print("Error: {1}".format(e))
+#                    print("on line >>>")
+#                    print(line, end='')
+#                    print("<<< {0}".format(fd.tell()))
+#                    raise e
+#                col = int(col)
+#                row = int(row)
+#
+#            elif line.lstrip("-")[:1].isnumeric():
+#                arraydata.extend(line.strip().split())
+#
+#            elif line.isspace():
+#                continue
+#
+#        self.populatearrays(vtkdata, arraydata, col, row, name, datatype)
 
         return vtkdata
 
@@ -154,27 +191,39 @@ class VTKReader:
         """Read VTK file."""
 
         with open(self.filename) as fd:
-            fd.readline()
-            fd.readline()
+            if self.debug: print("open({0})".format(self.filename))
+            tmp =  fd.readline()
+            if self.debug:  print("line={0}".format(tmp),end='')
+            tmp =  fd.readline()
+            if self.debug:  print("line={0}".format(tmp),end='')
 
             # We only output ASCII so we can ignore BINARY
-            if fd.readline().strip().upper() != "ASCII":
+            tmp =  fd.readline()
+            if self.debug: print("line={0}".format(tmp),end='')
+            if tmp.strip().upper() != "ASCII":
                 raise VTKReaderIOError("{0} doesn't look like a valid ASCII VTK file.".format(self.filename))
 
-            fd.readline()
+            tmp =  fd.readline()
+            if self.debug:  print("line={0}".format(tmp),end='')
 
-            _, self.numpoints, self.pointdatatype = fd.readline().strip().split()
+            tmp =  fd.readline()
+            if self.debug: print("line={0}".format(tmp),end='')
+            _, self.numpoints, self.pointdatatype = tmp.strip().split()
             self.numpoints = int(self.numpoints)
 
             self.points = self.readpoints(fd, self.numpoints, 3, self.pointdatatype)
+            if self.debug: print("self.points.shape = {0}".format(self.points.shape))
 
             for line in fd:
                 if line[:5] != "FIELD":
+                    #print("skipping line: {0}".format(line),end='')
                     continue
                 else:
+                    if self.debug:  print("break skipping on line: {0}".format(line),end='')
                     break
 
             self.arrays = self.readarrays(fd)
+            if self.debug: print("self.arrays.keys = {0}".format(self.arrays.keys()))
 
 
 class VTKReaderError(Exception):

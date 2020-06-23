@@ -4,22 +4,30 @@ class Mesh():
     """ Mesh class for spatial py """
 
 
-    def __init__(self, numpoints):
+    def __init__(self, numpoints, rho0=1.0, c0=10, P0=10):
         self.vertices = numpy.zeros((numpoints, 3), dtype=float)
-        self.triangles = numpy.zeros((0), dtype=int)
-        self.tetrahedrons = numpy.zeros((0), dtype=int)
+        self.triangles = None
+        self.tetrahedrons = None
+
         self.on_boundary = None
-        self.vol = numpy.zeros((numpoints), dtype=float)
         self.mesh_size = None
         self.tetrahedron_vol = None
+
+        self.vol = numpy.zeros((numpoints), dtype=float)
         self.mass = numpy.zeros((numpoints), dtype=float)
         self.sd = numpy.zeros((numpoints), dtype=int)
+        self.nu = numpy.zeros((numpoints), dtype=float)
+        self.fixed = numpy.zeros((numpoints), dtype=bool)
+
+        self.rho0 = rho0
+        self.c0 = c0;
+        self.P0 = P0
 
     def find_boundary_points(self):
         if self.on_boundary is None:
             self.on_boundary = numpy.zeros((self.get_num_voxels()), dtype=bool)
             # exterior triangles are part of one-and-only-one tetrahedron
-            if len(self.triangles) == 0 or len(self.tetrahedrons) == 0:
+            if self.triangles is None or len(self.triangles) == 0 or len(self.tetrahedrons) == 0:
                 return self.on_boundary
             from itertools import combinations
             triangle_in_tetrahedrons_count = {}
@@ -257,7 +265,56 @@ class Mesh():
 
 
 
-
+    @classmethod
+    def create_3D_domain(cls, xlim, ylim, zlim, nx, ny, nz, **kwargs):
+        """ Create a filled 3D domain  """
+        # Create mesh object
+        numberparticles = nx*ny*nz
+        obj = Mesh(numberparticles, **kwargs)
+        # Vertices
+        obj.vertices = numpy.zeros(( numberparticles, 3), dtype=float)
+        x_list = numpy.linspace(xlim[0],xlim[1],nx)
+        y_list = numpy.linspace(ylim[0],ylim[1],ny)
+        z_list = numpy.linspace(zlim[0],zlim[1],nz)
+        ndx = 0
+        totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0]) * (zlim[1] - zlim[0])
+        for x in x_list:
+            for y in y_list:
+                for z in z_list:
+                    obj.vol[ndx] = totalvolume / numberparticles
+                    obj.mass[ndx] = 1.0  # default
+                    obj.nu[ndx] = 1.0  # default
+                    obj.vertices[ndx,0] = x        
+                    obj.vertices[ndx,1] = y
+                    obj.vertices[ndx,2] = z
+                    ndx+=1
+                
+        # return model ref
+        return obj
+    @classmethod
+    def create_2D_domain(cls, xlim, ylim, nx, ny, **kwargs):
+        """ Create a filled 2D domain  """
+        # Create mesh object
+        numberparticles = nx*ny
+        obj = Mesh(numberparticles, **kwargs)
+        # Vertices
+        obj.vertices = numpy.zeros(( int(nx)*int(ny), 3), dtype=float)
+        x_list = numpy.linspace(xlim[0],xlim[1],nx)
+        y_list = numpy.linspace(ylim[0],ylim[1],ny)
+        ndx = 0
+        totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0])
+        for x in x_list:
+            for y in y_list:
+                obj.vol[ndx] = totalvolume / numberparticles
+                obj.mass[ndx] = 1.0  # default
+                obj.nu[ndx] = 1.0  # default
+                obj.vertices[ndx,0] = x        
+                obj.vertices[ndx,1] = y
+                obj.vertices[ndx,2] = 0.0
+                ndx+=1
+                
+        # return model ref
+        return obj
 
 
 

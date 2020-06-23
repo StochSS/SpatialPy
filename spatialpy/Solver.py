@@ -83,6 +83,7 @@ class Solver:
 
         if return_code != 0:
             try:
+                print("Reading stdout/stderr from process:")
                 print(handle.stdout.read().decode("utf-8"))
                 print(handle.stderr.read().decode("utf-8"))
             except Exception as e:
@@ -287,8 +288,10 @@ class Solver:
             if self.model.mesh.sd[i] == 0:
                 raise SimulationError(
                     "Not all particles have been defined in a subdomain. Mass and other properties must be defined")
-            init_particles += "    init_create_particle(sys,id++,{0},{1},{2},{3});".format(self.model.mesh.coordinates(
-            )[i, 0], self.model.mesh.coordinates()[i, 1], self.model.mesh.coordinates()[i, 2], self.model.mesh.sd[i]) + "\n"
+            init_particles += "init_create_particle(sys,id++,{0},{1},{2},{3},{4},{5},{6},{7});".format(
+                self.model.mesh.coordinates()[i,0],self.model.mesh.coordinates()[i,1],self.model.mesh.coordinates()[i,2],
+                self.model.mesh.sd[i],self.model.mesh.nu[i],self.model.mesh.mass[i],
+                (self.model.mesh.mass[i] / self.model.mesh.vol[i]),int(self.model.mesh.fixed[i]) )+"\n"
         propfilestr = propfilestr.replace("__INIT_PARTICLES__", init_particles)
 
         # process initial conditions here
@@ -451,11 +454,10 @@ class Solver:
         propfilestr = propfilestr.replace(
             "__INPUT_CONSTANTS__", input_constants)
 
-        system_config = ""
+        system_config = "debug_flag = {0};\n".format(self.debug_level)
         system_config += "system_t* system = create_system({0},{1},{2});\n".format(len(
             self.model.listOfSubdomainIDs), len(self.model.listOfSpecies), len(self.model.listOfReactions))
-        system_config += "system->static_domain = {0};\n".format(
-            int(self.model.staticDomain))
+        system_config += "system->static_domain = {0};\n".format(int(self.model.staticDomain))
         if(len(self.model.listOfReactions) > 0):
             system_config += "system->stochic_matrix = input_N_dense;\n"
             system_config += "system->chem_rxn_rhs_functions = ALLOC_ChemRxnFun();\n"
@@ -467,11 +469,11 @@ class Solver:
             self.h = self.model.mesh.find_h()
         if self.h == 0.0:
             raise ModelError('h (basis function width) can not be zero.')
-        system_config += "system->h = {0};\n".format(self.h)
-        system_config += "system->rho0 = 1.0;\n"
-        system_config += "system->c0 = 10;\n"
-        system_config += "system->P0 = 10;\n"
-        # // bounding box
+        system_config +="system->h = {0};\n".format(self.h)
+        system_config +="system->rho0 = {0};\n".format(self.model.mesh.rho0)
+        system_config +="system->c0 = {0};\n".format(self.model.mesh.c0)
+        system_config +="system->P0 = {0};\n".format(self.model.mesh.P0)
+        #// bounding box
         bounding_box = self.model.mesh.get_bounding_box()
         system_config += "system->xlo = {0};\n".format(bounding_box[0])
         system_config += "system->xhi = {0};\n".format(bounding_box[1])

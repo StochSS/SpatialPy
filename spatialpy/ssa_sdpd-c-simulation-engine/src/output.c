@@ -29,6 +29,8 @@ int output_buffer_current_step;
 int output_buffer_current_num_particles;
 unsigned int* output_buffer_xx;
 int output_buffer_xx_size = 0;
+double* output_buffer_chem;
+int output_buffer_chem_size = 0;
 
 void output_vtk__sync_step(system_t*system, int current_step){
     output_buffer_current_step = current_step;
@@ -38,12 +40,24 @@ void output_vtk__sync_step(system_t*system, int current_step){
     }else if(output_buffer_size < system->particle_list->count){
         output_buffer = realloc(output_buffer, sizeof(particle_t)*output_buffer_size);
     }
-    int i=0;
+    if(system->num_chem_species > 0){
+        if(output_buffer_chem_size==0){
+            output_buffer_chem_size = system->particle_list->count * system->num_chem_species;
+            output_buffer_chem = (double*) malloc(sizeof(double)*output_buffer_chem_size);
+        }else if(output_buffer_chem_size < system->particle_list->count * system->num_chem_species){
+            output_buffer_chem_size = system->particle_list->count * system->num_chem_species;
+            output_buffer_chem = realloc(output_buffer_chem, sizeof(double)*output_buffer_chem_size);
+        }
+    }
+    int ncnt=0;
     node*n;
     for(n=system->particle_list->head; n!=NULL; n=n->next){
-        memcpy( (void *) &output_buffer[i++], (void *) n->data, sizeof(particle_t) );
+        memcpy( (void *) &output_buffer[ncnt++], (void *) n->data, sizeof(particle_t) );
+        if(system->num_chem_species > 0){
+            memcpy( (void *) &output_buffer_chem[n->data->id*system->num_chem_species], (void *) n->data->C, sizeof(double)*system->num_chem_species );
+        }
     }
-    output_buffer_current_num_particles = i;
+    output_buffer_current_num_particles = ncnt;
     if(system->rdme != NULL){
         // make a copy of the RDME state vector xx
         if(output_buffer_xx_size==0){
@@ -71,7 +85,7 @@ void output_vtk__sync_step(system_t*system, int current_step){
         */
         //memcpy( (void*) &output_buffer_xx, (void*) system->rdme->xx, 
         //    sizeof(unsigned int)*system->rdme->Mspecies*output_buffer_current_num_particles);
-        for(i=0;i<system->rdme->Mspecies*output_buffer_current_num_particles;i++){
+        for(int i=0;i<system->rdme->Mspecies*output_buffer_current_num_particles;i++){
             //memcpy( (void*) &output_buffer_xx[i], (void*) system->rdme->xx[i], sizeof(unsigned int));
             output_buffer_xx[i] =  system->rdme->xx[i];
         }
@@ -123,9 +137,12 @@ void output_vtk__async_step(system_t*system){
     }
     fprintf(fp,"\n");
     fprintf(fp,"POINT_DATA %i\n", np);
-    int num_fields = 6;
+    int num_fields = 7;
     if(system->rdme != NULL){
         num_fields += system->rdme->Mspecies;
+    }
+    if(system->num_chem_species > 0){
+        num_fields += system->num_chem_species;
     }
     fprintf(fp,"FIELD FieldData %i\n",num_fields);//
     fprintf(fp,"id 1 %i int\n", np);
@@ -164,15 +181,30 @@ void output_vtk__async_step(system_t*system){
         if((i+1)%9==0){ fprintf(fp,"\n"); }
     } 
     fprintf(fp,"\n");
-    // add in loop here to check for continous? species
-    // if num_chem_species > 0 then ... everything below in loop until done
-    // somewhere there are references to a value d or c? 
-    // change c - concentration or continous? clarify at meeting
-    // change d - discrete
+    fprintf(fp,"nu 1 %i double\n", np);
+    for(i=0;i<np;i++){
+        fprintf(fp, "%lf ",output_buffer[i].nu);
+        if((i+1)%9==0){ fprintf(fp,"\n"); }
+    } 
+    fprintf(fp,"\n");
+    // loop here to check for continous species
+    // c - concentration or continous? clarify at meeting
+    if(system->num_chem_species > 0){
+        int s;
+        for(s=0;s<system->num_chem_species;s++){
+            fprintf(fp,"C[%s] 1 %i double\n", system->rdme->species_names[s], np);
+            for(i=0;i<np;i++){
+                fprintf(fp, "%lf ",output_buffer_chem[i*system->num_chem_species+s] );
+                if((i+1)%9==0){ fprintf(fp,"\n"); }
+            }
+            fprintf(fp,"\n");
+        }
+    }
+    // d - discrete
     if(system->rdme != NULL){
         int s;
         for(s=0;s<system->rdme->Mspecies;s++){
-            fprintf(fp,"C[%s] 1 %i int\n", system->rdme->species_names[s], np);
+            fprintf(fp,"D[%s] 1 %i int\n", system->rdme->species_names[s], np);
             for(i=0;i<np;i++){
                 fprintf(fp, "%u ",output_buffer_xx[i*system->rdme->Mspecies+s] );
                 if((i+1)%9==0){ fprintf(fp,"\n"); }
