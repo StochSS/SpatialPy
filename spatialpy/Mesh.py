@@ -266,8 +266,25 @@ class Mesh():
 
 
     @classmethod
-    def create_3D_domain(cls, xlim, ylim, zlim, nx, ny, nz, **kwargs):
-        """ Create a filled 3D domain  """
+    def create_3D_domain(cls, xlim, ylim, zlim, nx, ny, nz, type_id=1, mass=1.0, nu=1.0, fixed=False, **kwargs):
+        """ Create a filled 3D domain 
+        Args:
+            xlim: (tuple) highest and lowest coordinate in the x dimension
+            ylim: (tuple) highest and lowest coordinate in the y dimension
+            zlim: (tuple) highest and lowest coordinate in the z dimension
+            nx: (int) number of particle spacing in the x dimension
+            ny: (int) number of particle spacing in the y dimension
+            nz: (int) number of particle spacing in the z dimension
+            type_id: (int, default: 1) default type ID of particles created to be created
+            mass: (float, default: 1.0) default mass of particles created to be created
+            nu: (float, default: 1.0) default viscosity of particles created to be created
+            fixed: (bool, default: false) spatially fixed flag of particles created to be created
+            rho0: (float, default: 1.0) background density for the system
+            c0: (float, default: 10) speed of sound for the system
+            P0: (float, default: 10) background pressure for the system
+        Returns:
+            Mesh object
+        """
         # Create mesh object
         numberparticles = nx*ny*nz
         obj = Mesh(numberparticles, **kwargs)
@@ -282,18 +299,36 @@ class Mesh():
             for y in y_list:
                 for z in z_list:
                     obj.vol[ndx] = totalvolume / numberparticles
-                    obj.mass[ndx] = 1.0  # default
-                    obj.nu[ndx] = 1.0  # default
                     obj.vertices[ndx,0] = x        
                     obj.vertices[ndx,1] = y
                     obj.vertices[ndx,2] = z
+                    obj.sd[v_ndx] = type_id
+                    obj.mass[v_ndx] = mass
+                    obj.nu[v_ndx] = nu
+                    obj.fixed[v_ndx] = fixed
                     ndx+=1
                 
         # return model ref
         return obj
+
     @classmethod
-    def create_2D_domain(cls, xlim, ylim, nx, ny, **kwargs):
-        """ Create a filled 2D domain  """
+    def create_2D_domain(cls, xlim, ylim, nx, ny, type_id=1, mass=1.0, nu=1.0, fixed=False, **kwargs):
+        """ Create a filled 2D domain
+        Args:
+            xlim: (tuple) highest and lowest coordinate in the x dimension
+            ylim: (tuple) highest and lowest coordinate in the y dimension
+            nx: (int) number of particle spacing in the x dimension
+            ny: (int) number of particle spacing in the y dimension
+            type_id: (int, default: 1) default type ID of particles created to be created
+            mass: (float, default: 1.0) default mass of particles created to be created
+            nu: (float, default: 1.0) default viscosity of particles created to be created
+            fixed: (bool, default: false) spatially fixed flag of particles created to be created
+            rho0: (float, default: 1.0) background density for the system
+            c0: (float, default: 10) speed of sound for the system
+            P0: (float, default: 10) background pressure for the system
+        Returns:
+            Mesh object
+        """
         # Create mesh object
         numberparticles = nx*ny
         obj = Mesh(numberparticles, **kwargs)
@@ -306,11 +341,13 @@ class Mesh():
         for x in x_list:
             for y in y_list:
                 obj.vol[ndx] = totalvolume / numberparticles
-                obj.mass[ndx] = 1.0  # default
-                obj.nu[ndx] = 1.0  # default
                 obj.vertices[ndx,0] = x        
                 obj.vertices[ndx,1] = y
                 obj.vertices[ndx,2] = 0.0
+                obj.sd[v_ndx] = type_id
+                obj.mass[v_ndx] = mass
+                obj.nu[v_ndx] = nu
+                obj.fixed[v_ndx] = fixed
                 ndx+=1
                 
         # return model ref
