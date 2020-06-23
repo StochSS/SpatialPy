@@ -346,7 +346,7 @@ class Mesh():
                 obj.vertices[ndx,2] = 0.0
                 obj.sd[ndx] = type_id
                 obj.mass[ndx] = mass
-                obj.nu[v_ndx] = nu
+                obj.nu[ndx] = nu
                 obj.fixed[ndx] = fixed
                 ndx+=1
                 
