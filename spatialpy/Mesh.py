@@ -302,10 +302,10 @@ class Mesh():
                     obj.vertices[ndx,0] = x        
                     obj.vertices[ndx,1] = y
                     obj.vertices[ndx,2] = z
-                    obj.sd[v_ndx] = type_id
-                    obj.mass[v_ndx] = mass
-                    obj.nu[v_ndx] = nu
-                    obj.fixed[v_ndx] = fixed
+                    obj.sd[ndx] = type_id
+                    obj.mass[ndx] = mass
+                    obj.nu[ndx] = nu
+                    obj.fixed[ndx] = fixed
                     ndx+=1
                 
         # return model ref
@@ -344,10 +344,10 @@ class Mesh():
                 obj.vertices[ndx,0] = x        
                 obj.vertices[ndx,1] = y
                 obj.vertices[ndx,2] = 0.0
-                obj.sd[v_ndx] = type_id
-                obj.mass[v_ndx] = mass
+                obj.sd[ndx] = type_id
+                obj.mass[ndx] = mass
                 obj.nu[v_ndx] = nu
-                obj.fixed[v_ndx] = fixed
+                obj.fixed[ndx] = fixed
                 ndx+=1
                 
         # return model ref
