@@ -361,8 +361,8 @@ class Solver:
             "__DATA_FUNCTION_DEFINITIONS__", data_fn_defs)
 
         N = self.model.create_stoichiometric_matrix()
-        Nd = N.todense()
         if(min(N.shape) > 0):
+            Nd = N.todense() # this will not work if Nrxn or Nspecies is zero
             outstr = "static int input_N_dense[{0}] = ".format(
                 Nd.shape[0] * Nd.shape[1])
             outstr += "{"
@@ -457,16 +457,14 @@ class Solver:
         system_config = "debug_flag = {0};\n".format(self.debug_level)
         system_config += "system_t* system = create_system({0},{1},{2});\n".format(len(
             self.model.listOfSubdomainIDs), len(self.model.listOfSpecies), len(self.model.listOfReactions))
-        system_config += "system->static_domain = {0};\n".format(
-            int(self.model.staticDomain))
-        if(len(self.model.listOfReactions)>0):
-            system_config += "system->stochic_matrix = input_N_dense;\n";
-            system_config += "system->chem_rxn_rhs_functions = ALLOC_ChemRxnFun();\n";
+        system_config += "system->static_domain = {0};\n".format(int(self.model.staticDomain))
+        if(len(self.model.listOfReactions) > 0):
+            system_config += "system->stochic_matrix = input_N_dense;\n"
+            system_config += "system->chem_rxn_rhs_functions = ALLOC_ChemRxnFun();\n"
 
-
-        system_config +="system->dt = {0};\n".format(self.model.timestep_size)
-        system_config +="system->nt = {0};\n".format(self.model.num_timesteps)
-        system_config +="system->output_freq = 1;\n"
+        system_config += "system->dt = {0};\n".format(self.model.timestep_size)
+        system_config += "system->nt = {0};\n".format(self.model.num_timesteps)
+        system_config += "system->output_freq = 1;\n"
         if self.h is None:
             self.h = self.model.mesh.find_h()
         if self.h == 0.0:
