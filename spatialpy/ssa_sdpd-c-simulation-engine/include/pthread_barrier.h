@@ -53,4 +53,3 @@ int pthread_barrierattr_setpshared(pthread_barrierattr_t *attr,
 
 
 #endif /* PTHREAD_BARRIER_H */
-

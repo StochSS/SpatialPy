@@ -14,7 +14,7 @@ from spatialpy.Result import *
 class Solver:
     """ Abstract class for spatialpy solvers. """
 
-    def __init__(self, model, report_level=0):
+    def __init__(self, model, debug_level=0):
         """ Constructor. """
         # TODO: fix class checking
         # if not isinstance(model, Model):
@@ -27,7 +27,7 @@ class Solver:
 
         self.model = model
         self.is_compiled = False
-        self.report_level = report_level
+        self.debug_level = debug_level
         self.model_name = self.model.name
         self.build_dir = None
         self.executable_name = 'ssa_sdpd'
@@ -55,13 +55,13 @@ class Solver:
         self.build_dir = tempfile.mkdtemp(
             prefix='spatialpy_build_', dir=os.environ.get('SPATIALPY_TMPDIR'))
 
-        if self.report_level >= 1:
+        if self.debug_level >= 1:
             print("Compiling Solver.  Build dir: {0}".format(self.build_dir))
 
         # Write the propensity file
         self.propfilename = self.model_name + '_generated_model'
         self.prop_file_name = self.build_dir + '/' + self.propfilename + '.c'
-        if self.report_level > 1:
+        if self.debug_level > 1:
             print("Creating propensity file {0}".format(self.prop_file_name))
         self.create_propensity_file(file_name=self.prop_file_name)
 
@@ -90,7 +90,7 @@ class Solver:
             raise SimulationError(
                 "Compilation of solver failed, return_code={0}".format(return_code))
 
-        if self.report_level > 1:
+        if self.debug_level > 1:
             print(handle.stdout.read().decode("utf-8"))
             print(handle.stderr.read().decode("utf-8"))
 
@@ -125,12 +125,12 @@ class Solver:
 
             if seed is not None:
                 solver_cmd += " "+str(seed+run_ndx)
-            if self.report_level > 1:
+            if self.debug_level > 1:
                 print('cmd: {0}\n'.format(solver_cmd))
             stdout = ''
             stderr = ''
 #            try:
-#                if self.report_level >= 1:  #stderr & stdout to the terminal
+#                if self.debug_level >= 1:  #stderr & stdout to the terminal
 #                    handle = subprocess.Popen(solver_cmd, shell=True)
 #                else:
 #                    handle = subprocess.Popen(solver_cmd, stderr=subprocess.PIPE,
@@ -173,7 +173,7 @@ class Solver:
                 print("cmd = {0}".format(solver_cmd))
 
             if return_code != 0:
-                if self.report_level >= 1:
+                if self.debug_level >= 1:
                     try:
                         print(stderr)
                         print(stdout)

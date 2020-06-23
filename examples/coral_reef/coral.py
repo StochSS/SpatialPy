@@ -32,7 +32,7 @@ class CoralReef(spatialpy.Model):
         # Death rate of mobile propgules.  Combine with diffusion to determine spread.
         mu_c = spatialpy.Parameter(name="mu_c", expression=1.0) #1/year
         mu_m = spatialpy.Parameter(name="mu_m", expression=1.0) #1/year
-        # mobile propogules destroyed by estabilished 
+        # mobile propogules destroyed by estabilished
         alpha_c = spatialpy.Parameter(name="alpha_c", expression=0.1) #1/year
         alpha_m = spatialpy.Parameter(name="alpha_m", expression=0.5) #1/year
         # Production of mobile propogules
@@ -40,7 +40,6 @@ class CoralReef(spatialpy.Model):
         R_m = spatialpy.Parameter(name="R_m", expression=1.0) #1/year
 
         self.add_parameter([phi_c, phi_m, g_tc, g_tm, Gamma, dc, dm, phi_g, mu_c, mu_m, alpha_c, alpha_m, R_c, R_m])
-                
 
         # Reactions:
         # C -> T : dc
@@ -69,8 +68,6 @@ class CoralReef(spatialpy.Model):
         self.add_reaction(spatialpy.Reaction(name="R14", reactants={MA:1, Coral_m:1},  products={MA:1}, rate=alpha_c))
         # C + MA_m -> C : alpha_m
         self.add_reaction(spatialpy.Reaction(name="R15", reactants={Coral:1, MA_m:1},  products={Coral:1}, rate=alpha_m))
- 
-        
 
         # A unit square
         # each grid point is 10cm x 10cm, domain is 5m x 5m
@@ -78,8 +75,7 @@ class CoralReef(spatialpy.Model):
 
         Space_per_voxel = 10
         self.add_parameter(spatialpy.Parameter(name="Space_per_voxel", expression=Space_per_voxel)) #1/year
-        
-                          
+
         if True:
             # Start with two colonys
             self.set_initial_condition_distribute_uniformly({Turf:Space_per_voxel})
@@ -109,16 +105,15 @@ class CoralReef(spatialpy.Model):
 
 if __name__ == "__main__":
     model = CoralReef()
-    result = model.run(report_level=1)
+    result = model.run(debug_level=1)
 
     x_vals = model.mesh.coordinates()[:, 0]
     y_vals = model.mesh.coordinates()[:, 1]
     C_vals = result.get_species("Coral")
     MA_vals = result.get_species("MA")
     Turf_vals = result.get_species("Turf")
-    num_vox = len(x_vals)    
+    num_vox = len(x_vals)
 
     print(C_vals)
     print(MA_vals)
     print(Turf_vals)
-  

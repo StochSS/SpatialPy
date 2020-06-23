@@ -100,4 +100,3 @@ int pthread_barrierattr_setpshared(pthread_barrierattr_t *attr, int pshared) {
 }
 
 #endif  /* __APPLE */
-

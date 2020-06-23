@@ -45,7 +45,7 @@ class hes1(pyurdme.URDMEModel):
         alpha_p = pyurdme.Parameter(name="alpha_p",expression=1.)
         mu_m = pyurdme.Parameter(name="mu_m",expression=0.015)
         mu_p = pyurdme.Parameter(name="mu_p",expression=0.043)
-        
+
         self.add_parameter([k1,k2,alpha_m,alpha_m_gamma,alpha_p,mu_m,mu_p])
 
 
@@ -73,7 +73,7 @@ class hes1(pyurdme.URDMEModel):
 
 if __name__=="__main__":
     model = hes1(model_name="hes1")
-    result = model.run(report_level=1)
+    result = model.run(debug_level=1)
 
     try:
         protein = result.get_species("protein")
