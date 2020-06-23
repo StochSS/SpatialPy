@@ -21,7 +21,7 @@ class Mesh():
             # exterior triangles are part of one-and-only-one tetrahedron
             if len(self.triangles) == 0 or len(self.tetrahedrons) == 0:
                 return self.on_boundary
-            from itertools import combinations 
+            from itertools import combinations
             triangle_in_tetrahedrons_count = {}
             for i in range(self.get_num_voxels()):
                 tets = self.tetrahedrons[i,:]
@@ -65,7 +65,7 @@ class Mesh():
                 B = self.distance_between_2_vertices( t_vtx[1], t_vtx[3])
                 c = self.distance_between_2_vertices( t_vtx[0], t_vtx[3])
                 C = self.distance_between_2_vertices( t_vtx[1], t_vtx[2])
-                R = numpy.sqrt( (a*A+b*B+c*C)*(a*A+b*B-c*C)*(a*A-b*B+c*C)*(-a*A+b*B+c*C) ) / (24*self.tetrahedron_vol[i]) 
+                R = numpy.sqrt( (a*A+b*B+c*C)*(a*A+b*B-c*C)*(a*A-b*B+c*C)*(-a*A+b*B+c*C) ) / (24*self.tetrahedron_vol[i])
                 cr[i] = R
 
             # Compute the mean for each vertex based on all incident cells
@@ -139,8 +139,8 @@ class Mesh():
 
     def get_vol(self):
         if self.vol is None:
-               self.calculate_vol() 
-        return self.vol            
+               self.calculate_vol()
+        return self.vol
 
     def calculate_vol(self):
         self.vol = numpy.zeros((self.vertices.shape[0]),dtype=float)
@@ -166,16 +166,16 @@ class Mesh():
         #if periodic:
         #    raise Exception("TODO: periodic not working yet");
         """ Import a python meshio mesh object. """
-        # create mesh object
-        obj = Mesh()
         #vertices
-        obj.vertices = numpy.zeros(( int(nx)*int(ny), 3), dtype=float)
+        vertices = numpy.zeros(( int(nx)*int(ny), 3), dtype=float)
+        # create mesh object
+        obj = Mesh(len(vertices))
         x_list = numpy.linspace(0,1,nx)
         y_list = numpy.linspace(0,1,ny)
         ndx=0
         for x in x_list:
             for y in y_list:
-                obj.vertices[ndx,0] = x        
+                obj.vertices[ndx,0] = x
                 obj.vertices[ndx,1] = y
                 obj.vertices[ndx,2] = 0.0
                 ndx+=1
@@ -252,7 +252,7 @@ class Mesh():
             import meshio
         except ImportError as e:
             raise MeshError("The python package 'meshio' is not istaled.")
-        
+
         return cls.import_meshio_object(meshio.msh_io.read(filename))
 
 

@@ -12,7 +12,6 @@ See the file LICENSE.txt for details.
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 
 
