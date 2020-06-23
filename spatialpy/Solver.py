@@ -358,7 +358,7 @@ class Solver:
             "__DATA_FUNCTION_DEFINITIONS__", data_fn_defs)
 
         N = self.model.create_stoichiometric_matrix()
-        Nd = N.todense()
+        #Nd = N.todense() # There's something wrong here...
         if(min(N.shape) > 0):
             outstr = "static int input_N_dense[{0}] = ".format(
                 Nd.shape[0] * Nd.shape[1])
