@@ -259,7 +259,7 @@ void computeBoundaryVolumeFraction(particle_t* me, linked_list* neighbors,
 }
 
 
-void applyBoundaryCondition(particle_t* me, system_t* system)
+void applyBoundaryVolumeFraction(particle_t* me, system_t* system)
 {
     int i;
     double v_dot_normal;
