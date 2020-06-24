@@ -544,6 +544,7 @@ class Reaction():
         self.massaction = massaction
 
         self.propensity_function = propensity_function
+        self.ode_propensity_function = propensity_function
 
         if self.propensity_function is None:
             if rate is None:
@@ -604,6 +605,7 @@ class Reaction():
         # Case EmptySet -> Y
 
         propensity_function = self.marate.name
+        self.ode_propensity_function = self.marate.name
 
         # There are only three ways to get 'total_stoch==2':
         for r in self.reactants:
@@ -614,6 +616,7 @@ class Reaction():
             else:
                 # Case 3: X1, X2 -> Y;
                 propensity_function += "*" + str(r)
+            self.ode_propensity_function += "*" + str(r) 
 
         # Set the volume dependency based on order.
         order = len(self.reactants)

@@ -232,7 +232,6 @@ class Solver:
 
         # Reactions
         funheader = "double __NAME__(const int *x, double t, const double vol, const double *data, int sd)"
-        dfunheader = "double det__NAME__(const double *x, double t, const double vol, const double *data, int sd)"
 
         funcs = ""
         funcinits = ""
@@ -274,9 +273,46 @@ class Solver:
         propfilestr = propfilestr.replace("__DEFINE_PROPFUNS__", funcinits)
 
         # TODO make deterministic chemical reaction functions work
+        funheader = "double det__NAME__(const double *x, double t, const double vol, const double *data, int sd)"
         deterministic_chem_rxn_functions = ""
-        propfilestr = propfilestr.replace(
-            "__DEFINE_CHEM_FUNS__", deterministic_chem_rxn_functions)
+        deterministic_chem_rxn_function_init = ""
+        ############################################
+        i = 0
+        for R in self.model.listOfReactions:
+            func = ""
+            rname = self.model.listOfReactions[R].name
+            func += funheader.replace("__NAME__", rname) + "\n{\n"
+            if self.model.listOfReactions[R].restrict_to == None or (isinstance(self.model.listOfReactions[R].restrict_to, list) and len(self.model.listOfReactions[R].restrict_to) == 0):
+                func += "return "
+                func += self.model.listOfReactions[R].ode_propensity_function
+                func += ";"
+            else:
+                func += "if("
+                if isinstance(self.model.listOfReactions[R].restrict_to, list) and len(self.model.listOfReactions[R].restrict_to) > 0:
+                    for sd in self.model.listOfReactions[R].restrict_to:
+                        func += "sd == " + str(sd) + "||"
+                    func = func[:-2]
+                elif isinstance(self.model.listOfReactions[R].restrict_to, int):
+                    func += "sd == " + \
+                        str(self.model.listOfReactions[R].restrict_to)
+                else:
+                    raise SimulationError(
+                        "When restricting reaction to subdomains, you must specify either a list or an int")
+                func += "){\n"
+                func += "return "
+                func += self.model.listOfReactions[R].ode_propensity_function
+                func += ";"
+                func += "\n}else{"
+                func += "\n\treturn 0.0;}"
+
+            func += "\n}"
+            deterministic_chem_rxn_functions += func + "\n\n"
+            deterministic_chem_rxn_function_init += "    ptr[" + \
+                str(i) + "] = (ChemRxnFun) det" + rname + ";\n"
+            i += 1
+        ############################################
+        propfilestr = propfilestr.replace("__DEFINE_CHEM_FUNS__", deterministic_chem_rxn_functions)
+        propfilestr = propfilestr.replace("__DEFINE_CHEM_FUN_INITS__", deterministic_chem_rxn_function_init)
 
         # End of pyurdme replacements
         # SSA-SDPD values here

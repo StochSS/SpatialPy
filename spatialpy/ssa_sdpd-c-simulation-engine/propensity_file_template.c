@@ -27,11 +27,12 @@ __DEFINE_PARAMETERS__
 
 /* Reaction definitions */
 __DEFINE_REACTIONS__
+/* Deterministic RHS definitions */
+__DEFINE_CHEM_FUNS__
 
 PropensityFun *ALLOC_propensities(void)
 {
     PropensityFun *ptr = (PropensityFun *)malloc(sizeof(PropensityFun)*NUM_REACTIONS);
-    
 __DEFINE_PROPFUNS__
     return ptr;
 }
@@ -43,7 +44,7 @@ void FREE_propensities(PropensityFun* ptr)
 
 ChemRxnFun* ALLOC_ChemRxnFun(void){
     ChemRxnFun*ptr = (ChemRxnFun*)malloc(sizeof(ChemRxnFun)*NUM_REACTIONS);
-__DEFINE_CHEM_FUNS__
+__DEFINE_CHEM_FUN_INITS__
     return ptr;
 }
 void FREE_ChemRxnFun(ChemRxnFun* ptr){

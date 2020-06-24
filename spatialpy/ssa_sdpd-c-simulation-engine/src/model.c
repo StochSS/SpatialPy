@@ -275,11 +275,11 @@ void applyBoundaryVolumeFraction(particle_t* me, system_t* system)
 }
 
 
-void enforceVelocity(particle_t* me, system_t* system)
+/*void enforceVelocity(particle_t* me, system_t* system)
 {
     // Enforce velocity on top lid (v[0] = 1.0)
     if (me->x[1] >= 0.5) {
         me->v[0] = 1.0;
     }
-}
+}*/
 
