@@ -21,9 +21,6 @@ class Solver:
         #    raise SimulationError("Solver constructors must take a Model as an argument.")
         # if not issubclass(self.__class__, Solver):
         #    raise SimulationError("Solver classes must be a subclass of SpatialPy.Solver.")
-        if not hasattr(self, 'NAME'):
-            raise SimulationError(
-                "Solver classes must implement a NAME attribute.")
 
         self.model = model
         self.is_compiled = False
@@ -66,7 +63,7 @@ class Solver:
         self.create_propensity_file(file_name=self.prop_file_name)
 
         # Build the solver
-        makefile = self.SpatialPy_ROOT+'/build/Makefile.'+self.NAME
+        makefile = self.SpatialPy_ROOT+'/build/Makefile'
         cmd = " ".join(['cd', self.build_dir, ';', 'make', '-f', makefile, 'ROOT=' +
                         self.SpatialPy_ROOT, 'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir])
         if self.debug_level > 1:
