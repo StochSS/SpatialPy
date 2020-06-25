@@ -169,26 +169,26 @@ class Mesh():
 
 
 
-    @classmethod
-    def generate_unit_square_mesh(cls, nx, ny, periodic=False):
-        #if periodic:
-        #    raise Exception("TODO: periodic not working yet");
-        """ Import a python meshio mesh object. """
-        #vertices
-        vertices = numpy.zeros(( int(nx)*int(ny), 3), dtype=float)
-        # create mesh object
-        obj = Mesh(len(vertices))
-        x_list = numpy.linspace(0,1,nx)
-        y_list = numpy.linspace(0,1,ny)
-        ndx=0
-        for x in x_list:
-            for y in y_list:
-                obj.vertices[ndx,0] = x
-                obj.vertices[ndx,1] = y
-                obj.vertices[ndx,2] = 0.0
-                ndx+=1
-        # return model ref
-        return obj
+    #@classmethod
+    #def generate_unit_square_mesh(cls, nx, ny, periodic=False):
+    #    #if periodic:
+    #    #    raise Exception("TODO: periodic not working yet");
+    #    """ Import a python meshio mesh object. """
+    #    #vertices
+    #    vertices = numpy.zeros(( int(nx)*int(ny), 3), dtype=float)
+    #    # create mesh object
+    #    obj = Mesh(len(vertices))
+    #    x_list = numpy.linspace(0,1,nx)
+    #    y_list = numpy.linspace(0,1,ny)
+    #    ndx=0
+    #    for x in x_list:
+    #        for y in y_list:
+    #            obj.vertices[ndx,0] = x
+    #            obj.vertices[ndx,1] = y
+    #            obj.vertices[ndx,2] = 0.0
+    #            ndx+=1
+    #    # return model ref
+    #    return obj
 
 
     @classmethod
@@ -338,6 +338,7 @@ class Mesh():
         y_list = numpy.linspace(ylim[0],ylim[1],ny)
         ndx = 0
         totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0])
+        print("totalvolume",totalvolume)
         for x in x_list:
             for y in y_list:
                 obj.vol[ndx] = totalvolume / numberparticles
