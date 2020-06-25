@@ -270,7 +270,11 @@ class Result(dict):
 
         trace_list = _plotly_iterate(subdomains)
         
-        layout = {"width": 1000, "height": 1000}
+        scene_x = self.model.mesh.xlim[0]/2.5
+        scene_y = self.model.mesh.ylim[0]/2.5
+        scene_z = self.model.mesh.zlim[0]/2.5
+        scene = {"aspectratio": {"x":scene_x,"y":scene_y,"z":scene_y}}
+        layout = {"width": 1000, "height": 1000, "scene":scene}
         if title is not None:
             layout["title"] = title
 
@@ -416,7 +420,11 @@ class Result(dict):
 
         trace_list = _plotly_iterate(subdomains, property_name=property_name)
 
-        layout = {"width": 1000, "height": 1000}
+        scene_x = self.model.mesh.xlim[0]/2.5
+        scene_y = self.model.mesh.ylim[0]/2.5
+        scene_z = self.model.mesh.zlim[0]/2.5
+        scene = {"aspectratio": {"x":scene_x,"y":scene_y,"z":scene_y}}
+        layout = {"width": 1000, "height": 1000, "scene":scene}
         if title is not None:
             layout["title"] = title
 
