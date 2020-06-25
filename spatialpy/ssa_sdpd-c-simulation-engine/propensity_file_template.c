@@ -106,14 +106,20 @@ int main(int argc, char**argv){
                     input_jcG, input_species_names, input_u0, input_num_subdomain,
                     input_subdomain_diffusion_matrix);
 
+    int num_threads;
+
+    if(argc == 1){
+        puts("Expected number of threads as argument. Got none");
+    }
     if(argc>1){
-        srand48(atol(argv[1]));
+        num_threads = atoi(argv[1]);
+    }
+
+    if(argc>2){
+        srand48(atol(argv[2]));
     }else{
         srand48((long int)time(NULL)+(long int)(1e9*clock()));
     }
-    int num_threads = get_num_processors();
-    if(num_threads>8){ num_threads=8; }
     run_simulation(num_threads, system);
     exit(0);
 }
-

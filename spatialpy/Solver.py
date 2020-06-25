@@ -97,14 +97,13 @@ class Solver:
 
         self.is_compiled = True
 
-    def run(self, number_of_trajectories=1, seed=None, timeout=None):
+    def run(self, number_of_trajectories=1, seed=None, timeout=None, number_of_threads=None):
         """ Run one simulation of the model.
         Args:
             number_of_trajectories: (int) How many trajectories should be simulated.
             seed: (int) the random number seed (incremented by one for multiple runs).
             timeout: (int) maximum number of seconds the solver can run.
-
-
+            number_of_threads: (int) the number threads the solver will use.
         Returns:
             Result object.
                 or, if number_of_trajectories > 1
@@ -116,16 +115,28 @@ class Solver:
         if not self.is_compiled:
             self.compile()
 
+        # Set default number of threads.
+        available_threads = len(os.sched_getaffinity(0))
+        if  number_of_threads is None:
+            if available_threads >= 8:
+                number_of_threads = 8
+            else:
+                number_of_threads = available_threads
+
         # Execute the solver
         for run_ndx in range(number_of_trajectories):
             outfile = tempfile.mkdtemp(
                 prefix='spatialpy_result_', dir=os.environ.get('SPATIALPY_TMPDIR'))
             result = Result(self.model, outfile)
             solver_cmd = 'cd {0}'.format(
-                outfile) + ";" + os.path.join(self.build_dir, self.executable_name)
+                outfile) + ";" + os.path.join(self.build_dir, self.executable_name) + " " + str(number_of_threads)
 
             if seed is not None:
                 solver_cmd += " "+str(seed+run_ndx)
+                print("Number of threads")
+                print(number_of_threads)
+                print("seed")
+                print(seed)
             if self.debug_level > 1:
                 print('cmd: {0}\n'.format(solver_cmd))
             stdout = ''

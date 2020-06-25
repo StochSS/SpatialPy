@@ -47,12 +47,13 @@ class Model():
         self.staticDomain = True;
 
 
-    def run(self, number_of_trajectories=1, solver=None, seed=None, debug_level=0):
+    def run(self, number_of_trajectories=1, solver=None, seed=None,number_of_threads=None, debug_level=0):
         """ Simulate the model.
         Args:
             solver: A str or class type that is a subclass of SpatialPy.Solver.  Default: NSM solver.
             number_of_trajectories: How many trajectories should be run.
             seed: An int, the random seed given to the solver.
+            number_of_threads: (int) the number threads the solver will use.
             debug_level: An int, Level of output from the solver: 0, 1, or 2. Default: 0.
         Returns:
             A SpatialPY.Result object with the results of the simulation.
@@ -65,7 +66,7 @@ class Model():
             from spatialpy.nsmsolver import NSMSolver
             sol = NSMSolver(self, debug_level=debug_level)
 
-        return sol.run(number_of_trajectories=number_of_trajectories, seed=seed)
+        return sol.run(number_of_trajectories=number_of_trajectories, seed=seed, number_of_threads=number_of_threads)
 
 
     def set_timesteps(self, step_size, num_steps):
