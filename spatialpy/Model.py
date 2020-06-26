@@ -42,6 +42,7 @@ class Model():
         self.num_timesteps = None
         self.listOfDataFunctions = []
         self.listOfInitialConditions = []
+        self.listOfBoundaryConditions = []
         self.species_map = {}
         self.tspan = None
         self.staticDomain = True;
@@ -154,14 +155,15 @@ class Model():
             spatialpy.DataFunction class. It must implement a function 'map(x)' which takes a
             the spatial positon 'x' as an array, and it returns a float value.
         """
-        #TODO validate input
         self.listOfDataFunctions.append(data_function)
 
     def add_initial_condition(self, ic):
         """ Add an initial condition object to the initialization of the model."""
-        #TODO: validate model
         self.listOfInitialConditions.append(ic)
 
+    def add_boundary_condition(self, bc):
+        """ Add an BoundaryCondition object to the model."""
+        self.listOfBoundaryConditions.append(bc)
 
     def update_namespace(self):
         """ Create a dict with flattened parameter and species objects. """

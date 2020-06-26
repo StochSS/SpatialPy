@@ -531,6 +531,31 @@ class Solver:
 '''
         propfilestr = propfilestr.replace("__INIT_RDME__", init_rdme)
 
+
+        init_bc = ""
+        for bc in self.model.listOfBoundaryConditions:
+            cond=[]
+            if(bc.xmin is not None): cond.append("(me->x[0] >= {0})".format(bc.xmin))
+            if(bc.xmax is not None): cond.append("(me->x[0] <= {0})".format(bc.xmax))
+            if(bc.ymin is not None): cond.append("(me->x[1] >= {0})".format(bc.ymin))
+            if(bc.ymax is not None): cond.append("(me->x[1] <= {0})".format(bc.ymax))
+            if(bc.zmin is not None): cond.append("(me->x[2] >= {0})".format(bc.zmin))
+            if(bc.zmax is not None): cond.append("(me->x[2] <= {0})".format(bc.zmax))
+            if(len(cond)==0): raise Exception('need at least one condition on the BoundaryCondition')
+            bcstr = "if(" + '&&'.join(cond) + "){"
+            if(bc.property == 'v'):
+                for i in range(3):
+                    bcstr+= "me->v[{0}]={1};".format(i,bc.value[i])
+            elif(bc.property == 'nu'):
+                bcstr+= "me->nu={0};".format(bc.value)
+            elif(bc.property == 'rho'):
+                bcstr+= "me->rho={0};".format(bc.value)
+            else:
+                raise Exception("TODO: handle boundary condition for '{0}'".format(bc.property))
+            bcstr+= "}"
+            init_bc += bcstr
+        propfilestr = propfilestr.replace("__BOUNDARY_CONDITIONS__", init_bc)
+
         #### Write the data to the file ####
         propfile.write(propfilestr)
         propfile.close()

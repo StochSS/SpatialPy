@@ -41,6 +41,9 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
         me->C[i] += me->Q[i] * system->dt * 0.5;
     }
 
+    // Apply boundary conditions
+    applyBoundaryConditions(me, system);
+
 
 
     // Step 1.3: Clean forces
@@ -123,6 +126,7 @@ void take_step2(particle_t* me, system_t* system, unsigned int step)
     for(i=0; i< system->num_chem_species; i++){
         me->C[i] += me->Q[i] * system->dt * 0.5;
     }
+    // Apply boundary conditions
+    applyBoundaryConditions(me, system);
 
-    //TODO: BoundaryConditions
 }

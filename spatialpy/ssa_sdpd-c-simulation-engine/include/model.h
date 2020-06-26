@@ -20,6 +20,5 @@ void computeBoundaryVolumeFraction(particle_t* me, linked_list* neighbors, syste
 
 void applyBoundaryVolumeFraction(particle_t* me, system_t* system);
 
-//void enforceVelocity(particle_t* me, system_t* system);
 
 #endif //model_h

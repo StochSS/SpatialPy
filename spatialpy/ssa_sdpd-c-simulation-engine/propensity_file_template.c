@@ -119,3 +119,12 @@ int main(int argc, char**argv){
     exit(0);
 }
 
+
+void applyBoundaryConditions(particle_t* me, system_t* system){
+__BOUNDARY_CONDITIONS__
+}
+
+
+
+
+
