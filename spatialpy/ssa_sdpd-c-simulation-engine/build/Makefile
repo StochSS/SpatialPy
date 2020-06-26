@@ -1,15 +1,15 @@
 CC = gcc
-CFLAGS = -O3 -Wall 
+CFLAGS = -O3 -Wall
 LFLAGS = -pthread -lm
 INCDIR = $(ROOT)/include/
 OBJ = linked_list.o particle.o simulate.o count_cores.o output.o simulate_rdme.o binheap.o simulate_threads.o model.o pthread_barrier.o
 
 
-.PHONY: all 
+.PHONY: all
 
 all: ssa_sdpd
 
-main.o: 
+main.o:
 	$(CC) -c -o main.o $(MODEL) -I$(INCDIR) $(CFLAGS)
 
 ssa_sdpd: $(OBJ) main.o
