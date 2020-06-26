@@ -8,8 +8,9 @@ b) Create a new branch.
 c) Please use a meaningful name, and include the issue # if applicable.  
 d) For bug fixes, branch from 'master'  
 e) For new features, branch from 'develop'  
-f) Be sure to document your code  
-g) If you are creating a new file, prepend the [COPYRIGHT](/COPYRIGHT) notice to the beginning of the file.  
+f) Be sure to document your code.
+g) Eliminate any commented-out or dead code.
+h) If you are creating a new file, prepend the [COPYRIGHT](/COPYRIGHT) notice to the beginning of the file.  
   
 ### 2. Submitting a Pull Request:  
 a) If changes are bug/hotfix, make a pull request to 'master'.  
@@ -21,7 +22,7 @@ d) Provide a usage guide/how-to for new features in the PR description.
   
 ### 3. Merging a Pull Request:
 a) Verify correct merge destination ('master' for hotfix/bugs, 'develop' for features/changes).  
-b) Review code for logic, consistency, and documentation.  
+b) Review code for logic, consistency, documentation, and commented-out or dead sections.
 c) Verify that unit tests are provided for the new code, and that they accurately test the new feature/changes.  
 d) Make sure that all unit tests in Travis CI pass before merging the changes.  
 e) Merge!  
