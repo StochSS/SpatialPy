@@ -8,8 +8,8 @@ b) Create a new branch.
 c) Please use a meaningful name, and include the issue # if applicable.  
 d) For bug fixes, branch from 'master'  
 e) For new features, branch from 'develop'  
-f) Be sure to document your code.
-g) Eliminate any commented-out or dead code.
+f) Be sure to document your code.  
+g) Eliminate any commented-out or dead code.  
 h) If you are creating a new file, prepend the [COPYRIGHT](/COPYRIGHT) notice to the beginning of the file.  
   
 ### 2. Submitting a Pull Request:  
