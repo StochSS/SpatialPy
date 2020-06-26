@@ -31,7 +31,7 @@ __DEFINE_REACTIONS__
 PropensityFun *ALLOC_propensities(void)
 {
     PropensityFun *ptr = (PropensityFun *)malloc(sizeof(PropensityFun)*NUM_REACTIONS);
-    
+
 __DEFINE_PROPFUNS__
     return ptr;
 }
@@ -82,7 +82,7 @@ int main(int argc, char**argv){
     //system_t* system = create_system();
     // Fix particles in space
     //system->static_domain = 1;
-    //CONFIG = 
+    //CONFIG =
     //system->dt = 1;
     //system->nt = 101;
     //system->output_freq = 1;
@@ -106,20 +106,40 @@ int main(int argc, char**argv){
                     input_jcG, input_species_names, input_u0, input_num_subdomain,
                     input_subdomain_diffusion_matrix);
 
-    int num_threads;
-
-    if(argc == 1){
-        puts("Expected number of threads as argument. Got none");
+    int num_threads = 1, sflag = 0, tflag = 0, opt;
+    long seed;
+    while ((opt = getopt(argc, argv, "s:t:")) != -1) {
+        switch (opt) {
+        case 's':
+            seed = atol(optarg);
+            sflag = 1;
+            break;
+        case 't':
+            num_threads = atoi(optarg);
+            tflag = 1;
+            break;
+        case '?':
+            printf("Usage: %s [OPTION]...\n", argv[0]);
+            printf("Example: %s -t 8 -s 1059\n", argv[0]);
+            printf("\nOptional arguments:\n");
+            printf("  -s Seed value for random number generation.\n");
+            printf("  -t Number of threads to use.\n");
+            printf("\nIf no arguments are present, seed will be based on the time plus clock and the threads will be set up to 8.\n");
+            break;
+        }
     }
-    if(argc>1){
-        num_threads = atoi(argv[1]);
-    }
 
-    if(argc>2){
-        srand48(atol(argv[2]));
+    if(sflag){
+        srand48(seed);
     }else{
         srand48((long int)time(NULL)+(long int)(1e9*clock()));
     }
+
+    if(!tflag){
+        num_threads = get_num_processors();
+        if(num_threads>8){ num_threads=8; }
+    }
+
     run_simulation(num_threads, system);
     exit(0);
 }

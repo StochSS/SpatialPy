@@ -112,28 +112,20 @@ class Solver:
         if not self.is_compiled:
             self.compile()
 
-        # Set default number of threads.
-        available_threads = len(os.sched_getaffinity(0))
-        if  number_of_threads is None:
-            if available_threads >= 8:
-                number_of_threads = 8
-            else:
-                number_of_threads = available_threads
-
         # Execute the solver
         for run_ndx in range(number_of_trajectories):
             outfile = tempfile.mkdtemp(
                 prefix='spatialpy_result_', dir=os.environ.get('SPATIALPY_TMPDIR'))
             result = Result(self.model, outfile)
             solver_cmd = 'cd {0}'.format(
-                outfile) + ";" + os.path.join(self.build_dir, self.executable_name) + " " + str(number_of_threads)
+                outfile) + ";" + os.path.join(self.build_dir, self.executable_name)
+
+            if number_of_threads is not None:
+                solver_cmd += " -t " + str(number_of_threads)
 
             if seed is not None:
-                solver_cmd += " "+str(seed+run_ndx)
-                print("Number of threads")
-                print(number_of_threads)
-                print("seed")
-                print(seed)
+                solver_cmd += " -s "+str(seed+run_ndx)
+
             if self.debug_level > 1:
                 print('cmd: {0}\n'.format(solver_cmd))
             stdout = ''
