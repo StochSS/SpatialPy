@@ -24,6 +24,19 @@ import json
 
 # module-level variable to for javascript export in IPython/Jupyter notebooks
 __pyurdme_javascript_libraries_loaded = False
+
+common_rgb_values = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f',
+                         '#bcbd22', '#17becf', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff',
+                         '#800000', '#808000', '#008000', '#800080', '#008080', '#000080', '#ff9999', '#ffcc99',
+                         '#ccff99', '#cc99ff', '#ffccff', '#62666a', '#8896bb', '#77a096', '#9d5a6c', '#9d5a6c',
+                         '#eabc75', '#ff9600', '#885300', '#9172ad', '#a1b9c4', '#18749b', '#dadecf', '#c5b8a8',
+                         '#000117', '#13a8fe', '#cf0060', '#04354b', '#0297a0', '#037665', '#eed284', '#442244',
+                         '#ffddee', '#702afb']
+
+common_color_scales = ["Blues","YlOrRd","PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu",
+                        "PuBu","GnBu","YlGn","Greens","Reds","Greys","RdPu","OrRd",
+                        "Purples","Oranges"]
+        
 def load_pyurdme_javascript_libraries():
     global __pyurdme_javascript_libraries_loaded
     if not __pyurdme_javascript_libraries_loaded:
@@ -38,7 +51,23 @@ def load_pyurdme_javascript_libraries():
             bufc = fd.read()
         IPython.display.display(IPython.display.HTML('<script>'+bufa+bufc+bufb+'</script>'))
 
+def _plotly_iterate(subdomains, property_name=None):
+    import plotly.graph_objs as go
 
+    trace_list = []
+    for i, (name, sub_data) in enumerate(subdomains.items()):
+        # get point data for trace
+        x_data = list(map(lambda point: point[0], sub_data["points"]))
+        y_data = list(map(lambda point: point[1], sub_data["points"]))
+        z_data = list(map(lambda point: point[2], sub_data["points"]))
+
+        if property_name is not None and property_name == "type":
+            marker = {"size":5, "color":common_rgb_values[i]}
+        else:
+            marker = {"size":5, "color":sub_data["data"], "colorscale":common_color_scales[i]}
+        trace = go.Scatter3d(x=x_data, y=y_data, z=z_data, name=name, mode="markers", marker=marker)
+        trace_list.append(trace)
+    return trace_list
 
 class Result(dict):
     """ Result object for a URDME simulation, extends the dict object. """
@@ -192,6 +221,135 @@ class Result(dict):
             ret = ret.flatten()
         return ret
 
+    def plot_species(self, species, t_ndx, title=None, concentration=False, deterministic=False, return_plotly_figure=False):
+        """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
+
+            If concentration is False (default), the integer, raw, trajectory data is returned,
+            if set to True, the concentration (=copy_number/volume) is returned.
+
+            If deterministic is True, show results for determinstic (instead of stochastic) values
+
+        Attributes
+        ----------
+        species : str
+            A string describing the species to be plotted.
+        t_ndx : int
+            The time index of the results to be plotted
+        title : str
+            The title of the graph
+        concentration : bool
+            Whether or not to plot the data as stochastic concentration, ignored if deterministic is 
+            set to True
+        deterministic : bool
+            Whether or not to plot the data as deterministic
+        return_plotly_figure : bool
+            whether or not to return a figure dictionary of data(graph object traces) and layout options
+            which may be edited by the user.
+        """
+        from plotly.offline import init_notebook_mode, iplot
+        
+        # read data at time point
+        points, data = self.read_step(t_ndx)
+        
+        # map data to subdomains
+        subdomains = {}
+        for i, val in enumerate(data['type']):
+            name = "sub {}".format(val)
+            if deterministic:
+                spec_data = data["C[{}]".format(species)][i]
+            elif concentration:
+                spec_data = data["D[{}]".format(species)][i] / (data['mass'][i] / data['rho'][i])
+            else:
+                spec_data = data["D[{}]".format(species)][i]
+
+            if name in subdomains.keys():
+                subdomains[name]['points'].append(points[i])
+                subdomains[name]['data'].append(spec_data)
+            else:
+                subdomains[name] = {"points":[points[i]], "data":[spec_data]}
+
+        trace_list = _plotly_iterate(subdomains)
+        
+        scene_x = self.model.mesh.xlim[0]/2.5
+        scene_y = self.model.mesh.ylim[0]/2.5
+        scene_z = self.model.mesh.zlim[0]/2.5
+        scene = {"aspectratio": {"x":scene_x,"y":scene_y,"z":scene_y}}
+        layout = {"width": 1000, "height": 1000, "scene":scene}
+        if title is not None:
+            layout["title"] = title
+
+        fig = {"data":trace_list, "layout":layout}
+
+        # function for 3D animations
+        '''if len(output_data) > 1:
+            fig["layout"]["updatemenus"] = [
+                {"buttons": [
+                    {"args": [None, {"frame": {"duration": 500, "redraw": False},
+                                     "fromcurrent": True,
+                                     "transition": {"duration": 300, "easing": "quadratic-in-out"}}],
+                     "label": "Play",
+                     "method": "animate"
+                    },
+                    {"args": [[None], {"frame": {"duration": 0, "redraw": False},
+                                       "mode": "immediate",
+                                       "transition": {"duration": 0}}],
+                     "label": "Pause",
+                     "method": "animate"
+                    }],
+                 "direction": "left",
+                 "pad": {"r": 10, "t": 87},
+                 "showactive": False,
+                 "type": "buttons",
+                 "x": 0.1,
+                 "xanchor": "right",
+                 "y": 0,
+                 "yanchor": "top"
+                }]
+            
+            sliders_dict = {
+                "active": 0,
+                "yanchor": "top",
+                "xanchor": "left",
+                "currentvalue": {
+                    "font": {"size": 20},
+                    "prefix": "Time:",
+                    "visible": True,
+                    "xanchor": "right"
+                },
+                "transition": {"duration": 300, "easing": "cubic-in-out"},
+                "pad": {"b": 10, "t": 50},
+                "len": 0.9,
+                "x": 0.1,
+                "y": 0,
+                "steps": []}
+            
+            frames = []
+            for i in range(0, len(output_data), speed):
+                output = output_data[i]
+                data = output['fields'][species]
+                marker = {"size":5, "color":data, "colorscale":color_scales[species]}
+                trace = go.Scatter3d(x=x, y=y, z=z, name=species, mode="markers", marker=marker)
+                frame = {"data":[trace], "name":str(i)}
+                frames.append(frame)
+                
+                slider_step = {"args": [[str(i)],
+                                        {"frame": {"duration": 100, "redraw": True},
+                                         "mode": "immediate",
+                                         "transition": {"duration": 100}
+                                        }],
+                               "label": str(i),
+                               "method": "animate"}
+                
+                sliders_dict['steps'].append(slider_step)
+                
+            fig["layout"]["sliders"] = [sliders_dict]
+            fig["frames"] = frames'''
+
+        if return_plotly_figure:
+            return fig
+        else:
+            iplot(fig)
+          
     def get_property(self, property_name, timepoints=None):
         """ Get the property values for a given species in the model for 
             one or all timepoints.  
@@ -223,6 +381,59 @@ class Result(dict):
         if ret.shape[0] == 1:
             ret = ret.flatten()
         return ret
+
+    def plot_property(self, property_name, t_ndx, title=None, return_plotly_figure=False):
+        """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
+
+            If concentration is False (default), the integer, raw, trajectory data is returned,
+            if set to True, the concentration (=copy_number/volume) is returned.
+
+            If deterministic is True, show results for determinstic (instead of stochastic) values
+
+        Attributes
+        ----------
+        property_name : str
+            A string describing the property to be plotted.
+        t_ndx : int
+            The time index of the results to be plotted
+        title : str
+            The title of the graph
+        return_plotly_figure : bool
+            whether or not to return a figure dictionary of data(graph object traces) and layout options
+            which may be edited by the user.
+        """
+        from plotly.offline import init_notebook_mode, iplot
+        import plotly.graph_objs as go
+
+        # read data at time point
+        points, data = self.read_step(t_ndx)
+
+        subdomains = {}
+        for i, val in enumerate(data['type']):
+            name = "sub {}".format(val)
+            
+            if name in subdomains.keys():
+                subdomains[name]['points'].append(points[i])
+                subdomains[name]['data'].append(data[property_name][i])
+            else:
+                subdomains[name] = {"points":[points[i]], "data":[data[property_name][i]]}
+
+        trace_list = _plotly_iterate(subdomains, property_name=property_name)
+
+        scene_x = self.model.mesh.xlim[0]/2.5
+        scene_y = self.model.mesh.ylim[0]/2.5
+        scene_z = self.model.mesh.zlim[0]/2.5
+        scene = {"aspectratio": {"x":scene_x,"y":scene_y,"z":scene_y}}
+        layout = {"width": 1000, "height": 1000, "scene":scene}
+        if title is not None:
+            layout["title"] = title
+
+        fig = {"data":trace_list, "layout":layout}
+
+        if return_plotly_figure:
+            return fig
+        else:
+            iplot(fig)
 
 #    def __setattr__(self, k, v):
 #        if k in self.keys():

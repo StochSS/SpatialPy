@@ -4,7 +4,7 @@ class Mesh():
     """ Mesh class for spatial py """
 
 
-    def __init__(self, numpoints, rho0=1.0, c0=10, P0=10):
+    def __init__(self, numpoints, xlim, ylim, zlim, rho0=1.0, c0=10, P0=10):
         self.vertices = numpy.zeros((numpoints, 3), dtype=float)
         self.triangles = None
         self.tetrahedrons = None
@@ -20,8 +20,12 @@ class Mesh():
         self.fixed = numpy.zeros((numpoints), dtype=bool)
 
         self.rho0 = rho0
-        self.c0 = c0;
+        self.c0 = c0
         self.P0 = P0
+
+        self.xlim = xlim
+        self.ylim = ylim
+        self.zlim = zlim
 
     def find_boundary_points(self):
         if self.on_boundary is None:
@@ -170,28 +174,6 @@ class Mesh():
 
 
     @classmethod
-    def generate_unit_square_mesh(cls, nx, ny, periodic=False):
-        #if periodic:
-        #    raise Exception("TODO: periodic not working yet");
-        """ Import a python meshio mesh object. """
-        #vertices
-        vertices = numpy.zeros(( int(nx)*int(ny), 3), dtype=float)
-        # create mesh object
-        obj = Mesh(len(vertices))
-        x_list = numpy.linspace(0,1,nx)
-        y_list = numpy.linspace(0,1,ny)
-        ndx=0
-        for x in x_list:
-            for y in y_list:
-                obj.vertices[ndx,0] = x
-                obj.vertices[ndx,1] = y
-                obj.vertices[ndx,2] = 0.0
-                ndx+=1
-        # return model ref
-        return obj
-
-
-    @classmethod
     def read_xml_mesh(cls, filename):
         """ Read a FEniCS/dolfin style XML mesh file"""
         import xml.etree.ElementTree as ET
@@ -205,14 +187,20 @@ class Mesh():
         #
         vertices = mesh[0]
         cells = mesh[1]
-        # create mesh object
-        obj = Mesh(len(vertices))
         #vertices
-        #obj.vertices = numpy.zeros(( len(vertices), 3), dtype=float)
+        mesh_vertices = numpy.zeros(( len(vertices), 3), dtype=float)
         for v in vertices:
-            obj.vertices[ int(v.attrib['index']),0] = float(v.attrib['x'])
-            obj.vertices[ int(v.attrib['index']),1] = float(v.attrib['y'])
-            obj.vertices[ int(v.attrib['index']),2] = float(v.attrib['z'])
+            mesh_vertices[ int(v.attrib['index']),0] = float(v.attrib['x'])
+            mesh_vertices[ int(v.attrib['index']),1] = float(v.attrib['y'])
+            mesh_vertices[ int(v.attrib['index']),2] = float(v.attrib['z'])
+
+        # create mesh object
+        xlim = ( max(mesh_vertices[:,0]) , max(mesh_vertices[:,0]) )
+        ylim = ( max(mesh_vertices[:,1]) , max(mesh_vertices[:,1]) )
+        zlim = ( max(mesh_vertices[:,2]) , max(mesh_vertices[:,2]) )
+        obj = Mesh(len(vertices), xlim, ylim, zlim)
+        obj.vertices = mesh_vertices
+
         #tetrahedrons
         obj.tetrahedrons = numpy.zeros(( len(cells), 4), dtype=int)
         for c in cells:
@@ -287,7 +275,7 @@ class Mesh():
         """
         # Create mesh object
         numberparticles = nx*ny*nz
-        obj = Mesh(numberparticles, **kwargs)
+        obj = Mesh(numberparticles, xlim, ylim, zlim, **kwargs)
         # Vertices
         obj.vertices = numpy.zeros(( numberparticles, 3), dtype=float)
         x_list = numpy.linspace(xlim[0],xlim[1],nx)
@@ -331,13 +319,14 @@ class Mesh():
         """
         # Create mesh object
         numberparticles = nx*ny
-        obj = Mesh(numberparticles, **kwargs)
+        obj = Mesh(numberparticles, xlim, ylim, (0,0), **kwargs)
         # Vertices
         obj.vertices = numpy.zeros(( int(nx)*int(ny), 3), dtype=float)
         x_list = numpy.linspace(xlim[0],xlim[1],nx)
         y_list = numpy.linspace(ylim[0],ylim[1],ny)
         ndx = 0
         totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0])
+        print("totalvolume",totalvolume)
         for x in x_list:
             for y in y_list:
                 obj.vol[ndx] = totalvolume / numberparticles

@@ -474,13 +474,12 @@ class Solver:
         system_config +="system->c0 = {0};\n".format(self.model.mesh.c0)
         system_config +="system->P0 = {0};\n".format(self.model.mesh.P0)
         #// bounding box
-        bounding_box = self.model.mesh.get_bounding_box()
-        system_config += "system->xlo = {0};\n".format(bounding_box[0])
-        system_config += "system->xhi = {0};\n".format(bounding_box[1])
-        system_config += "system->ylo = {0};\n".format(bounding_box[2])
-        system_config += "system->yhi = {0};\n".format(bounding_box[3])
-        system_config += "system->zlo = {0};\n".format(bounding_box[4])
-        system_config += "system->zhi = {0};\n".format(bounding_box[5])
+        system_config += "system->xlo = {0};\n".format(self.model.mesh.xlim[0])
+        system_config += "system->xhi = {0};\n".format(self.model.mesh.xlim[1])
+        system_config += "system->ylo = {0};\n".format(self.model.mesh.ylim[0])
+        system_config += "system->yhi = {0};\n".format(self.model.mesh.ylim[1])
+        system_config += "system->zlo = {0};\n".format(self.model.mesh.zlim[0])
+        system_config += "system->zhi = {0};\n".format(self.model.mesh.zlim[1])
 
         propfilestr = propfilestr.replace("__SYSTEM_CONFIG__", system_config)
 
