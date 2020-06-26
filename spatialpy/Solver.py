@@ -21,9 +21,6 @@ class Solver:
         #    raise SimulationError("Solver constructors must take a Model as an argument.")
         # if not issubclass(self.__class__, Solver):
         #    raise SimulationError("Solver classes must be a subclass of SpatialPy.Solver.")
-        if not hasattr(self, 'NAME'):
-            raise SimulationError(
-                "Solver classes must implement a NAME attribute.")
 
         self.model = model
         self.is_compiled = False
@@ -66,7 +63,7 @@ class Solver:
         self.create_propensity_file(file_name=self.prop_file_name)
 
         # Build the solver
-        makefile = self.SpatialPy_ROOT+'/build/Makefile.'+self.NAME
+        makefile = self.SpatialPy_ROOT+'/build/Makefile'
         cmd = " ".join(['cd', self.build_dir, ';', 'make', '-f', makefile, 'ROOT=' +
                         self.SpatialPy_ROOT, 'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir])
         if self.debug_level > 1:
@@ -243,7 +240,7 @@ class Solver:
 
         # Reactions
         funheader = "double __NAME__(const int *x, double t, const double vol, const double *data, int sd)"
-        #funheader = "double __NAME__(const int *x, double t, const double vol, const double *data, int sd, int voxel, int *xx, const size_t *irK, const size_t *jcK, const double *prK)"
+        dfunheader = "double det__NAME__(const double *x, double t, const double vol, const double *data, int sd)"
 
         funcs = ""
         funcinits = ""
@@ -485,13 +482,12 @@ class Solver:
         system_config +="system->c0 = {0};\n".format(self.model.mesh.c0)
         system_config +="system->P0 = {0};\n".format(self.model.mesh.P0)
         #// bounding box
-        bounding_box = self.model.mesh.get_bounding_box()
-        system_config += "system->xlo = {0};\n".format(bounding_box[0])
-        system_config += "system->xhi = {0};\n".format(bounding_box[1])
-        system_config += "system->ylo = {0};\n".format(bounding_box[2])
-        system_config += "system->yhi = {0};\n".format(bounding_box[3])
-        system_config += "system->zlo = {0};\n".format(bounding_box[4])
-        system_config += "system->zhi = {0};\n".format(bounding_box[5])
+        system_config += "system->xlo = {0};\n".format(self.model.mesh.xlim[0])
+        system_config += "system->xhi = {0};\n".format(self.model.mesh.xlim[1])
+        system_config += "system->ylo = {0};\n".format(self.model.mesh.ylim[0])
+        system_config += "system->yhi = {0};\n".format(self.model.mesh.ylim[1])
+        system_config += "system->zlo = {0};\n".format(self.model.mesh.zlim[0])
+        system_config += "system->zhi = {0};\n".format(self.model.mesh.zlim[1])
 
         propfilestr = propfilestr.replace("__SYSTEM_CONFIG__", system_config)
 
