@@ -17,8 +17,9 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
     int i;
 
     // Step 1.1: Enforce initial velocity conditions at step 0
-    if (step == 0)
-        enforceVelocity(me, system);
+    // This is now done directly via python interface
+    //if (step == 0)
+    //    enforceVelocity(me, system);
 
     // Step 1.2: Predictor step
     

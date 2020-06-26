@@ -232,7 +232,7 @@ class Solver:
 
         # Reactions
         funheader = "double __NAME__(const int *x, double t, const double vol, const double *data, int sd)"
-        #funheader = "double __NAME__(const int *x, double t, const double vol, const double *data, int sd, int voxel, int *xx, const size_t *irK, const size_t *jcK, const double *prK)"
+        dfunheader = "double det__NAME__(const double *x, double t, const double vol, const double *data, int sd)"
 
         funcs = ""
         funcinits = ""
