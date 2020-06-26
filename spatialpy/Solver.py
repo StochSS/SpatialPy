@@ -334,132 +334,136 @@ class Solver:
 
         input_constants = ""
 
-        outstr = "static unsigned int input_u0[{0}] = ".format(nspecies*ncells)
-        outstr += "{"
-        for i in range(ncells):
-            for s in range(nspecies):
-                if i+s > 0:
-                    outstr += ','
-                outstr += str(int(self.model.u0[s, i]))
-        outstr += "};"
-        input_constants += outstr + "\n"
-        # attache the vol to the model as well, for backwards compatablity
-        self.model.vol = self.model.mesh.get_vol()
-        outstr = "static double input_vol[{0}] = ".format(
-            self.model.mesh.get_vol().shape[0])
-        outstr += "{"
-        for i in range(self.model.mesh.get_vol().shape[0]):
-            if i > 0:
-                outstr += ','
-            outstr += str(self.model.mesh.get_vol()[i])
-        outstr += "};"
-        input_constants += outstr + "\n"
-        outstr = "static int input_sd[{0}] = ".format(
-            self.model.mesh.sd.shape[0])
-        outstr += "{"
-        for i in range(self.model.mesh.sd.shape[0]):
-            if i > 0:
-                outstr += ','
-            outstr += str(self.model.mesh.sd[i])
-        outstr += "};"
-        input_constants += outstr + "\n"
-
-        data_fn_defs = ""
-        if len(self.model.listOfDataFunctions) == 0:
-            outstr = "static int input_dsize = 1;"
-            input_constants += outstr + "\n"
-            outstr = "static double input_data[{0}] = ".format(ncells)
-            outstr += "{" + ",".join(['0']*80) + "};"
-            input_constants += outstr + "\n"
-        else:
-            outstr = "static int input_dsize = {0};".format(
-                len(self.model.listOfDataFunctions))
-            input_constants += outstr + "\n"
-            outstr = "static double input_data[{0}] = ".format(
-                ncells*len(self.model.listOfDataFunctions))
+        if len(self.model.listOfSpecies) > 0:
+            outstr = "static unsigned int input_u0[{0}] = ".format(nspecies*ncells)
             outstr += "{"
-            for v_ndx in range(ncells):
-                for ndf in range(len(self.model.listOfDataFunctions)):
-                    if ndf+v_ndx > 0:
+            for i in range(ncells):
+                for s in range(nspecies):
+                    if i+s > 0:
                         outstr += ','
-                    outstr += "{0}".format(self.model.listOfDataFunctions[ndf].map(
-                        self.model.mesh.coordinates()[v_ndx, :]))
+                    outstr += str(int(self.model.u0[s, i]))
+            outstr += "};"
+            input_constants += outstr + "\n"
+            # attache the vol to the model as well, for backwards compatablity
+            self.model.vol = self.model.mesh.get_vol()
+            outstr = "static double input_vol[{0}] = ".format(
+                self.model.mesh.get_vol().shape[0])
+            outstr += "{"
+            for i in range(self.model.mesh.get_vol().shape[0]):
+                if i > 0:
+                    outstr += ','
+                outstr += str(self.model.mesh.get_vol()[i])
+            outstr += "};"
+            input_constants += outstr + "\n"
+            outstr = "static int input_sd[{0}] = ".format(
+                self.model.mesh.sd.shape[0])
+            outstr += "{"
+            for i in range(self.model.mesh.sd.shape[0]):
+                if i > 0:
+                    outstr += ','
+                outstr += str(self.model.mesh.sd[i])
             outstr += "};"
             input_constants += outstr + "\n"
 
-            for ndf in range(len(self.model.listOfDataFunctions)):
-                data_fn_defs += "#define {0} data[{1}]\n".format(
-                    self.model.listOfDataFunctions[ndf].name, ndf)
+        data_fn_defs = ""
+        if len(self.model.listOfSpecies) > 0:
+            if len(self.model.listOfDataFunctions) == 0:
+                outstr = "static int input_dsize = 1;"
+                input_constants += outstr + "\n"
+                outstr = "static double input_data[{0}] = ".format(ncells)
+                outstr += "{" + ",".join(['0']*80) + "};"
+                input_constants += outstr + "\n"
+            else:
+                outstr = "static int input_dsize = {0};".format(
+                    len(self.model.listOfDataFunctions))
+                input_constants += outstr + "\n"
+                outstr = "static double input_data[{0}] = ".format(
+                    ncells*len(self.model.listOfDataFunctions))
+                outstr += "{"
+                for v_ndx in range(ncells):
+                    for ndf in range(len(self.model.listOfDataFunctions)):
+                        if ndf+v_ndx > 0:
+                            outstr += ','
+                        outstr += "{0}".format(self.model.listOfDataFunctions[ndf].map(
+                            self.model.mesh.coordinates()[v_ndx, :]))
+                outstr += "};"
+                input_constants += outstr + "\n"
+
+                for ndf in range(len(self.model.listOfDataFunctions)):
+                    data_fn_defs += "#define {0} data[{1}]\n".format(
+                        self.model.listOfDataFunctions[ndf].name, ndf)
         propfilestr = propfilestr.replace(
             "__DATA_FUNCTION_DEFINITIONS__", data_fn_defs)
 
-        N = self.model.create_stoichiometric_matrix()
-        if(min(N.shape) > 0):
-            Nd = N.todense() # this will not work if Nrxn or Nspecies is zero
-            outstr = "static int input_N_dense[{0}] = ".format(
-                Nd.shape[0] * Nd.shape[1])
-            outstr += "{"
-            for i in range(Nd.shape[0]):
-                for j in range(Nd.shape[1]):
-                    if j+i > 0:
+        if len(self.model.listOfSpecies) > 0:
+            N = self.model.create_stoichiometric_matrix()
+            if(min(N.shape) > 0):
+                Nd = N.todense() # this will not work if Nrxn or Nspecies is zero
+                outstr = "static int input_N_dense[{0}] = ".format(
+                    Nd.shape[0] * Nd.shape[1])
+                outstr += "{"
+                for i in range(Nd.shape[0]):
+                    for j in range(Nd.shape[1]):
+                        if j+i > 0:
+                            outstr += ','
+                        outstr += "{0}".format(Nd[i, j])
+                outstr += "};\n"
+                outstr += "static size_t input_irN[{0}] = ".format(len(N.indices))
+                outstr += "{"
+                for i in range(len(N.indices)):
+                    if i > 0:
                         outstr += ','
-                    outstr += "{0}".format(Nd[i, j])
-            outstr += "};\n"
-            outstr += "static size_t input_irN[{0}] = ".format(len(N.indices))
-            outstr += "{"
-            for i in range(len(N.indices)):
-                if i > 0:
-                    outstr += ','
-                outstr += str(N.indices[i])
-            outstr += "};"
-            input_constants += outstr + "\n"
-            outstr = "static size_t input_jcN[{0}] = ".format(len(N.indptr))
-            outstr += "{"
-            for i in range(len(N.indptr)):
-                if i > 0:
-                    outstr += ','
-                outstr += str(N.indptr[i])
-            outstr += "};"
-            input_constants += outstr + "\n"
-            outstr = "static int input_prN[{0}] = ".format(len(N.data))
-            outstr += "{"
-            for i in range(len((N.data))):
-                if i > 0:
-                    outstr += ','
-                outstr += str(N.data[i])
-            outstr += "};"
-            input_constants += outstr + "\n"
-        else:
-            input_constants += "static int input_N_dense[0] = {};\n"
-            input_constants += "static size_t input_irN[0] = {};\n"
-            input_constants += "static size_t input_jcN[0] = {};\n"
-            input_constants += "static int input_prN[0] = {};\n"
+                    outstr += str(N.indices[i])
+                outstr += "};"
+                input_constants += outstr + "\n"
+                outstr = "static size_t input_jcN[{0}] = ".format(len(N.indptr))
+                outstr += "{"
+                for i in range(len(N.indptr)):
+                    if i > 0:
+                        outstr += ','
+                    outstr += str(N.indptr[i])
+                outstr += "};"
+                input_constants += outstr + "\n"
+                outstr = "static int input_prN[{0}] = ".format(len(N.data))
+                outstr += "{"
+                for i in range(len((N.data))):
+                    if i > 0:
+                        outstr += ','
+                    outstr += str(N.data[i])
+                outstr += "};"
+                input_constants += outstr + "\n"
+            else:
+                input_constants += "static int input_N_dense[0] = {};\n"
+                input_constants += "static size_t input_irN[0] = {};\n"
+                input_constants += "static size_t input_jcN[0] = {};\n"
+                input_constants += "static int input_prN[0] = {};\n"
 
-        G = self.model.create_dependency_graph()
-        outstr = "static size_t input_irG[{0}] = ".format(len(G.indices))
-        outstr += "{"
-        for i in range(len(G.indices)):
-            if i > 0:
-                outstr += ','
-            outstr += str(G.indices[i])
-        outstr += "};"
-        input_constants += outstr + "\n"
+            G = self.model.create_dependency_graph()
+            outstr = "static size_t input_irG[{0}] = ".format(len(G.indices))
+            outstr += "{"
+            for i in range(len(G.indices)):
+                if i > 0:
+                    outstr += ','
+                outstr += str(G.indices[i])
+            outstr += "};"
+            input_constants += outstr + "\n"
 
-        outstr = "static size_t input_jcG[{0}] = ".format(len(G.indptr))
-        outstr += "{"
-        for i in range(len(G.indptr)):
-            if i > 0:
-                outstr += ','
-            outstr += str(G.indptr[i])
-        outstr += "};"
-        input_constants += outstr + "\n"
-        outstr = "const char* const input_species_names[] = {"
-        for i, s in enumerate(self.model.listOfSpecies.keys()):
-            if i > 0:
-                outstr += ","
-            outstr += '"'+s+'"'
-        outstr += ", 0};"
-        input_constants += outstr + "\n"
+            outstr = "static size_t input_jcG[{0}] = ".format(len(G.indptr))
+            outstr += "{"
+            for i in range(len(G.indptr)):
+                if i > 0:
+                    outstr += ','
+                outstr += str(G.indptr[i])
+            outstr += "};"
+            input_constants += outstr + "\n"
+        if(len(self.model.listOfSpecies)>0):
+            outstr = "const char* const input_species_names[] = {"
+            for i, s in enumerate(self.model.listOfSpecies.keys()):
+                if i > 0:
+                    outstr += ","
+                outstr += '"'+s+'"'
+            outstr += ", 0};"
+            input_constants += outstr + "\n"
         num_subdomains = len(self.model.listOfSubdomainIDs)
         outstr = "const int input_num_subdomain = {0};".format(num_subdomains)
         input_constants += outstr + "\n"
@@ -491,7 +495,7 @@ class Solver:
         system_config += "system_t* system = create_system({0},{1},{2});\n".format(len(
             self.model.listOfSubdomainIDs), len(self.model.listOfSpecies), len(self.model.listOfReactions))
         system_config += "system->static_domain = {0};\n".format(int(self.model.staticDomain))
-        if(len(self.model.listOfReactions) > 0):
+        if(len(self.model.listOfSpecies) > 0):
             system_config += "system->stochic_matrix = input_N_dense;\n"
             system_config += "system->chem_rxn_rhs_functions = ALLOC_ChemRxnFun();\n"
 
@@ -515,6 +519,17 @@ class Solver:
         system_config += "system->zhi = {0};\n".format(self.model.mesh.zlim[1])
 
         propfilestr = propfilestr.replace("__SYSTEM_CONFIG__", system_config)
+
+        init_rdme=''
+        if(len(self.model.listOfSpecies) > 0):
+            init_rdme = '''
+    initialize_rdme(system, NUM_VOXELS, NUM_SPECIES, NUM_REACTIONS, input_vol, input_sd,
+                    input_data, input_dsize, input_irN, input_jcN, input_prN, input_irG,
+                    input_jcG, input_species_names, input_u0, input_num_subdomain,
+                    input_subdomain_diffusion_matrix);
+
+'''
+        propfilestr = propfilestr.replace("__INIT_RDME__", init_rdme)
 
         #### Write the data to the file ####
         propfile.write(propfilestr)

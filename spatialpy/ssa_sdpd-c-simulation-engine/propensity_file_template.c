@@ -102,10 +102,11 @@ int main(int argc, char**argv){
     // create all particles in system
     init_all_particles(system);
     // Setup chemical reaction system
-    initialize_rdme(system, NUM_VOXELS, NUM_SPECIES, NUM_REACTIONS, input_vol, input_sd,
-                    input_data, input_dsize, input_irN, input_jcN, input_prN, input_irG,
-                    input_jcG, input_species_names, input_u0, input_num_subdomain,
-                    input_subdomain_diffusion_matrix);
+    //initialize_rdme(system, NUM_VOXELS, NUM_SPECIES, NUM_REACTIONS, input_vol, input_sd,
+    //                input_data, input_dsize, input_irN, input_jcN, input_prN, input_irG,
+    //                input_jcG, input_species_names, input_u0, input_num_subdomain,
+    //                input_subdomain_diffusion_matrix);
+    __INIT_RDME__
 
     if(argc>1){
         srand48(atol(argv[1]));
