@@ -117,11 +117,12 @@ void* run_simulation_thread(void *targ_in){
         pthread_barrier_wait(&end_step_barrier);
         //---------------------------------------
         // take_step2
+        if(debug_flag)printf("[WORKER %i] waiting for begin_step in take_step2 %i\n",targ->thread_id,step);
         pthread_barrier_wait(&begin_step_barrier);
         count = 0;
         n=targ->my_first_particle;
         for(i=0; i<targ->num_my_particles; i++){
-            if(n==NULL) break;
+           if(n==NULL) break;
             take_step2(n->data,system,step);
             count++;
             n=n->next;
@@ -129,7 +130,6 @@ void* run_simulation_thread(void *targ_in){
 
         // block on the end barrier
         if(debug_flag)printf("[WORKER %i] completed take_step2 %i, processed %i particles\n",targ->thread_id,step,count);
-        //pthread_barrier_wait(&end_step_barrier);
         pthread_barrier_wait(&end_step_barrier);
         //---------------------------------------
     } //end for(step)

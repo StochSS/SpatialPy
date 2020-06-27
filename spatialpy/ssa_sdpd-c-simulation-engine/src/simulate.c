@@ -25,8 +25,8 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
     
     // Update half-state
     if (me->solidTag == 0 && system->static_domain == 0) {
-        for (i = 0; i < 3; i++) {
-            // Update velocity using forces
+       for (i = 0; i < 3; i++) {
+           // Update velocity using forces
             me->v[i] = me->v[i] + 0.5 * system->dt * me->F[i];
             // Update transport velocity using background pressure force
             me->vt[i] = me->v[i] + 0.5 * system->dt * me->Fbp[i];
@@ -70,6 +70,7 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
 // Step 2/3: Compute forces
 void compute_forces(particle_t* me, system_t* system, unsigned int step)
 {
+
     // Step 2.1: Build neighbor list at first step
     if (system->static_domain) {
         if (step == 0) {
@@ -83,7 +84,6 @@ void compute_forces(particle_t* me, system_t* system, unsigned int step)
 
     // Step 2.3: Compute forces
     pairwiseForce(me, me->neighbors, system);
-
 }
 
 
