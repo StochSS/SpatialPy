@@ -75,18 +75,21 @@ void* run_simulation_thread(void *targ_in){
         if(debug_flag) printf("[WORKER %i] waiting to begin step %i\n",targ->thread_id,step);
         pthread_barrier_wait(&begin_step_barrier);
         //---------------------------------------
-        // take_step1
-        count = 0;
-        n=targ->my_first_particle;
-        for(i=0; i<targ->num_my_particles; i++){
-            if(n==NULL) break;
-            take_step1(n->data,system,step);
-            count++;
-            n=n->next;
+        unsigned int nsubsteps = get_number_of_substeps();
+        for(int substep=0;substep < nsubsteps; substep++){
+            // take_step
+            count = 0;
+            n=targ->my_first_particle;
+            for(i=0; i<targ->num_my_particles; i++){
+                if(n==NULL) break;
+                take_step(n->data,system,step,substep);
+                count++;
+                n=n->next;
+            }
+            // block on the end barrier
+            if(debug_flag)printf("[WORKER %i] completed step %i, substep %i/%i, processed %i particles\n",targ->thread_id,step,substep,nsubsteps,count);
+            pthread_barrier_wait(&end_step_barrier);
         }
-        // block on the end barrier
-        if(debug_flag)printf("[WORKER %i] completed take_step1 %i, processed %i particles\n",targ->thread_id,step,count);
-        pthread_barrier_wait(&end_step_barrier);
         //---------------------------------------
         // compute_bond_forces
         /*
@@ -102,35 +105,6 @@ void* run_simulation_thread(void *targ_in){
         if(debug_flag)printf("[WORKER %i] completed compute_bond_forces %i, processed %i particles\n",targ->thread_id,step,count);
         pthread_barrier_wait(&end_step_barrier);
         */
-        //---------------------------------------
-        // compute forces
-        pthread_barrier_wait(&begin_step_barrier);
-        count = 0;
-        n=targ->my_first_particle;
-        for(i=0; i<targ->num_my_particles; i++){
-            if(n==NULL) break;
-            compute_forces(n->data,system,step);
-            count++;
-            n=n->next;
-        }
-        if(debug_flag)printf("[WORKER %i] completed compute_forces %i, processed %i particles\n",targ->thread_id,step,count);
-        pthread_barrier_wait(&end_step_barrier);
-        //---------------------------------------
-        // take_step2
-        if(debug_flag)printf("[WORKER %i] waiting for begin_step in take_step2 %i\n",targ->thread_id,step);
-        pthread_barrier_wait(&begin_step_barrier);
-        count = 0;
-        n=targ->my_first_particle;
-        for(i=0; i<targ->num_my_particles; i++){
-           if(n==NULL) break;
-            take_step2(n->data,system,step);
-            count++;
-            n=n->next;
-        }
-
-        // block on the end barrier
-        if(debug_flag)printf("[WORKER %i] completed take_step2 %i, processed %i particles\n",targ->thread_id,step,count);
-        pthread_barrier_wait(&end_step_barrier);
         //---------------------------------------
     } //end for(step)
     return NULL;
@@ -232,9 +206,12 @@ void run_simulation(int num_threads, system_t* system){
         // Release the worker threads to take step
         if(debug_flag) printf("[%i] Starting the Worker threads\n",step);
         pthread_barrier_wait(&begin_step_barrier);
-        // Wait until worker threads are done
-        pthread_barrier_wait(&end_step_barrier);
-        if(debug_flag) printf("[%i] Worker threads finished\n",step);
+        unsigned int nsubsteps = get_number_of_substeps();
+        for(int substep=0;substep < nsubsteps; substep++){
+            // Wait until worker threads are done
+            pthread_barrier_wait(&end_step_barrier);
+            if(debug_flag) printf("[%i] Worker threads finished substep %i/%i\n",step,substep,nsubsteps);
+        }
         // Solve RDME 
         if(debug_flag) printf("[%i] starting RDME simulation\n",step);
         simulate_rdme(system, step);

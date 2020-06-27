@@ -1,4 +1,5 @@
 #include "linked_list.h"
+#include "simulate.h"
 #include "output.h"
 #include "particle.h"
 #include "simulate_rdme.h"
@@ -9,6 +10,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+void take_step(void*me, system_t*system, unsigned int step, unsigned int substep){
+    if(substep==0){
+        take_step1((particle_t*)me,system,step);
+    }else if(substep==1){
+        compute_forces((particle_t*)me,system,step);
+    }else if(substep==2){
+        take_step2((particle_t*)me,system,step);
+    }else{
+        printf("ERROR, substep=%u\n",substep);
+        exit(1);
+    }
+}
+
+unsigned int get_number_of_substeps(){
+    return 3;
+}
 
 
 // Step 1/3: First part of time step computation
