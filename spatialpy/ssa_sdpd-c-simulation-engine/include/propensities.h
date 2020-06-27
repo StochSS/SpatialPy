@@ -6,12 +6,15 @@
 /* A. Hellander 2012-06-05 (rev). */  
 /* B. Drawert   2012-09-08 */
 
+#include "particle.h"
+
 
 #ifndef PROPENSITIES__H
 #define PROPENSITIES__H
 
+
 /* Global variable that can be used to pass parameters to the propensity functions. */
-extern double *parameters;
+extern double *parameters;  //TODO: can we delete this?
 
 /* Definition of the propensity function. */
 // double rfun(const int *x, double t, const double vol, const double *data, int sd, int voxel, int *xx, const size_t *irK, const size_t *jcK, const double *prK)
@@ -24,6 +27,9 @@ typedef double (*ChemRxnFun)(const double *, double, double, const double *, int
 PropensityFun *ALLOC_propensities(void);
 ChemRxnFun *ALLOC_ChemRxnFun(void);
 void FREE_propensities(PropensityFun* ptr);
+
+void applyBoundaryConditions(particle_t* me, system_t* system);
+
 
 
 #endif 
