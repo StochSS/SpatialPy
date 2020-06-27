@@ -15,7 +15,7 @@ class Model():
     special_characters = ['[', ']', '+', '-', '*', '/', '.', '^']
 
 
-    def __init__(self, name="", volume=1.0):
+    def __init__(self, name=""):
         """ Create an empty SpatialPy model. """
 
         # The name that the model is referenced by (should be a String)
@@ -26,9 +26,6 @@ class Model():
         self.listOfParameters = OrderedDict()
         self.listOfSpecies    = OrderedDict()
         self.listOfReactions  = OrderedDict()
-
-        # A well mixed model has an optional volume parameter
-        self.volume = volume;
 
         # Dict that holds flattended parameters and species for
         # evaluation of expressions in the scope of the model.

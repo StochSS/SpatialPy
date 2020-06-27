@@ -113,6 +113,7 @@ void* run_simulation_thread(void *targ_in){
             count++;
             n=n->next;
         }
+        if(debug_flag)printf("[WORKER %i] completed compute_forces %i, processed %i particles\n",targ->thread_id,step,count);
         pthread_barrier_wait(&end_step_barrier);
         //---------------------------------------
         // take_step2
@@ -127,7 +128,7 @@ void* run_simulation_thread(void *targ_in){
         }
 
         // block on the end barrier
-        //if(debug_flag)printf("[WORKER %i] completed take_step2 %i, processed %i particles\n",targ->thread_id,step,count);
+        if(debug_flag)printf("[WORKER %i] completed take_step2 %i, processed %i particles\n",targ->thread_id,step,count);
         //pthread_barrier_wait(&end_step_barrier);
         pthread_barrier_wait(&end_step_barrier);
         //---------------------------------------
