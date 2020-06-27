@@ -27,11 +27,12 @@ __DEFINE_PARAMETERS__
 
 /* Reaction definitions */
 __DEFINE_REACTIONS__
+/* Deterministic RHS definitions */
+__DEFINE_CHEM_FUNS__
 
 PropensityFun *ALLOC_propensities(void)
 {
     PropensityFun *ptr = (PropensityFun *)malloc(sizeof(PropensityFun)*NUM_REACTIONS);
-
 __DEFINE_PROPFUNS__
     return ptr;
 }
@@ -43,7 +44,7 @@ void FREE_propensities(PropensityFun* ptr)
 
 ChemRxnFun* ALLOC_ChemRxnFun(void){
     ChemRxnFun*ptr = (ChemRxnFun*)malloc(sizeof(ChemRxnFun)*NUM_REACTIONS);
-__DEFINE_CHEM_FUNS__
+__DEFINE_CHEM_FUN_INITS__
     return ptr;
 }
 void FREE_ChemRxnFun(ChemRxnFun* ptr){
@@ -101,10 +102,11 @@ int main(int argc, char**argv){
     // create all particles in system
     init_all_particles(system);
     // Setup chemical reaction system
-    initialize_rdme(system, NUM_VOXELS, NUM_SPECIES, NUM_REACTIONS, input_vol, input_sd,
-                    input_data, input_dsize, input_irN, input_jcN, input_prN, input_irG,
-                    input_jcG, input_species_names, input_u0, input_num_subdomain,
-                    input_subdomain_diffusion_matrix);
+    //initialize_rdme(system, NUM_VOXELS, NUM_SPECIES, NUM_REACTIONS, input_vol, input_sd,
+    //                input_data, input_dsize, input_irN, input_jcN, input_prN, input_irG,
+    //                input_jcG, input_species_names, input_u0, input_num_subdomain,
+    //                input_subdomain_diffusion_matrix);
+    __INIT_RDME__
 
     int num_threads = 1, sflag = 0, tflag = 0, opt;
     long seed;
@@ -142,4 +144,15 @@ int main(int argc, char**argv){
 
     run_simulation(num_threads, system);
     exit(0);
+
 }
+
+
+void applyBoundaryConditions(particle_t* me, system_t* system){
+__BOUNDARY_CONDITIONS__
+}
+
+
+
+
+

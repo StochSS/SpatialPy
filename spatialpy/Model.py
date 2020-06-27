@@ -42,6 +42,7 @@ class Model():
         self.num_timesteps = None
         self.listOfDataFunctions = []
         self.listOfInitialConditions = []
+        self.listOfBoundaryConditions = []
         self.species_map = {}
         self.tspan = None
         self.staticDomain = True;
@@ -155,14 +156,15 @@ class Model():
             spatialpy.DataFunction class. It must implement a function 'map(x)' which takes a
             the spatial positon 'x' as an array, and it returns a float value.
         """
-        #TODO validate input
         self.listOfDataFunctions.append(data_function)
 
     def add_initial_condition(self, ic):
         """ Add an initial condition object to the initialization of the model."""
-        #TODO: validate model
         self.listOfInitialConditions.append(ic)
 
+    def add_boundary_condition(self, bc):
+        """ Add an BoundaryCondition object to the model."""
+        self.listOfBoundaryConditions.append(bc)
 
     def update_namespace(self):
         """ Create a dict with flattened parameter and species objects. """
@@ -539,6 +541,7 @@ class Reaction():
         self.massaction = massaction
 
         self.propensity_function = propensity_function
+        self.ode_propensity_function = propensity_function
 
         if self.propensity_function is None:
             if rate is None:
@@ -599,6 +602,7 @@ class Reaction():
         # Case EmptySet -> Y
 
         propensity_function = self.marate.name
+        self.ode_propensity_function = self.marate.name
 
         # There are only three ways to get 'total_stoch==2':
         for r in self.reactants:
@@ -609,6 +613,7 @@ class Reaction():
             else:
                 # Case 3: X1, X2 -> Y;
                 propensity_function += "*" + str(r)
+            self.ode_propensity_function += "*" + str(r) 
 
         # Set the volume dependency based on order.
         order = len(self.reactants)
