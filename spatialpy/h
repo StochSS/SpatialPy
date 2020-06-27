@@ -1,0 +1,170 @@
+Solver.py:        system_config += "system->static_domain = {0};\n".format(int(self.model.staticDomain))
+Solver.py:            system_config += "system->stochic_matrix = input_N_dense;\n"
+Solver.py:            system_config += "system->chem_rxn_rhs_functions = ALLOC_ChemRxnFun();\n"
+Solver.py:        system_config += "system->dt = {0};\n".format(self.model.timestep_size)
+Solver.py:        system_config += "system->nt = {0};\n".format(self.model.num_timesteps)
+Solver.py:        system_config += "system->output_freq = 1;\n"
+Solver.py:        system_config +="system->h = {0};\n".format(self.h)
+Solver.py:        system_config +="system->rho0 = {0};\n".format(self.model.mesh.rho0)
+Solver.py:        system_config +="system->c0 = {0};\n".format(self.model.mesh.c0)
+Solver.py:        system_config +="system->P0 = {0};\n".format(self.model.mesh.P0)
+Solver.py:        system_config += "system->xlo = {0};\n".format(self.model.mesh.xlim[0])
+Solver.py:        system_config += "system->xhi = {0};\n".format(self.model.mesh.xlim[1])
+Solver.py:        system_config += "system->ylo = {0};\n".format(self.model.mesh.ylim[0])
+Solver.py:        system_config += "system->yhi = {0};\n".format(self.model.mesh.ylim[1])
+Solver.py:        system_config += "system->zlo = {0};\n".format(self.model.mesh.zlim[0])
+Solver.py:        system_config += "system->zhi = {0};\n".format(self.model.mesh.zlim[1])
+Binary file __pycache__/Solver.cpython-37.pyc matches
+ssa_sdpd-c-simulation-engine/propensity_file_template.c:    //system->static_domain = 1;
+ssa_sdpd-c-simulation-engine/propensity_file_template.c:    //system->dt = 1;
+ssa_sdpd-c-simulation-engine/propensity_file_template.c:    //system->nt = 101;
+ssa_sdpd-c-simulation-engine/propensity_file_template.c:    //system->output_freq = 1;
+ssa_sdpd-c-simulation-engine/propensity_file_template.c:    //system->h = 0.5;
+ssa_sdpd-c-simulation-engine/propensity_file_template.c:    //system->rho0 = 1.0;
+ssa_sdpd-c-simulation-engine/propensity_file_template.c:    //system->c0 = 10;
+ssa_sdpd-c-simulation-engine/propensity_file_template.c:    //system->P0 = 10;
+ssa_sdpd-c-simulation-engine/propensity_file_template.c:    //system->xlo = -5.1;
+ssa_sdpd-c-simulation-engine/propensity_file_template.c:    //system->xhi = 5.1;
+ssa_sdpd-c-simulation-engine/propensity_file_template.c:    //system->ylo = -1.1;
+ssa_sdpd-c-simulation-engine/propensity_file_template.c:    //system->yhi = 1.1;
+ssa_sdpd-c-simulation-engine/propensity_file_template.c:    //system->zlo = -1.1;
+ssa_sdpd-c-simulation-engine/propensity_file_template.c:    //system->zhi = 1.1;
+ssa_sdpd-c-simulation-engine/src/read_lammps_input_file.c:    system->xlo = xlow;
+ssa_sdpd-c-simulation-engine/src/read_lammps_input_file.c:    system->xhi = xhigh; 
+ssa_sdpd-c-simulation-engine/src/read_lammps_input_file.c:    system->ylo = ylow;
+ssa_sdpd-c-simulation-engine/src/read_lammps_input_file.c:    system->yhi = yhigh; 
+ssa_sdpd-c-simulation-engine/src/read_lammps_input_file.c:    system->zlo = zlow;
+ssa_sdpd-c-simulation-engine/src/read_lammps_input_file.c:    system->zhi = zhigh; 
+ssa_sdpd-c-simulation-engine/src/model.c:    double h = system->h;
+ssa_sdpd-c-simulation-engine/src/model.c:    double rho0 = system->rho0;
+ssa_sdpd-c-simulation-engine/src/model.c:    double P0 = system->P0;
+ssa_sdpd-c-simulation-engine/src/model.c:    double c0 = system->c0;
+ssa_sdpd-c-simulation-engine/src/model.c:    if (system->dimension == 3) {
+ssa_sdpd-c-simulation-engine/src/model.c:    else if (system->dimension == 2) {
+ssa_sdpd-c-simulation-engine/src/model.c:        for (i = 0; i < system->dimension; i++) {
+ssa_sdpd-c-simulation-engine/src/model.c:        for (i = 0; i < system->dimension; i++) {
+ssa_sdpd-c-simulation-engine/src/model.c:        for(s=0; s < system->num_chem_species; s++){
+ssa_sdpd-c-simulation-engine/src/model.c:            int k = system->num_types * (me->type - 1) + s;
+ssa_sdpd-c-simulation-engine/src/model.c:            double dQc = system->subdomain_diffusion_matrix[k] * (me->C[s] - pt_j->C[s]) * dQc_base;
+ssa_sdpd-c-simulation-engine/src/model.c:    for(rxn=0; rxn < system->num_chem_rxns; rxn++){
+ssa_sdpd-c-simulation-engine/src/model.c:        double flux = (*system->chem_rxn_rhs_functions[rxn])(me->C,0.0, 0.0, NULL, me->type);
+ssa_sdpd-c-simulation-engine/src/model.c:        for(s=0; s< system->num_chem_species; s++){
+ssa_sdpd-c-simulation-engine/src/model.c:            int k = system->num_chem_rxns * rxn + s;
+ssa_sdpd-c-simulation-engine/src/model.c:            me->Q[s] += system->stochic_matrix[k] * flux;
+ssa_sdpd-c-simulation-engine/src/model.c:  double h = system->h;
+ssa_sdpd-c-simulation-engine/src/model.c:  if(system->dimension==3){
+ssa_sdpd-c-simulation-engine/src/model.c:  }else if(system->dimension==2){
+ssa_sdpd-c-simulation-engine/src/model.c:    double h = system->h;
+ssa_sdpd-c-simulation-engine/src/model.c:    if (system->dimension == 3) {
+ssa_sdpd-c-simulation-engine/src/model.c:    else if (system->dimension == 2) {
+ssa_sdpd-c-simulation-engine/src/model.c:    for (i = 0; i < system->dimension; i++) {
+ssa_sdpd-c-simulation-engine/src/model.c:        for (i = 0; i < system->dimension; i++) {
+ssa_sdpd-c-simulation-engine/src/model.c:        for (i = 0; i < system->dimension; i++) {
+ssa_sdpd-c-simulation-engine/src/particle.c:        if(n->data->x[0] > (me->x[0] + system->h)) break; //stop searching
+ssa_sdpd-c-simulation-engine/src/particle.c:        if( (n->data->x[1] > (me->x[1] + system->h)) || (n->data->x[1] < (me->x[1] - system->h) ) ) continue;
+ssa_sdpd-c-simulation-engine/src/particle.c:        if( (n->data->x[2] > (me->x[2] + system->h)) || (n->data->x[2] < (me->x[2] - system->h) ) ) continue;
+ssa_sdpd-c-simulation-engine/src/particle.c:    /*if(n==NULL && system->boundary_conditions[0] == 'p'){
+ssa_sdpd-c-simulation-engine/src/particle.c:        double max_x = system->h - (me->x[0] - system->xhi);
+ssa_sdpd-c-simulation-engine/src/particle.c:        for(n = system->x_index->head; n!=NULL; n=n->next){
+ssa_sdpd-c-simulation-engine/src/particle.c:            if( (n->data->x[1] > (me->x[1] + system->h)) || (n->data->x[1] < (me->x[1] - system->h) ) ) continue;
+ssa_sdpd-c-simulation-engine/src/particle.c:            if( (n->data->x[2] > (me->x[2] + system->h)) || (n->data->x[2] < (me->x[2] - system->h) ) ) continue;
+ssa_sdpd-c-simulation-engine/src/particle.c:    if(system->boundary_conditions[1] == 'p' && (me->x[1] + system->h) > system->yhi){
+ssa_sdpd-c-simulation-engine/src/particle.c:        //double max_y = system->ylo + ((me->x[1] + system->h) - system->yhi);
+ssa_sdpd-c-simulation-engine/src/particle.c:    if(system->boundary_conditions[1] == 'p' && (me->x[1] - system->h) < system->ylo){
+ssa_sdpd-c-simulation-engine/src/particle.c:    if(system->boundary_conditions[2] == 'p' && (me->x[2] + system->h) > system->zhi){
+ssa_sdpd-c-simulation-engine/src/particle.c:    if(system->boundary_conditions[2] == 'p' && (me->x[2] - system->h) < system->zlo){
+ssa_sdpd-c-simulation-engine/src/particle.c:        //if(n->data->x[0] > (me->x[0] + system->h)) break; //stop searching forward
+ssa_sdpd-c-simulation-engine/src/particle.c:        if(n->data->x[0] < (me->x[0] - system->h)){
+ssa_sdpd-c-simulation-engine/src/particle.c:        if( (n->data->x[1] > (me->x[1] + system->h)) || (n->data->x[1] < (me->x[1] - system->h) ) ){
+ssa_sdpd-c-simulation-engine/src/particle.c:        if( (n->data->x[2] > (me->x[2] + system->h)) || (n->data->x[2] < (me->x[2] - system->h) ) ){ 
+ssa_sdpd-c-simulation-engine/src/particle.c:    /*if(n==NULL && system->boundary_conditions[0] == 'p'){
+ssa_sdpd-c-simulation-engine/src/particle.c:        double min_x = system->xhi - (system->h - (system->xlo - me->x[0]));
+ssa_sdpd-c-simulation-engine/src/particle.c:        for(n = system->x_index->tail; n!=NULL; n=n->prev){
+ssa_sdpd-c-simulation-engine/src/particle.c:            if( (n->data->x[1] > (me->x[1] + system->h)) || (n->data->x[1] < (me->x[1] - system->h) ) ) continue;
+ssa_sdpd-c-simulation-engine/src/particle.c:            if( (n->data->x[2] > (me->x[2] + system->h)) || (n->data->x[2] < (me->x[2] - system->h) ) ) continue;
+ssa_sdpd-c-simulation-engine/src/particle.c:    linked_list_add(system->particle_list, me);
+ssa_sdpd-c-simulation-engine/src/particle.c:    me->x_index = linked_list_add(system->x_index, me);
+ssa_sdpd-c-simulation-engine/src/particle.c:    //me->y_index = linked_list_add(system->y_index, me);
+ssa_sdpd-c-simulation-engine/src/particle.c:    //me->z_index = linked_list_add(system->z_index, me);
+ssa_sdpd-c-simulation-engine/src/particle.c:    me->Q = (double*) calloc(system->num_chem_species, sizeof(double));
+ssa_sdpd-c-simulation-engine/src/particle.c:    me->C = (double*) calloc(system->num_chem_species, sizeof(double));
+ssa_sdpd-c-simulation-engine/src/simulate.c:     printf("h = %f\n",system->h);
+ssa_sdpd-c-simulation-engine/src/simulate.c:    if (me->solidTag == 0 && system->static_domain == 0) {
+ssa_sdpd-c-simulation-engine/src/simulate.c:            me->v[i] = me->v[i] + 0.5 * system->dt * me->F[i];
+ssa_sdpd-c-simulation-engine/src/simulate.c:            me->vt[i] = me->v[i] + 0.5 * system->dt * me->Fbp[i];
+ssa_sdpd-c-simulation-engine/src/simulate.c:            me->x[i] = me->x[i] + system->dt * me->vt[i];
+ssa_sdpd-c-simulation-engine/src/simulate.c:        me->rho = me->rho + 0.5 * system->dt * me->Frho;
+ssa_sdpd-c-simulation-engine/src/simulate.c:    for(i=0; i< system->num_chem_species; i++){
+ssa_sdpd-c-simulation-engine/src/simulate.c:        me->C[i] += me->Q[i] * system->dt * 0.5;
+ssa_sdpd-c-simulation-engine/src/simulate.c:    for(i=0; i< system->num_chem_species; i++){
+ssa_sdpd-c-simulation-engine/src/simulate.c:    if (system->static_domain) {
+ssa_sdpd-c-simulation-engine/src/simulate.c:    if (me->solidTag == 0 && system->static_domain == 0) {
+ssa_sdpd-c-simulation-engine/src/simulate.c:            me->v[i] = me->v[i] + 0.5 * system->dt * me->F[i];
+ssa_sdpd-c-simulation-engine/src/simulate.c:            me->rho = me->rho + 0.5 * system->dt * me->Frho;
+ssa_sdpd-c-simulation-engine/src/simulate.c:            me->rho = me->rho + 0.5 * system->dt * me->Frho;
+ssa_sdpd-c-simulation-engine/src/simulate.c:    for(i=0; i< system->num_chem_species; i++){
+ssa_sdpd-c-simulation-engine/src/simulate.c:        me->C[i] += me->Q[i] * system->dt * 0.5;
+ssa_sdpd-c-simulation-engine/src/simulate_rdme.c:    system->rdme = rdme;
+ssa_sdpd-c-simulation-engine/src/simulate_rdme.c:    rdme_t*rdme = system->rdme;
+ssa_sdpd-c-simulation-engine/src/simulate_rdme.c:    if(!system->static_domain || !rdme->initialized){
+ssa_sdpd-c-simulation-engine/src/simulate_rdme.c:    if(debug_flag) printf("Simulating RDME for %e seconds\n",system->dt);
+ssa_sdpd-c-simulation-engine/src/simulate_rdme.c:    nsm_core__take_step(rdme, system->dt*step, system->dt);
+ssa_sdpd-c-simulation-engine/src/simulate_rdme.c:    if(system->rdme == NULL){
+ssa_sdpd-c-simulation-engine/src/simulate_rdme.c:    if(debug_flag) printf("NSM: total # reacton events %lu\n",system->rdme->total_reactions);
+ssa_sdpd-c-simulation-engine/src/simulate_rdme.c:    if(debug_flag) printf("NSM: total # diffusion events %lu\n",system->rdme->total_diffusion);
+ssa_sdpd-c-simulation-engine/src/simulate_rdme.c:    nsm_core__destroy(system->rdme);
+ssa_sdpd-c-simulation-engine/src/simulate_rdme.c:    for(n=system->particle_list->head; n!=NULL; n=n->next){
+ssa_sdpd-c-simulation-engine/src/simulate_rdme.c:    double h = system->h;
+ssa_sdpd-c-simulation-engine/src/simulate_rdme.c:    for(n=system->particle_list->head; n!=NULL; n=n->next){
+ssa_sdpd-c-simulation-engine/src/simulate_rdme.c:    for(n=system->particle_list->head; n!=NULL; n=n->next){
+ssa_sdpd-c-simulation-engine/src/simulate_threads.c:    for(step=0; step < system->nt; step++){
+ssa_sdpd-c-simulation-engine/src/simulate_threads.c:    int num_particles_per_thread = system->particle_list->count / num_threads;
+ssa_sdpd-c-simulation-engine/src/simulate_threads.c:    //int num_bonds_per_thread = system->bond_list->count / num_threads;
+ssa_sdpd-c-simulation-engine/src/simulate_threads.c:    int num_particles_left = system->particle_list->count;
+ssa_sdpd-c-simulation-engine/src/simulate_threads.c:    node*particle_list_ittr = system->particle_list->head;
+ssa_sdpd-c-simulation-engine/src/simulate_threads.c:    sort_args[0].ll = system->x_index;
+ssa_sdpd-c-simulation-engine/src/simulate_threads.c:    /*sort_args[1].ll = system->y_index;
+ssa_sdpd-c-simulation-engine/src/simulate_threads.c:    sort_args[2].ll = system->z_index;
+ssa_sdpd-c-simulation-engine/src/simulate_threads.c:    for(step=0; step < system->nt; step++){
+ssa_sdpd-c-simulation-engine/src/simulate_threads.c:            next_output_step += system->output_freq;
+ssa_sdpd-c-simulation-engine/src/simulate_threads.c:            for(n = system->x_index->head; n!=NULL; n=n->next){
+ssa_sdpd-c-simulation-engine/src/simulate_threads.c:            for(n = system->x_index->head; n!=NULL; n=n->next){
+ssa_sdpd-c-simulation-engine/src/output.c:    for(n=system->particle_list->head; n!=NULL; n=n->next){
+ssa_sdpd-c-simulation-engine/src/output.c:        output_buffer_size = system->particle_list->count;
+ssa_sdpd-c-simulation-engine/src/output.c:    }else if(output_buffer_size < system->particle_list->count){
+ssa_sdpd-c-simulation-engine/src/output.c:    if(system->num_chem_species > 0){
+ssa_sdpd-c-simulation-engine/src/output.c:            output_buffer_chem_size = system->particle_list->count * system->num_chem_species;
+ssa_sdpd-c-simulation-engine/src/output.c:        }else if(output_buffer_chem_size < system->particle_list->count * system->num_chem_species){
+ssa_sdpd-c-simulation-engine/src/output.c:            output_buffer_chem_size = system->particle_list->count * system->num_chem_species;
+ssa_sdpd-c-simulation-engine/src/output.c:    for(n=system->particle_list->head; n!=NULL; n=n->next){
+ssa_sdpd-c-simulation-engine/src/output.c:        if(system->num_chem_species > 0){
+ssa_sdpd-c-simulation-engine/src/output.c:            memcpy( (void *) &output_buffer_chem[n->data->id*system->num_chem_species], (void *) n->data->C, sizeof(double)*system->num_chem_species );
+ssa_sdpd-c-simulation-engine/src/output.c:    if(system->rdme != NULL){
+ssa_sdpd-c-simulation-engine/src/output.c:            output_buffer_xx_size = output_buffer_current_num_particles*system->rdme->Mspecies;
+ssa_sdpd-c-simulation-engine/src/output.c:        }else if(output_buffer_xx_size < output_buffer_current_num_particles*system->rdme->Mspecies){
+ssa_sdpd-c-simulation-engine/src/output.c:            output_buffer_xx_size = output_buffer_current_num_particles*system->rdme->Mspecies;
+ssa_sdpd-c-simulation-engine/src/output.c:        printf("system->rdme->Mspecies*output_buffer_current_num_particles = %i\n",system->rdme->Mspecies*output_buffer_current_num_particles);
+ssa_sdpd-c-simulation-engine/src/output.c:        printf("system->rdme->Mspecies = %i\n",system->rdme->Mspecies);
+ssa_sdpd-c-simulation-engine/src/output.c:        for(i=0;i<system->rdme->Mspecies*output_buffer_current_num_particles;i++){
+ssa_sdpd-c-simulation-engine/src/output.c:            printf("%i ",system->rdme->xx[i]);
+ssa_sdpd-c-simulation-engine/src/output.c:        for(i=0;i<system->rdme->Mspecies*output_buffer_current_num_particles;i++){
+ssa_sdpd-c-simulation-engine/src/output.c:        //memcpy( (void*) &output_buffer_xx, (void*) system->rdme->xx, 
+ssa_sdpd-c-simulation-engine/src/output.c:        //    sizeof(unsigned int)*system->rdme->Mspecies*output_buffer_current_num_particles);
+ssa_sdpd-c-simulation-engine/src/output.c:        for(int i=0;i<system->rdme->Mspecies*output_buffer_current_num_particles;i++){
+ssa_sdpd-c-simulation-engine/src/output.c:            //memcpy( (void*) &output_buffer_xx[i], (void*) system->rdme->xx[i], sizeof(unsigned int));
+ssa_sdpd-c-simulation-engine/src/output.c:            output_buffer_xx[i] =  system->rdme->xx[i];
+ssa_sdpd-c-simulation-engine/src/output.c:        fprintf(fp, "%lf %lf\n", system->xlo, system->xhi);
+ssa_sdpd-c-simulation-engine/src/output.c:        fprintf(fp, "%lf %lf\n", system->ylo, system->yhi);
+ssa_sdpd-c-simulation-engine/src/output.c:        fprintf(fp, "%lf %lf\n", system->zlo, system->zhi);
+ssa_sdpd-c-simulation-engine/src/output.c:    if(system->rdme != NULL){
+ssa_sdpd-c-simulation-engine/src/output.c:        num_fields += system->rdme->Mspecies;
+ssa_sdpd-c-simulation-engine/src/output.c:    if(system->num_chem_species > 0){
+ssa_sdpd-c-simulation-engine/src/output.c:        num_fields += system->num_chem_species;
+ssa_sdpd-c-simulation-engine/src/output.c:    if(system->num_chem_species > 0){
+ssa_sdpd-c-simulation-engine/src/output.c:        for(s=0;s<system->num_chem_species;s++){
+ssa_sdpd-c-simulation-engine/src/output.c:            fprintf(fp,"C[%s] 1 %i double\n", system->rdme->species_names[s], np);
+ssa_sdpd-c-simulation-engine/src/output.c:                fprintf(fp, "%lf ",output_buffer_chem[i*system->num_chem_species+s] );
+ssa_sdpd-c-simulation-engine/src/output.c:    if(system->rdme != NULL){
+ssa_sdpd-c-simulation-engine/src/output.c:        for(s=0;s<system->rdme->Mspecies;s++){
+ssa_sdpd-c-simulation-engine/src/output.c:            fprintf(fp,"D[%s] 1 %i int\n", system->rdme->species_names[s], np);
+ssa_sdpd-c-simulation-engine/src/output.c:                fprintf(fp, "%u ",output_buffer_xx[i*system->rdme->Mspecies+s] );
