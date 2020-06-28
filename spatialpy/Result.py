@@ -22,6 +22,39 @@ import pickle
 import json
 
 
+
+common_rgb_values=['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f',
+                   '#bcbd22','#17becf','#ff0000','#00ff00','#0000ff','#ffff00','#00ffff','#ff00ff',
+                   '#800000','#808000','#008000','#800080','#008080','#000080','#ff9999','#ffcc99',
+                   '#ccff99','#cc99ff','#ffccff','#62666a','#8896bb','#77a096','#9d5a6c','#9d5a6c',
+                   '#eabc75','#ff9600','#885300','#9172ad','#a1b9c4','#18749b','#dadecf','#c5b8a8',
+                   '#000117','#13a8fe','#cf0060','#04354b','#0297a0','#037665','#eed284','#442244',
+                   '#ffddee','#702afb']
+
+common_color_scales = ["Plotly3","Jet","Blues","YlOrRd","PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu",
+                       "PuBu","GnBu","YlGn","Greens","Reds","Greys","RdPu","OrRd","Purples","Oranges"]
+
+
+def _plotly_iterate(subdomains, property_name=None, colormap=None):
+    import plotly.graph_objs as go
+
+    trace_list = []
+    for i, (name, sub_data) in enumerate(subdomains.items()):
+        # get point data for trace
+        x_data = list(map(lambda point: point[0], sub_data["points"]))
+        y_data = list(map(lambda point: point[1], sub_data["points"]))
+        z_data = list(map(lambda point: point[2], sub_data["points"]))
+
+        if property_name is not None and property_name == "type":
+            marker = {"size":5, "color":common_rgb_values[i]}
+        else:
+            marker = {"size":5, "color":sub_data["data"], "colorscale":colormap, 
+                        "colorbar":{'thickness':20,'title':name}}
+        trace = go.Scatter3d(x=x_data, y=y_data, z=z_data, name=name, mode="markers", marker=marker)
+        trace_list.append(trace)
+    return trace_list
+
+
 class Result(dict):
     """ Result object for a URDME simulation, extends the dict object. """
 
@@ -140,7 +173,7 @@ class Result(dict):
             ret = ret.flatten()
         return ret
 
-    def plot_species(self, species, t_ndx, title=None, concentration=False, deterministic=False, return_plotly_figure=False):
+    def plot_species(self, species, t_ndx, title=None, concentration=False, deterministic=False, return_plotly_figure=False, width=500, height=500, colormap=None):
         """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
@@ -164,6 +197,8 @@ class Result(dict):
         return_plotly_figure : bool
             whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
+        colormap : str
+            colormap to use
         """
         from plotly.offline import init_notebook_mode, iplot
         
@@ -173,7 +208,7 @@ class Result(dict):
         # map data to subdomains
         subdomains = {}
         for i, val in enumerate(data['type']):
-            name = "sub {}".format(val)
+            name = species
             if deterministic:
                 spec_data = data["C[{}]".format(species)][i]
             elif concentration:
@@ -187,13 +222,13 @@ class Result(dict):
             else:
                 subdomains[name] = {"points":[points[i]], "data":[spec_data]}
 
-        trace_list = _plotly_iterate(subdomains)
+        trace_list = _plotly_iterate(subdomains, colormap=colormap)
         
         scene_x = self.model.mesh.xlim[0]/2.5
         scene_y = self.model.mesh.ylim[0]/2.5
         scene_z = self.model.mesh.zlim[0]/2.5
         scene = {"aspectratio": {"x":scene_x,"y":scene_y,"z":scene_y}}
-        layout = {"width": 1000, "height": 1000, "scene":scene}
+        layout = {"width": width, "height": height, "scene":scene}
         if title is not None:
             layout["title"] = title
 
@@ -301,7 +336,8 @@ class Result(dict):
             ret = ret.flatten()
         return ret
 
-    def plot_property(self, property_name, t_ndx, title=None, return_plotly_figure=False):
+    def plot_property(self, property_name, t_ndx, title=None, return_plotly_figure=False, width=500,
+                      height=500, colormap=None):
         """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
@@ -320,6 +356,12 @@ class Result(dict):
         return_plotly_figure : bool
             whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
+        width : int
+            The width of the output window
+        height : int
+            The height of the output window
+        colormap: str
+            The style of color maps to use
         """
         from plotly.offline import init_notebook_mode, iplot
         import plotly.graph_objs as go
@@ -328,22 +370,28 @@ class Result(dict):
         points, data = self.read_step(t_ndx)
 
         subdomains = {}
-        for i, val in enumerate(data['type']):
-            name = "sub {}".format(val)
-            
-            if name in subdomains.keys():
-                subdomains[name]['points'].append(points[i])
-                subdomains[name]['data'].append(data[property_name][i])
-            else:
-                subdomains[name] = {"points":[points[i]], "data":[data[property_name][i]]}
+        if property_name == 'type':
+            for i, val in enumerate(data['type']):
+                name = "type {}".format(val)
+                
+                if name in subdomains.keys():
+                    subdomains[name]['points'].append(points[i])
+                    subdomains[name]['data'].append(data[property_name][i])
+                else:
+                    subdomains[name] = {"points":[points[i]], "data":[data[property_name][i]]}
+        else:
+            subdomains[property_name] = {
+                "points": points,
+                "data" : data[property_name]
+            }
 
-        trace_list = _plotly_iterate(subdomains, property_name=property_name)
+        trace_list = _plotly_iterate(subdomains, property_name=property_name, colormap=colormap)
 
         scene_x = self.model.mesh.xlim[0]/2.5
         scene_y = self.model.mesh.ylim[0]/2.5
         scene_z = self.model.mesh.zlim[0]/2.5
         scene = {"aspectratio": {"x":scene_x,"y":scene_y,"z":scene_y}}
-        layout = {"width": 1000, "height": 1000, "scene":scene}
+        layout = {"width": width, "height": width, "scene":scene}
         if title is not None:
             layout["title"] = title
 
