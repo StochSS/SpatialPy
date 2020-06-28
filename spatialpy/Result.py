@@ -22,6 +22,39 @@ import pickle
 import json
 
 
+
+common_rgb_values=['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f',
+                   '#bcbd22','#17becf','#ff0000','#00ff00','#0000ff','#ffff00','#00ffff','#ff00ff',
+                   '#800000','#808000','#008000','#800080','#008080','#000080','#ff9999','#ffcc99',
+                   '#ccff99','#cc99ff','#ffccff','#62666a','#8896bb','#77a096','#9d5a6c','#9d5a6c',
+                   '#eabc75','#ff9600','#885300','#9172ad','#a1b9c4','#18749b','#dadecf','#c5b8a8',
+                   '#000117','#13a8fe','#cf0060','#04354b','#0297a0','#037665','#eed284','#442244',
+                   '#ffddee','#702afb']
+
+common_color_scales = ["Blues","YlOrRd","PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu",
+                       "PuBu","GnBu","YlGn","Greens","Reds","Greys","RdPu","OrRd",
+                       "Purples","Oranges"]
+
+
+def _plotly_iterate(subdomains, property_name=None):
+    import plotly.graph_objs as go
+
+    trace_list = []
+    for i, (name, sub_data) in enumerate(subdomains.items()):
+        # get point data for trace
+        x_data = list(map(lambda point: point[0], sub_data["points"]))
+        y_data = list(map(lambda point: point[1], sub_data["points"]))
+        z_data = list(map(lambda point: point[2], sub_data["points"]))
+
+        if property_name is not None and property_name == "type":
+            marker = {"size":5, "color":common_rgb_values[i]}
+        else:
+            marker = {"size":5, "color":sub_data["data"], "colorscale":common_color_scales[i]}
+        trace = go.Scatter3d(x=x_data, y=y_data, z=z_data, name=name, mode="markers", marker=marker)
+        trace_list.append(trace)
+    return trace_list
+
+
 class Result(dict):
     """ Result object for a URDME simulation, extends the dict object. """
 
