@@ -45,11 +45,12 @@ class Model():
         self.staticDomain = True;
 
 
-    def run(self, number_of_trajectories=1, seed=None, debug_level=0):
+    def run(self, number_of_trajectories=1, seed=None, number_of_threads=None, debug_level=0):
         """ Simulate the model.
         Args:
             number_of_trajectories: How many trajectories should be run.
             seed: (int) The random seed given to the solver.
+            number_of_threads: (int) The number threads the solver will use.
             debug_level: (int) Level of output from the solver: 0, 1, or 2. Default: 0.
         Returns:
             A SpatialPy.Result object with the results of the simulation.
@@ -57,7 +58,7 @@ class Model():
 
         sol = Solver(self, debug_level=debug_level)
 
-        return sol.run(number_of_trajectories=number_of_trajectories, seed=seed)
+        return sol.run(number_of_trajectories=number_of_trajectories, seed=seed, number_of_threads=number_of_threads)
 
 
     def set_timesteps(self, step_size, num_steps):
