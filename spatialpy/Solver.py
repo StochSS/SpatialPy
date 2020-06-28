@@ -550,7 +550,7 @@ class Solver:
             if bc.species is not None:
                 if bc.deterministic:
                     s_ndx = self.model.species_map[self.model.listOfSpecies[bc.species]]
-                    #bcstr += 
+                    bcstr += "me->C[{0}] = {1};".format(s_ndx,bc.value)
                 else:
                     raise Exception("BoundaryConditions don't work for stochastic species yet")
             elif bc.property is not None:

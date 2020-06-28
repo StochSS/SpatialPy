@@ -201,6 +201,9 @@ class Result(dict):
             colormap to use
         """
         from plotly.offline import init_notebook_mode, iplot
+
+        if(t_ndx < 0):
+            t_ndx = len(self.get_timespan()) + t_ndx
         
         # read data at time point
         points, data = self.read_step(t_ndx)
@@ -224,11 +227,10 @@ class Result(dict):
 
         trace_list = _plotly_iterate(subdomains, colormap=colormap)
         
-        scene_x = self.model.mesh.xlim[0]/2.5
-        scene_y = self.model.mesh.ylim[0]/2.5
-        scene_z = self.model.mesh.zlim[0]/2.5
-        scene = {"aspectratio": {"x":scene_x,"y":scene_y,"z":scene_y}}
-        layout = {"width": width, "height": height, "scene":scene}
+        scene = {
+            "aspectmode": 'data',
+        }
+        layout = {"width": width,"height": height,"scene":scene}
         if title is not None:
             layout["title"] = title
 
