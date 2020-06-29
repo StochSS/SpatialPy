@@ -22,9 +22,6 @@ import pickle
 import json
 
 
-# module-level variable to for javascript export in IPython/Jupyter notebooks
-__pyurdme_javascript_libraries_loaded = False
-
 common_rgb_values = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f',
                          '#bcbd22', '#17becf', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff',
                          '#800000', '#808000', '#008000', '#800080', '#008080', '#000080', '#ff9999', '#ffcc99',
@@ -37,20 +34,6 @@ common_color_scales = ["Blues","YlOrRd","PuRd","BuGn","YlOrBr","PuBuGn","BuPu","
                         "PuBu","GnBu","YlGn","Greens","Reds","Greys","RdPu","OrRd",
                         "Purples","Oranges"]
         
-def load_pyurdme_javascript_libraries():
-    global __pyurdme_javascript_libraries_loaded
-    if not __pyurdme_javascript_libraries_loaded:
-        __pyurdme_javascript_libraries_loaded = True
-        import os.path
-        import IPython.display
-        with open(os.path.join(os.path.dirname(__file__),'data/three.js_templates/js/three.js')) as fd:
-            bufa = fd.read()
-        with open(os.path.join(os.path.dirname(__file__),'data/three.js_templates/js/render.js')) as fd:
-            bufb = fd.read()
-        with open(os.path.join(os.path.dirname(__file__),'data/three.js_templates/js/OrbitControls.js')) as fd:
-            bufc = fd.read()
-        IPython.display.display(IPython.display.HTML('<script>'+bufa+bufc+bufb+'</script>'))
-
 def _plotly_iterate(subdomains, size, property_name=None):
     import plotly.graph_objs as go
 
