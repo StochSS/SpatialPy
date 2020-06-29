@@ -499,12 +499,13 @@ class Solver:
             self.model.listOfSubdomainIDs), len(self.model.listOfSpecies), len(self.model.listOfReactions))
         system_config += "system->static_domain = {0};\n".format(int(self.model.staticDomain))
         if(len(self.model.listOfSpecies) > 0):
+            system_config += "system->subdomain_diffusion_matrix = input_subdomain_diffusion_matrix;\n"
             system_config += "system->stochic_matrix = input_N_dense;\n"
             system_config += "system->chem_rxn_rhs_functions = ALLOC_ChemRxnFun();\n"
 
         system_config += "system->dt = {0};\n".format(self.model.timestep_size)
         system_config += "system->nt = {0};\n".format(self.model.num_timesteps)
-        system_config += "system->output_freq = 1;\n"
+        system_config += "system->output_freq = {0};\n".format(self.model.output_freq)
         if self.h is None:
             self.h = self.model.mesh.find_h()
         if self.h == 0.0:

@@ -100,8 +100,9 @@ class Result(dict):
     def read_step(self, step_num, debug=False):
         """ Read the data for simulation step 'step_num'. """
         reader = VTKReader(debug=debug)
-        filename = os.path.join(self.result_dir, "output{0}.vtk".format(step_num))
-        #print("read_step({0}) opening '{1}'".format(step_num, filename))
+        num = int(step_num * self.model.output_freq)
+        filename = os.path.join(self.result_dir, "output{0}.vtk".format(num))
+        print("read_step({0}) opening '{1}'".format(step_num, filename))
         reader.setfilename(filename)
         reader.readfile()
         if reader.getpoints() is None or reader.getarrays() is None:
@@ -113,7 +114,7 @@ class Result(dict):
 
     def get_timespan(self):
         self.tspan = numpy.linspace(0,self.model.num_timesteps,
-                num=self.model.num_timesteps+1) * self.model.timestep_size
+                num=math.ceil(self.model.num_timesteps/self.model.output_freq)+1) * self.model.timestep_size
         return self.tspan
 
     def get_species(self, species, timepoints=None, concentration=False, deterministic=False, debug=False):

@@ -6,6 +6,7 @@ from spatialpy.Solver import Solver
 import numpy
 import scipy
 import warnings
+import math
 
 
 
@@ -30,19 +31,22 @@ class Model():
         # Dict that holds flattended parameters and species for
         # evaluation of expressions in the scope of the model.
         self.namespace = OrderedDict([])
+        self.species_map = {}
 
         ######################
         self.mesh = None
         self.listOfSubdomainIDs = [1] # starts with subdomain '1'
         self.listOfDiffusionRestrictions = {}
-        self.timestep_size = None
-        self.num_timesteps = None
         self.listOfDataFunctions = []
         self.listOfInitialConditions = []
         self.listOfBoundaryConditions = []
-        self.species_map = {}
-        self.tspan = None
+
         self.staticDomain = True;
+
+        self.tspan = None
+        self.timestep_size = 1e-5
+        self.num_timesteps = None
+        self.output_freq = None
 
 
     def run(self, number_of_trajectories=1, seed=None, number_of_threads=None, debug_level=0):
@@ -70,9 +74,13 @@ class Model():
         Note: the number of output times will be num_steps+1 as the first
               output will be at time zero.
         """
-        #TODO, add checking
-        self.timestep_size = step_size
-        self.num_timesteps = num_steps
+        if self.timestep_size is None:
+            raise InvalidModelError("timestep_size is not set")
+
+        steps_per_output = math.ceil(step_size/self.timestep_size)
+
+        self.num_timesteps = math.ceil(num_steps *  steps_per_output)
+        self.output_freq = steps_per_output
 
     def timespan(self, time_span):
         """
@@ -91,8 +99,7 @@ class Model():
         isuniform = (len(set(items)) == 1)
 
         if isuniform:
-            self.timestep_size = items_diff[0]
-            self.num_timesteps = len(items_diff)
+            self.set_timesteps( items_diff[0], len(items_diff) )
         else:
             raise InvalidModelError("Only uniform timespans are supported")
 

@@ -12,6 +12,9 @@
 #include <unistd.h>
 
 void take_step(void*me, system_t*system, unsigned int step, unsigned int substep){
+    //particle_t*me2 = (particle_t*)me;
+    //printf("take_step(me->id=%i step=%i substep=%i)\n",me2->id, step, substep);
+    //fflush(stdout);
     if(substep==0){
         take_step1((particle_t*)me,system,step);
     }else if(substep==1){
@@ -33,11 +36,12 @@ unsigned int get_number_of_substeps(){
 void take_step1(particle_t* me, system_t* system, unsigned int step)
 {
     int i;
+    //printf("particle id=%i Q[0]=%e\n",me->id,me->Q[0]);
 
-    // Step 1.1: Enforce initial velocity conditions at step 0
-    // This is now done directly via python interface
-    //if (step == 0)
-    //    enforceVelocity(me, system);
+    // Step 1.1: 
+    if(system->static_domain == 0){
+        find_neighbors(me, system);
+    }
 
     // Step 1.2: Predictor step
     
@@ -55,8 +59,10 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
         me->rho = me->rho + 0.5 * system->dt * me->Frho;
     }
     // update half-state of chem rxn
-    for(i=0; i< system->num_chem_species; i++){
-        me->C[i] += me->Q[i] * system->dt * 0.5;
+    if(step > 0){
+        for(i=0; i< system->num_chem_species; i++){
+            me->C[i] += me->Q[i] * system->dt * 0.5;
+        }
     }
 
     // Apply boundary conditions
@@ -89,19 +95,13 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
 void compute_forces(particle_t* me, system_t* system, unsigned int step)
 {
 
-    // Step 2.1: Build neighbor list at first step
-    if (system->static_domain) {
-        if (step == 0) {
-            find_neighbors(me, system);
-        }
-        return;
-    }
-
+    //printf("compute_forces() particle id=%i Q[0]=%e\n",me->id,me->Q[0]);
     // Step 2.2: Find nearest neighbors
     find_neighbors(me, system);
 
     // Step 2.3: Compute forces
     pairwiseForce(me, me->neighbors, system);
+
 }
 
 
