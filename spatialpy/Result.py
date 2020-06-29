@@ -51,7 +51,7 @@ def load_pyurdme_javascript_libraries():
             bufc = fd.read()
         IPython.display.display(IPython.display.HTML('<script>'+bufa+bufc+bufb+'</script>'))
 
-def _plotly_iterate(subdomains, property_name=None):
+def _plotly_iterate(subdomains, size, property_name=None):
     import plotly.graph_objs as go
 
     trace_list = []
@@ -62,9 +62,9 @@ def _plotly_iterate(subdomains, property_name=None):
         z_data = list(map(lambda point: point[2], sub_data["points"]))
 
         if property_name is not None and property_name == "type":
-            marker = {"size":5, "color":common_rgb_values[i]}
+            marker = {"size":size, "color":common_rgb_values[i]}
         else:
-            marker = {"size":5, "color":sub_data["data"], "colorscale":common_color_scales[i]}
+            marker = {"size":size, "color":sub_data["data"], "colorscale":common_color_scales[i]}
         trace = go.Scatter3d(x=x_data, y=y_data, z=z_data, name=name, mode="markers", marker=marker)
         trace_list.append(trace)
     return trace_list
@@ -221,7 +221,7 @@ class Result(dict):
             ret = ret.flatten()
         return ret
 
-    def plot_species(self, species, t_ndx=0, t_ndx_list=None, animated=False, speed=1, title=None, concentration=False, deterministic=False, return_plotly_figure=False):
+    def plot_species(self, species, t_ndx=0, t_ndx_list=None, size=5, animated=False, speed=1, title=None, concentration=False, deterministic=False, return_plotly_figure=False):
         """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
@@ -279,7 +279,7 @@ class Result(dict):
             else:
                 subdomains[name] = {"points":[points[i]], "data":[spec_data]}
 
-        trace_list = _plotly_iterate(subdomains)
+        trace_list = _plotly_iterate(subdomains, size)
         
         scene_x = self.model.mesh.xlim[0]/2.5
         scene_y = self.model.mesh.ylim[0]/2.5
@@ -410,7 +410,7 @@ class Result(dict):
             ret = ret.flatten()
         return ret
 
-    def plot_property(self, property_name, t_ndx, title=None, return_plotly_figure=False):
+    def plot_property(self, property_name, t_ndx, size=5, title=None, return_plotly_figure=False):
         """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
@@ -446,7 +446,7 @@ class Result(dict):
             else:
                 subdomains[name] = {"points":[points[i]], "data":[data[property_name][i]]}
 
-        trace_list = _plotly_iterate(subdomains, property_name=property_name)
+        trace_list = _plotly_iterate(subdomains, size, property_name=property_name)
 
         scene_x = self.model.mesh.xlim[0]/2.5
         scene_y = self.model.mesh.ylim[0]/2.5
