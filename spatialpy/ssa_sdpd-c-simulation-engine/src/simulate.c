@@ -17,8 +17,9 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
     int i;
 
     // Step 1.1: Enforce initial velocity conditions at step 0
-    if (step == 0)
-        enforceVelocity(me, system);
+    // This is now done directly via python interface
+    //if (step == 0)
+    //    enforceVelocity(me, system);
 
     // Step 1.2: Predictor step
     
@@ -39,6 +40,9 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
     for(i=0; i< system->num_chem_species; i++){
         me->C[i] += me->Q[i] * system->dt * 0.5;
     }
+
+    // Apply boundary conditions
+    applyBoundaryConditions(me, system);
 
 
 
@@ -111,11 +115,10 @@ void take_step2(particle_t* me, system_t* system, unsigned int step)
 
 
     // Step 3.2: Compute boundary volume fractions (bvf)
-    computeBoundaryVolumeFraction(me, me->neighbors, system);
-
-    // Step 3.3: Apply Boundary Conditions
-    if (me -> solidTag == 0) {
-        applyBoundaryCondition(me, system);
+    // Step 3.3: Apply BVF 
+    if (me->solidTag == 0) {
+        computeBoundaryVolumeFraction(me, me->neighbors, system);
+        applyBoundaryVolumeFraction(me, system);
     }
 
     //  Solve deterministic/stochastic reaction-diffusion system
@@ -123,4 +126,7 @@ void take_step2(particle_t* me, system_t* system, unsigned int step)
     for(i=0; i< system->num_chem_species; i++){
         me->C[i] += me->Q[i] * system->dt * 0.5;
     }
+    // Apply boundary conditions
+    applyBoundaryConditions(me, system);
+
 }

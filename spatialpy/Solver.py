@@ -21,9 +21,6 @@ class Solver:
         #    raise SimulationError("Solver constructors must take a Model as an argument.")
         # if not issubclass(self.__class__, Solver):
         #    raise SimulationError("Solver classes must be a subclass of SpatialPy.Solver.")
-        if not hasattr(self, 'NAME'):
-            raise SimulationError(
-                "Solver classes must implement a NAME attribute.")
 
         self.model = model
         self.is_compiled = False
@@ -66,7 +63,7 @@ class Solver:
         self.create_propensity_file(file_name=self.prop_file_name)
 
         # Build the solver
-        makefile = self.SpatialPy_ROOT+'/build/Makefile.'+self.NAME
+        makefile = self.SpatialPy_ROOT+'/build/Makefile'
         cmd = " ".join(['cd', self.build_dir, ';', 'make', '-f', makefile, 'ROOT=' +
                         self.SpatialPy_ROOT, 'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir])
         if self.debug_level > 1:
@@ -97,14 +94,13 @@ class Solver:
 
         self.is_compiled = True
 
-    def run(self, number_of_trajectories=1, seed=None, timeout=None):
+    def run(self, number_of_trajectories=1, seed=None, timeout=None, number_of_threads=None):
         """ Run one simulation of the model.
         Args:
             number_of_trajectories: (int) How many trajectories should be simulated.
             seed: (int) the random number seed (incremented by one for multiple runs).
             timeout: (int) maximum number of seconds the solver can run.
-
-
+            number_of_threads: (int) the number threads the solver will use.
         Returns:
             Result object.
                 or, if number_of_trajectories > 1
@@ -124,8 +120,12 @@ class Solver:
             solver_cmd = 'cd {0}'.format(
                 outfile) + ";" + os.path.join(self.build_dir, self.executable_name)
 
+            if number_of_threads is not None:
+                solver_cmd += " -t " + str(number_of_threads)
+
             if seed is not None:
-                solver_cmd += " "+str(seed+run_ndx)
+                solver_cmd += " -s "+str(seed+run_ndx)
+
             if self.debug_level > 1:
                 print('cmd: {0}\n'.format(solver_cmd))
             stdout = ''
@@ -232,7 +232,6 @@ class Solver:
 
         # Reactions
         funheader = "double __NAME__(const int *x, double t, const double vol, const double *data, int sd)"
-        #funheader = "double __NAME__(const int *x, double t, const double vol, const double *data, int sd, int voxel, int *xx, const size_t *irK, const size_t *jcK, const double *prK)"
 
         funcs = ""
         funcinits = ""
@@ -274,9 +273,46 @@ class Solver:
         propfilestr = propfilestr.replace("__DEFINE_PROPFUNS__", funcinits)
 
         # TODO make deterministic chemical reaction functions work
+        funheader = "double det__NAME__(const double *x, double t, const double vol, const double *data, int sd)"
         deterministic_chem_rxn_functions = ""
-        propfilestr = propfilestr.replace(
-            "__DEFINE_CHEM_FUNS__", deterministic_chem_rxn_functions)
+        deterministic_chem_rxn_function_init = ""
+        ############################################
+        i = 0
+        for R in self.model.listOfReactions:
+            func = ""
+            rname = self.model.listOfReactions[R].name
+            func += funheader.replace("__NAME__", rname) + "\n{\n"
+            if self.model.listOfReactions[R].restrict_to == None or (isinstance(self.model.listOfReactions[R].restrict_to, list) and len(self.model.listOfReactions[R].restrict_to) == 0):
+                func += "return "
+                func += self.model.listOfReactions[R].ode_propensity_function
+                func += ";"
+            else:
+                func += "if("
+                if isinstance(self.model.listOfReactions[R].restrict_to, list) and len(self.model.listOfReactions[R].restrict_to) > 0:
+                    for sd in self.model.listOfReactions[R].restrict_to:
+                        func += "sd == " + str(sd) + "||"
+                    func = func[:-2]
+                elif isinstance(self.model.listOfReactions[R].restrict_to, int):
+                    func += "sd == " + \
+                        str(self.model.listOfReactions[R].restrict_to)
+                else:
+                    raise SimulationError(
+                        "When restricting reaction to subdomains, you must specify either a list or an int")
+                func += "){\n"
+                func += "return "
+                func += self.model.listOfReactions[R].ode_propensity_function
+                func += ";"
+                func += "\n}else{"
+                func += "\n\treturn 0.0;}"
+
+            func += "\n}"
+            deterministic_chem_rxn_functions += func + "\n\n"
+            deterministic_chem_rxn_function_init += "    ptr[" + \
+                str(i) + "] = (ChemRxnFun) det" + rname + ";\n"
+            i += 1
+        ############################################
+        propfilestr = propfilestr.replace("__DEFINE_CHEM_FUNS__", deterministic_chem_rxn_functions)
+        propfilestr = propfilestr.replace("__DEFINE_CHEM_FUN_INITS__", deterministic_chem_rxn_function_init)
 
         # End of pyurdme replacements
         # SSA-SDPD values here
@@ -301,132 +337,136 @@ class Solver:
 
         input_constants = ""
 
-        outstr = "static unsigned int input_u0[{0}] = ".format(nspecies*ncells)
-        outstr += "{"
-        for i in range(ncells):
-            for s in range(nspecies):
-                if i+s > 0:
-                    outstr += ','
-                outstr += str(int(self.model.u0[s, i]))
-        outstr += "};"
-        input_constants += outstr + "\n"
-        # attache the vol to the model as well, for backwards compatablity
-        self.model.vol = self.model.mesh.get_vol()
-        outstr = "static double input_vol[{0}] = ".format(
-            self.model.mesh.get_vol().shape[0])
-        outstr += "{"
-        for i in range(self.model.mesh.get_vol().shape[0]):
-            if i > 0:
-                outstr += ','
-            outstr += str(self.model.mesh.get_vol()[i])
-        outstr += "};"
-        input_constants += outstr + "\n"
-        outstr = "static int input_sd[{0}] = ".format(
-            self.model.mesh.sd.shape[0])
-        outstr += "{"
-        for i in range(self.model.mesh.sd.shape[0]):
-            if i > 0:
-                outstr += ','
-            outstr += str(self.model.mesh.sd[i])
-        outstr += "};"
-        input_constants += outstr + "\n"
-
-        data_fn_defs = ""
-        if len(self.model.listOfDataFunctions) == 0:
-            outstr = "static int input_dsize = 1;"
-            input_constants += outstr + "\n"
-            outstr = "static double input_data[{0}] = ".format(ncells)
-            outstr += "{" + ",".join(['0']*80) + "};"
-            input_constants += outstr + "\n"
-        else:
-            outstr = "static int input_dsize = {0};".format(
-                len(self.model.listOfDataFunctions))
-            input_constants += outstr + "\n"
-            outstr = "static double input_data[{0}] = ".format(
-                ncells*len(self.model.listOfDataFunctions))
+        if len(self.model.listOfSpecies) > 0:
+            outstr = "static unsigned int input_u0[{0}] = ".format(nspecies*ncells)
             outstr += "{"
-            for v_ndx in range(ncells):
-                for ndf in range(len(self.model.listOfDataFunctions)):
-                    if ndf+v_ndx > 0:
+            for i in range(ncells):
+                for s in range(nspecies):
+                    if i+s > 0:
                         outstr += ','
-                    outstr += "{0}".format(self.model.listOfDataFunctions[ndf].map(
-                        self.model.mesh.coordinates()[v_ndx, :]))
+                    outstr += str(int(self.model.u0[s, i]))
+            outstr += "};"
+            input_constants += outstr + "\n"
+            # attache the vol to the model as well, for backwards compatablity
+            self.model.vol = self.model.mesh.get_vol()
+            outstr = "static double input_vol[{0}] = ".format(
+                self.model.mesh.get_vol().shape[0])
+            outstr += "{"
+            for i in range(self.model.mesh.get_vol().shape[0]):
+                if i > 0:
+                    outstr += ','
+                outstr += str(self.model.mesh.get_vol()[i])
+            outstr += "};"
+            input_constants += outstr + "\n"
+            outstr = "static int input_sd[{0}] = ".format(
+                self.model.mesh.sd.shape[0])
+            outstr += "{"
+            for i in range(self.model.mesh.sd.shape[0]):
+                if i > 0:
+                    outstr += ','
+                outstr += str(self.model.mesh.sd[i])
             outstr += "};"
             input_constants += outstr + "\n"
 
-            for ndf in range(len(self.model.listOfDataFunctions)):
-                data_fn_defs += "#define {0} data[{1}]\n".format(
-                    self.model.listOfDataFunctions[ndf].name, ndf)
+        data_fn_defs = ""
+        if len(self.model.listOfSpecies) > 0:
+            if len(self.model.listOfDataFunctions) == 0:
+                outstr = "static int input_dsize = 1;"
+                input_constants += outstr + "\n"
+                outstr = "static double input_data[{0}] = ".format(ncells)
+                outstr += "{" + ",".join(['0']*80) + "};"
+                input_constants += outstr + "\n"
+            else:
+                outstr = "static int input_dsize = {0};".format(
+                    len(self.model.listOfDataFunctions))
+                input_constants += outstr + "\n"
+                outstr = "static double input_data[{0}] = ".format(
+                    ncells*len(self.model.listOfDataFunctions))
+                outstr += "{"
+                for v_ndx in range(ncells):
+                    for ndf in range(len(self.model.listOfDataFunctions)):
+                        if ndf+v_ndx > 0:
+                            outstr += ','
+                        outstr += "{0}".format(self.model.listOfDataFunctions[ndf].map(
+                            self.model.mesh.coordinates()[v_ndx, :]))
+                outstr += "};"
+                input_constants += outstr + "\n"
+
+                for ndf in range(len(self.model.listOfDataFunctions)):
+                    data_fn_defs += "#define {0} data[{1}]\n".format(
+                        self.model.listOfDataFunctions[ndf].name, ndf)
         propfilestr = propfilestr.replace(
             "__DATA_FUNCTION_DEFINITIONS__", data_fn_defs)
 
-        N = self.model.create_stoichiometric_matrix()
-        if(min(N.shape) > 0):
-            Nd = N.todense() # this will not work if Nrxn or Nspecies is zero
-            outstr = "static int input_N_dense[{0}] = ".format(
-                Nd.shape[0] * Nd.shape[1])
-            outstr += "{"
-            for i in range(Nd.shape[0]):
-                for j in range(Nd.shape[1]):
-                    if j+i > 0:
+        if len(self.model.listOfSpecies) > 0:
+            N = self.model.create_stoichiometric_matrix()
+            if(min(N.shape) > 0):
+                Nd = N.todense() # this will not work if Nrxn or Nspecies is zero
+                outstr = "static int input_N_dense[{0}] = ".format(
+                    Nd.shape[0] * Nd.shape[1])
+                outstr += "{"
+                for i in range(Nd.shape[0]):
+                    for j in range(Nd.shape[1]):
+                        if j+i > 0:
+                            outstr += ','
+                        outstr += "{0}".format(Nd[i, j])
+                outstr += "};\n"
+                outstr += "static size_t input_irN[{0}] = ".format(len(N.indices))
+                outstr += "{"
+                for i in range(len(N.indices)):
+                    if i > 0:
                         outstr += ','
-                    outstr += "{0}".format(Nd[i, j])
-            outstr += "};\n"
-            outstr += "static size_t input_irN[{0}] = ".format(len(N.indices))
-            outstr += "{"
-            for i in range(len(N.indices)):
-                if i > 0:
-                    outstr += ','
-                outstr += str(N.indices[i])
-            outstr += "};"
-            input_constants += outstr + "\n"
-            outstr = "static size_t input_jcN[{0}] = ".format(len(N.indptr))
-            outstr += "{"
-            for i in range(len(N.indptr)):
-                if i > 0:
-                    outstr += ','
-                outstr += str(N.indptr[i])
-            outstr += "};"
-            input_constants += outstr + "\n"
-            outstr = "static int input_prN[{0}] = ".format(len(N.data))
-            outstr += "{"
-            for i in range(len((N.data))):
-                if i > 0:
-                    outstr += ','
-                outstr += str(N.data[i])
-            outstr += "};"
-            input_constants += outstr + "\n"
-        else:
-            input_constants += "static int input_N_dense[0] = {};\n"
-            input_constants += "static size_t input_irN[0] = {};\n"
-            input_constants += "static size_t input_jcN[0] = {};\n"
-            input_constants += "static int input_prN[0] = {};\n"
+                    outstr += str(N.indices[i])
+                outstr += "};"
+                input_constants += outstr + "\n"
+                outstr = "static size_t input_jcN[{0}] = ".format(len(N.indptr))
+                outstr += "{"
+                for i in range(len(N.indptr)):
+                    if i > 0:
+                        outstr += ','
+                    outstr += str(N.indptr[i])
+                outstr += "};"
+                input_constants += outstr + "\n"
+                outstr = "static int input_prN[{0}] = ".format(len(N.data))
+                outstr += "{"
+                for i in range(len((N.data))):
+                    if i > 0:
+                        outstr += ','
+                    outstr += str(N.data[i])
+                outstr += "};"
+                input_constants += outstr + "\n"
+            else:
+                input_constants += "static int input_N_dense[0] = {};\n"
+                input_constants += "static size_t input_irN[0] = {};\n"
+                input_constants += "static size_t input_jcN[0] = {};\n"
+                input_constants += "static int input_prN[0] = {};\n"
 
-        G = self.model.create_dependency_graph()
-        outstr = "static size_t input_irG[{0}] = ".format(len(G.indices))
-        outstr += "{"
-        for i in range(len(G.indices)):
-            if i > 0:
-                outstr += ','
-            outstr += str(G.indices[i])
-        outstr += "};"
-        input_constants += outstr + "\n"
+            G = self.model.create_dependency_graph()
+            outstr = "static size_t input_irG[{0}] = ".format(len(G.indices))
+            outstr += "{"
+            for i in range(len(G.indices)):
+                if i > 0:
+                    outstr += ','
+                outstr += str(G.indices[i])
+            outstr += "};"
+            input_constants += outstr + "\n"
 
-        outstr = "static size_t input_jcG[{0}] = ".format(len(G.indptr))
-        outstr += "{"
-        for i in range(len(G.indptr)):
-            if i > 0:
-                outstr += ','
-            outstr += str(G.indptr[i])
-        outstr += "};"
-        input_constants += outstr + "\n"
-        outstr = "const char* const input_species_names[] = {"
-        for i, s in enumerate(self.model.listOfSpecies.keys()):
-            if i > 0:
-                outstr += ","
-            outstr += '"'+s+'"'
-        outstr += ", 0};"
-        input_constants += outstr + "\n"
+            outstr = "static size_t input_jcG[{0}] = ".format(len(G.indptr))
+            outstr += "{"
+            for i in range(len(G.indptr)):
+                if i > 0:
+                    outstr += ','
+                outstr += str(G.indptr[i])
+            outstr += "};"
+            input_constants += outstr + "\n"
+        if(len(self.model.listOfSpecies)>0):
+            outstr = "const char* const input_species_names[] = {"
+            for i, s in enumerate(self.model.listOfSpecies.keys()):
+                if i > 0:
+                    outstr += ","
+                outstr += '"'+s+'"'
+            outstr += ", 0};"
+            input_constants += outstr + "\n"
         num_subdomains = len(self.model.listOfSubdomainIDs)
         outstr = "const int input_num_subdomain = {0};".format(num_subdomains)
         input_constants += outstr + "\n"
@@ -458,7 +498,7 @@ class Solver:
         system_config += "system_t* system = create_system({0},{1},{2});\n".format(len(
             self.model.listOfSubdomainIDs), len(self.model.listOfSpecies), len(self.model.listOfReactions))
         system_config += "system->static_domain = {0};\n".format(int(self.model.staticDomain))
-        if(len(self.model.listOfReactions) > 0):
+        if(len(self.model.listOfSpecies) > 0):
             system_config += "system->stochic_matrix = input_N_dense;\n"
             system_config += "system->chem_rxn_rhs_functions = ALLOC_ChemRxnFun();\n"
 
@@ -482,6 +522,42 @@ class Solver:
         system_config += "system->zhi = {0};\n".format(self.model.mesh.zlim[1])
 
         propfilestr = propfilestr.replace("__SYSTEM_CONFIG__", system_config)
+
+        init_rdme=''
+        if(len(self.model.listOfSpecies) > 0):
+            init_rdme = '''
+    initialize_rdme(system, NUM_VOXELS, NUM_SPECIES, NUM_REACTIONS, input_vol, input_sd,
+                    input_data, input_dsize, input_irN, input_jcN, input_prN, input_irG,
+                    input_jcG, input_species_names, input_u0, input_num_subdomain,
+                    input_subdomain_diffusion_matrix);
+
+'''
+        propfilestr = propfilestr.replace("__INIT_RDME__", init_rdme)
+
+
+        init_bc = ""
+        for bc in self.model.listOfBoundaryConditions:
+            cond=[]
+            if(bc.xmin is not None): cond.append("(me->x[0] >= {0})".format(bc.xmin))
+            if(bc.xmax is not None): cond.append("(me->x[0] <= {0})".format(bc.xmax))
+            if(bc.ymin is not None): cond.append("(me->x[1] >= {0})".format(bc.ymin))
+            if(bc.ymax is not None): cond.append("(me->x[1] <= {0})".format(bc.ymax))
+            if(bc.zmin is not None): cond.append("(me->x[2] >= {0})".format(bc.zmin))
+            if(bc.zmax is not None): cond.append("(me->x[2] <= {0})".format(bc.zmax))
+            if(len(cond)==0): raise Exception('need at least one condition on the BoundaryCondition')
+            bcstr = "if(" + '&&'.join(cond) + "){"
+            if(bc.property == 'v'):
+                for i in range(3):
+                    bcstr+= "me->v[{0}]={1};".format(i,bc.value[i])
+            elif(bc.property == 'nu'):
+                bcstr+= "me->nu={0};".format(bc.value)
+            elif(bc.property == 'rho'):
+                bcstr+= "me->rho={0};".format(bc.value)
+            else:
+                raise Exception("TODO: handle boundary condition for '{0}'".format(bc.property))
+            bcstr+= "}"
+            init_bc += bcstr
+        propfilestr = propfilestr.replace("__BOUNDARY_CONDITIONS__", init_bc)
 
         #### Write the data to the file ####
         propfile.write(propfilestr)

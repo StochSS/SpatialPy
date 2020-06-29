@@ -42,30 +42,26 @@ class Model():
         self.num_timesteps = None
         self.listOfDataFunctions = []
         self.listOfInitialConditions = []
+        self.listOfBoundaryConditions = []
         self.species_map = {}
         self.tspan = None
         self.staticDomain = True;
 
 
-    def run(self, number_of_trajectories=1, solver=None, seed=None, debug_level=0):
+    def run(self, number_of_trajectories=1, seed=None, number_of_threads=None, debug_level=0):
         """ Simulate the model.
         Args:
-            solver: A str or class type that is a subclass of SpatialPy.Solver.  Default: NSM solver.
             number_of_trajectories: How many trajectories should be run.
-            seed: An int, the random seed given to the solver.
-            debug_level: An int, Level of output from the solver: 0, 1, or 2. Default: 0.
+            seed: (int) The random seed given to the solver.
+            number_of_threads: (int) The number threads the solver will use.
+            debug_level: (int) Level of output from the solver: 0, 1, or 2. Default: 0.
         Returns:
-            A SpatialPY.Result object with the results of the simulation.
+            A SpatialPy.Result object with the results of the simulation.
         """
-        if solver is not None:
-            if ((isinstance(solver, type)
-                    and issubclass(solver, Solver))) or issubclass(type(solver), Solver):
-                sol = solver(self, debug_level=debug_level)
-        else:
-            from spatialpy.nsmsolver import NSMSolver
-            sol = NSMSolver(self, debug_level=debug_level)
 
-        return sol.run(number_of_trajectories=number_of_trajectories, seed=seed)
+        sol = Solver(self, debug_level=debug_level)
+
+        return sol.run(number_of_trajectories=number_of_trajectories, seed=seed, number_of_threads=number_of_threads)
 
 
     def set_timesteps(self, step_size, num_steps):
@@ -160,14 +156,15 @@ class Model():
             spatialpy.DataFunction class. It must implement a function 'map(x)' which takes a
             the spatial positon 'x' as an array, and it returns a float value.
         """
-        #TODO validate input
         self.listOfDataFunctions.append(data_function)
 
     def add_initial_condition(self, ic):
         """ Add an initial condition object to the initialization of the model."""
-        #TODO: validate model
         self.listOfInitialConditions.append(ic)
 
+    def add_boundary_condition(self, bc):
+        """ Add an BoundaryCondition object to the model."""
+        self.listOfBoundaryConditions.append(bc)
 
     def update_namespace(self):
         """ Create a dict with flattened parameter and species objects. """
@@ -544,6 +541,7 @@ class Reaction():
         self.massaction = massaction
 
         self.propensity_function = propensity_function
+        self.ode_propensity_function = propensity_function
 
         if self.propensity_function is None:
             if rate is None:
@@ -604,6 +602,7 @@ class Reaction():
         # Case EmptySet -> Y
 
         propensity_function = self.marate.name
+        self.ode_propensity_function = self.marate.name
 
         # There are only three ways to get 'total_stoch==2':
         for r in self.reactants:
@@ -614,6 +613,7 @@ class Reaction():
             else:
                 # Case 3: X1, X2 -> Y;
                 propensity_function += "*" + str(r)
+            self.ode_propensity_function += "*" + str(r) 
 
         # Set the volume dependency based on order.
         order = len(self.reactants)

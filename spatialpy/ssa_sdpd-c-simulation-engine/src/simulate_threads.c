@@ -214,7 +214,7 @@ void run_simulation(int num_threads, system_t* system){
         // Wait until Sort Index threads are done
         pthread_barrier_wait(&end_sort_barrier);
         if(debug_flag) printf("[%i] Sort Index threads finished\n",step);
-        if(debug_flag && step==0){
+        if(debug_flag>2 && step==0){
             printf("x_index = [");
             node*n;
             for(n = system->x_index->head; n!=NULL; n=n->next){

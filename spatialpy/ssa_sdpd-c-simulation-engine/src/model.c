@@ -259,7 +259,7 @@ void computeBoundaryVolumeFraction(particle_t* me, linked_list* neighbors,
 }
 
 
-void applyBoundaryCondition(particle_t* me, system_t* system)
+void applyBoundaryVolumeFraction(particle_t* me, system_t* system)
 {
     int i;
     double v_dot_normal;
@@ -275,11 +275,4 @@ void applyBoundaryCondition(particle_t* me, system_t* system)
 }
 
 
-void enforceVelocity(particle_t* me, system_t* system)
-{
-    // Enforce velocity on top lid (v[0] = 1.0)
-    if (me->x[1] >= 0.5) {
-        me->v[0] = 1.0;
-    }
-}
 

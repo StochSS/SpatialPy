@@ -1,5 +1,5 @@
 #include "linked_list.h"
-#include <time.h> 
+#include <time.h>
 #include "output.h"
 #include "particle.h"
 #include "simulate_rdme.h"
@@ -96,67 +96,67 @@ void print_current_state(int subvol, unsigned int*xx,const size_t Mspecies){
 /*void nsm_core(const size_t *irD,const size_t *jcD,const double *prD,
               const size_t *irN,const size_t *jcN,const int *prN,
               const size_t *irG,const size_t *jcG,
-	      const double *vol,
-	      const int *sd,
-	      const double *data,
+          const double *vol,
+          const int *sd,
+          const double *data,
               const size_t Ncells,
               const size_t Mspecies,
-	      const size_t Mreactions,
-	      const size_t dsize,
-	      int report_level
+          const size_t Mreactions,
+          const size_t dsize,
+          int report_level
               int *xx,
-	      double end_time)
+          double end_time)
 */
 /* Specification of the inputs:
- 
+
  Ncells
  Number of subvolumes.
- 
+
  Mspecies
  Number of species.
- 
+
  Hence Ndofs = Ncells*Mspecies.
- 
+
  Mreactions
  Total number of reactions.
- 
+
  dsize
  Size of data vector sent to propensities.
- 
+
  end_time
  length of the simulation.  This function simulates the RDME on the
  time interval [0, end_time].
- 
+
  report_level
  The desired degree of feedback during simulations. 0, 1, and 2 are
  currently supported options.
- 
+
  Diffusion matrix D. Double sparse (Ndofs X Ndofs).
  Macroscopic diffusion matrix. D(i,j) is the diffusion rate from dof #j to
  dof #i. This matrix uses the CSR-format and not CSC because fast access to
  rows is needed.
- 
+
  State vector 'xx'. Integer (Mspecies X Ncells).
  Gives the initial copy number of the species in each subvolume.
  !!! This is also the output.
- 
+
  Stochiometric matrix N. Integer sparse (Mspecies X Nreactions).
  N(:,j) describes how reaction j changes the number of species.
- 
+
  Dependency graph G. Integer sparse (Mreactions X Mspecies+Mreactions).
  G(i,Mspecies+j) is non-zero if executing reaction j means that reaction i
  needs to be re-evaluated. The first Mspecies columns of G similarily cover
  diffusion events.
  vol. Double vector (length Ncells).
  vol[i] gives the volume of cell #i.
- 
+
  data. Double matrix (dsize X Ncells).
  Generalized data matrix, data(:,j) gives a data vector for cell #j.
- 
+
  sd. Integer vector (length Ncells).
  Subdomain number. sd[i] is the subdomain of cell #i. The vector sd can also
  be used to separate boundaries, line segments and points.
- 
+
  Format of sparse matrices:
  G, N and S are sparse matrices in compressed column format (CCS). D is sparse
  but in compressed row format (CRS), or equivalently, a transposed matrix in
@@ -164,14 +164,14 @@ void print_current_state(int subvol, unsigned int*xx,const size_t Mspecies){
  jcD, irD, prD (double *)
  jcN, irN, prN (int *)
  jcG, irG (int *)
- 
+
  Propensities:
  a vector of function pointers (length Mreactions) is input by
  linking with the prototypes in propensities.h and function
  definitions in a user-specified .c-file. The type of this vector is
  PropensityFun which defines the input to a property function. See
  propensities.h for more details.
- 
+
  Ordering of the dofs:
  Dof #i is located in cell #(i/Mspecies), and the dofs located in
  cell #j is u0(:,j). Thus, u0 is understood as a matrix of size
@@ -179,8 +179,8 @@ void print_current_state(int subvol, unsigned int*xx,const size_t Mspecies){
  */
 
 /**************************************************************************/
-rdme_t* nsm_core__create(system_t*system, const int Ncells, const int Mspecies, 
-                        const int Mreactions, const double*vol, const int*sd, 
+rdme_t* nsm_core__create(system_t*system, const int Ncells, const int Mspecies,
+                        const int Mreactions, const double*vol, const int*sd,
                         const double*data, size_t dsize,
                         size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
                         const char* const species_names[],
@@ -217,7 +217,7 @@ rdme_t* nsm_core__create(system_t*system, const int Ncells, const int Mspecies,
     particle_t*p;
     //int i=0;
     for(n=system->particle_list->head; n!=NULL; n=n->next){
-		p = n->data;
+        p = n->data;
         rdme->sd[p->id] = p->type;
         rdme->vol[p->id] = p->mass / p->rho;
     }
@@ -245,7 +245,7 @@ rdme_t* nsm_core__create(system_t*system, const int Ncells, const int Mspecies,
     rdme->rtimes = (double *)malloc(rdme->Ncells*sizeof(double));
     rdme->node = (int *)malloc(rdme->Ncells*sizeof(int));
     rdme->heap = (int *)malloc(rdme->Ncells*sizeof(int));
-    
+
     //nsm_core__initialize_heap(rdme);
 
     /* return rdme structure */
@@ -333,48 +333,48 @@ void nsm_core__initialize_chem_populations(rdme_t* rdme, const unsigned int*u0){
 /**************************************************************************/
 void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
     if(debug_flag){ printf("*************** build_diffusion_matrix ***************\n");fflush(stdout);}
-	double off_diag_sum,diff_const,dist2;
-	node *n,*n2;
+    double off_diag_sum,diff_const,dist2;
+    node *n,*n2;
     particle_t *p1,*p2;
     int s_ndx;
     double D_i_j;
-    double ih,ihsq,wfd; 
+    double ih,ihsq,wfd;
     double h = system->h;
 
-	size_t jcD_length = rdme->Ncells + 1;
-	size_t irD_length = 0;
-	size_t prD_length = 0;
-	// find total length of jc & pr arrays: O(n)
+    size_t jcD_length = rdme->Ncells + 1;
+    size_t irD_length = 0;
+    size_t prD_length = 0;
+    // find total length of jc & pr arrays: O(n)
     for(n=system->particle_list->head; n!=NULL; n=n->next){
-		p1 = n->data;
+        p1 = n->data;
         if(p1->neighbors->count == 0){
             if(debug_flag){printf("find_neighbors(%i)\n",p1->id);}
             find_neighbors(p1, system);
         }
         if(debug_flag){printf("node %i # neighbors %i\n",p1->id,p1->neighbors->count);}
-		irD_length += (p1->neighbors->count + 1);
+        irD_length += (p1->neighbors->count + 1);
         // update the volume
         rdme->vol[p1->id] = p1->mass / p1->rho;
-	}
-	prD_length = irD_length;
-    if(debug_flag){printf("irD_length= %i\n",irD_length);fflush(stdout);}
-    if(debug_flag){printf("jcD_length= %i\n",jcD_length);fflush(stdout);}
-	// allocate space for each array
-    //printf("MALLOC rdme->irD [%i]\n",irD_length*rdme->Mspecies);
-	rdme->irD = (size_t*) malloc(sizeof(size_t)*irD_length*rdme->Mspecies);
+    }
+    prD_length = irD_length;
+    if(debug_flag){printf("irD_length= %li\n",irD_length);fflush(stdout);}
+    if(debug_flag){printf("jcD_length= %li\n",jcD_length);fflush(stdout);}
+    // allocate space for each array
+    //printf("MALLOC rdme->irD [%li]\n",irD_length*rdme->Mspecies);
+    rdme->irD = (size_t*) malloc(sizeof(size_t)*irD_length*rdme->Mspecies);
     size_t irD_ndx = 0;
-    //printf("MALLOC rdme->jcD [%i]\n",jcD_length*rdme->Mspecies);
-	rdme->jcD = (size_t*) malloc(sizeof(size_t)*jcD_length*rdme->Mspecies);
+    //printf("MALLOC rdme->jcD [%li]\n",jcD_length*rdme->Mspecies);
+    rdme->jcD = (size_t*) malloc(sizeof(size_t)*jcD_length*rdme->Mspecies);
     size_t jcD_ndx = 0;
     rdme->jcD[jcD_ndx++] = 0;
-    //printf("MALLOC rdme->prD [%i]\n",prD_length*rdme->Mspecies);
-	rdme->prD = (double*) malloc(sizeof(double)*prD_length*rdme->Mspecies);
+    //printf("MALLOC rdme->prD [%li]\n",prD_length*rdme->Mspecies);
+    rdme->prD = (double*) malloc(sizeof(double)*prD_length*rdme->Mspecies);
     size_t prD_ndx = 0;
-	// for each particle p, look at each neighbor p2
+    // for each particle p, look at each neighbor p2
     for(n=system->particle_list->head; n!=NULL; n=n->next){
-		p1 = n->data;
+        p1 = n->data;
         //printf("p1 = %i\n",p1->id);fflush(stdout);
-        //TODO: the ordering is very inefficient here.  Should do all species for a single p2, only 
+        //TODO: the ordering is very inefficient here.  Should do all species for a single p2, only
         //      calculate dist once.  Requires reordering.
         for(s_ndx=0; s_ndx<rdme->Mspecies; s_ndx++){
             // keep track of the total off diagonal sum
@@ -407,8 +407,8 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
             rdme->prD[prD_ndx++] = -1*off_diag_sum;
 
             rdme->jcD[jcD_ndx++] = prD_ndx;
-		}
-	}
+        }
+    }
     if(debug_flag){
         printf("irD_ndx (%li) length rdme->irD (%li)\n",irD_ndx,irD_length*rdme->Mspecies);
         printf("jcD_ndx (%li) length rdme->jcD (%li)\n",jcD_ndx,jcD_length*rdme->Mspecies);
@@ -420,9 +420,9 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
             printf("Assembly: irD_ndx (%zu) != irD_length*Mspecies (%li)\n", irD_ndx, irD_length*rdme->Mspecies);
         }
         char filename[256];
-        time_t seconds; 
+        time_t seconds;
         size_t i;
-        seconds = time(NULL); 
+        seconds = time(NULL);
         sprintf(filename,"diffusion_matrix_%ld", seconds);
         printf("Writing out diffusion matrix to '%s'\n",filename);
         FILE*fp = fopen(filename,"w+");
@@ -457,9 +457,9 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
 
 /**************************************************************************/
 void nsm_core__destroy_diffusion_matrix(rdme_t*rdme){
-	free(rdme->irD);
-	free(rdme->jcD);
-	free(rdme->prD);
+    free(rdme->irD);
+    free(rdme->jcD);
+    free(rdme->prD);
 }
 
 
@@ -753,4 +753,3 @@ void nsm_core__take_step(rdme_t* rdme, double current_time, double step_size){
 }
 
 /**************************************************************************/
-
