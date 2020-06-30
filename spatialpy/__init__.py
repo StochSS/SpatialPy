@@ -13,3 +13,4 @@ from spatialpy.DataFunction import *
 from spatialpy.InitialCondition import *
 from spatialpy.BoundaryCondition import BoundaryCondition
 from spatialpy.VTKReader import *
+from spatialpy.Log import *

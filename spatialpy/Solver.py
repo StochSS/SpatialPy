@@ -9,6 +9,7 @@ import time
 
 from spatialpy.Model import *
 from spatialpy.Result import *
+from spatialpy.Log import *
 
 
 class Solver:
@@ -33,6 +34,9 @@ class Solver:
         self.SpatialPy_ROOT = os.path.dirname(
             os.path.abspath(__file__))+"/ssa_sdpd-c-simulation-engine"
 
+        init_log(__name__, self.model_name)
+        log.setLevel(logging.INFO)
+
     def __del__(self):
         """ Deconstructor.  Removes the compiled solver."""
         try:
@@ -40,7 +44,7 @@ class Solver:
                 try:
                     shutil.rmtree(self.build_dir)
                 except OSError as e:
-                    print("Could not delete '{0}'".format(
+                    log.exception("Could not delete '{0}'".format(
                         self.solver_base_dir))
         except Exception as e:
             pass
@@ -52,30 +56,35 @@ class Solver:
         self.build_dir = tempfile.mkdtemp(
             prefix='spatialpy_build_', dir=os.environ.get('SPATIALPY_TMPDIR'))
 
-        if self.debug_level >= 1:
-            print("Compiling Solver.  Build dir: {0}".format(self.build_dir))
+        if log.isEnabledFor(logging.INFO):
+            print("Writing output to " + log.handlers[0].baseFilename)
+            log.info("Compiling Solver.  Build dir: {0}".format(self.build_dir))
 
         # Write the propensity file
         self.propfilename = self.model_name + '_generated_model'
         self.prop_file_name = self.build_dir + '/' + self.propfilename + '.c'
-        if self.debug_level > 1:
-            print("Creating propensity file {0}".format(self.prop_file_name))
+
+        if log.isEnabledFor(logging.INFO):
+            log.debug("Creating propensity file {0}".format(self.prop_file_name))
+
         self.create_propensity_file(file_name=self.prop_file_name)
 
         # Build the solver
         makefile = self.SpatialPy_ROOT+'/build/Makefile'
         cmd = " ".join(['cd', self.build_dir, ';', 'make', '-f', makefile, 'ROOT=' +
                         self.SpatialPy_ROOT, 'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir])
-        if self.debug_level > 1:
-            print("cmd: {0}\n".format(cmd))
+
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug("cmd: {0}\n".format(cmd))
+
         try:
             handle = subprocess.Popen(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             return_code = handle.wait()
         except OSError as e:
-            print(
+            log.exception(
                 "Error, execution of compilation raised an exception: {0}".format(e))
-            print("cmd = {0}".format(cmd))
+            log.exception("cmd = {0}".format(cmd))
             raise SimulationError("Compilation of solver failed")
 
         if return_code != 0:
@@ -88,9 +97,9 @@ class Solver:
             raise SimulationError(
                 "Compilation of solver failed, return_code={0}".format(return_code))
 
-        if self.debug_level > 1:
-            print(handle.stdout.read().decode("utf-8"))
-            print(handle.stderr.read().decode("utf-8"))
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug(handle.stdout.read().decode("utf-8"))
+            log.debug(handle.stderr.read().decode("utf-8"))
 
         self.is_compiled = True
 
@@ -126,8 +135,9 @@ class Solver:
             if seed is not None:
                 solver_cmd += " -s "+str(seed+run_ndx)
 
-            if self.debug_level > 1:
-                print('cmd: {0}\n'.format(solver_cmd))
+            if log.isEnabledFor(logging.DEBUG):
+                log.debug('cmd: {0}\n'.format(solver_cmd))
+
             stdout = ''
             stderr = ''
 #            try:
@@ -151,13 +161,15 @@ class Solver:
                         else:
                             stdout, stderr = process.communicate()
                         return_code = process.wait()
-                        if self.debug_level >= 1:  # stderr & stdout to the terminal
-                            print('Elapsed seconds: {:.2f}'.format(
+
+                        if log.isEnabledFor(logging.INFO):  # stderr & stdout to log
+                            log.info('Elapsed seconds: {:.2f}'.format(
                                 time.monotonic() - start))
                             if stdout is not None:
-                                print(stdout.decode('utf-8'))
+                                log.info(stdout.decode('utf-8'))
                             if stderr is not None:
-                                print(stderr.decode('utf-8'))
+                                log.info(stderr.decode('utf-8'))
+
                     except subprocess.TimeoutExpired:
                         # send signal to the process group
                         os.killpg(process.pid, signal.SIGINT)
@@ -169,18 +181,18 @@ class Solver:
                             message += stderr.decode('utf-8')
                         raise SimulationTimeout(message)
             except OSError as e:
-                print(
+                log.exception(
                     "Error, execution of solver raised an exception: {0}".format(e))
-                print("cmd = {0}".format(solver_cmd))
+                log.exception("cmd = {0}".format(solver_cmd))
 
             if return_code != 0:
-                if self.debug_level >= 1:
+                if log.isEnabledFor(logging.INFO):
                     try:
-                        print(stderr)
-                        print(stdout)
+                        log.info(stderr)
+                        log.info(stdout)
                     except Exception as e:
                         pass
-                print("solver_cmd = {0}".format(solver_cmd))
+                log.info("solver_cmd = {0}".format(solver_cmd))
                 raise SimulationError(
                     "Solver execution failed, return code = {0}".format(return_code))
 
