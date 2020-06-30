@@ -20,6 +20,7 @@ import inspect
 
 import pickle
 import json
+import math
 
 
 
@@ -102,7 +103,7 @@ class Result(dict):
         reader = VTKReader(debug=debug)
         num = int(step_num * self.model.output_freq)
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(num))
-        print("read_step({0}) opening '{1}'".format(step_num, filename))
+        #print("read_step({0}) opening '{1}'".format(step_num, filename))
         reader.setfilename(filename)
         reader.readfile()
         if reader.getpoints() is None or reader.getarrays() is None:
@@ -144,8 +145,9 @@ class Result(dict):
         if spec_name not in self.model.listOfSpecies.keys():
             raise ResultError("Species '{0}' not found".format(spec_name))
 
-        t_index_arr = numpy.linspace(0,self.model.num_timesteps, 
-                            num=self.model.num_timesteps+1, dtype=int)
+        #t_index_arr = numpy.linspace(0,self.model.num_timesteps, 
+        #                    num=self.model.num_timesteps+1, dtype=int)
+        t_index_arr = self.get_timespan();
 
         if timepoints is not None:
             if isinstance(timepoints,float):
@@ -368,6 +370,9 @@ class Result(dict):
         """
         from plotly.offline import init_notebook_mode, iplot
         import plotly.graph_objs as go
+
+        if(t_ndx < 0):
+            t_ndx = len(self.get_timespan()) + t_ndx
 
         # read data at time point
         points, data = self.read_step(t_ndx)
