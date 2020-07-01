@@ -61,6 +61,7 @@ struct __system_t {
     const double *subdomain_diffusion_matrix;
     ChemRxnFun* chem_rxn_rhs_functions;
     int *stochic_matrix;
+    double* gravity;
 
 };
 
