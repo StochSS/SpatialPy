@@ -205,6 +205,10 @@ class Result(dict):
         return_plotly_figure : bool
             whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
+        width: int (default 500)
+            Width in pixels of output plot box
+        height: int (default 500)
+            Height in pixels of output plot box
         colormap : str
             colormap to use.  Plotly specification, valid values: "Plotly3","Jet","Blues","YlOrRd",
                 "PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu", "PuBu","GnBu","YlGn","Greens","Reds",
@@ -390,12 +394,14 @@ class Result(dict):
         return_plotly_figure : bool
             whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
-        width : int
-            The width of the output window
-        height : int
-            The height of the output window
-        colormap: str
-            The style of color maps to use
+        width: int (default 500)
+            Width in pixels of output plot box
+        height: int (default 500)
+            Height in pixels of output plot box
+        colormap : str
+            colormap to use.  Plotly specification, valid values: "Plotly3","Jet","Blues","YlOrRd",
+                "PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu", "PuBu","GnBu","YlGn","Greens","Reds",
+                "Greys","RdPu","OrRd","Purples","Oranges".
         """
         from plotly.offline import init_notebook_mode, iplot
         import plotly.graph_objs as go
