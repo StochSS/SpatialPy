@@ -58,9 +58,10 @@ struct __system_t {
     int num_chem_species;
     int num_chem_rxns;
     int num_types;
-    double *subdomain_diffusion_matrix;
+    const double *subdomain_diffusion_matrix;
     ChemRxnFun* chem_rxn_rhs_functions;
     int *stochic_matrix;
+    double* gravity;
 
 };
 

@@ -20,6 +20,7 @@ import inspect
 
 import pickle
 import json
+import math
 
 
 
@@ -101,7 +102,8 @@ class Result(dict):
     def read_step(self, step_num, debug=False):
         """ Read the data for simulation step 'step_num'. """
         reader = VTKReader(debug=debug)
-        filename = os.path.join(self.result_dir, "output{0}.vtk".format(step_num))
+        num = int(step_num * self.model.output_freq)
+        filename = os.path.join(self.result_dir, "output{0}.vtk".format(num))
         #print("read_step({0}) opening '{1}'".format(step_num, filename))
         reader.setfilename(filename)
         reader.readfile()
@@ -114,7 +116,7 @@ class Result(dict):
 
     def get_timespan(self):
         self.tspan = numpy.linspace(0,self.model.num_timesteps,
-                num=self.model.num_timesteps+1) * self.model.timestep_size
+                num=math.ceil(self.model.num_timesteps/self.model.output_freq)+1) * self.model.timestep_size
         return self.tspan
 
     def get_species(self, species, timepoints=None, concentration=False, deterministic=False, debug=False):
@@ -144,8 +146,9 @@ class Result(dict):
         if spec_name not in self.model.listOfSpecies.keys():
             raise ResultError("Species '{0}' not found".format(spec_name))
 
-        t_index_arr = numpy.linspace(0,self.model.num_timesteps, 
-                            num=self.model.num_timesteps+1, dtype=int)
+        #t_index_arr = numpy.linspace(0,self.model.num_timesteps, 
+        #                    num=self.model.num_timesteps+1, dtype=int)
+        t_index_arr = self.get_timespan();
 
         if timepoints is not None:
             if isinstance(timepoints,float):
@@ -215,6 +218,9 @@ class Result(dict):
                 "Greys","RdPu","OrRd","Purples","Oranges".
         """
         from plotly.offline import init_notebook_mode, iplot
+
+        if(t_ndx < 0):
+            t_ndx = len(self.get_timespan()) + t_ndx
         
         if animated and t_ndx_list is None:
             t_ndx_list = [item for item in range(self.model.num_timesteps+1)]
@@ -242,10 +248,6 @@ class Result(dict):
 
         trace_list = _plotly_iterate(subdomains, size=size, colormap=colormap)
         
-        #scene_x = self.model.mesh.xlim[0]/2.5
-        #scene_y = self.model.mesh.ylim[0]/2.5
-        #scene_z = self.model.mesh.zlim[0]/2.5
-        #scene = {"aspectratio": {"x":scene_x,"y":scene_y,"z":scene_y}}
         scene = {
             "aspectmode": 'data',
         }
@@ -405,6 +407,9 @@ class Result(dict):
         """
         from plotly.offline import init_notebook_mode, iplot
         import plotly.graph_objs as go
+
+        if(t_ndx < 0):
+            t_ndx = len(self.get_timespan()) + t_ndx
 
         # read data at time point
         points, data = self.read_step(t_ndx)
