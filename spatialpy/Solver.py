@@ -143,6 +143,7 @@ class Solver:
 #                print("cmd = {0}".format(solver_cmd))
             try:
                 start = time.monotonic()
+                return_code = None
                 with subprocess.Popen(solver_cmd, shell=True, stdout=subprocess.PIPE, preexec_fn=os.setsid) as process:
                     try:
                         if timeout is not None:
@@ -151,6 +152,19 @@ class Solver:
                         else:
                             stdout, stderr = process.communicate()
                         return_code = process.wait()
+                        if self.debug_level >= 1:  # stderr & stdout to the terminal
+                            print('Elapsed seconds: {:.2f}'.format(
+                                time.monotonic() - start))
+                            if stdout is not None:
+                                print(stdout.decode('utf-8'))
+                            if stderr is not None:
+                                print(stderr.decode('utf-8'))
+                    except KeyboardInterrupt:
+                        print('Terminated by user after seconds: {:.2f}'.format(
+                            time.monotonic() - start))
+                        os.killpg(process.pid, signal.SIGINT)
+                        #return_code = process.wait()
+                        stdout, stderr = process.communicate()
                         if self.debug_level >= 1:  # stderr & stdout to the terminal
                             print('Elapsed seconds: {:.2f}'.format(
                                 time.monotonic() - start))
@@ -167,13 +181,13 @@ class Solver:
                             message += stdout.decode('utf-8')
                         if stderr is not None:
                             message += stderr.decode('utf-8')
-                        raise SimulationTimeout(message)
+                        #raise SimulationTimeout(message)
             except OSError as e:
                 print(
                     "Error, execution of solver raised an exception: {0}".format(e))
                 print("cmd = {0}".format(solver_cmd))
 
-            if return_code != 0:
+            if return_code is not None and return_code != 0:
                 if self.debug_level >= 1:
                     try:
                         print(stderr)
@@ -543,34 +557,7 @@ class Solver:
 
         init_bc = ""
         for bc in self.model.listOfBoundaryConditions:
-            cond=[]
-            if(bc.xmin is not None): cond.append("(me->x[0] >= {0})".format(bc.xmin))
-            if(bc.xmax is not None): cond.append("(me->x[0] <= {0})".format(bc.xmax))
-            if(bc.ymin is not None): cond.append("(me->x[1] >= {0})".format(bc.ymin))
-            if(bc.ymax is not None): cond.append("(me->x[1] <= {0})".format(bc.ymax))
-            if(bc.zmin is not None): cond.append("(me->x[2] >= {0})".format(bc.zmin))
-            if(bc.zmax is not None): cond.append("(me->x[2] <= {0})".format(bc.zmax))
-            if(bc.type_id is not None): cond.append("(me->type == {0})".format(int(bc.type_id)))
-            if(len(cond)==0): raise ModelError('need at least one condition on the BoundaryCondition')
-            bcstr = "if(" + '&&'.join(cond) + "){"
-            if bc.species is not None:
-                if bc.deterministic:
-                    s_ndx = self.model.species_map[self.model.listOfSpecies[bc.species]]
-                    bcstr += "me->C[{0}] = {1};".format(s_ndx,bc.value)
-                else:
-                    raise Exception("BoundaryConditions don't work for stochastic species yet")
-            elif bc.property is not None:
-                if(bc.property == 'v'):
-                    for i in range(3):
-                        bcstr+= "me->v[{0}]={1};".format(i,bc.value[i])
-                elif(bc.property == 'nu'):
-                    bcstr+= "me->nu={0};".format(bc.value)
-                elif(bc.property == 'rho'):
-                    bcstr+= "me->rho={0};".format(bc.value)
-                else:
-                    raise Exception("Unable handle boundary condition for property '{0}'".format(bc.property))
-            bcstr+= "}"
-            init_bc += bcstr
+            init_bc += bc.expression()
         propfilestr = propfilestr.replace("__BOUNDARY_CONDITIONS__", init_bc)
 
         #### Write the data to the file ####
