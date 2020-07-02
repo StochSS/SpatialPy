@@ -42,7 +42,7 @@ class BoundaryCondition():
         self.deterministic = deterministic
 
         if( species is not None and property is not None):
-            ModelError("Can not set both species and property")
+            raise ModelError("Can not set both species and property")
         if species is not None:
             self.species = species
             self.deterministic = deterministic
@@ -50,7 +50,7 @@ class BoundaryCondition():
             self.property = property
 
         if value is None:
-            ModelError("Must set value")
+            raise ModelError("Must set value")
         self.value = value
 
         
