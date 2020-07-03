@@ -15,6 +15,18 @@
 #include "propensities.h"
 #include "binheap.h"
 
+// Define debug level macros
+#if VERB
+    #define INFO(fmt, args...) printf("%s - INFO - %s - %d - "fmt, __FILE__, __FUNCTION__, __LINE__,  args)
+#else
+    #define INFO(fmt, args...)
+#endif
+
+#if VERB > 1
+    #define DEBUG(fmt, args...) printf("%s - DEBUG - %s - %d - "fmt, __FILE__, __FUNCTION__, __LINE__, args)
+#else
+    #define DEBUG(fmt, args...)
+#endif
 
 /**************************************************************************/
 void initialize_rdme(system_t*system, const int Ncells, const int Mspecies,
@@ -25,7 +37,7 @@ void initialize_rdme(system_t*system, const int Ncells, const int Mspecies,
                         const unsigned int*u0,
                         const int num_subdomains, const double*subdomain_diffusion_matrix
                         ){
-    if(debug_flag){printf("*************** initialize_rdme ******************\n");}
+    INFO("\n*************** initialize_rdme ******************\n", NULL);
     rdme_t*rdme =  nsm_core__create(system,Ncells,Mspecies,Mreactions,vol,sd,data,
                                     dsize,irN,jcN,prN,irG,jcG,species_names,
                                     num_subdomains, subdomain_diffusion_matrix);
@@ -47,25 +59,25 @@ void simulate_rdme(system_t*system,unsigned int step){
     if(!system->static_domain || !rdme->initialized){
             // if the  domain is not static, rebuild the diffusion matrix after movement
         if(!rdme->initialized){
-            if(debug_flag) printf("Building diffusion matrix\n");
-            if(debug_flag) printf("\tnsm_core__build_diffusion_matrix\n");
+            INFO("Building diffusion matrix\n", NULL);
+            INFO("\tnsm_core__build_diffusion_matrix\n", NULL);
             nsm_core__build_diffusion_matrix(rdme,system);
             rdme->initialized=1;
         }else{
-            if(debug_flag) printf("Rebuilding diffusion matrix\n");
-            if(debug_flag) printf("\tnsm_core__destroy_diffusion_matrix\n");
+            INFO("Rebuilding diffusion matrix\n", NULL);
+            INFO("\tnsm_core__destroy_diffusion_matrix\n", NULL);
             nsm_core__destroy_diffusion_matrix(rdme);
-            if(debug_flag) printf("\tnsm_core__build_diffusion_matrix\n");
+            INFO("\tnsm_core__build_diffusion_matrix\\n", NULL);
             nsm_core__build_diffusion_matrix(rdme,system);
         }
-        if(debug_flag) printf("\tnsm_core__initialize_rxn_propensities\n");
+        INFO("\tnsm_core__initialize_rxn_propensities\n", NULL);
         nsm_core__initialize_rxn_propensities(rdme);
-        if(debug_flag) printf("\tnsm_core__initialize_diff_propensities\n");
+        INFO("\tnsm_core__initialize_diff_propensities\n", NULL);
         nsm_core__initialize_diff_propensities(rdme);
-        if(debug_flag) printf("\tnsm_core__initialize_heap\n");
+        INFO("\tnsm_core__initialize_heap\n", NULL);
         nsm_core__initialize_heap(rdme);
     }
-    if(debug_flag) printf("Simulating RDME for %e seconds\n",system->dt);
+    INFO("Simulating RDME for %e seconds\n",system->dt);
     nsm_core__take_step(rdme, system->dt*step, system->dt);
 }
 /**************************************************************************/
@@ -73,8 +85,8 @@ void destroy_rdme(system_t*system){
     if(system->rdme == NULL){
         return;
     }
-    if(debug_flag) printf("NSM: total # reacton events %lu\n",system->rdme->total_reactions);
-    if(debug_flag) printf("NSM: total # diffusion events %lu\n",system->rdme->total_diffusion);
+    INFO("NSM: total # reacton events %lu\n",system->rdme->total_reactions);
+    INFO("NSM: total # diffusion events %lu\n",system->rdme->total_diffusion);
     nsm_core__destroy(system->rdme);
 }
 
@@ -332,7 +344,7 @@ void nsm_core__initialize_chem_populations(rdme_t* rdme, const unsigned int*u0){
 
 /**************************************************************************/
 void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
-    if(debug_flag){ printf("*************** build_diffusion_matrix ***************\n");fflush(stdout);}
+    INFO("*************** build_diffusion_matrix ***************\n", NULL); fflush(stdout);
     double off_diag_sum,diff_const,dist2;
     node *n,*n2;
     particle_t *p1,*p2;
@@ -348,17 +360,17 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
     for(n=system->particle_list->head; n!=NULL; n=n->next){
         p1 = n->data;
         if(p1->neighbors->count == 0){
-            if(debug_flag){printf("find_neighbors(%i)\n",p1->id);}
+            INFO("find_neighbors(%i)\n",p1->id);
             find_neighbors(p1, system);
         }
-        if(debug_flag){printf("node %i # neighbors %i\n",p1->id,p1->neighbors->count);}
+        INFO("node %i # neighbors %i\n",p1->id,p1->neighbors->count);
         irD_length += (p1->neighbors->count + 1);
         // update the volume
         rdme->vol[p1->id] = p1->mass / p1->rho;
     }
     prD_length = irD_length;
-    if(debug_flag){printf("irD_length= %li\n",irD_length);fflush(stdout);}
-    if(debug_flag){printf("jcD_length= %li\n",jcD_length);fflush(stdout);}
+    INFO("irD_length= %li\n",irD_length);fflush(stdout);
+    INFO("irD_length= %li\n",irD_length);fflush(stdout);
     // allocate space for each array
     //printf("MALLOC rdme->irD [%li]\n",irD_length*rdme->Mspecies);
     rdme->irD = (size_t*) malloc(sizeof(size_t)*irD_length*rdme->Mspecies);
@@ -410,21 +422,21 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
         }
     }
     if(debug_flag){
-        printf("irD_ndx (%li) length rdme->irD (%li)\n",irD_ndx,irD_length*rdme->Mspecies);
-        printf("jcD_ndx (%li) length rdme->jcD (%li)\n",jcD_ndx,jcD_length*rdme->Mspecies);
-        printf("prD_ndx (%li) length rdme->prD (%li)\n",prD_ndx,prD_length*rdme->Mspecies);
+        INFO("irD_ndx (%li) length rdme->irD (%li)\n",irD_ndx,irD_length*rdme->Mspecies);
+        INFO("jcD_ndx (%li) length rdme->jcD (%li)\n",jcD_ndx,jcD_length*rdme->Mspecies);
+        INFO("prD_ndx (%li) length rdme->prD (%li)\n",prD_ndx,prD_length*rdme->Mspecies);
         if( prD_ndx != irD_ndx){
-            printf("Assembly: prD_ndx (%zu) != irD_ndx (%zu)\n",prD_ndx,irD_ndx);
+            INFO("Assembly: prD_ndx (%zu) != irD_ndx (%zu)\n",prD_ndx,irD_ndx);
         }
         if( irD_ndx != irD_length*rdme->Mspecies ){
-            printf("Assembly: irD_ndx (%zu) != irD_length*Mspecies (%li)\n", irD_ndx, irD_length*rdme->Mspecies);
+            INFO("Assembly: irD_ndx (%zu) != irD_length*Mspecies (%li)\n", irD_ndx, irD_length*rdme->Mspecies);
         }
         char filename[256];
         time_t seconds;
         size_t i;
         seconds = time(NULL);
         sprintf(filename,"diffusion_matrix_%ld", seconds);
-        printf("Writing out diffusion matrix to '%s'\n",filename);
+        INFO("Writing out diffusion matrix to '%s'\n",filename);
         FILE*fp = fopen(filename,"w+");
         fprintf(fp, "irD = [");
         for(i=0;i<irD_ndx;i++){
@@ -483,7 +495,7 @@ void nsm_core__take_step(rdme_t* rdme, double current_time, double step_size){
         //told = tt;
         tt   = rdme->rtimes[0];
         subvol = rdme->node[0];
-        if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol);}
+        DEBUG("nsm: tt=%e subvol=%i\n",tt,subvol);
         /* First check if it is a reaction or a diffusion event. */
         totrate = rdme->srrate[subvol]+rdme->sdrate[subvol];
 
@@ -530,8 +542,8 @@ void nsm_core__take_step(rdme_t* rdme, double current_time, double step_size){
                     exit(1);
                 }
             }
-            if(debug_flag){printf("nsm: tt=%e subvol=%i sd=%i",tt,subvol,rdme->sd[subvol]);}
-            if(debug_flag){printf("Rxn %i \n",re);}
+            DEBUG("nsm: tt=%e subvol=%i sd=%i",tt,subvol,rdme->sd[subvol]);
+            DEBUG("Rxn %i \n",re);
             /* b) Update the state of the subvolume subvol and sdrate[subvol]. */
             for (i = rdme->jcN[re]; i < rdme->jcN[re+1]; i++) {
                 int prev_val = rdme->xx[subvol*rdme->Mspecies+rdme->irN[i]];
@@ -674,8 +686,8 @@ void nsm_core__take_step(rdme_t* rdme, double current_time, double step_size){
             rdme->xx[to_node]++;
 
 
-            if(debug_flag){printf("nsm: tt=%e subvol=%i sd=%i",tt,subvol,rdme->sd[subvol]);}
-            if(debug_flag){printf("Diff %i->%li\n",subvol,to_vol);}
+            DEBUG("nsm: tt=%e subvol=%i sd=%i",tt,subvol,rdme->sd[subvol]);
+            DEBUG("Diff %i->%li\n",subvol,to_vol);
 
             /* Save reaction and diffusion rates. */
             old_rrate = rdme->srrate[to_vol];

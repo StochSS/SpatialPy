@@ -65,7 +65,7 @@ class Solver:
         self.prop_file_name = self.build_dir + '/' + self.propfilename + '.c'
 
         if log.isEnabledFor(logging.INFO):
-            log.debug("Creating propensity file {0}".format(self.prop_file_name))
+            log.info("Creating propensity file {0}".format(self.prop_file_name))
 
         self.create_propensity_file(file_name=self.prop_file_name)
 

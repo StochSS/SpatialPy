@@ -11,7 +11,18 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+// Define debug level macros
+#if VERB
+    #define INFO(fmt, args...) printf("%s - INFO - %s - %d - "fmt, __FILE__, __FUNCTION__, __LINE__,  args)
+#else
+    #define INFO(fmt, args...)
+#endif
 
+#if VERB > 1
+    #define DEBUG(fmt, args...) printf("%s - DEBUG - %s - %d - "fmt, __FILE__, __FUNCTION__, __LINE__, args)
+#else
+    #define DEBUG(fmt, args...)
+#endif
 
 struct arg {
     system_t* system;
@@ -36,13 +47,13 @@ void* output_system_thread(void* targ){
     while(1){
         pthread_barrier_wait(&begin_output_barrier);
         //output_csv(system, current_step);
-        if(debug_flag) printf("[OUT] start output_vtk__sync_step()\n");
+        INFO("[OUT] start output_vtk__sync_step()\n", NULL);
         output_vtk__sync_step(system, current_step);
-        if(debug_flag) printf("[OUT] done output_vtk__sync_step()\n");
+        INFO("[OUT] done output_vtk__sync_step()\n", NULL);
         pthread_barrier_wait(&end_output_barrier);
-        if(debug_flag) printf("[OUT] start output_vtk__async_step()\n");
+        INFO("[OUT] start output_vtk__async_step()\n", NULL);
         output_vtk__async_step(system);
-        if(debug_flag) printf("[OUT] done output_vtk__async_step()\n");
+        INFO("[OUT] done output_vtk__async_step()\n", NULL);
     }
 }
 
@@ -55,9 +66,9 @@ void* sort_index_thread(void* targ_in){
     struct sarg* targ = (struct sarg*) targ_in;
     while(1){
         pthread_barrier_wait(&begin_sort_barrier);
-        if(debug_flag) printf("[SORT] begin sort\n");
+        INFO("[SORT] begin sort\n", NULL);
         linked_list_sort(targ->ll,targ->sort_ndx);
-        if(debug_flag) printf("[SORT] sort complete\n");
+        INFO("[SORT] sort complete\n", NULL);
         pthread_barrier_wait(&end_sort_barrier);
     }
 }
@@ -72,7 +83,7 @@ void* run_simulation_thread(void *targ_in){
     // each thread will take a step with each of it's particles
     for(step=0; step < system->nt; step++){
         // block on the begin barrier
-        if(debug_flag) printf("[WORKER %i] waiting to begin step %i\n",targ->thread_id,step);
+        INFO("[WORKER %i] waiting to begin step %i\n",targ->thread_id,step);
         pthread_barrier_wait(&begin_step_barrier);
         //---------------------------------------
         // take_step1
@@ -85,7 +96,7 @@ void* run_simulation_thread(void *targ_in){
             n=n->next;
         }
         // block on the end barrier
-        if(debug_flag)printf("[WORKER %i] completed take_step1 %i, processed %i particles\n",targ->thread_id,step,count);
+        INFO("[WORKER %i] completed take_step1 %i, processed %i particles\n",targ->thread_id,step,count);
         pthread_barrier_wait(&end_step_barrier);
         //---------------------------------------
         // compute_bond_forces
@@ -99,7 +110,7 @@ void* run_simulation_thread(void *targ_in){
             n=n->next;
         }
         // block on the end barrier
-        if(debug_flag)printf("[WORKER %i] completed compute_bond_forces %i, processed %i particles\n",targ->thread_id,step,count);
+        INFO("[WORKER %i] completed compute_bond_forces %i, processed %i particles\n",targ->thread_id,step,count);
         pthread_barrier_wait(&end_step_barrier);
         */
         //---------------------------------------
@@ -127,7 +138,7 @@ void* run_simulation_thread(void *targ_in){
         }
 
         // block on the end barrier
-        //if(debug_flag)printf("[WORKER %i] completed take_step2 %i, processed %i particles\n",targ->thread_id,step,count);
+        //INFO("[WORKER %i] completed take_step2 %i, processed %i particles\n",targ->thread_id,step,count);
         //pthread_barrier_wait(&end_step_barrier);
         pthread_barrier_wait(&end_step_barrier);
         //---------------------------------------
@@ -167,7 +178,7 @@ void run_simulation(int num_threads, system_t* system){
                 }
             }
         }
-        if(debug_flag) printf("Creating thread to process %i particles\n", targs[i].num_my_particles);
+        INFO("Creating thread to process %i particles\n", targs[i].num_my_particles);
         pthread_create(&thread_handles[i], NULL, run_simulation_thread, &targs[i]);
     }
     // Create threads to sort indexes
@@ -178,7 +189,7 @@ void run_simulation(int num_threads, system_t* system){
     sort_args[0].ll = system->x_index;
     sort_args[0].sort_ndx = 0;
     pthread_create(&sort_thread_handles[0], NULL, sort_index_thread, &sort_args[0]);
-    if(debug_flag) printf("Creating thread to update x-position index\n");
+    INFO("Creating thread to update x-position index\n", NULL);
     /*sort_args[1].ll = system->y_index;
     sort_args[1].sort_index = 1;
     pthread_create(&sort_thread_handles[1], NULL, sort_index_thread, &sort_args[1]);
@@ -191,71 +202,71 @@ void run_simulation(int num_threads, system_t* system){
     pthread_barrier_init(&begin_output_barrier, NULL, 2);
     pthread_barrier_init(&end_output_barrier, NULL, 2);
     pthread_create(&output_thread_handles[0], NULL, output_system_thread, system);
-    if(debug_flag) printf("Creating thread to create output files\n");
+    INFO("Creating thread to create output files\n", NULL);
 
     // Start simulation, coordinate simulation
     int step,next_output_step = 0;
     for(step=0; step < system->nt; step++){
         // Release the Sort Index threads
-        if(debug_flag) printf("[%i] Starting the Sort Index threads\n",step);
+        INFO("[%i] Starting the Sort Index threads\n",step);
         pthread_barrier_wait(&begin_sort_barrier);
         // Output state
         if(step >= next_output_step){
             // Release output thread
             current_step = step;
-            if(debug_flag) printf("[%i] Starting the Output threads\n",step);
+            INFO("[%i] Starting the Output threads\n",step);
             pthread_barrier_wait(&begin_output_barrier);
             next_output_step += system->output_freq;
             // Wait until output threads are done
             pthread_barrier_wait(&end_output_barrier);
-            if(debug_flag) printf("[%i] Output threads finished\n",step);
+            INFO("[%i] Output threads finished\n",step);
 
         }
         // Wait until Sort Index threads are done
         pthread_barrier_wait(&end_sort_barrier);
-        if(debug_flag) printf("[%i] Sort Index threads finished\n",step);
+        INFO("[%i] Sort Index threads finished\n",step);
         if(debug_flag>2 && step==0){
-            printf("x_index = [");
+            DEBUG("x_index = [", NULL);
             node*n;
             for(n = system->x_index->head; n!=NULL; n=n->next){
-                printf("%e ",n->data->x[0]);
+                DEBUG("%e ",n->data->x[0], NULL);
             }
-            printf("]\n");
-            printf("x_index_id = [");
+            DEBUG("]\n", NULL);
+            DEBUG("x_index_id = [", NULL);
             for(n = system->x_index->head; n!=NULL; n=n->next){
-                printf("%i ",n->data->id);
+                DEBUG("%i ",n->data->id);
             }
-            printf("]\n");
+            DEBUG("]\n", NULL);
         }
 
         // Release the worker threads to take step
-        if(debug_flag) printf("[%i] Starting the Worker threads\n",step);
+        INFO("[%i] Starting the Worker threads\n",step);
         pthread_barrier_wait(&begin_step_barrier);
         // Wait until worker threads are done
         pthread_barrier_wait(&end_step_barrier);
-        if(debug_flag) printf("[%i] Worker threads finished\n",step);
+        INFO("[%i] Worker threads finished\n",step);
         // Solve RDME 
-        if(debug_flag) printf("[%i] starting RDME simulation\n",step);
+        INFO("[%i] starting RDME simulation\n",step);
         simulate_rdme(system, step);
-        if(debug_flag) printf("[%i] Finish RDME simulation\n",step);
+        INFO("[%i] Finish RDME simulation\n",step);
     }
     // Record final timepoint
     current_step = step;
-    if(debug_flag) printf("[%i] Starting the Output threads\n",step);
+    INFO("[%i] Starting the Output threads\n",step);
     pthread_barrier_wait(&begin_output_barrier);
     pthread_barrier_wait(&end_output_barrier);
-    if(debug_flag) printf("[%i] Output threads finished\n",step);
-    if(debug_flag) printf("[%i] Waiting for Async Output threads\n",step);
+    INFO("[%i] Output threads finished\n",step);
+    INFO("[%i] Waiting for Async Output threads\n",step);
     pthread_barrier_wait(&begin_output_barrier); // wait for the async 
-    if(debug_flag) printf("[%i] Async Output threads finished\n",step);
+    INFO("[%i] Async Output threads finished\n",step);
 
     //clean up
-    if(debug_flag) printf("Cleaning up RDME\n");
+    INFO("Cleaning up RDME\n", NULL);
     destroy_rdme(system);
 
     // Kill threads and wait for them to finish
     /*
-    if(debug_flag) printf("Cleaning up threads\n");
+    INFO("Cleaning up threads\n", NULL);
     for(i=0;i<3;i++){
         pthread_kill(sort_thread_handles[i], SIGINT);
         pthread_join(sort_thread_handles[i], NULL);
@@ -268,7 +279,7 @@ void run_simulation(int num_threads, system_t* system){
     }
     */
     // done
-    if(debug_flag) printf("Simulation complete\n");;
+    INFO("Simulation complete\n", NULL);;
     return;
 }
 

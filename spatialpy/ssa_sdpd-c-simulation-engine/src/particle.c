@@ -11,6 +11,18 @@ See the file LICENSE.txt for details.
 #include <stdio.h>
 #include <math.h>
 
+// Define debug level macros
+#if VERB
+    #define INFO(fmt, args...) printf("%s - INFO - %s - %d - "fmt, __FILE__, __FUNCTION__, __LINE__,  args)
+#else
+    #define INFO(fmt, args...)
+#endif
+
+#if VERB > 1
+    #define DEBUG(fmt, args...) printf("%s - DEBUG - %s - %d - "fmt, __FILE__, __FUNCTION__, __LINE__, args)
+#else
+    #define DEBUG(fmt, args...)
+#endif
 
 void find_neighbors(particle_t* me, system_t* system){
     node*n;
@@ -24,13 +36,11 @@ void find_neighbors(particle_t* me, system_t* system){
         if( (n->data->x[1] > (me->x[1] + system->h)) || (n->data->x[1] < (me->x[1] - system->h) ) ) continue;
         if( (n->data->x[2] > (me->x[2] + system->h)) || (n->data->x[2] < (me->x[2] - system->h) ) ) continue;
         linked_list_add(me->neighbors, n->data);
-        if(debug_flag>2){ 
-            printf("find_neighbors(%i) forward found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
+        DEBUG("find_neighbors(%i) forward found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
             me->id,n->data->id, particle_dist(me,n->data),
             me->x[0] - n->data->x[0],
             me->x[1] - n->data->x[1],
             me->x[2] - n->data->x[2]);
-        }
     }
     // check for wrap around points x
     /*if(n==NULL && system->boundary_conditions[0] == 'p'){
@@ -40,13 +50,11 @@ void find_neighbors(particle_t* me, system_t* system){
             if( (n->data->x[1] > (me->x[1] + system->h)) || (n->data->x[1] < (me->x[1] - system->h) ) ) continue;
             if( (n->data->x[2] > (me->x[2] + system->h)) || (n->data->x[2] < (me->x[2] - system->h) ) ) continue;
             linked_list_add(me->neighbors, n->data);
-            if(debug_flag){ 
-                printf("find_neighbors(%i) forward wrap around found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
+            INFO("find_neighbors(%i) forward wrap around found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
                 me->id,n->data->id, particle_dist(me,n->data),
                 me->x[0] - n->data->x[0],
                 me->x[1] - n->data->x[1],
                 me->x[2] - n->data->x[2]);
-            }
         }
     }
     // check for wrap around points y
@@ -97,13 +105,11 @@ void find_neighbors(particle_t* me, system_t* system){
             continue;
         }
         linked_list_add(me->neighbors, n->data);
-        if(debug_flag>2){ 
-            printf("find_neighbors(%i) backwards found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
+        DEBUG("find_neighbors(%i) backwards found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
             me->id,n->data->id, particle_dist(me,n->data),
             me->x[0] - n->data->x[0],
             me->x[1] - n->data->x[1],
             me->x[2] - n->data->x[2]);
-        }
     }
     /*if(n==NULL && system->boundary_conditions[0] == 'p'){
         double min_x = system->xhi - (system->h - (system->xlo - me->x[0]));
@@ -112,13 +118,11 @@ void find_neighbors(particle_t* me, system_t* system){
             if( (n->data->x[1] > (me->x[1] + system->h)) || (n->data->x[1] < (me->x[1] - system->h) ) ) continue;
             if( (n->data->x[2] > (me->x[2] + system->h)) || (n->data->x[2] < (me->x[2] - system->h) ) ) continue;
             linked_list_add(me->neighbors, n->data);
-            if(debug_flag){ 
-                printf("find_neighbors(%i) backwards wrap around found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
+            INFO("find_neighbors(%i) backwards wrap around found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
                 me->id,n->data->id, particle_dist(me,n->data),
                 me->x[0] - n->data->x[0],
                 me->x[1] - n->data->x[1],
                 me->x[2] - n->data->x[2]);
-            }
         }
     }*/
     // return the neighbor list

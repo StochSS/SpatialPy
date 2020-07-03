@@ -4,7 +4,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Define debug level macros
+#if VERB
+    #define INFO(fmt, args...) printf("%s - INFO - %s - %d - "fmt, __FILE__, __FUNCTION__, __LINE__,  args)
+#else
+    #define INFO(fmt, args...)
+#endif
 
+#if VERB > 1
+    #define DEBUG(fmt, args...) printf("%s - DEBUG - %s - %d - "fmt, __FILE__, __FUNCTION__, __LINE__, args)
+#else
+    #define DEBUG(fmt, args...)
+#endif
 
 void output_csv(system_t*system, int current_step){
     char filename[256];
@@ -98,7 +109,7 @@ void output_vtk__async_step(system_t*system){
     int np = output_buffer_current_num_particles;
     if(output_buffer_current_step == 0){
         sprintf(filename, "output0_boundingBox.vtk");
-        if(debug_flag){printf("Writing file '%s'\n", filename);}
+        INFO("Writing file '%s'\n", filename);
         if((fp = fopen(filename,"w+"))==NULL){ 
             perror("Can't write 'output0_boundingBox.vtk'");exit(1);
         }
@@ -116,7 +127,7 @@ void output_vtk__async_step(system_t*system){
         fclose(fp);
     }
     sprintf(filename,"output%u.vtk",output_buffer_current_step);
-    if(debug_flag){printf("Writing file '%s'\n", filename);}
+    INFO("Writing file '%s'\n", filename);
     if((fp = fopen(filename,"w+"))==NULL){ 
         perror("Can't write output vtk file");exit(1);
     }
