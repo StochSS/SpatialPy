@@ -266,11 +266,7 @@ class Result(dict):
             plt.colorbar()
             if title is not None:
                 plt.title(title)
-            #plt.xticks(numpy.arange(-0.6, 0.7, 0.1)) 
-            #plt.yticks(numpy.arange(-0.6, 0.7, 0.1)) 
             plt.grid(linestyle='--', linewidth=1)
-            # plt.xlim(self.model.mesh.xlim)
-            # plt.ylim(self.model.mesh.ylim)
             plt.plot()
             return
         
@@ -508,11 +504,7 @@ class Result(dict):
             plt.colorbar()
             if title is not None:
                 plt.title(title)
-            #plt.xticks(numpy.arange(-0.6, 0.7, 0.1)) 
-            #plt.yticks(numpy.arange(-0.6, 0.7, 0.1)) 
             plt.grid(linestyle='--', linewidth=1)
-            plt.xlim(self.model.mesh.xlim)
-            plt.ylim(self.model.mesh.ylim)
             plt.plot()
             return
         
