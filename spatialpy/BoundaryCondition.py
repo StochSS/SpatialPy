@@ -37,24 +37,17 @@ class BoundaryCondition():
         self.zmin = zmin
         self.zmax = zmax
         self.type_id = type_id
-        self.species = None
-        self.property = None
+        self.species = species
+        self.property = property
         self.deterministic = deterministic
-
-        if( species is not None and property is not None):
-            raise ModelError("Can not set both species and property")
-        if species is not None:
-            self.species = species
-            self.deterministic = deterministic
-        else:
-            self.property = property
-
-        if value is None:
-            raise ModelError("Must set value")
         self.value = value
 
         
     def expression(self):
+        if( self.species is not None and self.property is not None):
+            raise ModelError("Can not set both species and property")
+        if self.value is None:
+            raise ModelError("Must set value")
         cond=[]
         if(self.xmin is not None): cond.append("(me->x[0] >= {0})".format(self.xmin))
         if(self.xmax is not None): cond.append("(me->x[0] <= {0})".format(self.xmax))
