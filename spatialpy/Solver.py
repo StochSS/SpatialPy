@@ -13,7 +13,7 @@ from spatialpy.Log import *
 
 
 class Solver:
-    """ Abstract class for spatialpy solvers. """
+    """ spatialpy solvers. """
 
     def __init__(self, model, debug_level=0):
         """ Constructor. """
@@ -511,12 +511,13 @@ class Solver:
             self.model.listOfSubdomainIDs), len(self.model.listOfSpecies), len(self.model.listOfReactions))
         system_config += "system->static_domain = {0};\n".format(int(self.model.staticDomain))
         if(len(self.model.listOfSpecies) > 0):
+            system_config += "system->subdomain_diffusion_matrix = input_subdomain_diffusion_matrix;\n"
             system_config += "system->stochic_matrix = input_N_dense;\n"
             system_config += "system->chem_rxn_rhs_functions = ALLOC_ChemRxnFun();\n"
 
         system_config += "system->dt = {0};\n".format(self.model.timestep_size)
         system_config += "system->nt = {0};\n".format(self.model.num_timesteps)
-        system_config += "system->output_freq = 1;\n"
+        system_config += "system->output_freq = {0};\n".format(self.model.output_freq)
         if self.h is None:
             self.h = self.model.mesh.find_h()
         if self.h == 0.0:
@@ -556,17 +557,25 @@ class Solver:
             if(bc.ymax is not None): cond.append("(me->x[1] <= {0})".format(bc.ymax))
             if(bc.zmin is not None): cond.append("(me->x[2] >= {0})".format(bc.zmin))
             if(bc.zmax is not None): cond.append("(me->x[2] <= {0})".format(bc.zmax))
-            if(len(cond)==0): raise Exception('need at least one condition on the BoundaryCondition')
+            if(bc.type_id is not None): cond.append("(me->type == {0})".format(int(bc.type_id)))
+            if(len(cond)==0): raise ModelError('need at least one condition on the BoundaryCondition')
             bcstr = "if(" + '&&'.join(cond) + "){"
-            if(bc.property == 'v'):
-                for i in range(3):
-                    bcstr+= "me->v[{0}]={1};".format(i,bc.value[i])
-            elif(bc.property == 'nu'):
-                bcstr+= "me->nu={0};".format(bc.value)
-            elif(bc.property == 'rho'):
-                bcstr+= "me->rho={0};".format(bc.value)
-            else:
-                raise Exception("TODO: handle boundary condition for '{0}'".format(bc.property))
+            if bc.species is not None:
+                if bc.deterministic:
+                    s_ndx = self.model.species_map[self.model.listOfSpecies[bc.species]]
+                    bcstr += "me->C[{0}] = {1};".format(s_ndx,bc.value)
+                else:
+                    raise Exception("BoundaryConditions don't work for stochastic species yet")
+            elif bc.property is not None:
+                if(bc.property == 'v'):
+                    for i in range(3):
+                        bcstr+= "me->v[{0}]={1};".format(i,bc.value[i])
+                elif(bc.property == 'nu'):
+                    bcstr+= "me->nu={0};".format(bc.value)
+                elif(bc.property == 'rho'):
+                    bcstr+= "me->rho={0};".format(bc.value)
+                else:
+                    raise Exception("Unable handle boundary condition for property '{0}'".format(bc.property))
             bcstr+= "}"
             init_bc += bcstr
         propfilestr = propfilestr.replace("__BOUNDARY_CONDITIONS__", init_bc)

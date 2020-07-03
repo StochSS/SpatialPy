@@ -360,17 +360,17 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
     for(n=system->particle_list->head; n!=NULL; n=n->next){
         p1 = n->data;
         if(p1->neighbors->count == 0){
-            INFO("find_neighbors(%i)\n",p1->id);
+            //if(debug_flag){printf("find_neighbors(%i)\n",p1->id);}
             find_neighbors(p1, system);
         }
-        INFO("node %i # neighbors %i\n",p1->id,p1->neighbors->count);
+        //if(debug_flag){printf("node %i # neighbors %i\n",p1->id,p1->neighbors->count);}
         irD_length += (p1->neighbors->count + 1);
         // update the volume
         rdme->vol[p1->id] = p1->mass / p1->rho;
     }
     prD_length = irD_length;
-    INFO("irD_length= %li\n",irD_length);fflush(stdout);
-    INFO("irD_length= %li\n",irD_length);fflush(stdout);
+    //if(debug_flag){printf("irD_length= %li\n",irD_length);fflush(stdout);}
+    //if(debug_flag){printf("jcD_length= %li\n",jcD_length);fflush(stdout);}
     // allocate space for each array
     //printf("MALLOC rdme->irD [%li]\n",irD_length*rdme->Mspecies);
     rdme->irD = (size_t*) malloc(sizeof(size_t)*irD_length*rdme->Mspecies);
