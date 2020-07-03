@@ -36,7 +36,7 @@ common_color_scales = ["Plotly3","Jet","Blues","YlOrRd","PuRd","BuGn","YlOrBr","
                        "PuBu","GnBu","YlGn","Greens","Reds","Greys","RdPu","OrRd","Purples","Oranges"]
 
 
-def _plotly_iterate(subdomains, size=5, property_name=None, colormap=None, is_2d=False):
+def _plotly_iterate(subdomains, size=5, property_name=None, cmin=None, cmax=None, colormap=None, is_2d=False):
     import plotly.graph_objs as go
 
     trace_list = []
@@ -53,11 +53,14 @@ def _plotly_iterate(subdomains, size=5, property_name=None, colormap=None, is_2d
                 colormap = common_color_scales[i]
             marker = {"size":size, "color":sub_data["data"], "colorscale":colormap, 
                         "colorbar":{'thickness':20,'title':name}}
+            if cmin is not None and cmax is not None:
+                marker["cmin"] = cmin
+                marker["cmax"] = cmax
 
-        if is_2d:
-            trace = go.Scatter(x=x_data, y=y_data, name=name, mode="markers", marker=marker)
-        else:
-            trace = go.Scatter3d(x=x_data, y=y_data, z=z_data, name=name, mode="markers", marker=marker)
+        # if is_2d:
+        #     trace = go.Scatter(x=x_data, y=y_data, name=name, mode="markers", marker=marker)
+        # else:
+        trace = go.Scatter3d(x=x_data, y=y_data, z=z_data, name=name, mode="markers", marker=marker)
         trace_list.append(trace)
     return trace_list
 
@@ -182,7 +185,7 @@ class Result(dict):
         return ret
 
     def plot_species(self, species, t_ndx=0, concentration=False, deterministic=False, width=500, height=500, colormap=None, size=5, title=None,
-                     animated=False, t_ndx_list=None, speed=1, return_plotly_figure=False):
+                     animated=False, t_ndx_list=None, speed=1, f_duration=500, t_duration=300, return_plotly_figure=False):
         """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
@@ -220,6 +223,10 @@ class Result(dict):
             False (default)
         speed : int
             The interval of the time indeces of the results to be plotted (animated plots only) 
+        f_duration : int
+            The duration of time that a frame is displayed
+        t_duration : int
+            The duration of time to execute the transition between frames
         return_plotly_figure : bool
             whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
@@ -232,6 +239,8 @@ class Result(dict):
         if animated and t_ndx_list is None:
             t_ndx_list = [item for item in range(self.model.num_timesteps+1)]
 
+        spec_name = "C[{0}]".format(species) if deterministic else "D[{0}]".format(species)
+
         # read data at time point
         time_index = t_ndx_list[0] if animated else t_ndx
         points, data = self.read_step(time_index)
@@ -240,13 +249,11 @@ class Result(dict):
         subdomains = {}
         for i, val in enumerate(data['type']):
             name = species
-            if deterministic:
-                spec_data = data["C[{}]".format(species)][i]
-            elif concentration:
-                spec_data = data["D[{}]".format(species)][i] / (data['mass'][i] / data['rho'][i])
+            if deterministic or not concentration:
+                spec_data = data[spec_name][i]
             else:
-                spec_data = data["D[{}]".format(species)][i]
-
+                spec_data = data[spec_name][i] / (data['mass'][i] / data['rho'][i])
+            
             if name in subdomains.keys():
                 subdomains[name]['points'].append(points[i])
                 subdomains[name]['data'].append(spec_data)
@@ -254,13 +261,15 @@ class Result(dict):
                 subdomains[name] = {"points":[points[i]], "data":[spec_data]}
 
         is_2d = self.model.mesh.zlim[0] == self.model.mesh.zlim[1]
-
+        
         trace_list = _plotly_iterate(subdomains, size=size, colormap=colormap, is_2d=is_2d)
         
         scene = {
             "aspectmode": 'data',
         }
-        layout = {"width": width, "height": height, "scene":scene}
+        layout = {"width": width, "height": width, "scene":scene, 
+                  "xaxis":{"range":self.model.mesh.xlim}, "yaxis":{"range":self.model.mesh.ylim}
+                 }
         if title is not None:
             layout["title"] = title
 
@@ -270,9 +279,9 @@ class Result(dict):
         if animated and len(t_ndx_list) > 1:
             fig["layout"]["updatemenus"] = [
                 {"buttons": [
-                    {"args": [None, {"frame": {"duration": 500, "redraw": False},
+                    {"args": [None, {"frame": {"duration": f_duration, "redraw": False},
                                      "fromcurrent": True,
-                                     "transition": {"duration": 300, "easing": "quadratic-in-out"}}],
+                                     "transition": {"duration": t_duration, "easing": "quadratic-in-out"}}],
                      "label": "Play",
                      "method": "animate"
                     },
@@ -302,13 +311,24 @@ class Result(dict):
                     "visible": True,
                     "xanchor": "right"
                 },
-                "transition": {"duration": 300, "easing": "cubic-in-out"},
+                "transition": {"duration": t_duration, "easing": "cubic-in-out"},
                 "pad": {"b": 10, "t": 50},
                 "len": 0.9,
                 "x": 0.1,
                 "y": 0,
                 "steps": []}
             
+            _data = data[spec_name] if deterministic or not concentration else data[spec_name] / (data['mass'] / data['rho'])
+            cmin = min(_data)
+            cmax = max(_data)
+            for i in range(1, len(t_ndx_list), speed):
+                _, _data = self.read_step(t_ndx_list[i])
+                _data = _data[spec_name] if deterministic or not concentration else _data[spec_name] / (_data['mass'] / _data['rho'])
+                if min(_data) < cmin:
+                    cmin = min(_data)
+                if max(_data) > cmax:
+                    cmax = max(_data)
+
             frames = []
             for index in range(0, len(t_ndx_list), speed):
                 points, data = self.read_step(t_ndx_list[index])
@@ -317,28 +337,26 @@ class Result(dict):
                 subdomains = {}
                 for i, val in enumerate(data['type']):
                     name = "sub {}".format(val)
-                    if deterministic:
-                        spec_data = data["C[{}]".format(species)][i]
-                    elif concentration:
-                        spec_data = data["D[{}]".format(species)][i] / (data['mass'][i] / data['rho'][i])
+                    if deterministic or not concentration:
+                        spec_data = data[spec_name][i]
                     else:
-                        spec_data = data["D[{}]".format(species)][i]
-
+                        spec_data = data[spec_name][i] / (data['mass'][i] / data['rho'][i])
+            
                     if name in subdomains.keys():
                         subdomains[name]['points'].append(points[i])
                         subdomains[name]['data'].append(spec_data)
                     else:
                         subdomains[name] = {"points":[points[i]], "data":[spec_data]}
 
-                trace_list = _plotly_iterate(subdomains, size=size, colormap=colormap, is_2d=is_2d)
+                trace_list = _plotly_iterate(subdomains, size=size, colormap=colormap, cmin=cmin, cmax=cmax, is_2d=is_2d)
                 
                 frame = {"data":trace_list, "name":str(t_ndx_list[index])}
                 frames.append(frame)
                 
                 slider_step = {"args": [[str(t_ndx_list[index])],
-                                        {"frame": {"duration": 100, "redraw": True},
+                                        {"frame": {"duration": f_duration, "redraw": True},
                                          "mode": "immediate",
-                                         "transition": {"duration": 100}
+                                         "transition": {"duration": t_duration}
                                         }],
                                "label": str(t_ndx_list[index]),
                                "method": "animate"}
@@ -385,8 +403,8 @@ class Result(dict):
             ret = ret.flatten()
         return ret
 
-    def plot_property(self, property_name, t_ndx=0, width=500, height=500, colormap=None, size=5, title=None,
-                      animated=False, t_ndx_list=None, speed=1, return_plotly_figure=False):
+    def plot_property(self, property_name, t_ndx=0, p_ndx=0, width=500, height=500, colormap=None, size=5, title=None,
+                      animated=False, t_ndx_list=None, speed=1, f_duration=500, t_duration=300, return_plotly_figure=False):
         """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
@@ -400,6 +418,8 @@ class Result(dict):
             A string describing the property to be plotted.
         t_ndx : int
             The time index of the results to be plotted
+        p_ndx : int
+            The property index of the results to be plotted
         width: int (default 500)
             Width in pixels of output plot box
         height: int (default 500)
@@ -419,6 +439,10 @@ class Result(dict):
             False (default)
         speed : int
             The interval of the time indeces of the results to be plotted (animated plots only) 
+        f_duration : int
+            The duration of time that a frame is displayed
+        t_duration : int
+            The duration of time to execute the transition between frames
         return_plotly_figure : bool
             whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
@@ -445,11 +469,10 @@ class Result(dict):
                     subdomains[name]['data'].append(data[property_name][i])
                 else:
                     subdomains[name] = {"points":[points[i]], "data":[data[property_name][i]]}
-                print("Name: {0}, Point: {1}, Data: {2}".format(name, points[i], data[property_name][i]))
         elif property_name == 'v':
             subdomains[property_name] = {
                 "points": points,
-                "data" : [data[property_name][i][1] for i in range(0,len(data[property_name]))]
+                "data" : [data[property_name][i][p_ndx] for i in range(0,len(data[property_name]))]
             }
         else:
             subdomains[property_name] = {
@@ -478,13 +501,13 @@ class Result(dict):
         if animated and len(t_ndx_list) > 1:
             fig["layout"]["updatemenus"] = [
                 {"buttons": [
-                    {"args": [None, {"frame": {"duration": 200, "redraw": True},
+                    {"args": [None, {"frame": {"duration": f_duration, "redraw": False},
                                      "fromcurrent": True,
-                                     "transition": {"duration": 200, "easing": "quadratic-in-out"}}],
+                                     "transition": {"duration": t_duration, "easing": "quadratic-in-out"}}],
                      "label": "Play",
                      "method": "animate"
                     },
-                    {"args": [[None], {"frame": {"duration": 0, "redraw": True},
+                    {"args": [[None], {"frame": {"duration": 0, "redraw": False},
                                        "mode": "immediate",
                                        "transition": {"duration": 0}}],
                      "label": "Pause",
@@ -510,13 +533,24 @@ class Result(dict):
                     "visible": True,
                     "xanchor": "right"
                 },
-                "transition": {"duration": 200, "easing": "cubic-in-out"},
+                "transition": {"duration": t_duration, "easing": "cubic-in-out"},
                 "pad": {"b": 10, "t": 50},
                 "len": 0.9,
                 "x": 0.1,
                 "y": 0,
                 "steps": []}
             
+            cmin = min(data[property_name]) if property_name != "v" else min(data[property_name], key=lambda val: val[p_ndx])[p_ndx]
+            cmax = max(data[property_name]) if property_name != "v" else max(data[property_name], key=lambda val: val[p_ndx])[p_ndx]
+            for i in range(1, len(t_ndx_list), speed):
+                _, _data = self.read_step(t_ndx_list[i])
+                _cmin = min(_data[property_name]) if property_name != "v" else min(_data[property_name], key=lambda val: val[p_ndx])[p_ndx]
+                if _cmin < cmin:
+                    cmin = _cmin
+                _cmax = max(_data[property_name]) if property_name != "v" else max(_data[property_name], key=lambda val: val[p_ndx])[p_ndx]
+                if _cmax > cmax:
+                    cmax = _cmax
+
             frames = []
             for index in range(0, len(t_ndx_list), speed):
                 points, data = self.read_step(t_ndx_list[index])
@@ -535,7 +569,7 @@ class Result(dict):
                 elif property_name == 'v':
                     subdomains[property_name] = {
                         "points": points,
-                        "data" : [data[property_name][i][1] for i in range(0,len(data[property_name]))]
+                        "data" : [data[property_name][i][p_ndx] for i in range(0,len(data[property_name]))]
                     }
                 else:
                     subdomains[property_name] = {
@@ -544,15 +578,15 @@ class Result(dict):
                     }
 
                 trace_list = _plotly_iterate(subdomains, size=size, property_name=property_name,
-                                     colormap=colormap, is_2d=is_2d)
+                                     colormap=colormap, cmin=cmin, cmax=cmax, is_2d=is_2d)
                 
                 frame = {"data":trace_list, "name":str(t_ndx_list[index])}
                 frames.append(frame)
                 
                 slider_step = {"args": [[str(t_ndx_list[index])],
-                                        {"frame": {"duration": 200, "redraw": True},
+                                        {"frame": {"duration": f_duration, "redraw": False},
                                          "mode": "immediate",
-                                         "transition": {"duration": 200}
+                                         "transition": {"duration": t_duration}
                                         }],
                                "label": str(t_ndx_list[index]),
                                "method": "animate"}
