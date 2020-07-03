@@ -197,9 +197,9 @@ class Mesh():
             mesh_vertices[ int(v.attrib['index']),2] = float(v.attrib['z'])
 
         # create mesh object
-        xlim = ( max(mesh_vertices[:,0]) , max(mesh_vertices[:,0]) )
-        ylim = ( max(mesh_vertices[:,1]) , max(mesh_vertices[:,1]) )
-        zlim = ( max(mesh_vertices[:,2]) , max(mesh_vertices[:,2]) )
+        xlim = ( min(mesh_vertices[:,0]) , max(mesh_vertices[:,0]) )
+        ylim = ( min(mesh_vertices[:,1]) , max(mesh_vertices[:,1]) )
+        zlim = ( min(mesh_vertices[:,2]) , max(mesh_vertices[:,2]) )
         obj = Mesh(len(vertices), xlim, ylim, zlim)
         obj.vertices = mesh_vertices
 
