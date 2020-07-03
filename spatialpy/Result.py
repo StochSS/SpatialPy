@@ -185,7 +185,8 @@ class Result(dict):
         return ret
 
     def plot_species(self, species, t_ndx=0, concentration=False, deterministic=False, width=500, height=500, colormap=None, size=5, title=None,
-                     animated=False, t_ndx_list=None, speed=1, f_duration=500, t_duration=300, return_plotly_figure=False):
+                     animated=False, t_ndx_list=None, speed=1, f_duration=500, t_duration=300, return_plotly_figure=False,
+                     use_matplotlib=False, mpl_width=6.4, mpl_height=4.8):
         """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
@@ -217,7 +218,7 @@ class Result(dict):
         title : str
             The title of the graph
         animated : bool
-            Whether or not the plot is a 3D animation
+            Whether or not the plot is a 3D animation, ignored if use_matplotlib True
         t_ndx_list : list
             The list of time indeces of the results to be plotted, ignored if animated is 
             False (default)
@@ -230,6 +231,12 @@ class Result(dict):
         return_plotly_figure : bool
             whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
+        use_matplotlib : bool
+            whether or not to plot the proprties results using matplotlib.
+        mpl_width: int (default 6.4)
+            Width in inches of output plot box
+        mpl_height: int (default 4.8)
+            Height in inches of output plot box
         """
         from plotly.offline import init_notebook_mode, iplot
 
@@ -244,6 +251,28 @@ class Result(dict):
         # read data at time point
         time_index = t_ndx_list[0] if animated else t_ndx
         points, data = self.read_step(time_index)
+        
+        if use_matplotlib:
+            import matplotlib.pyplot as plt
+
+            if (deterministic or not concentration):
+                d = data[spec_name]
+            else:
+                d = data[spec_name] / (data['mass'] / data['rho'])
+            
+            plt.figure(figsize=(mpl_width,mpl_height))       
+            plt.scatter(points[:,0],points[:,1],c=d)
+            plt.axis('scaled')
+            plt.colorbar()
+            if title is not None:
+                plt.title(title)
+            #plt.xticks(numpy.arange(-0.6, 0.7, 0.1)) 
+            #plt.yticks(numpy.arange(-0.6, 0.7, 0.1)) 
+            plt.grid(linestyle='--', linewidth=1)
+            # plt.xlim(self.model.mesh.xlim)
+            # plt.ylim(self.model.mesh.ylim)
+            plt.plot()
+            return
         
         # map data to subdomains
         subdomains = {}
@@ -404,7 +433,8 @@ class Result(dict):
         return ret
 
     def plot_property(self, property_name, t_ndx=0, p_ndx=0, width=500, height=500, colormap=None, size=5, title=None,
-                      animated=False, t_ndx_list=None, speed=1, f_duration=500, t_duration=300, return_plotly_figure=False, use_matplotlib=False):
+                      animated=False, t_ndx_list=None, speed=1, f_duration=500, t_duration=300, return_plotly_figure=False,
+                      use_matplotlib=False, mpl_width=6.4, mpl_height=4.8):
         """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
@@ -433,7 +463,7 @@ class Result(dict):
         title : str
             The title of the graph
         animated : bool
-            Whether or not the plot is a 3D animation
+            Whether or not the plot is a 3D animation, ignored if use_matplotlib True
         t_ndx_list : list
             The list of time indeces of the results to be plotted, ignored if animated is 
             False (default)
@@ -448,6 +478,10 @@ class Result(dict):
             which may be edited by the user.
         use_matplotlib : bool
             whether or not to plot the proprties results using matplotlib.
+        mpl_width: int (default 6.4)
+            Width in inches of output plot box
+        mpl_height: int (default 4.8)
+            Height in inches of output plot box
         """
         if(t_ndx < 0):
             t_ndx = len(self.get_timespan()) + t_ndx
@@ -468,10 +502,10 @@ class Result(dict):
             else:
                 d = data[property_name]
             
-            plt.figure(figsize=(width,height) )       
-            plt.scatter(pts[:,0],pts[:,1],c=d)
+            plt.figure(figsize=(mpl_width,mpl_height))       
+            plt.scatter(points[:,0],points[:,1],c=d)
             plt.axis('scaled')
-            #plt.colorbar()
+            plt.colorbar()
             if title is not None:
                 plt.title(title)
             #plt.xticks(numpy.arange(-0.6, 0.7, 0.1)) 
@@ -479,6 +513,7 @@ class Result(dict):
             plt.grid(linestyle='--', linewidth=1)
             plt.xlim(self.model.mesh.xlim)
             plt.ylim(self.model.mesh.ylim)
+            plt.plot()
             return
         
         from plotly.offline import init_notebook_mode, iplot
