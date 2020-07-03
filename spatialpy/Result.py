@@ -57,10 +57,10 @@ def _plotly_iterate(subdomains, size=5, property_name=None, cmin=None, cmax=None
                 marker["cmin"] = cmin
                 marker["cmax"] = cmax
 
-        # if is_2d:
-        #     trace = go.Scatter(x=x_data, y=y_data, name=name, mode="markers", marker=marker)
-        # else:
-        trace = go.Scatter3d(x=x_data, y=y_data, z=z_data, name=name, mode="markers", marker=marker)
+        if is_2d:
+            trace = go.Scatter(x=x_data, y=y_data, name=name, mode="markers", marker=marker)
+        else:
+            trace = go.Scatter3d(x=x_data, y=y_data, z=z_data, name=name, mode="markers", marker=marker)
         trace_list.append(trace)
     return trace_list
 
@@ -404,7 +404,7 @@ class Result(dict):
         return ret
 
     def plot_property(self, property_name, t_ndx=0, p_ndx=0, width=500, height=500, colormap=None, size=5, title=None,
-                      animated=False, t_ndx_list=None, speed=1, f_duration=500, t_duration=300, return_plotly_figure=False):
+                      animated=False, t_ndx_list=None, speed=1, f_duration=500, t_duration=300, return_plotly_figure=False, use_matplotlib=False):
         """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
@@ -446,9 +446,9 @@ class Result(dict):
         return_plotly_figure : bool
             whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
+        use_matplotlib : bool
+            whether or not to plot the proprties results using matplotlib.
         """
-        from plotly.offline import init_notebook_mode, iplot
-        
         if(t_ndx < 0):
             t_ndx = len(self.get_timespan()) + t_ndx
 
@@ -459,6 +459,30 @@ class Result(dict):
         time_index = t_ndx_list[0] if animated else t_ndx
         points, data = self.read_step(time_index)
 
+        if use_matplotlib:
+            import matplotlib.pyplot as plt
+
+            if (property_name == 'v'):
+                d = data[property_name]
+                d = [d[i][p_ndx] for i in range(0,len(d))]
+            else:
+                d = data[property_name]
+            
+            plt.figure(figsize=(width,height) )       
+            plt.scatter(pts[:,0],pts[:,1],c=d)
+            plt.axis('scaled')
+            #plt.colorbar()
+            if title is not None:
+                plt.title(title)
+            #plt.xticks(numpy.arange(-0.6, 0.7, 0.1)) 
+            #plt.yticks(numpy.arange(-0.6, 0.7, 0.1)) 
+            plt.grid(linestyle='--', linewidth=1)
+            plt.xlim(self.model.mesh.xlim)
+            plt.ylim(self.model.mesh.ylim)
+            return
+        
+        from plotly.offline import init_notebook_mode, iplot
+        
         subdomains = {}
         if property_name == 'type':
             for i, val in enumerate(data['type']):
