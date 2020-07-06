@@ -20,6 +20,9 @@ See the file LICENSE.txt for details.
 void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
 {
     // F, Frho and Fbp are output
+
+    //printf("pairwiseForce(id=%i)\n",me->id);
+    //fflush(stdout);
     
     double R, Pj, dv[3], dx[3], alpha, r, dWdr, dv_dx, fp, fv, fbp,
         transportTensor[3][3], ft[3], pressure_gradient;
@@ -43,7 +46,7 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
         alpha = 5 / (M_PI * h * h);
     }
     else {
-        printf("Not 1D or 2D\n");
+        printf("Error, only 3D or 2D domains are supported\n");
         exit(1);
     }
    
@@ -54,12 +57,17 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
         }
     }
 
+    //printf("pairwiseForce(id=%i) before compute force\n",me->id);
+    //fflush(stdout);
+
     // Compute force from each neighbor
     for (n = neighbors->head; n != NULL; n = n->next) {
         pt_j = n->data;
 
         r = particle_dist(me, pt_j);
         R = r / h;
+        //printf("pairwiseForce(id=%i) pt_j->id=%i r=%e R=%e\n",me->id,pt_j->id,r,R);
+        //fflush(stdout);
         if (R > 1.0)
             continue; // outside kernel support
         if (r == 0.0)
@@ -107,6 +115,8 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
             me->F[i] += fp * dx[i] + fv * dv[i] + ft[i];
             me->Fbp[i] += fbp * dx[i];
         }
+        //printf("pairwiseForce(id=%i) me->F = [%e, %e, %e]\n",me->id,me->F[0],me->F[1],me->F[2]);
+        //fflush(stdout);
 
         // Compute density variation
         me->Frho = me->Frho + me->rho * (pt_j->mass / pt_j->rho) * dv_dx * (1 / (r + 0.001 * h)) * dWdr 
@@ -114,16 +124,34 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
                       - (pt_j->mass / pt_j->rho) * (me->rho * ((me->v[0] - me->vt[0]) * dx[0] + (me->v[1] - me->vt[1]) * dx[1] + (me->v[2] - me->vt[2]) * dx[2]) 
                       + pt_j->rho * ((pt_j->v[0] - pt_j->vt[0]) * dx[0] + (pt_j->v[1] - pt_j->vt[1]) * dx[1] + (pt_j->v[2] - pt_j->vt[2]) * dx[2])) * (1.0 / (r + 0.001 * h)) * dWdr;
 
+        //printf("pairwiseForce(id=%i) me->Frho = [%e]\n",me->id,me->Frho);
+        //fflush(stdout);
+
         // Compute Chem Rxn Flux (diffusion part)
         double wfd = (1.0 / (r + 0.001 * h)) * dWdr;
+        //printf("pairwiseForce(id=%i) wfd = %e\n",me->id,wfd);
+        //fflush(stdout);
         double dQc_base = 2.0* ((me->mass*pt_j->mass)/(me->mass+pt_j->mass)) * ((me->rho+pt_j->rho)/(me->rho*pt_j->rho)) * (r*r) * wfd / ((r*r) + 0.01*h*h); // (Tartakovsky et. al., 2007, JCP)
+        //printf("pairwiseForce(id=%i) dQc_base = %e\n",me->id,dQc_base);
+        //fflush(stdout);
+
+        //printf("pairwiseForce(id=%i) system->num_chem_species = %i\n",me->id,system->num_chem_species);
+        //fflush(stdout);
         for(s=0; s < system->num_chem_species; s++){
             // Note about below:  do species types start at  1
-            int k = system->num_types * (me->type - 1) + s;
+            int k = (system->num_chem_species) * (me->type - 1) + s;
+            //printf("pairwiseForce(id=%i) s=%i, k=%i num_types=%i me->type=%i\n",me->id,s,k,system->num_types,me->type);
+            //fflush(stdout);
             double dQc = system->subdomain_diffusion_matrix[k] * (me->C[s] - pt_j->C[s]) * dQc_base;
+            //printf("pairwiseForce(id=%i) dQc = %e (me->C[s]=%e - pt_j->C[s]=%e) diffusion=%e \n",me->id,dQc,me->C[s],pt_j->C[s],system->subdomain_diffusion_matrix[k]);
+            //fflush(stdout);
             me->Q[s] += dQc;
         }
+        //printf("pairwiseForce(id=%i) me->Q = [%e]\n",me->id,me->Q[0]);
+        //fflush(stdout);
     }
+    //printf("pairwiseForce(id=%i) num_chem_rxns=%i\n",me->id,system->num_chem_rxns);
+    //fflush(stdout);
     // after processing all neighbors
     for(rxn=0; rxn < system->num_chem_rxns; rxn++){
         //TODO, vol (3rd arg) set to zero, fix

@@ -20,21 +20,23 @@ import inspect
 
 import pickle
 import json
+import math
 
 
-common_rgb_values = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f',
-                         '#bcbd22', '#17becf', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff',
-                         '#800000', '#808000', '#008000', '#800080', '#008080', '#000080', '#ff9999', '#ffcc99',
-                         '#ccff99', '#cc99ff', '#ffccff', '#62666a', '#8896bb', '#77a096', '#9d5a6c', '#9d5a6c',
-                         '#eabc75', '#ff9600', '#885300', '#9172ad', '#a1b9c4', '#18749b', '#dadecf', '#c5b8a8',
-                         '#000117', '#13a8fe', '#cf0060', '#04354b', '#0297a0', '#037665', '#eed284', '#442244',
-                         '#ffddee', '#702afb']
 
-common_color_scales = ["Blues","YlOrRd","PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu",
-                        "PuBu","GnBu","YlGn","Greens","Reds","Greys","RdPu","OrRd",
-                        "Purples","Oranges"]
-        
-def _plotly_iterate(subdomains, size, property_name=None):
+common_rgb_values=['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f',
+                   '#bcbd22','#17becf','#ff0000','#00ff00','#0000ff','#ffff00','#00ffff','#ff00ff',
+                   '#800000','#808000','#008000','#800080','#008080','#000080','#ff9999','#ffcc99',
+                   '#ccff99','#cc99ff','#ffccff','#62666a','#8896bb','#77a096','#9d5a6c','#9d5a6c',
+                   '#eabc75','#ff9600','#885300','#9172ad','#a1b9c4','#18749b','#dadecf','#c5b8a8',
+                   '#000117','#13a8fe','#cf0060','#04354b','#0297a0','#037665','#eed284','#442244',
+                   '#ffddee','#702afb']
+
+common_color_scales = ["Plotly3","Jet","Blues","YlOrRd","PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu",
+                       "PuBu","GnBu","YlGn","Greens","Reds","Greys","RdPu","OrRd","Purples","Oranges"]
+
+
+def _plotly_iterate(subdomains, size=5, property_name=None, colormap=None):
     import plotly.graph_objs as go
 
     trace_list = []
@@ -47,7 +49,10 @@ def _plotly_iterate(subdomains, size, property_name=None):
         if property_name is not None and property_name == "type":
             marker = {"size":size, "color":common_rgb_values[i]}
         else:
-            marker = {"size":size, "color":sub_data["data"], "colorscale":common_color_scales[i]}
+            if colormap is None:
+                colormap = common_color_scales[i]
+            marker = {"size":size, "color":sub_data["data"], "colorscale":colormap, 
+                        "colorbar":{'thickness':20,'title':name}}
         trace = go.Scatter3d(x=x_data, y=y_data, z=z_data, name=name, mode="markers", marker=marker)
         trace_list.append(trace)
     return trace_list
@@ -97,7 +102,8 @@ class Result(dict):
     def read_step(self, step_num, debug=False):
         """ Read the data for simulation step 'step_num'. """
         reader = VTKReader(debug=debug)
-        filename = os.path.join(self.result_dir, "output{0}.vtk".format(step_num))
+        num = int(step_num * self.model.output_freq)
+        filename = os.path.join(self.result_dir, "output{0}.vtk".format(num))
         #print("read_step({0}) opening '{1}'".format(step_num, filename))
         reader.setfilename(filename)
         reader.readfile()
@@ -110,7 +116,7 @@ class Result(dict):
 
     def get_timespan(self):
         self.tspan = numpy.linspace(0,self.model.num_timesteps,
-                num=self.model.num_timesteps+1) * self.model.timestep_size
+                num=math.ceil(self.model.num_timesteps/self.model.output_freq)+1) * self.model.timestep_size
         return self.tspan
 
     def get_species(self, species, timepoints=None, concentration=False, deterministic=False, debug=False):
@@ -140,8 +146,9 @@ class Result(dict):
         if spec_name not in self.model.listOfSpecies.keys():
             raise ResultError("Species '{0}' not found".format(spec_name))
 
-        t_index_arr = numpy.linspace(0,self.model.num_timesteps, 
-                            num=self.model.num_timesteps+1, dtype=int)
+        #t_index_arr = numpy.linspace(0,self.model.num_timesteps, 
+        #                    num=self.model.num_timesteps+1, dtype=int)
+        t_index_arr = self.get_timespan();
 
         if timepoints is not None:
             if isinstance(timepoints,float):
@@ -170,7 +177,7 @@ class Result(dict):
             ret = ret.flatten()
         return ret
 
-    def plot_species(self, species, t_ndx=0, t_ndx_list=None, size=5, animated=False, speed=1, title=None, concentration=False, deterministic=False, return_plotly_figure=False):
+    def plot_species(self, species, t_ndx=0, t_ndx_list=None, size=5, animated=False, speed=1, title=None, concentration=False, deterministic=False, return_plotly_figure=False, width=500, height=500, colormap=None):
         """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
@@ -189,6 +196,8 @@ class Result(dict):
             False (default)
         animated : bool
             Whether or not the plot is a 3D animation
+        speed : int
+            The interval of the time indeces of the results to be plotted (animated plots only) 
         title : str
             The title of the graph
         concentration : bool
@@ -199,10 +208,19 @@ class Result(dict):
         return_plotly_figure : bool
             whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
-        speed : int
-            The interval of the time indeces of the results to be plotted (animated plots only) 
+        width: int (default 500)
+            Width in pixels of output plot box
+        height: int (default 500)
+            Height in pixels of output plot box
+        colormap : str
+            colormap to use.  Plotly specification, valid values: "Plotly3","Jet","Blues","YlOrRd",
+                "PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu", "PuBu","GnBu","YlGn","Greens","Reds",
+                "Greys","RdPu","OrRd","Purples","Oranges".
         """
         from plotly.offline import init_notebook_mode, iplot
+
+        if(t_ndx < 0):
+            t_ndx = len(self.get_timespan()) + t_ndx
         
         if animated and t_ndx_list is None:
             t_ndx_list = [item for item in range(self.model.num_timesteps+1)]
@@ -214,7 +232,7 @@ class Result(dict):
         # map data to subdomains
         subdomains = {}
         for i, val in enumerate(data['type']):
-            name = "sub {}".format(val)
+            name = species
             if deterministic:
                 spec_data = data["C[{}]".format(species)][i]
             elif concentration:
@@ -228,13 +246,12 @@ class Result(dict):
             else:
                 subdomains[name] = {"points":[points[i]], "data":[spec_data]}
 
-        trace_list = _plotly_iterate(subdomains, size)
+        trace_list = _plotly_iterate(subdomains, size=size, colormap=colormap)
         
-        scene_x = self.model.mesh.xlim[0]/2.5
-        scene_y = self.model.mesh.ylim[0]/2.5
-        scene_z = self.model.mesh.zlim[0]/2.5
-        scene = {"aspectratio": {"x":scene_x,"y":scene_y,"z":scene_y}}
-        layout = {"width": 1000, "height": 1000, "scene":scene}
+        scene = {
+            "aspectmode": 'data',
+        }
+        layout = {"width": width, "height": height, "scene":scene}
         if title is not None:
             layout["title"] = title
 
@@ -359,7 +376,8 @@ class Result(dict):
             ret = ret.flatten()
         return ret
 
-    def plot_property(self, property_name, t_ndx, size=5, title=None, return_plotly_figure=False):
+    def plot_property(self, property_name, t_ndx=0, size=5, title=None, return_plotly_figure=False,
+                      width=500, height=500, colormap=None):
         """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
@@ -378,30 +396,47 @@ class Result(dict):
         return_plotly_figure : bool
             whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
+        width: int (default 500)
+            Width in pixels of output plot box
+        height: int (default 500)
+            Height in pixels of output plot box
+        colormap : str
+            colormap to use.  Plotly specification, valid values: "Plotly3","Jet","Blues","YlOrRd",
+                "PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu", "PuBu","GnBu","YlGn","Greens","Reds",
+                "Greys","RdPu","OrRd","Purples","Oranges".
         """
         from plotly.offline import init_notebook_mode, iplot
         import plotly.graph_objs as go
+
+        if(t_ndx < 0):
+            t_ndx = len(self.get_timespan()) + t_ndx
 
         # read data at time point
         points, data = self.read_step(t_ndx)
 
         subdomains = {}
-        for i, val in enumerate(data['type']):
-            name = "sub {}".format(val)
-            
-            if name in subdomains.keys():
-                subdomains[name]['points'].append(points[i])
-                subdomains[name]['data'].append(data[property_name][i])
-            else:
-                subdomains[name] = {"points":[points[i]], "data":[data[property_name][i]]}
+        if property_name == 'type':
+            for i, val in enumerate(data['type']):
+                name = "type {}".format(val)
+                
+                if name in subdomains.keys():
+                    subdomains[name]['points'].append(points[i])
+                    subdomains[name]['data'].append(data[property_name][i])
+                else:
+                    subdomains[name] = {"points":[points[i]], "data":[data[property_name][i]]}
+        else:
+            subdomains[property_name] = {
+                "points": points,
+                "data" : data[property_name]
+            }
 
-        trace_list = _plotly_iterate(subdomains, size, property_name=property_name)
+        trace_list = _plotly_iterate(subdomains, size=size, property_name=property_name,
+                                     colormap=colormap)
 
-        scene_x = self.model.mesh.xlim[0]/2.5
-        scene_y = self.model.mesh.ylim[0]/2.5
-        scene_z = self.model.mesh.zlim[0]/2.5
-        scene = {"aspectratio": {"x":scene_x,"y":scene_y,"z":scene_y}}
-        layout = {"width": 1000, "height": 1000, "scene":scene}
+        scene = {
+            "aspectmode": 'data',
+        }
+        layout = {"width": width, "height": width, "scene":scene}
         if title is not None:
             layout["title"] = title
 
