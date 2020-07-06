@@ -40,7 +40,6 @@ class Model():
         self.listOfDiffusionRestrictions = {}
         self.timestep_size = None
         self.num_timesteps = None
-        self.listOfDataFunctions = []
         self.listOfInitialConditions = []
         self.listOfBoundaryConditions = []
         self.species_map = {}
@@ -149,14 +148,6 @@ class Model():
             self.listOfDiffusionRestrictions[species] = [listOfSubDomains]
         else:
             self.listOfDiffusionRestrictions[species] = listOfSubDomains
-
-    def add_data_function(self, data_function):
-        """ Add a scalar spatial function to the simulation.  This is useful if you have a
-            spatially varying in put to your model.  Argument is a instances of subclass of the
-            spatialpy.DataFunction class. It must implement a function 'map(x)' which takes a
-            the spatial positon 'x' as an array, and it returns a float value.
-        """
-        self.listOfDataFunctions.append(data_function)
 
     def add_initial_condition(self, ic):
         """ Add an initial condition object to the initialization of the model."""

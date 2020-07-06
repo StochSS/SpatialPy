@@ -368,35 +368,12 @@ class Solver:
             outstr += "};"
             input_constants += outstr + "\n"
 
-        data_fn_defs = ""
         if len(self.model.listOfSpecies) > 0:
-            if len(self.model.listOfDataFunctions) == 0:
-                outstr = "static int input_dsize = 1;"
-                input_constants += outstr + "\n"
-                outstr = "static double input_data[{0}] = ".format(ncells)
-                outstr += "{" + ",".join(['0']*80) + "};"
-                input_constants += outstr + "\n"
-            else:
-                outstr = "static int input_dsize = {0};".format(
-                    len(self.model.listOfDataFunctions))
-                input_constants += outstr + "\n"
-                outstr = "static double input_data[{0}] = ".format(
-                    ncells*len(self.model.listOfDataFunctions))
-                outstr += "{"
-                for v_ndx in range(ncells):
-                    for ndf in range(len(self.model.listOfDataFunctions)):
-                        if ndf+v_ndx > 0:
-                            outstr += ','
-                        outstr += "{0}".format(self.model.listOfDataFunctions[ndf].map(
-                            self.model.mesh.coordinates()[v_ndx, :]))
-                outstr += "};"
-                input_constants += outstr + "\n"
-
-                for ndf in range(len(self.model.listOfDataFunctions)):
-                    data_fn_defs += "#define {0} data[{1}]\n".format(
-                        self.model.listOfDataFunctions[ndf].name, ndf)
-        propfilestr = propfilestr.replace(
-            "__DATA_FUNCTION_DEFINITIONS__", data_fn_defs)
+            outstr = "static int input_dsize = 1;"
+            input_constants += outstr + "\n"
+            outstr = "static double input_data[{0}] = ".format(ncells)
+            outstr += "{" + ",".join(['0']*80) + "};"
+            input_constants += outstr + "\n"
 
         if len(self.model.listOfSpecies) > 0:
             N = self.model.create_stoichiometric_matrix()
