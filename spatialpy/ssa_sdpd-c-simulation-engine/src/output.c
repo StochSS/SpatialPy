@@ -5,7 +5,7 @@
 #include <string.h>
 
 // Define debug level macros
-#if VERB
+#if VERB > 0
     #define INFO(fmt, args...) printf("%s - INFO - %s - %d - "fmt, __FILE__, __FUNCTION__, __LINE__,  args)
 #else
     #define INFO(fmt, args...)
