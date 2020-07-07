@@ -141,6 +141,7 @@ system_t* create_system(int num_types, int num_chem_species, int num_chem_rxns){
     s->num_chem_species = num_chem_species;
     s->num_chem_rxns = num_chem_rxns;
     s->num_types = num_types;
+    s->gravity = calloc(3,sizeof(double));
     return s;
 }
 

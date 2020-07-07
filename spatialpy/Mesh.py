@@ -4,7 +4,7 @@ class Mesh():
     """ Mesh class for spatial py """
 
 
-    def __init__(self, numpoints, xlim, ylim, zlim, rho0=1.0, c0=10, P0=10):
+    def __init__(self, numpoints, xlim, ylim, zlim, rho0=1.0, c0=10, P0=10, gravity=None):
         self.vertices = numpy.zeros((numpoints, 3), dtype=float)
         self.triangles = None
         self.tetrahedrons = None
@@ -22,10 +22,12 @@ class Mesh():
         self.rho0 = rho0
         self.c0 = c0
         self.P0 = P0
+        self.gravity = gravity
 
         self.xlim = xlim
         self.ylim = ylim
         self.zlim = zlim
+
 
     def find_boundary_points(self):
         if self.on_boundary is None:
@@ -195,9 +197,9 @@ class Mesh():
             mesh_vertices[ int(v.attrib['index']),2] = float(v.attrib['z'])
 
         # create mesh object
-        xlim = ( max(mesh_vertices[:,0]) , max(mesh_vertices[:,0]) )
-        ylim = ( max(mesh_vertices[:,1]) , max(mesh_vertices[:,1]) )
-        zlim = ( max(mesh_vertices[:,2]) , max(mesh_vertices[:,2]) )
+        xlim = ( min(mesh_vertices[:,0]) , max(mesh_vertices[:,0]) )
+        ylim = ( min(mesh_vertices[:,1]) , max(mesh_vertices[:,1]) )
+        zlim = ( min(mesh_vertices[:,2]) , max(mesh_vertices[:,2]) )
         obj = Mesh(len(vertices), xlim, ylim, zlim)
         obj.vertices = mesh_vertices
 
