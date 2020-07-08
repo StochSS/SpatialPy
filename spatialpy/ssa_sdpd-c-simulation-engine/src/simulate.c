@@ -70,19 +70,6 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
 
 
 
-    // Step 1.3: Clean forces
-    for (i = 0; i < 3; i++) {
-        // Clean momentum force
-        me -> F[i] = 0.0;
-        // Clean background pressure force
-        me -> Fbp[i] = 0.0;
-    }
-    // Clean mass flux term
-    me -> Frho = 0.0;
-    // Clean chem rxn flux
-    for(i=0; i< system->num_chem_species; i++){
-        me->Q[i] = 0.0;
-    }
 
 }
 
@@ -94,6 +81,20 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
 // Step 2/3: Compute forces
 void compute_forces(particle_t* me, system_t* system, unsigned int step)
 {
+    int i;
+    //  Clean forces
+    for (i = 0; i < 3; i++) {
+        // Clean momentum force
+        me->F[i] = system->gravity[i];
+        // Clean background pressure force
+        me->Fbp[i] = 0.0;
+    }
+    // Clean mass flux term
+    me->Frho = 0.0;
+    // Clean chem rxn flux
+    for(i=0; i< system->num_chem_species; i++){
+        me->Q[i] = 0.0;
+    }
 
     //printf("compute_forces() particle id=%i Q[0]=%e\n",me->id,me->Q[0]);
     // Step 2.2: Find nearest neighbors

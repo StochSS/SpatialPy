@@ -37,22 +37,44 @@ class BoundaryCondition():
         self.zmin = zmin
         self.zmax = zmax
         self.type_id = type_id
-        self.species = None
-        self.property = None
+        self.species = species
+        self.property = property
         self.deterministic = deterministic
-
-        if( species is not None and property is not None):
-            raise ModelError("Can not set both species and property")
-        if species is not None:
-            self.species = species
-            self.deterministic = deterministic
-        else:
-            self.property = property
-
-        if value is None:
-            raise ModelError("Must set value")
         self.value = value
 
         
+    def expression(self):
+        if( self.species is not None and self.property is not None):
+            raise ModelError("Can not set both species and property")
+        if self.value is None:
+            raise ModelError("Must set value")
+        cond=[]
+        if(self.xmin is not None): cond.append("(me->x[0] >= {0})".format(self.xmin))
+        if(self.xmax is not None): cond.append("(me->x[0] <= {0})".format(self.xmax))
+        if(self.ymin is not None): cond.append("(me->x[1] >= {0})".format(self.ymin))
+        if(self.ymax is not None): cond.append("(me->x[1] <= {0})".format(self.ymax))
+        if(self.zmin is not None): cond.append("(me->x[2] >= {0})".format(self.zmin))
+        if(self.zmax is not None): cond.append("(me->x[2] <= {0})".format(self.zmax))
+        if(self.type_id is not None): cond.append("(me->type == {0})".format(int(self.type_id)))
+        if(len(cond)==0): raise ModelError('need at least one condition on the BoundaryCondition')
+        bcstr = "if(" + '&&'.join(cond) + "){"
+        if self.species is not None:
+            if self.deterministic:
+                s_ndx = self.model.species_map[self.model.listOfSpecies[self.species]]
+                bcstr += "me->C[{0}] = {1};".format(s_ndx,self.value)
+            else:
+                raise Exception("BoundaryConditions don't work for stochastic species yet")
+        elif self.property is not None:
+            if(self.property == 'v'):
+                for i in range(3):
+                    bcstr+= "me->v[{0}]={1};".format(i,self.value[i])
+            elif(self.property == 'nu'):
+                bcstr+= "me->nu={0};".format(self.value)
+            elif(self.property == 'rho'):
+                bcstr+= "me->rho={0};".format(self.value)
+            else:
+                raise Exception("Unable handle boundary condition for property '{0}'".format(self.property))
+        bcstr+= "}"
+        return bcstr
 
 
