@@ -69,18 +69,6 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
     applyBoundaryConditions(me, system);
 
 
-
-
-}
-
-// Step 2/3: Update the 'F' field of each partile attached to a bond
-// void compute_bond_forces(bond_t*bond, system_t*system, unsigned int step){
-//}
-
-
-// Step 2/3: Compute forces
-void compute_forces(particle_t* me, system_t* system, unsigned int step)
-{
     int i;
     //  Clean forces
     for (i = 0; i < 3; i++) {
@@ -95,6 +83,18 @@ void compute_forces(particle_t* me, system_t* system, unsigned int step)
     for(i=0; i< system->num_chem_species; i++){
         me->Q[i] = 0.0;
     }
+
+
+}
+
+// Step 2/3: Update the 'F' field of each partile attached to a bond
+// void compute_bond_forces(bond_t*bond, system_t*system, unsigned int step){
+//}
+
+
+// Step 2/3: Compute forces
+void compute_forces(particle_t* me, system_t* system, unsigned int step)
+{
 
     //printf("compute_forces() particle id=%i Q[0]=%e\n",me->id,me->Q[0]);
     // Step 2.2: Find nearest neighbors
