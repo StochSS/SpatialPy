@@ -35,7 +35,8 @@ class Solver:
             os.path.abspath(__file__))+"/ssa_sdpd-c-simulation-engine"
 
         init_log(__name__, self.model_name)
-        log.setLevel(logging.INFO)
+        debugList = [logging.WARNING, logging.INFO, logging.DEBUG]
+        log.setLevel(debugList[self.debug_level])
 
     def __del__(self):
         """ Deconstructor.  Removes the compiled solver."""
@@ -164,25 +165,25 @@ class Solver:
                         return_code = process.wait()
 
                         if log.isEnabledFor(logging.INFO):  # stderr & stdout to log
-                            log.info('Elapsed seconds: {:.2f}'.format(
-                                time.monotonic() - start))
                             if stdout is not None:
                                 log.info(stdout.decode('utf-8'))
                             if stderr is not None:
-                                print(stderr.decode('utf-8'))
+                                log.info(stderr.decode('utf-8'))
+                            log.info('Elapsed seconds: {:.2f}'.format(
+                                time.monotonic() - start))
                     except KeyboardInterrupt:
                         print('Terminated by user after seconds: {:.2f}'.format(
                             time.monotonic() - start))
                         os.killpg(process.pid, signal.SIGINT)
                         #return_code = process.wait()
                         stdout, stderr = process.communicate()
-                        if self.debug_level >= 1:  # stderr & stdout to the terminal
-                            print('Elapsed seconds: {:.2f}'.format(
-                                time.monotonic() - start))
+                        if log.isEnabledFor(logging.INFO):  # stderr & stdout to log
                             if stdout is not None:
-                                print(stdout.decode('utf-8'))
+                                log.info(stdout.decode('utf-8'))
                             if stderr is not None:
-                                print(stderr.decode('utf-8'))
+                                log.info(stderr.decode('utf-8'))
+                            log.info('Elapsed seconds: {:.2f}'.format(
+                                time.monotonic() - start))
                     except subprocess.TimeoutExpired:
                         # send signal to the process group
                         os.killpg(process.pid, signal.SIGINT)
@@ -550,7 +551,6 @@ class Solver:
         if self.model.mesh.gravity is not None:
             for i in range(3):
                 system_config += "system->gravity[{0}] = {1};\n".format(i,self.model.mesh.gravity[i])
-            
 
         propfilestr = propfilestr.replace("__SYSTEM_CONFIG__", system_config)
 

@@ -11,18 +11,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-// Define debug level macros
-#if VERB > 0
-    #define INFO(fmt, args...) printf("%s - INFO - %s - %d - "fmt, __FILE__, __FUNCTION__, __LINE__,  args)
-#else
-    #define INFO(fmt, args...)
-#endif
-
-#if VERB > 1
-    #define DEBUG(fmt, args...) printf("%s - DEBUG - %s - %d - "fmt, __FILE__, __FUNCTION__, __LINE__, args)
-#else
-    #define DEBUG(fmt, args...)
-#endif
 
 struct arg {
     system_t* system;
@@ -98,7 +86,7 @@ void* run_simulation_thread(void *targ_in){
                 n=n->next;
             }
             // block on the end barrier
-            if(debug_flag)printf("[WORKER %i] completed step %i, substep %i/%i, processed %i particles\n",targ->thread_id,step,substep,nsubsteps,count);
+            INFO("[WORKER %i] completed step %i, substep %i/%i, processed %i particles\n",targ->thread_id,step,substep,nsubsteps,count);
             pthread_barrier_wait(&end_step_barrier);
         }
         //---------------------------------------
@@ -201,17 +189,17 @@ void run_simulation(int num_threads, system_t* system){
         pthread_barrier_wait(&end_sort_barrier);
         INFO("[%i] Sort Index threads finished\n",step);
         if(debug_flag>2 && step==0){
-            DEBUG("x_index = [", NULL);
+            printf("x_index = [", NULL);
             node*n;
             for(n = system->x_index->head; n!=NULL; n=n->next){
-                DEBUG("%e ",n->data->x[0], NULL);
+                printf("%e ",n->data->x[0], NULL);
             }
-            DEBUG("]\n", NULL);
-            DEBUG("x_index_id = [", NULL);
+            printf("]\n", NULL);
+            printf("x_index_id = [", NULL);
             for(n = system->x_index->head; n!=NULL; n=n->next){
-                DEBUG("%i ",n->data->id);
+                printf("%i ",n->data->id);
             }
-            DEBUG("]\n", NULL);
+            printf("]\n", NULL);
         }
 
         // Release the worker threads to take step
@@ -235,7 +223,7 @@ void run_simulation(int num_threads, system_t* system){
     pthread_barrier_wait(&end_output_barrier);
     INFO("[%i] Output threads finished\n",step);
     INFO("[%i] Waiting for Async Output threads\n",step);
-    pthread_barrier_wait(&begin_output_barrier); // wait for the async 
+    pthread_barrier_wait(&begin_output_barrier); // wait for the async
     INFO("[%i] Async Output threads finished\n",step);
 
     //clean up
@@ -257,9 +245,6 @@ void run_simulation(int num_threads, system_t* system){
     }
     */
     // done
-    INFO("Simulation complete\n", NULL);;
+    INFO("Simulation complete", NULL);;
     return;
 }
-
-
-

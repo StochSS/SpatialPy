@@ -11,18 +11,6 @@ See the file LICENSE.txt for details.
 #include <stdio.h>
 #include <math.h>
 
-// Define debug level macros
-#if VERB > 0
-    #define INFO(fmt, args...) printf("%s - INFO - %s - %d - "fmt, __FILE__, __FUNCTION__, __LINE__,  args)
-#else
-    #define INFO(fmt, args...)
-#endif
-
-#if VERB > 1
-    #define DEBUG(fmt, args...) printf("%s - DEBUG - %s - %d - "fmt, __FILE__, __FUNCTION__, __LINE__, args)
-#else
-    #define DEBUG(fmt, args...)
-#endif
 
 void find_neighbors(particle_t* me, system_t* system){
     node*n;

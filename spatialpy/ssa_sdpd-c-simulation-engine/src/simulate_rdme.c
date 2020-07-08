@@ -15,18 +15,6 @@
 #include "propensities.h"
 #include "binheap.h"
 
-// Define debug level macros
-#if VERB > 0
-    #define INFO(fmt, args...) printf("%s - INFO - %s - %d - "fmt, __FILE__, __FUNCTION__, __LINE__,  args)
-#else
-    #define INFO(fmt, args...)
-#endif
-
-#if VERB > 1
-    #define DEBUG(fmt, args...) printf("%s - DEBUG - %s - %d - "fmt, __FILE__, __FUNCTION__, __LINE__, args)
-#else
-    #define DEBUG(fmt, args...)
-#endif
 
 /**************************************************************************/
 void initialize_rdme(system_t*system, const int Ncells, const int Mspecies,
@@ -37,7 +25,7 @@ void initialize_rdme(system_t*system, const int Ncells, const int Mspecies,
                         const unsigned int*u0,
                         const int num_subdomains, const double*subdomain_diffusion_matrix
                         ){
-    INFO("\n*************** initialize_rdme ******************\n", NULL);
+    INFO("*************** initialize_rdme ******************\n", NULL);
     rdme_t*rdme =  nsm_core__create(system,Ncells,Mspecies,Mreactions,vol,sd,data,
                                     dsize,irN,jcN,prN,irG,jcG,species_names,
                                     num_subdomains, subdomain_diffusion_matrix);
