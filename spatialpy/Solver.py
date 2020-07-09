@@ -245,7 +245,7 @@ class Solver:
             "__DEFINE_PARAMETERS__", str(parameters))
 
         # Reactions
-        funheader = "double __NAME__(const int *x, double t, const double vol, const double *data, int sd)"
+        funheader = "double __NAME__(const int *x, double t, const double vol, const double *data_fn, int sd)"
 
         funcs = ""
         funcinits = ""
@@ -287,7 +287,7 @@ class Solver:
         propfilestr = propfilestr.replace("__DEFINE_PROPFUNS__", funcinits)
 
         # TODO make deterministic chemical reaction functions work
-        funheader = "double det__NAME__(const double *x, double t, const double vol, const double *data, int sd)"
+        funheader = "double det__NAME__(const double *x, double t, const double vol, const double *data_fn, int sd)"
         deterministic_chem_rxn_functions = ""
         deterministic_chem_rxn_function_init = ""
         ############################################
@@ -384,31 +384,9 @@ class Solver:
 
         data_fn_defs = ""
         if len(self.model.listOfSpecies) > 0:
-            if len(self.model.listOfDataFunctions) == 0:
-                outstr = "static int input_dsize = 1;"
-                input_constants += outstr + "\n"
-                outstr = "static double input_data[{0}] = ".format(ncells)
-                outstr += "{" + ",".join(['0']*80) + "};"
-                input_constants += outstr + "\n"
-            else:
-                outstr = "static int input_dsize = {0};".format(
-                    len(self.model.listOfDataFunctions))
-                input_constants += outstr + "\n"
-                outstr = "static double input_data[{0}] = ".format(
-                    ncells*len(self.model.listOfDataFunctions))
-                outstr += "{"
-                for v_ndx in range(ncells):
-                    for ndf in range(len(self.model.listOfDataFunctions)):
-                        if ndf+v_ndx > 0:
-                            outstr += ','
-                        outstr += "{0}".format(self.model.listOfDataFunctions[ndf].map(
-                            self.model.mesh.coordinates()[v_ndx, :]))
-                outstr += "};"
-                input_constants += outstr + "\n"
-
-                for ndf in range(len(self.model.listOfDataFunctions)):
-                    data_fn_defs += "#define {0} data[{1}]\n".format(
-                        self.model.listOfDataFunctions[ndf].name, ndf)
+            for ndf in range(len(self.model.listOfDataFunctions)):
+                data_fn_defs += "#define {0} data_fn[{1}]\n".format(
+                    self.model.listOfDataFunctions[ndf].name, ndf)
         propfilestr = propfilestr.replace(
             "__DATA_FUNCTION_DEFINITIONS__", data_fn_defs)
 
@@ -509,8 +487,9 @@ class Solver:
             "__INPUT_CONSTANTS__", input_constants)
 
         system_config = "debug_flag = {0};\n".format(self.debug_level)
-        system_config += "system_t* system = create_system({0},{1},{2});\n".format(len(
-            self.model.listOfSubdomainIDs), len(self.model.listOfSpecies), len(self.model.listOfReactions))
+        system_config += "system_t* system = create_system({0},{1},{2},{3});\n".format(
+            len(self.model.listOfSubdomainIDs), len(self.model.listOfSpecies), 
+            len(self.model.listOfReactions), len(self.model.listOfDataFunctions)
         system_config += "system->static_domain = {0};\n".format(int(self.model.staticDomain))
         if(len(self.model.listOfSpecies) > 0):
             system_config += "system->subdomain_diffusion_matrix = input_subdomain_diffusion_matrix;\n"
@@ -546,18 +525,18 @@ class Solver:
         init_rdme=''
         if(len(self.model.listOfSpecies) > 0):
             init_rdme = '''
-    initialize_rdme(system, NUM_VOXELS, NUM_SPECIES, NUM_REACTIONS, input_vol, input_sd,
-                    input_data, input_dsize, input_irN, input_jcN, input_prN, input_irG,
-                    input_jcG, input_species_names, input_u0, input_num_subdomain,
-                    input_subdomain_diffusion_matrix);
-
-'''
+            initialize_rdme(system, NUM_VOXELS, NUM_SPECIES, NUM_REACTIONS, 
+                            input_irN, input_jcN, input_prN, input_irG,
+                            input_jcG, input_species_names, input_u0, 
+                            input_num_subdomain, input_subdomain_diffusion_matrix);'''
         propfilestr = propfilestr.replace("__INIT_RDME__", init_rdme)
 
 
         init_bc = ""
         for bc in self.model.listOfBoundaryConditions:
             init_bc += bc.expression()
+        for ndf, df in enumerate(self.model.listOfDataFunctions):
+            init_bc += "me->data_fn[{0}] = {1};\n".format(ndf,df.expression())
         propfilestr = propfilestr.replace("__BOUNDARY_CONDITIONS__", init_bc)
 
         #### Write the data to the file ####

@@ -36,7 +36,6 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
     double Pi = P0 * (me->rho / rho0 - 1.0);
     int i, j, s, rxn;
     particle_t* pt_j;
-    node* n;
 
     // Kernel function parameter
     if (system->dimension == 3) {
@@ -61,10 +60,12 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
     //fflush(stdout);
 
     // Compute force from each neighbor
+    neighbor_node_t* n;
     for (n = neighbors->head; n != NULL; n = n->next) {
         pt_j = n->data;
 
-        r = particle_dist(me, pt_j);
+        //r = particle_dist(me, pt_j);
+        r = n->dist;
         R = r / h;
         //printf("pairwiseForce(id=%i) pt_j->id=%i r=%e R=%e\n",me->id,pt_j->id,r,R);
         //fflush(stdout);
@@ -74,7 +75,8 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
             continue; // ignore sigularities
         // Compute weight function and weight function derivative
         // dWdr = (5/(pi*(h^2))) * (-12*r/(h^2)) * (1 - r/h)^2;
-        dWdr = alpha * (-12 * r / (h * h)) * pow(1 - R, 2);
+        //dWdr = alpha * (-12 * r / (h * h)) * pow(1 - R, 2);
+        dWdr = n->dWdr
         // Spatial deriviatives
         dv_dx = 0.0;
         for (i = 0; i < system->dimension; i++) {
@@ -138,7 +140,7 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
         //printf("pairwiseForce(id=%i) system->num_chem_species = %i\n",me->id,system->num_chem_species);
         //fflush(stdout);
         for(s=0; s < system->num_chem_species; s++){
-            // Note about below:  do species types start at  1
+            // Note about below:  types start at  1
             int k = (system->num_chem_species) * (me->type - 1) + s;
             //printf("pairwiseForce(id=%i) s=%i, k=%i num_types=%i me->type=%i\n",me->id,s,k,system->num_types,me->type);
             //fflush(stdout);

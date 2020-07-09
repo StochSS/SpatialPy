@@ -21,6 +21,15 @@ struct node_t {
     node* prev;
 };
 
+struct neighbor_node_t {
+    particle_t* data;
+    double dist;
+    double dWdr;
+    double D_i_j;
+    neighbor_node_t* next;
+    neighbor_node_t* prev;
+};
+
 // Data structre for the linked list type
 
 struct linked_list_t {

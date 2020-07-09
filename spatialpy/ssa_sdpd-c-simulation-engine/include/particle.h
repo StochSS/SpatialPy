@@ -30,12 +30,17 @@ struct __particle_t {
     double F[3];
     double Frho;
     double Fbp[3];
+    // Data Function
+    double* data_fn;
     // chem_rxn_system
+    int*xx; // populaion of discrete/stochastic species
     double *C;  // concentration of chem species
     double *Q;  // flux of chem species
     // below here for simulation
     node* x_index;
     linked_list*neighbors;
+    // RDME solver data
+    rdme_voxel_t*rdme;
 };
 
 struct __system_t {
@@ -58,6 +63,7 @@ struct __system_t {
     int num_chem_species;
     int num_chem_rxns;
     int num_types;
+    int num_data_fn;
     const double *subdomain_diffusion_matrix;
     ChemRxnFun* chem_rxn_rhs_functions;
     int *stochic_matrix;
@@ -75,7 +81,7 @@ struct __bond_t {
 
 
 void find_neighbors(particle_t* me, system_t* system);
-system_t* create_system(int num_types, int num_chem_species, int num_chem_rxns);
+system_t* create_system(int num_types, int num_chem_species, int num_chem_rxns, int num_data_fn);
 particle_t* create_particle(int id);
 void add_particle(particle_t* me, system_t* system);
 double particle_dist(particle_t* p1, particle_t*p2);

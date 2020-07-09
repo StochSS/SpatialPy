@@ -17,17 +17,14 @@
 
 
 /**************************************************************************/
-void initialize_rdme(system_t*system, const int Ncells, const int Mspecies,
-                        const int Mreactions, const double*vol, const int*sd,
-                        const double*data, size_t dsize,
+void initialize_rdme(system_t*system, const int Ncells, const int Mspecies, const int Mreactions, 
                         size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
-                        const char* const species_names[],
-                        const unsigned int*u0,
+                        const char* const species_names[], const unsigned int*u0,
                         const int num_subdomains, const double*subdomain_diffusion_matrix
                         ){
     if(debug_flag){printf("*************** initialize_rdme ******************\n");}
-    rdme_t*rdme =  nsm_core__create(system,Ncells,Mspecies,Mreactions,vol,sd,data,
-                                    dsize,irN,jcN,prN,irG,jcG,species_names,
+    rdme_t*rdme =  nsm_core__create(system,Ncells,Mspecies,Mreactions,
+                                    irN,jcN,prN,irG,jcG,species_names,
                                     num_subdomains, subdomain_diffusion_matrix);
 
 
@@ -179,12 +176,10 @@ void print_current_state(int subvol, unsigned int*xx,const size_t Mspecies){
  */
 
 /**************************************************************************/
-rdme_t* nsm_core__create(system_t*system, const int Ncells, const int Mspecies,
-                        const int Mreactions, const double*vol, const int*sd,
-                        const double*data, size_t dsize,
+rdme_t* nsm_core__create(system_t*system, const int Ncells, const int Mspecies, const int Mreactions,
                         size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
-                        const char* const species_names[],
-                        const int num_subdomains, const double*subdomain_diffusion_matrix
+                        const char* const species_names[], const int num_subdomains,
+                        const double*subdomain_diffusion_matrix
                         ){
     /* Create the RDME object */
     rdme_t* rdme = (rdme_t*) malloc(sizeof(rdme_t));
@@ -192,8 +187,6 @@ rdme_t* nsm_core__create(system_t*system, const int Ncells, const int Mspecies,
     rdme->Ncells = Ncells;
     rdme->Mspecies = Mspecies;
     rdme->Mreactions = Mreactions;
-    rdme->data =data;
-    rdme->dsize = dsize;
     rdme->irN = irN;
     rdme->jcN = jcN;
     rdme->prN = prN;
@@ -209,18 +202,15 @@ rdme_t* nsm_core__create(system_t*system, const int Ncells, const int Mspecies,
     rdme->Ndofs = rdme->Ncells*rdme->Mspecies;
     rdme->rfun = ALLOC_propensities();
 
-    // create sd vector
-    rdme->sd = (int*)malloc(rdme->Ncells*sizeof(int));
-    rdme->vol = (double*)malloc(rdme->Ncells*sizeof(double));
 
-    node*n;
-    particle_t*p;
+    //node*n;
+    //particle_t*p;
     //int i=0;
-    for(n=system->particle_list->head; n!=NULL; n=n->next){
-        p = n->data;
-        rdme->sd[p->id] = p->type;
-        rdme->vol[p->id] = p->mass / p->rho;
-    }
+    //for(n=system->particle_list->head; n!=NULL; n=n->next){
+    //    p = n->data;
+    ///    rdme->sd[p->id] = p->type;
+    //    rdme->vol[p->id] = p->mass / p->rho;
+    //}
 
 
 
@@ -258,7 +248,16 @@ void nsm_core__initialize_rxn_propensities(rdme_t* rdme){
     /* Calculate the propensity for every reaction and every
      subvolume. Store the sum of the reaction intensities in each
      subvolume in srrate. */
-    for (i = 0; i < rdme->Ncells; i++) {
+    node*n;
+    particle_t*p;
+    //int i=0;
+    for(n=system->particle_list->head; n!=NULL; n=n->next){
+    //    p = n->data;
+    ///    rdme->sd[p->id] = p->type;
+    //    rdme->vol[p->id] = p->mass / p->rho;
+    //}
+    //for (i = 0; i < rdme->Ncells; i++) {
+        //TODO: i
         rdme->srrate[i] = 0.0;
         for (j = 0; j < rdme->Mreactions; j++) {
             //rrate[i*Mreactions+j] =
@@ -271,21 +270,32 @@ void nsm_core__initialize_rxn_propensities(rdme_t* rdme){
 }
 
 /**************************************************************************/
-void nsm_core__initialize_diff_propensities(rdme_t* rdme){
+void nsm_core__initialize_diff_propensities(system_t* system){
     int i,j;
 
-    for (i = 0; i < rdme->Ndofs; i++) {
-        rdme->Ddiag[i] = 0.0;
-        for (j = rdme->jcD[i]; j < rdme->jcD[i+1]; j++)
-        if (rdme->irD[j] == i) rdme->Ddiag[i] = -1*rdme->prD[j];
+//    for (i = 0; i < rdme->Ndofs; i++) {
+//        rdme->Ddiag[i] = 0.0;
+//        for (j = rdme->jcD[i]; j < rdme->jcD[i+1]; j++)
+//        if (rdme->irD[j] == i) rdme->Ddiag[i] = -1*rdme->prD[j];
+//    }
+//
+//    /* Calculate the total diffusion rate for each subvolume. */
+//    for(i = 0; i < rdme->Ncells; i++) {
+//        rdme->sdrate[i] = 0.0;
+//        for(j = 0; j < rdme->Mspecies; j++)
+//        rdme->sdrate[i] += rdme->Ddiag[i*rdme->Mspecies+j]*rdme->xx[i*rdme->Mspecies+j];
+//    }
+    node*n;
+    particle_t*p;
+    for(n=system->particle_list->head; n!=NULL; n=n->next){
+        p=n->data;
+        p->rdme->sdrate = 0.0;
+        p->rdme->Ddiag = 0.0;
+        for(n2=p->neighbors->head; n2!=NULL; n2=n2->next){
+            p2 = n2->data;
+        }
     }
 
-    /* Calculate the total diffusion rate for each subvolume. */
-    for(i = 0; i < rdme->Ncells; i++) {
-        rdme->sdrate[i] = 0.0;
-        for(j = 0; j < rdme->Mspecies; j++)
-        rdme->sdrate[i] += rdme->Ddiag[i*rdme->Mspecies+j]*rdme->xx[i*rdme->Mspecies+j];
-    }
 }
 
 /**************************************************************************/
@@ -318,6 +328,7 @@ void nsm_core__destroy(rdme_t*rdme){
 void nsm_core__initialize_chem_populations(rdme_t* rdme, const unsigned int*u0){
     /* Set xx to the initial state. xx will always hold the current solution. */
     //printf("malloc Ndofs = %li\n",rdme->Ndofs);
+    //TODO
     rdme->xx = (unsigned int *)malloc(rdme->Ndofs*sizeof(unsigned int));
     memcpy(rdme->xx,u0,rdme->Ndofs*sizeof(unsigned int));
     //printf("       Ndofs = %li\n",rdme->Ndofs);
@@ -334,7 +345,8 @@ void nsm_core__initialize_chem_populations(rdme_t* rdme, const unsigned int*u0){
 void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
     if(debug_flag){ printf("*************** build_diffusion_matrix ***************\n");fflush(stdout);}
     double off_diag_sum,diff_const,dist2;
-    node *n,*n2;
+    node *n;
+    neighbor_node_t*n2;
     particle_t *p1,*p2;
     int s_ndx;
     double D_i_j;
@@ -353,8 +365,6 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
         }
         //if(debug_flag){printf("node %i # neighbors %i\n",p1->id,p1->neighbors->count);}
         irD_length += (p1->neighbors->count + 1);
-        // update the volume
-        rdme->vol[p1->id] = p1->mass / p1->rho;
     }
     prD_length = irD_length;
     //if(debug_flag){printf("irD_length= %li\n",irD_length);fflush(stdout);}
@@ -385,17 +395,18 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
                 //printf("p2=%i\n",p2->id);fflush(stdout);
                 diff_const = rdme->subdomain_diffusion_matrix[s_ndx*rdme->num_subdomains + (p2->type-1)];
                 //
-                dist2 = particle_dist_sqrd(p1,p2);
+                //dist2 = particle_dist_sqrd(p1,p2);
                 // Eq (13-14), Drawert et al 2019
-                ih = 1.0 / h;
-                ihsq = ih * ih;
-                wfd = h - sqrt(dist2);
-                if(wfd <= 0.0){
-                    continue; // outside support of basis function
-                }
-                wfd = -25.066903536973515383e0 * wfd * wfd * ihsq * ihsq * ihsq * ih; //3D
+                //ih = 1.0 / h;
+                //ihsq = ih * ih;
+                //wfd = h - sqrt(dist2);
+                //if(wfd <= 0.0){
+                //    continue; // outside support of basis function
+                //}
+                //wfd = -25.066903536973515383e0 * wfd * wfd * ihsq * ihsq * ihsq * ih; //3D
                 // Eq 28 of Drawert et al 2019, Tartakovsky et. al., 2007, JCP
-                D_i_j = -2.0*(p1->mass*p2->mass)/(p1->mass+p2->mass)*(p1->rho+p2->rho)/(p1->rho*p2->rho) * dist2 * wfd / (dist2+0.01*h*h);
+                //D_i_j = -2.0*(p1->mass*p2->mass)/(p1->mass+p2->mass)*(p1->rho+p2->rho)/(p1->rho*p2->rho) * dist2 * wfd / (dist2+0.01*h*h);
+                D_i_j = n2->D_i_j;
 
                 if(diff_const > 0.0){
                     rdme->irD[irD_ndx++] = p2->id*rdme->Mspecies + s_ndx;

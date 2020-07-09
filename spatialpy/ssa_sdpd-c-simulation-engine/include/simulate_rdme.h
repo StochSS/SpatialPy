@@ -22,12 +22,8 @@ struct __rdme_data_t {
     const int *prN;
     const size_t *irG;
     const size_t *jcG;
-    double *vol;
-    int *sd;
-    const double *data;
     int num_subdomains;
     const double*subdomain_diffusion_matrix;
-    size_t dsize;
     size_t Ncells;
     size_t Mspecies;
     size_t Mreactions;
@@ -35,11 +31,11 @@ struct __rdme_data_t {
     unsigned int *xx;
     int initialized;
     PropensityFun *rfun;
-    double *srrate;
-    double *rrate;
-    double *sdrate;
-    double *Ddiag;
-    double *rtimes;
+    //double *srrate;
+    //double *rrate;
+    //double *sdrate;
+    //double *Ddiag;
+    //double *rtimes;
     int *node;
     int *heap;
     long int total_reactions;
@@ -47,11 +43,19 @@ struct __rdme_data_t {
     char** species_names;
 };
 
+typedef struct __rdme_voxel_t rdme_voxel_t;
+struct __rdme_voxel_t {
+    double srrate;
+    double rrate;
+    double sdrate;
+    double Ddiag;
+    double
+
+}
 
 
-void initialize_rdme(system_t*system, const int Ncells, const int Mspecies,
-                        const int Mreactions, const double*vol, const int*sd,
-                        const double*data, size_t dsize,
+
+void initialize_rdme(system_t*system, const int Ncells, const int Mspecies, const int Mreactions, 
                         size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
                         const char* const species_names[], const unsigned int*u0,
                         const int num_subdomains, const double*subdomain_diffusion_matrix);
@@ -63,9 +67,7 @@ void destroy_rdme(system_t*system);
 
 
 
-rdme_t* nsm_core__create(system_t*system, const int Ncells, const int Mspecies,
-                        const int Mreactions, const double*vol, const int*sd,
-                        const double*data, size_t dsize,
+rdme_t* nsm_core__create(system_t*system, const int Ncells, const int Mspecies, const int Mreactions, 
                         size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
                         const char* const species_names[],
                         const int num_subdomains, const double*subdomain_diffusion_matrix);
