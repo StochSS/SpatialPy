@@ -90,7 +90,7 @@ class VTKReader:
 
         for line in fd:
             l = line.strip().split()
-            if self.isvalidnum(l[0].strip("-")):
+            if self.isvalidnum(l[0]):
                 numericlist.extend(l)
             else:
                 break
