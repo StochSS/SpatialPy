@@ -170,6 +170,39 @@ void linked_list_sort(linked_list*ll, int sort_ndx){
 
 
 
+orderd_list_t* ordered_list_sort__sub(orderd_node_t* head){
+    orderd_list_t* min_orderd_list_t = head;
+    orderd_list_t* before = NULL;
+    orderd_list_t* ptr;
+    orderd_list_t* tmp;
+    if(head->next == NULL){
+        return head;
+    }
+    for(ptr = head; ptr->next != NULL; ptr = ptr->next){
+        if( ptr->next->tt < min_orderd_list_t->tt ){
+            min_orderd_list_t = ptr->next;
+            before = ptr;
+        }
+    }
+    if( min_orderd_list_t != head ){
+        tmp = head;
+        head = min_orderd_list_t;
+        before->next = min_orderd_list_t->next;
+        if(min_orderd_list_t->next != NULL){ min_orderd_list_t->next->prev = before;}
+        head->next = tmp;
+        tmp->prev = head;
+        head->prev = NULL;
+    }
+    head->next = ordered_list_sort__sub(head->next,sort_ndx);
+    if(head->next != NULL){
+        head->next->prev = head;
+    }
+    return head;
+}
+
+void ordered_list_sort(ordered_list*ll, int sort_ndx){
+    ll->head = ordered_list_sort__sub(ll->head, sort_ndx);
+}
 
 
 

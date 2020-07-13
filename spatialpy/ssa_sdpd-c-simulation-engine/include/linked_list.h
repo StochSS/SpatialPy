@@ -20,7 +20,17 @@ struct node_t {
     node* next;
     node* prev;
 };
+// Data structre for the linked list type
+struct linked_list_t {
+    node* head;
+    node* tail;
+    int count;
+};
 
+
+// Linked list structure for each particle to hold
+// the list of neighbors (including distance and 
+// diffusion parameters: dWdr, D_i_j)
 struct neighbor_node_t {
     particle_t* data;
     double dist;
@@ -29,25 +39,43 @@ struct neighbor_node_t {
     neighbor_node_t* next;
     neighbor_node_t* prev;
 };
-
-// Data structre for the linked list type
-
-struct linked_list_t {
-    node* head;
-    node* tail;
+struct neighbor_list_t {
+    neighbor_node_t* head;
+    neighbor_node_t* tail;
     int count;
-    //pthread_mutex_t mutex; // not used
 };
+
+
+//Linked list structure to hold an ordered 
+// list (based on 'tt', smallest values at the head) 
+struct ordered_node_t {
+    particle_t* data;
+    double tt;
+    ordered_node_t*prev;
+    ordered_node_t*next;
+};
+struct ordered_list_t {
+    ordered_node_t* head;
+    ordered_node_t* tail;
+    int count;
+};
+
 
 // Functions to manipulate the linked list
 
 //constructor
 linked_list* create_linked_list();
+neighbor_list_t* create_neighbor_list();
+ordered_list_t* create_ordered_list();
 
 void empty_linked_list( linked_list*ll);
+void empty_neighbor_list( neighbor_list_t*ll);
+void empty_ordered_list( ordered_list_t*ll);
 
 // destructor
 void destroy_linked_list( linked_list* ll );
+void destroy_neighbor_list( neighbor_list* ll );
+void destroy_ordered_list( ordered_list* ll );
 
 // add a new node to the end of the linked list
 node* linked_list_add( linked_list* ll, particle_t* data_in);
@@ -69,6 +97,7 @@ void free_node(node*n);
 
 // in-place bubble sort
 void linked_list_sort(linked_list*ll, int sort_ndx);
+void orderd_list_sort(ordered_list_t*ll);
 
 
 #endif /* linked_list_h*/
