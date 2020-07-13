@@ -1,4 +1,5 @@
 import numpy
+import math
 
 
 class VTKReader:
@@ -63,6 +64,21 @@ class VTKReader:
         """Get (list) points."""
         return self.points
 
+    def isvalidnum(self, numstr):
+        """Test if string is a valid numeric value.
+        Args:
+            (str) string to test
+        Return:
+            (boolean) True/False
+        """
+
+        try:
+            float(numstr)
+        except:
+            return False
+
+        return True
+
     def readnumeric(self, fd):
         """Read numeric data to be returned in a list.
         Args:
@@ -73,8 +89,9 @@ class VTKReader:
         numericlist = []
 
         for line in fd:
-            if line.lstrip("-")[:1].isnumeric():
-                numericlist.extend(line.strip().split())
+            l = line.strip().split()
+            if self.isvalidnum(l[0]):
+                numericlist.extend(l)
             else:
                 break
 
@@ -156,7 +173,6 @@ class VTKReader:
 
             if self.debug: print("populatearrays(name={0})".format(name))
             self.populatearrays(vtkdata, arraydata, col, row, name, datatype)
-                
 
 #
 #            #
