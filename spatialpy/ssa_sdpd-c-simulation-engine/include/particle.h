@@ -12,6 +12,7 @@ typedef struct __particle_t particle_t;
 typedef struct __system_t system_t;
 typedef struct __bond_t bond_t;
 
+#include <string.h>
 #include "linked_list.h"
 #include "simulate_rdme.h"
 

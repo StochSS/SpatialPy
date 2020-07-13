@@ -189,17 +189,17 @@ void run_simulation(int num_threads, system_t* system){
         pthread_barrier_wait(&end_sort_barrier);
         INFO("[%i] Sort Index threads finished\n",step);
         if(debug_flag>2 && step==0){
-            printf("x_index = [", NULL);
+            printf("x_index = [");
             node*n;
             for(n = system->x_index->head; n!=NULL; n=n->next){
-                printf("%e ",n->data->x[0], NULL);
+                printf("%e ",n->data->x[0]);
             }
-            printf("]\n", NULL);
-            printf("x_index_id = [", NULL);
+            printf("]\n");
+            printf("x_index_id = [");
             for(n = system->x_index->head; n!=NULL; n=n->next){
                 printf("%i ",n->data->id);
             }
-            printf("]\n", NULL);
+            printf("]\n");
         }
 
         // Release the worker threads to take step
@@ -211,7 +211,7 @@ void run_simulation(int num_threads, system_t* system){
             pthread_barrier_wait(&end_step_barrier);
             INFO("[%i] Worker threads finished substep %i/%i\n",step,substep,nsubsteps);
         }
-        // Solve RDME 
+        // Solve RDME
         INFO("[%i] starting RDME simulation\n",step);
         simulate_rdme(system, step);
         INFO("[%i] Finish RDME simulation\n",step);

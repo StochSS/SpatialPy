@@ -98,7 +98,7 @@ void output_vtk__async_step(system_t*system){
     if(output_buffer_current_step == 0){
         sprintf(filename, "output0_boundingBox.vtk");
         INFO("Writing file '%s'\n", filename);
-        if((fp = fopen(filename,"w+"))==NULL){ 
+        if((fp = fopen(filename,"w+"))==NULL){
             perror("Can't write 'output0_boundingBox.vtk'");exit(1);
         }
         fprintf(fp, "# vtk DataFile Version 4.1\n");
@@ -116,7 +116,7 @@ void output_vtk__async_step(system_t*system){
     }
     sprintf(filename,"output%u.vtk",output_buffer_current_step);
     INFO("Writing file '%s'\n", filename);
-    if((fp = fopen(filename,"w+"))==NULL){ 
+    if((fp = fopen(filename,"w+"))==NULL){
         perror("Can't write output vtk file");exit(1);
     }
     fprintf(fp, "# vtk DataFile Version 4.1\n");

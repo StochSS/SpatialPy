@@ -73,7 +73,7 @@ class Solver:
         # Build the solver
         makefile = self.SpatialPy_ROOT+'/build/Makefile'
         cmd = " ".join(['cd', self.build_dir, ';', 'make', '-f', makefile, 'ROOT=' +
-                        self.SpatialPy_ROOT, 'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir, 'VERB='+str(self.debug_level)])
+                        self.SpatialPy_ROOT, 'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir, 'DEBUG_LEVEL='+str(self.debug_level)])
 
         if log.isEnabledFor(logging.DEBUG):
             log.debug("cmd: {0}\n".format(cmd))

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O3 -Wall -DVERB=$(VERB)
+CFLAGS = -O3 -Wall -DDEBUG_LEVEL=$(DEBUG_LEVEL)
 LFLAGS = -pthread -lm
 INCDIR = $(ROOT)/include/
 OBJ = linked_list.o particle.o simulate.o count_cores.o output.o simulate_rdme.o binheap.o simulate_threads.o model.o pthread_barrier.o
