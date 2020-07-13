@@ -20,13 +20,13 @@ typedef struct __bond_t bond_t;
 // http://support.raisonance.com/content/how-remove-file-path
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
-#if VERB > 0
+#if DEBUG_LEVEL > 0
     #define INFO(fmt, args...) printf("%s %s - ssa-sdpd.%s - INFO - %d - "fmt, __DATE__, __TIME__, __FILENAME__, __LINE__,  args)
 #else
     #define INFO(fmt, args...)
 #endif
 
-#if VERB > 1
+#if DEBUG_LEVEL > 1
     #define DEBUG(fmt, args...) printf("%s %s - ssa-sdpd.%s - DEBUG - %d - "fmt, __DATE__, __TIME__, __FILENAME__, __LINE__, args)
 #else
     #define DEBUG(fmt, args...)
@@ -58,7 +58,7 @@ struct __particle_t {
 struct __system_t {
     int dimension;
     double dt;
-    unsigned int nt; 
+    unsigned int nt;
     unsigned int current_step;
     unsigned int output_freq;
     double xlo, xhi, ylo, yhi, zlo, zhi;
