@@ -2,7 +2,7 @@
 SSA-SDPD simulation engine
 Copyright 2018 Brian Drawert (UNCA)
 
-This program is distributed under the terms of the GNU General Public License.
+This program is distributed under the terms of the GNU General Public License v3.0 only.
 See the file LICENSE.txt for details.
 ***************************************************************************** */
 #ifndef particle_h
@@ -16,21 +16,6 @@ typedef struct __bond_t bond_t;
 #include "linked_list.h"
 #include "simulate_rdme.h"
 
-// Define debug level macros
-// http://support.raisonance.com/content/how-remove-file-path
-#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
-
-#if DEBUG_LEVEL > 0
-    #define INFO(fmt, args...) printf("%s %s - ssa-sdpd.%s - INFO - %d - "fmt, __DATE__, __TIME__, __FILENAME__, __LINE__,  args)
-#else
-    #define INFO(fmt, args...)
-#endif
-
-#if DEBUG_LEVEL > 1
-    #define DEBUG(fmt, args...) printf("%s %s - ssa-sdpd.%s - DEBUG - %d - "fmt, __DATE__, __TIME__, __FILENAME__, __LINE__, args)
-#else
-    #define DEBUG(fmt, args...)
-#endif
 
 struct __particle_t {
     unsigned int id;

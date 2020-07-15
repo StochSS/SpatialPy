@@ -2,7 +2,7 @@
 SSA-SDPD simulation engine
 Copyright 2018 Brian Drawert (UNCA)
 
-This program is distributed under the terms of the GNU General Public License.
+This program is distributed under the terms of the GNU General Public License v3.0 only.
 See the file LICENSE.txt for details.
 ***************************************************************************** */
 #ifndef output_h

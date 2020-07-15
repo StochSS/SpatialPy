@@ -1,3 +1,4 @@
+#include "debug.h"
 #include "output.h"
 #include "particle.h"
 #include <stdio.h>
@@ -82,7 +83,7 @@ void output_vtk__sync_step(system_t*system, int current_step){
         }
         printf("]\n");
         */
-        //memcpy( (void*) &output_buffer_xx, (void*) system->rdme->xx, 
+        //memcpy( (void*) &output_buffer_xx, (void*) system->rdme->xx,
         //    sizeof(unsigned int)*system->rdme->Mspecies*output_buffer_current_num_particles);
         for(int i=0;i<system->rdme->Mspecies*output_buffer_current_num_particles;i++){
             //memcpy( (void*) &output_buffer_xx[i], (void*) system->rdme->xx[i], sizeof(unsigned int));
@@ -97,7 +98,7 @@ void output_vtk__async_step(system_t*system){
     int np = output_buffer_current_num_particles;
     if(output_buffer_current_step == 0){
         sprintf(filename, "output0_boundingBox.vtk");
-        INFO("Writing file '%s'\n", filename);
+        SSA_LOG(1,"Writing file '%s'\n", filename);
         if((fp = fopen(filename,"w+"))==NULL){
             perror("Can't write 'output0_boundingBox.vtk'");exit(1);
         }
@@ -115,7 +116,7 @@ void output_vtk__async_step(system_t*system){
         fclose(fp);
     }
     sprintf(filename,"output%u.vtk",output_buffer_current_step);
-    INFO("Writing file '%s'\n", filename);
+    SSA_LOG(1,"Writing file '%s'\n", filename);
     if((fp = fopen(filename,"w+"))==NULL){
         perror("Can't write output vtk file");exit(1);
     }
@@ -178,13 +179,13 @@ void output_vtk__async_step(system_t*system){
     for(i=0;i<np;i++){
         fprintf(fp, "%lf ",output_buffer[i].bvf_phi);
         if((i+1)%9==0){ fprintf(fp,"\n"); }
-    } 
+    }
     fprintf(fp,"\n");
     fprintf(fp,"nu 1 %i double\n", np);
     for(i=0;i<np;i++){
         fprintf(fp, "%lf ",output_buffer[i].nu);
         if((i+1)%9==0){ fprintf(fp,"\n"); }
-    } 
+    }
     fprintf(fp,"\n");
     // loop here to check for continous species
     // c - concentration or continous? clarify at meeting
@@ -215,4 +216,3 @@ void output_vtk__async_step(system_t*system){
     fclose(fp);
 
 }
-

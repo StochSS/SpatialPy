@@ -63,7 +63,7 @@ void percolate_up(int node,double *data,int *INDEX,int *INDEX2,int N)
 
   do {
     parent=(node-1)>>1;
-		
+
     if(key<data[parent]) {
       rxn=INDEX[parent];
       data[node]=data[parent];
@@ -85,7 +85,7 @@ void update(int node,double *data,int *INDEX,int *INDEX2,int N)
 /*** ? ***/
 {
   int parent=(node-1)>>1;
-   
+
   if(node>0 && data[node]<data[parent])
     percolate_up(node,data,INDEX,INDEX2,N);
   else
@@ -98,12 +98,12 @@ int test_heap_prty(double *data,int *INDEX,int N)
   int i;
   for(i=0; i<(N-1)/2; i++)
     if(data[i]>data[2*i+1] || data[i]>data[2*i+2])
-      return -1; 
+      return -1;
   return 0;
 }
 
 void print_heap(double *data,int N)
-{	
+{
   int i;
   printf("\n");
   for(i=0; i<(N-1)/2; i++)
@@ -116,7 +116,7 @@ void test_min_prty(double *data,int N)
   double min=data[0];
   for(i=1;i<N;i++)
     if(data[i]<min){
-      printf("Min propery violated\n");	
+      printf("Min propery violated\n");
       break;
     }
 }

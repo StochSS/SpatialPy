@@ -4,7 +4,7 @@ Copyright 2018 Brian Drawert (UNCA)
 
 Based on a Matlab program by Bruno Jacob (UCSB)
 
-This program is distributed under the terms of the GNU General Public License.
+This program is distributed under the terms of the GNU General Public License v3.0 only.
 See the file LICENSE.txt for details.
 ***************************************************************************** */
 #include "linked_list.h"
@@ -23,7 +23,7 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
 
     //printf("pairwiseForce(id=%i)\n",me->id);
     //fflush(stdout);
-    
+
     double R, Pj, dv[3], dx[3], alpha, r, dWdr, dv_dx, fp, fv, fbp,
         transportTensor[3][3], ft[3], pressure_gradient;
     dx[0] = 0.0;
@@ -49,7 +49,7 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
         printf("Error, only 3D or 2D domains are supported\n");
         exit(1);
     }
-   
+
     // Zero tensors
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
@@ -106,7 +106,7 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
             }
         }
         for (i = 0; i < 3; i++) {
-            ft[i] = (1.0 / me->mass) * (pow(me->mass / me->rho, 2) + pow(pt_j->mass / pt_j->rho, 2)) * 
+            ft[i] = (1.0 / me->mass) * (pow(me->mass / me->rho, 2) + pow(pt_j->mass / pt_j->rho, 2)) *
                                        (transportTensor[i][0] * dx[0] + transportTensor[i][1] * dx[1] + transportTensor[i][2] * dx[2]) * dWdr / (r + 0.001 * h);
         }
 
@@ -119,9 +119,9 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
         //fflush(stdout);
 
         // Compute density variation
-        me->Frho = me->Frho + me->rho * (pt_j->mass / pt_j->rho) * dv_dx * (1 / (r + 0.001 * h)) * dWdr 
-                      - 0.0 * h * me->rho * c0 * pt_j->mass * 2.0 * (pt_j->rho / me->rho - 1.0) * (r * r / (r * r + 0.01 * h * h)) * (1.0 / (r + 0.001 * h)) * dWdr / pt_j->rho 
-                      - (pt_j->mass / pt_j->rho) * (me->rho * ((me->v[0] - me->vt[0]) * dx[0] + (me->v[1] - me->vt[1]) * dx[1] + (me->v[2] - me->vt[2]) * dx[2]) 
+        me->Frho = me->Frho + me->rho * (pt_j->mass / pt_j->rho) * dv_dx * (1 / (r + 0.001 * h)) * dWdr
+                      - 0.0 * h * me->rho * c0 * pt_j->mass * 2.0 * (pt_j->rho / me->rho - 1.0) * (r * r / (r * r + 0.01 * h * h)) * (1.0 / (r + 0.001 * h)) * dWdr / pt_j->rho
+                      - (pt_j->mass / pt_j->rho) * (me->rho * ((me->v[0] - me->vt[0]) * dx[0] + (me->v[1] - me->vt[1]) * dx[1] + (me->v[2] - me->vt[2]) * dx[2])
                       + pt_j->rho * ((pt_j->v[0] - pt_j->vt[0]) * dx[0] + (pt_j->v[1] - pt_j->vt[1]) * dx[1] + (pt_j->v[2] - pt_j->vt[2]) * dx[2])) * (1.0 / (r + 0.001 * h)) * dWdr;
 
         //printf("pairwiseForce(id=%i) me->Frho = [%e]\n",me->id,me->Frho);

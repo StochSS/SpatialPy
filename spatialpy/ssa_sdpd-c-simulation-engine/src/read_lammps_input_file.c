@@ -2,7 +2,7 @@
 SSA-SDPD simulation engine
 Copyright 2018 Brian Drawert (UNCA)
 
-This program is distributed under the terms of the GNU General Public License.
+This program is distributed under the terms of the GNU General Public License v3.0 only.
 See the file LICENSE.txt for details.
 ***************************************************************************** */
 #include "read_lammps_input_file.h"
@@ -15,7 +15,7 @@ void read_lammps_input_file(const char*filename, system_t*system){
     char* s;
     FILE* fp = fopen(filename, "r");
     if(fp == NULL){
-        perror("Error opening input file");   
+        perror("Error opening input file");
         exit(EXIT_FAILURE);
     }
     char buffer[1024];
@@ -45,11 +45,11 @@ void read_lammps_input_file(const char*filename, system_t*system){
     printf("r=%i zlow=%f zhi=%f\n",r,zlow,zhigh);
 
     system->xlo = xlow;
-    system->xhi = xhigh; 
+    system->xhi = xhigh;
     system->ylo = ylow;
-    system->yhi = yhigh; 
+    system->yhi = yhigh;
     system->zlo = zlow;
-    system->zhi = zhigh; 
+    system->zhi = zhigh;
 
     s=fgets(buffer,1024,fp);
     s=fgets(buffer,1024,fp);
@@ -91,4 +91,3 @@ void read_lammps_input_file(const char*filename, system_t*system){
 
 
 }
-
