@@ -9,13 +9,13 @@ MAX_X_DIM = 5.0
 MIN_X_DIM = -5.0
 TOL = 1e-9
 
-class Edge1(spatialpy.SubDomain):
+class Edge1(spatialpy.Geometry):
     def inside(self, x, on_boundary):
         return abs(x[0] - MAX_X_DIM) < 0.05
-class Edge2(spatialpy.SubDomain):
+class Edge2(spatialpy.Geometry):
     def inside(self, x, on_boundary):
         return abs(x[0] - MIN_X_DIM) < 0.05
-class Middle(spatialpy.SubDomain):
+class Middle(spatialpy.Geometry):
     def inside(self, x, on_boundary):
         return abs(x[0] - MIN_X_DIM) >= 0.05
 class cylinderDemo3D(spatialpy.Model):
