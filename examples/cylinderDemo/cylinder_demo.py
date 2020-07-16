@@ -18,9 +18,11 @@ class Edge2(spatialpy.Geometry):
 class Middle(spatialpy.Geometry):
     def inside(self, x, on_boundary):
         return abs(x[0] - MIN_X_DIM) >= 0.05
-class cylinderDemo3D(spatialpy.Model):
+class cylinderDemo3D(spatialpy.Geometry):
     def __init__(self, model_name="cylinder_demo3d"):
         spatialpy.Model.__init__(self, model_name)
+
+        self.timestep_size = 1
 
         # System constants
         D_const = 0.1
@@ -33,19 +35,19 @@ class cylinderDemo3D(spatialpy.Model):
         # Define Geometry
         self.mesh = spatialpy.Mesh.read_xml_mesh('cylinder.xml')
 
-        # Define Subdomains
-        self.add_subdomain(Middle(), 1)
-        self.add_subdomain(Edge1(), 2)
-        self.add_subdomain(Edge2(), 3)
+        # Define Types
+        self.set_type(Middle(), 1)
+        self.set_type(Edge1(), 2)
+        self.set_type(Edge2(), 3)
 
         # Restrict the movement of Chemical Species
         self.restrict(A,[1,2])
         self.restrict(B,[1,3])
 
         vol = self.mesh.get_vol()
-        sd = self.mesh.sd
-        left = numpy.sum(vol[sd == 2])
-        right = numpy.sum(vol[sd == 3])
+        type_id = self.mesh.type
+        left = numpy.sum(vol[type_id == 2])
+        right = numpy.sum(vol[type_id == 3])
         print("left "+str(left)+" right "+str(right))
 
         k_react = spatialpy.Parameter(name="k_react", expression=1.0)

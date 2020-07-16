@@ -269,7 +269,7 @@ class Solver:
                         str(self.model.listOfReactions[R].restrict_to)
                 else:
                     raise SimulationError(
-                        "When restricting reaction to subdomains, you must specify either a list or an int")
+                        "When restricting reaction to types, you must specify either a list or an int")
                 func += "){\n"
                 func += "return "
                 func += self.model.listOfReactions[R].propensity_function
@@ -311,7 +311,7 @@ class Solver:
                         str(self.model.listOfReactions[R].restrict_to)
                 else:
                     raise SimulationError(
-                        "When restricting reaction to subdomains, you must specify either a list or an int")
+                        "When restricting reaction to types, you must specify either a list or an int")
                 func += "){\n"
                 func += "return "
                 func += self.model.listOfReactions[R].ode_propensity_function
@@ -331,16 +331,15 @@ class Solver:
         # End of pyurdme replacements
         # SSA-SDPD values here
         init_particles = ""
-        if self.model.mesh.sd is None:
-            self.model.mesh.sd = numpy.ones(self.model.mesh.get_num_voxels())
-        for i in range(len(self.model.mesh.sd)):
-            # This needs a better message in the future
-            if self.model.mesh.sd[i] == 0:
+        if self.model.mesh.type is None:
+            self.model.mesh.type = numpy.ones(self.model.mesh.get_num_voxels())
+        for i in range(len(self.model.mesh.type)):
+            if self.model.mesh.type[i] == 0:
                 raise SimulationError(
-                    "Not all particles have been defined in a subdomain. Mass and other properties must be defined")
+                    "Not all particles have been defined in a type. Mass and other properties must be defined")
             init_particles += "init_create_particle(sys,id++,{0},{1},{2},{3},{4},{5},{6},{7});".format(
                 self.model.mesh.coordinates()[i,0],self.model.mesh.coordinates()[i,1],self.model.mesh.coordinates()[i,2],
-                self.model.mesh.sd[i],self.model.mesh.nu[i],self.model.mesh.mass[i],
+                self.model.mesh.type[i],self.model.mesh.nu[i],self.model.mesh.mass[i],
                 (self.model.mesh.mass[i] / self.model.mesh.vol[i]),int(self.model.mesh.fixed[i]) )+"\n"
         propfilestr = propfilestr.replace("__INIT_PARTICLES__", init_particles)
 
@@ -373,12 +372,12 @@ class Solver:
             outstr += "};"
             input_constants += outstr + "\n"
             outstr = "static int input_sd[{0}] = ".format(
-                self.model.mesh.sd.shape[0])
+                self.model.mesh.type.shape[0])
             outstr += "{"
-            for i in range(self.model.mesh.sd.shape[0]):
+            for i in range(self.model.mesh.type.shape[0]):
                 if i > 0:
                     outstr += ','
-                outstr += str(self.model.mesh.sd[i])
+                outstr += str(self.model.mesh.type[i])
             outstr += "};"
             input_constants += outstr + "\n"
 
@@ -481,15 +480,15 @@ class Solver:
                 outstr += '"'+s+'"'
             outstr += ", 0};"
             input_constants += outstr + "\n"
-        num_subdomains = len(self.model.listOfSubdomainIDs)
-        outstr = "const int input_num_subdomain = {0};".format(num_subdomains)
+        num_types = len(self.model.listOfTypeIDs)
+        outstr = "const int input_num_subdomain = {0};".format(num_types)
         input_constants += outstr + "\n"
         outstr = "const double input_subdomain_diffusion_matrix[{0}] = ".format(
-            len(self.model.listOfSpecies)*num_subdomains)
+            len(self.model.listOfSpecies)*num_types)
         outstr += "{"
         for i, sname in enumerate(self.model.listOfSpecies.keys()):
             s = self.model.listOfSpecies[sname]
-            for j, sd_id in enumerate(self.model.listOfSubdomainIDs):
+            for j, sd_id in enumerate(self.model.listOfTypeIDs):
                 if i+j > 0:
                     outstr += ','
                 try:
@@ -510,8 +509,8 @@ class Solver:
 
         system_config = "debug_flag = {0};\n".format(self.debug_level)
         system_config += "system_t* system = create_system({0},{1},{2});\n".format(len(
-            self.model.listOfSubdomainIDs), len(self.model.listOfSpecies), len(self.model.listOfReactions))
-        system_config += "system->static_domain = {0};\n".format(int(self.model.staticDomain))
+            self.model.listOfTypeIDs), len(self.model.listOfSpecies), len(self.model.listOfReactions))
+        system_config += "system->static_domain = {0};\n".format(int(self.model.staticType))
         if(len(self.model.listOfSpecies) > 0):
             system_config += "system->subdomain_diffusion_matrix = input_subdomain_diffusion_matrix;\n"
             system_config += "system->stochic_matrix = input_N_dense;\n"
@@ -539,7 +538,7 @@ class Solver:
         if self.model.mesh.gravity is not None:
             for i in range(3):
                 system_config += "system->gravity[{0}] = {1};\n".format(i,self.model.mesh.gravity[i])
-            
+
 
         propfilestr = propfilestr.replace("__SYSTEM_CONFIG__", system_config)
 
