@@ -75,7 +75,7 @@ class Model():
               output will be at time zero.
         """
         if self.timestep_size is None:
-            raise InvalidModelError("timestep_size is not set")
+            raise ModelError("timestep_size is not set")
 
         steps_per_output = math.ceil(step_size/self.timestep_size)
 
@@ -101,7 +101,7 @@ class Model():
         if isuniform:
             self.set_timesteps( items_diff[0], len(items_diff) )
         else:
-            raise InvalidModelError("Only uniform timespans are supported")
+            raise ModelError("Only uniform timespans are supported")
 
 
 
