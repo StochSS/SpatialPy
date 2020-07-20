@@ -510,7 +510,7 @@ class Solver:
         system_config = "debug_flag = {0};\n".format(self.debug_level)
         system_config += "system_t* system = create_system({0},{1},{2});\n".format(len(
             self.model.listOfTypeIDs), len(self.model.listOfSpecies), len(self.model.listOfReactions))
-        system_config += "system->static_domain = {0};\n".format(int(self.model.staticType))
+        system_config += "system->static_domain = {0};\n".format(int(self.model.staticDomain))
         if(len(self.model.listOfSpecies) > 0):
             system_config += "system->subdomain_diffusion_matrix = input_subdomain_diffusion_matrix;\n"
             system_config += "system->stochic_matrix = input_N_dense;\n"

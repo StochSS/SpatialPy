@@ -41,7 +41,7 @@ class Model():
         self.listOfInitialConditions = []
         self.listOfBoundaryConditions = []
 
-        self.staticType = True;
+        self.staticDomain = True;
 
         self.tspan = None
         self.timestep_size = 1e-5
