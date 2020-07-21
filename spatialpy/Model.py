@@ -105,11 +105,11 @@ class Model():
 
 
 
-    def set_type(self, type_ivar, type_id, mass=None, nu=None, fixed=False):
+    def set_type(self, geometry_ivar, type_id, mass=None, nu=None, fixed=False):
         """ Add a type definition to the model.  By default, all regions are set to
         type 0.
         Args:
-            type_ivar: an instance of a 'spatialpy.Geometry' subclass.  The 'inside()' method
+            geometry_ivar: an instance of a 'spatialpy.Geometry' subclass.  The 'inside()' method
                        of this object will be used to assign type_id to points.
             type_id: (usually an int) the identifier for this type
             mass: (float) the mass of each particle in the type
@@ -128,7 +128,7 @@ class Model():
         count = 0
         on_boundary = self.mesh.find_boundary_points()
         for v_ndx in range(self.mesh.get_num_voxels()):
-            if type_ivar.inside( self.mesh.coordinates()[v_ndx,:], on_boundary[v_ndx]):
+            if geometry_ivar.inside( self.mesh.coordinates()[v_ndx,:], on_boundary[v_ndx]):
                 self.mesh.type[v_ndx] = type_id
                 if (mass is not None):
                     self.mesh.mass[v_ndx] = mass
