@@ -18,5 +18,3 @@ class DataFunction():
             A float
         """
         raise Exception("DataFunction.map() not implemented.")
-
-

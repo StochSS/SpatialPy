@@ -3,10 +3,10 @@ from spatialpy.Model import ModelError
 
 
 class BoundaryCondition():
-    """ Set spatial regions of the domain where a property of 
+    """ Set spatial regions of the domain where a property of
         particles are held constant (updated each simulation step)
     """
-    def __init__(self, 
+    def __init__(self,
                  xmin=None, xmax=None,
                  ymin=None, ymax=None,
                  zmin=None, zmax=None,
@@ -23,10 +23,10 @@ class BoundaryCondition():
                  type_id: type (subdomain) of the partciles
             Targets (one of the following must be set):
                 property: (str), 'nu', 'rho','v'
-                spesicies: (str) name of a chemical species.  
+                spesicies: (str) name of a chemical species.
                            Must also set deterministic=True/False flag.
             Assignment:
-                value: (float or float[3]), value property will take in region 
+                value: (float or float[3]), value property will take in region
                        defined by the conditions
 
         """
@@ -42,7 +42,7 @@ class BoundaryCondition():
         self.deterministic = deterministic
         self.value = value
 
-        
+
     def expression(self):
         if( self.species is not None and self.property is not None):
             raise ModelError("Can not set both species and property")
@@ -76,5 +76,3 @@ class BoundaryCondition():
                 raise Exception("Unable handle boundary condition for property '{0}'".format(self.property))
         bcstr+= "}"
         return bcstr
-
-

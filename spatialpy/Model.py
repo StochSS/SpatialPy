@@ -23,19 +23,19 @@ class Model():
         self.name = name
 
         # Dictionaries with Species, Reactions and Parameter objects.
-        # Species,Reactio and Paramter names are used as keys.
+        # Species, Reaction, and Parameter names are used as keys.
         self.listOfParameters = OrderedDict()
         self.listOfSpecies    = OrderedDict()
         self.listOfReactions  = OrderedDict()
 
-        # Dict that holds flattended parameters and species for
+        # Dict that holds flattened parameters and species for
         # evaluation of expressions in the scope of the model.
         self.namespace = OrderedDict([])
         self.species_map = {}
 
         ######################
         self.mesh = None
-        self.listOfSubdomainIDs = [1] # starts with subdomain '1'
+        self.listOfTypeIDs = [1] # starts with type '1'
         self.listOfDiffusionRestrictions = {}
         self.listOfDataFunctions = []
         self.listOfInitialConditions = []
@@ -75,7 +75,7 @@ class Model():
               output will be at time zero.
         """
         if self.timestep_size is None:
-            raise InvalidModelError("timestep_size is not set")
+            raise ModelError("timestep_size is not set")
 
         steps_per_output = math.ceil(step_size/self.timestep_size)
 
@@ -101,62 +101,65 @@ class Model():
         if isuniform:
             self.set_timesteps( items_diff[0], len(items_diff) )
         else:
-            raise InvalidModelError("Only uniform timespans are supported")
+            raise ModelError("Only uniform timespans are supported")
 
 
 
-    def add_subdomain(self, subdomain, type_id, mass=1.0, nu=1.0, fixed=False):
-        """ Add a subdomain definition to the model.  By default, all regions are set to
-        subdomain 0.
+    def set_type(self, geometry_ivar, type_id, mass=None, nu=None, fixed=False):
+        """ Add a type definition to the model.  By default, all regions are set to
+        type 0.
         Args:
-            subdomain: an instance of a 'spatialpy.SubDomain' subclass.  The 'inside()' method
-                       of this object will be used to assign domain_id to points.
-            type_id: the identifier for this subdomain (usually an int).
-            mass: the mass of each particle in the subdomain
-            nu: the viscosity of each particle in the subdomain
-            fixed: (bool) are the particles in this subdomain immobile
+            geometry_ivar: an instance of a 'spatialpy.Geometry' subclass.  The 'inside()' method
+                       of this object will be used to assign type_id to points.
+            type_id: (usually an int) the identifier for this type
+            mass: (float) the mass of each particle in the type
+            nu: (float) the viscosity of each particle in the type
+            fixed: (bool) are the particles in this type immobile
         Return values:
-            Number of mesh points that were tagged with this domain_id
+            Number of mesh points that were tagged with this type_id
         """
+
         if self.mesh is None:
-            raise Exception("SpatialPy models must have a mesh before subdomains can be attached");
-        if type_id not in self.listOfSubdomainIDs:
-            # index is the "particle type", value is the "subdomain ID"
-            self.listOfSubdomainIDs.append(type_id)
-        # apply the subdomain to all points, set sd for any points that match
+            raise Exception("SpatialPy models must have a mesh before types can be attached");
+        if type_id not in self.listOfTypeIDs:
+            # index is the "particle type", value is the "type ID"
+            self.listOfTypeIDs.append(type_id)
+        # apply the type to all points, set type for any points that match
         count = 0
         on_boundary = self.mesh.find_boundary_points()
         for v_ndx in range(self.mesh.get_num_voxels()):
-            if subdomain.inside( self.mesh.coordinates()[v_ndx,:], on_boundary[v_ndx]):
-                self.mesh.sd[v_ndx] = type_id
-                self.mesh.mass[v_ndx] = mass
-                self.mesh.nu[v_ndx] = nu
+            if geometry_ivar.inside( self.mesh.coordinates()[v_ndx,:], on_boundary[v_ndx]):
+                self.mesh.type[v_ndx] = type_id
+                if (mass is not None):
+                    self.mesh.mass[v_ndx] = mass
+                if (nu is not None):
+                    self.mesh.nu[v_ndx] = nu
                 self.mesh.fixed[v_ndx] = fixed
                 count +=1
         if count == 0:
-            warnings.warn("Subdomain with type_id={0} has zero particles in it".format(type_id))
+            warnings.warn("Type with type_id={0} has zero particles in it".format(type_id))
         return count
 
-    def restrict(self, species, listOfSubDomains):
-        """ Set the diffusion coefficient to zero for 'species' in all subdomains not in
-            'listOfSubDomains'. This effectively restricts the movement of 'species' to
-            the subdomains specified in 'listOfSubDomains'.
+    def restrict(self, species, listOfTypes):
+        """ Set the diffusion coefficient to zero for 'species' in all types not in
+            'listOfTypes'. This effectively restricts the movement of 'species' to
+            the types specified in 'listOfTypes'.
         Args:
             species: an instance of a 'spatialpy.Species'.
-            listOfSubdomains: a list, each object in the list should be a 'domain_id'
+            listOfTypes: a list, each object in the list should be a 'type_id'
         """
         #x = Species()
         #if not isinstance(species, Species):
         #if str(type(species)) != 'Species':
         #    raise ModelError("First argument to restrict() must be a Species object, not {0}".format(str(type(species))))
-        if not isinstance(listOfSubDomains,list):
-            self.listOfDiffusionRestrictions[species] = [listOfSubDomains]
+        if not isinstance(listOfTypes,list):
+            self.listOfDiffusionRestrictions[species] = [listOfTypes]
         else:
-            self.listOfDiffusionRestrictions[species] = listOfSubDomains
+            self.listOfDiffusionRestrictions[species] = listOfTypes
 
     def add_data_function(self, data_function):
-        """ Add a scalar spatial function to the simulation.  This is useful if you have a
-            spatially varying in put to your model.  Argument is a instances of subclass of the
+        """ Add a scalar spatial function to the simulation. This is useful if you have a
+            spatially varying in put to your model. Argument is a instances of subclass of the
             spatialpy.DataFunction class. It must implement a function 'map(x)' which takes a
             the spatial positon 'x' as an array, and it returns a float value.
         """
@@ -290,7 +293,7 @@ class Model():
 
     def add_reaction(self,reacs):
         """ Add Reaction(s) to the model. Input can be single instance, a list of instances
-            or a dict with name,instance pairs. """
+            or a dict with name, instance pairs. """
         if isinstance(reacs, list):
             for r in reacs:
                 if r.name is None or r.name == "":
@@ -532,7 +535,7 @@ class Reaction():
 
             If massaction is set to true, propensity_function is not a valid argument. Instead, the
             propensity function is constructed automatically. For mass-action, zeroth, first and second
-            order reactions are supported, appemting to used higher orders will result in an error.
+            order reactions are supported, attempting to used higher orders will result in an error.
 
             Raises: ReactionError
 
@@ -617,7 +620,7 @@ class Reaction():
             else:
                 # Case 3: X1, X2 -> Y;
                 propensity_function += "*" + str(r)
-            self.ode_propensity_function += "*" + str(r) 
+            self.ode_propensity_function += "*" + str(r)
 
         # Set the volume dependency based on order.
         order = len(self.reactants)

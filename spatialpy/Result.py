@@ -36,11 +36,11 @@ common_color_scales = ["Plotly3","Jet","Blues","YlOrRd","PuRd","BuGn","YlOrBr","
                        "PuBu","GnBu","YlGn","Greens","Reds","Greys","RdPu","OrRd","Purples","Oranges"]
 
 
-def _plotly_iterate(subdomains, size=5, property_name=None, cmin=None, cmax=None, colormap=None, is_2d=False):
+def _plotly_iterate(types, size=5, property_name=None, cmin=None, cmax=None, colormap=None, is_2d=False):
     import plotly.graph_objs as go
 
     trace_list = []
-    for i, (name, sub_data) in enumerate(subdomains.items()):
+    for i, (name, sub_data) in enumerate(types.items()):
         # get point data for trace
         x_data = list(map(lambda point: point[0], sub_data["points"]))
         y_data = list(map(lambda point: point[1], sub_data["points"]))
@@ -51,7 +51,7 @@ def _plotly_iterate(subdomains, size=5, property_name=None, cmin=None, cmax=None
         else:
             if colormap is None:
                 colormap = common_color_scales[i]
-            marker = {"size":size, "color":sub_data["data"], "colorscale":colormap, 
+            marker = {"size":size, "color":sub_data["data"], "colorscale":colormap,
                         "colorbar":{'thickness':20,'title':name}}
             if cmin is not None and cmax is not None:
                 marker["cmin"] = cmin
@@ -127,13 +127,13 @@ class Result(dict):
         return self.tspan
 
     def get_species(self, species, timepoints=None, concentration=False, deterministic=False, debug=False):
-        """ Get the populations/concentration values for a given species in the model for 
-            one or all timepoints.  
-            
+        """ Get the populations/concentration values for a given species in the model for
+            one or all timepoints.
+
             If 'timepoints' is None (default), a matrix of dimension:
             (number of timepoints) x (number of voxels) is returned.  If an integer value is
             given, that value is used to index into the timespan, and that time point is returned
-            as a 1D array with size (number of voxel). 
+            as a 1D array with size (number of voxel).
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
             if set to True, the concentration (=copy_number/volume) is returned.
@@ -153,7 +153,7 @@ class Result(dict):
         if spec_name not in self.model.listOfSpecies.keys():
             raise ResultError("Species '{0}' not found".format(spec_name))
 
-        #t_index_arr = numpy.linspace(0,self.model.num_timesteps, 
+        #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
         #                    num=self.model.num_timesteps+1, dtype=int)
         t_index_arr = self.get_timespan();
 
@@ -172,7 +172,7 @@ class Result(dict):
         ret = numpy.zeros( (num_timepoints, num_voxel))
         for ndx, t_ndx in enumerate(t_index_arr):
             (_, step) = self.read_step(t_ndx, debug=debug)
-            if deterministic: 
+            if deterministic:
                 ret[ndx,:] = step['C['+spec_name+']']
             elif concentration:
                 # concentration = (copy_number/volume)
@@ -201,7 +201,7 @@ class Result(dict):
         t_ndx : int
             The time index of the results to be plotted, ignored if animated is set to True
         concentration : bool
-            Whether or not to plot the data as stochastic concentration, ignored if deterministic is 
+            Whether or not to plot the data as stochastic concentration, ignored if deterministic is
             set to True
         deterministic : bool
             Whether or not to plot the data as deterministic
@@ -220,10 +220,10 @@ class Result(dict):
         animated : bool
             Whether or not the plot is a 3D animation, ignored if use_matplotlib True
         t_ndx_list : list
-            The list of time indeces of the results to be plotted, ignored if animated is 
+            The list of time indeces of the results to be plotted, ignored if animated is
             False (default)
         speed : int
-            The interval of the time indeces of the results to be plotted (animated plots only) 
+            The interval of the time indeces of the results to be plotted (animated plots only)
         f_duration : int
             The duration of time that a frame is displayed
         t_duration : int
@@ -242,7 +242,7 @@ class Result(dict):
 
         if(t_ndx < 0):
             t_ndx = len(self.get_timespan()) + t_ndx
-        
+
         if animated and t_ndx_list is None:
             t_ndx_list = [item for item in range(self.model.num_timesteps+1)]
 
@@ -251,7 +251,7 @@ class Result(dict):
         # read data at time point
         time_index = t_ndx_list[0] if animated else t_ndx
         points, data = self.read_step(time_index)
-        
+
         if use_matplotlib:
             import matplotlib.pyplot as plt
 
@@ -259,8 +259,8 @@ class Result(dict):
                 d = data[spec_name]
             else:
                 d = data[spec_name] / (data['mass'] / data['rho'])
-            
-            plt.figure(figsize=(mpl_width,mpl_height))       
+
+            plt.figure(figsize=(mpl_width,mpl_height))
             plt.scatter(points[:,0],points[:,1],c=d)
             plt.axis('scaled')
             plt.colorbar()
@@ -269,30 +269,30 @@ class Result(dict):
             plt.grid(linestyle='--', linewidth=1)
             plt.plot()
             return
-        
-        # map data to subdomains
-        subdomains = {}
+
+        # map data to types
+        types = {}
         for i, val in enumerate(data['type']):
             name = species
             if deterministic or not concentration:
                 spec_data = data[spec_name][i]
             else:
                 spec_data = data[spec_name][i] / (data['mass'][i] / data['rho'][i])
-            
-            if name in subdomains.keys():
-                subdomains[name]['points'].append(points[i])
-                subdomains[name]['data'].append(spec_data)
+
+            if name in types.keys():
+                types[name]['points'].append(points[i])
+                types[name]['data'].append(spec_data)
             else:
-                subdomains[name] = {"points":[points[i]], "data":[spec_data]}
+                types[name] = {"points":[points[i]], "data":[spec_data]}
 
         is_2d = self.model.mesh.zlim[0] == self.model.mesh.zlim[1]
-        
-        trace_list = _plotly_iterate(subdomains, size=size, colormap=colormap, is_2d=is_2d)
-        
+
+        trace_list = _plotly_iterate(types, size=size, colormap=colormap, is_2d=is_2d)
+
         scene = {
             "aspectmode": 'data',
         }
-        layout = {"width": width, "height": width, "scene":scene, 
+        layout = {"width": width, "height": width, "scene":scene,
                   "xaxis":{"range":self.model.mesh.xlim}, "yaxis":{"range":self.model.mesh.ylim}
                  }
         if title is not None:
@@ -325,7 +325,7 @@ class Result(dict):
                  "y": 0,
                  "yanchor": "top"
                 }]
-            
+
             sliders_dict = {
                 "active": 0,
                 "yanchor": "top",
@@ -342,7 +342,7 @@ class Result(dict):
                 "x": 0.1,
                 "y": 0,
                 "steps": []}
-            
+
             _data = data[spec_name] if deterministic or not concentration else data[spec_name] / (data['mass'] / data['rho'])
             cmin = min(_data)
             cmax = max(_data)
@@ -358,26 +358,26 @@ class Result(dict):
             for index in range(0, len(t_ndx_list), speed):
                 points, data = self.read_step(t_ndx_list[index])
 
-                # map data to subdomains
-                subdomains = {}
+                # map data to types
+                types = {}
                 for i, val in enumerate(data['type']):
                     name = "sub {}".format(val)
                     if deterministic or not concentration:
                         spec_data = data[spec_name][i]
                     else:
                         spec_data = data[spec_name][i] / (data['mass'][i] / data['rho'][i])
-            
-                    if name in subdomains.keys():
-                        subdomains[name]['points'].append(points[i])
-                        subdomains[name]['data'].append(spec_data)
-                    else:
-                        subdomains[name] = {"points":[points[i]], "data":[spec_data]}
 
-                trace_list = _plotly_iterate(subdomains, size=size, colormap=colormap, cmin=cmin, cmax=cmax, is_2d=is_2d)
-                
+                    if name in types.keys():
+                        types[name]['points'].append(points[i])
+                        types[name]['data'].append(spec_data)
+                    else:
+                        types[name] = {"points":[points[i]], "data":[spec_data]}
+
+                trace_list = _plotly_iterate(types, size=size, colormap=colormap, cmin=cmin, cmax=cmax, is_2d=is_2d)
+
                 frame = {"data":trace_list, "name":str(t_ndx_list[index])}
                 frames.append(frame)
-                
+
                 slider_step = {"args": [[str(t_ndx_list[index])],
                                         {"frame": {"duration": f_duration, "redraw": True},
                                          "mode": "immediate",
@@ -385,9 +385,9 @@ class Result(dict):
                                         }],
                                "label": str(t_ndx_list[index]),
                                "method": "animate"}
-                
+
                 sliders_dict['steps'].append(slider_step)
-                
+
             fig["layout"]["sliders"] = [sliders_dict]
             fig["frames"] = frames
 
@@ -395,18 +395,18 @@ class Result(dict):
             return fig
         else:
             iplot(fig)
-          
+
     def get_property(self, property_name, timepoints=None):
-        """ Get the property values for a given species in the model for 
-            one or all timepoints.  
-            
+        """ Get the property values for a given species in the model for
+            one or all timepoints.
+
             If 'timepoints' is None (default), a matrix of dimension:
             (number of timepoints) x (number of voxels) is returned.  If an integer value is
             given, that value is used to index into the timespan, and that time point is returned
-            as a 1D array with size (number of voxel). 
+            as a 1D array with size (number of voxel).
         """
 
-        t_index_arr = numpy.linspace(0,self.model.num_timesteps, 
+        t_index_arr = numpy.linspace(0,self.model.num_timesteps,
                             num=self.model.num_timesteps+1, dtype=int)
         num_voxel = self.model.mesh.get_num_voxels()
 
@@ -461,10 +461,10 @@ class Result(dict):
         animated : bool
             Whether or not the plot is a 3D animation, ignored if use_matplotlib True
         t_ndx_list : list
-            The list of time indeces of the results to be plotted, ignored if animated is 
+            The list of time indeces of the results to be plotted, ignored if animated is
             False (default)
         speed : int
-            The interval of the time indeces of the results to be plotted (animated plots only) 
+            The interval of the time indeces of the results to be plotted (animated plots only)
         f_duration : int
             The duration of time that a frame is displayed
         t_duration : int
@@ -497,8 +497,8 @@ class Result(dict):
                 d = [d[i][p_ndx] for i in range(0,len(d))]
             else:
                 d = data[property_name]
-            
-            plt.figure(figsize=(mpl_width,mpl_height))       
+
+            plt.figure(figsize=(mpl_width,mpl_height))
             plt.scatter(points[:,0],points[:,1],c=d)
             plt.axis('scaled')
             plt.colorbar()
@@ -507,39 +507,39 @@ class Result(dict):
             plt.grid(linestyle='--', linewidth=1)
             plt.plot()
             return
-        
+
         from plotly.offline import init_notebook_mode, iplot
-        
-        subdomains = {}
+
+        types = {}
         if property_name == 'type':
             for i, val in enumerate(data['type']):
                 name = "type {}".format(val)
-                
-                if name in subdomains.keys():
-                    subdomains[name]['points'].append(points[i])
-                    subdomains[name]['data'].append(data[property_name][i])
+
+                if name in types.keys():
+                    types[name]['points'].append(points[i])
+                    types[name]['data'].append(data[property_name][i])
                 else:
-                    subdomains[name] = {"points":[points[i]], "data":[data[property_name][i]]}
+                    types[name] = {"points":[points[i]], "data":[data[property_name][i]]}
         elif property_name == 'v':
-            subdomains[property_name] = {
+            types[property_name] = {
                 "points": points,
                 "data" : [data[property_name][i][p_ndx] for i in range(0,len(data[property_name]))]
             }
         else:
-            subdomains[property_name] = {
+            types[property_name] = {
                 "points": points,
                 "data" : data[property_name]
             }
 
         is_2d = self.model.mesh.zlim[0] == self.model.mesh.zlim[1]
 
-        trace_list = _plotly_iterate(subdomains, size=size, property_name=property_name,
+        trace_list = _plotly_iterate(types, size=size, property_name=property_name,
                                      colormap=colormap, is_2d=is_2d)
 
         scene = {
             "aspectmode": 'data',
         }
-        layout = {"width": width, "height": width, "scene":scene, 
+        layout = {"width": width, "height": width, "scene":scene,
                   "xaxis":{"range":self.model.mesh.xlim}, "yaxis":{"range":self.model.mesh.ylim}
                  }
 
@@ -573,7 +573,7 @@ class Result(dict):
                  "y": 0,
                  "yanchor": "top"
                 }]
-            
+
             sliders_dict = {
                 "active": 0,
                 "yanchor": "top",
@@ -590,7 +590,7 @@ class Result(dict):
                 "x": 0.1,
                 "y": 0,
                 "steps": []}
-            
+
             cmin = min(data[property_name]) if property_name != "v" else min(data[property_name], key=lambda val: val[p_ndx])[p_ndx]
             cmax = max(data[property_name]) if property_name != "v" else max(data[property_name], key=lambda val: val[p_ndx])[p_ndx]
             for i in range(1, len(t_ndx_list), speed):
@@ -606,34 +606,34 @@ class Result(dict):
             for index in range(0, len(t_ndx_list), speed):
                 points, data = self.read_step(t_ndx_list[index])
 
-                # map data to subdomains
-                subdomains = {}
+                # map data to types
+                types = {}
                 if property_name == 'type':
                     for i, val in enumerate(data['type']):
                         name = "type {}".format(val)
-                        
-                        if name in subdomains.keys():
-                            subdomains[name]['points'].append(points[i])
-                            subdomains[name]['data'].append(data[property_name][i])
+
+                        if name in types.keys():
+                            types[name]['points'].append(points[i])
+                            types[name]['data'].append(data[property_name][i])
                         else:
-                            subdomains[name] = {"points":[points[i]], "data":[data[property_name][i]]}
+                            types[name] = {"points":[points[i]], "data":[data[property_name][i]]}
                 elif property_name == 'v':
-                    subdomains[property_name] = {
+                    types[property_name] = {
                         "points": points,
                         "data" : [data[property_name][i][p_ndx] for i in range(0,len(data[property_name]))]
                     }
                 else:
-                    subdomains[property_name] = {
+                    types[property_name] = {
                         "points": points,
                         "data" : data[property_name]
                     }
 
-                trace_list = _plotly_iterate(subdomains, size=size, property_name=property_name,
+                trace_list = _plotly_iterate(types, size=size, property_name=property_name,
                                      colormap=colormap, cmin=cmin, cmax=cmax, is_2d=is_2d)
-                
+
                 frame = {"data":trace_list, "name":str(t_ndx_list[index])}
                 frames.append(frame)
-                
+
                 slider_step = {"args": [[str(t_ndx_list[index])],
                                         {"frame": {"duration": f_duration, "redraw": False},
                                          "mode": "immediate",
@@ -641,9 +641,9 @@ class Result(dict):
                                         }],
                                "label": str(t_ndx_list[index]),
                                "method": "animate"}
-                
+
                 sliders_dict['steps'].append(slider_step)
-                
+
             fig["layout"]["sliders"] = [sliders_dict]
             fig["frames"] = frames
 
@@ -690,24 +690,21 @@ class Result(dict):
         except Exception as e:
             pass
 
-
-
-
     def export_to_csv(self, folder_name):
         """ Dump trajectory to a set CSV files, the first specifies the mesh (mesh.csv) and the rest specify trajectory data for each species (species_S.csv for species named 'S').
-            The columns of mesh.csv are: 'Voxel ID', 'X', 'Y', 'Z', 'Volume', 'Subdomain'.
+            The columns of mesh.csv are: 'Voxel ID', 'X', 'Y', 'Z', 'Volume', 'Type'.
             The columns of species_S.csv are: 'Time', 'Voxel 0', Voxel 1', ... 'Voxel N'.
         """
         #TODO: Check if this still works
         import csv
         subprocess.call(["mkdir", "-p", folder_name])
-        #['Voxel ID', 'X', 'Y', 'Z', 'Volume', 'Subdomain']
+        #['Voxel ID', 'X', 'Y', 'Z', 'Volume', 'Type']
         with open(os.path.join(folder_name,'mesh.csv'), 'w+') as csvfile:
             writer = csv.writer(csvfile, delimiter=',')
-            writer.writerow(['Voxel ID', 'X', 'Y', 'Z', 'Volume', 'Subdomain'])
+            writer.writerow(['Voxel ID', 'X', 'Y', 'Z', 'Volume', 'Type'])
             vol = self.model.get_solver_datastructure()['vol']
             for ndx in range(self.model.mesh.get_num_voxels()):
-                row = [ndx]+self.model.mesh.coordinates()[ndx,:].tolist()+[vol[ndx]]+[self.model.mesh.sd[ndx]]
+                row = [ndx]+self.model.mesh.coordinates()[ndx,:].tolist()+[vol[ndx]]+[self.model.mesh.type[ndx]]
                 writer.writerow(row)
 
         for spec in self.model.listOfSpecies:
@@ -740,4 +737,3 @@ class Result(dict):
 
 class ResultError(Exception):
     pass
-
