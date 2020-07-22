@@ -487,14 +487,17 @@ class Solver:
             "__INPUT_CONSTANTS__", input_constants)
 
         system_config = "debug_flag = {0};\n".format(self.debug_level)
-        system_config += "system_t* system = create_system({0},{1},{2},{3});\n".format(
+        system_config += "system_t* system = create_system({0},{1},{2},{3},{4},{5});\n".format(
             len(self.model.listOfSubdomainIDs), len(self.model.listOfSpecies), 
+            len(self.model.listOfReactions), len(self.model.listOfSpecies), 
             len(self.model.listOfReactions), len(self.model.listOfDataFunctions)
         system_config += "system->static_domain = {0};\n".format(int(self.model.staticDomain))
         if(len(self.model.listOfSpecies) > 0):
             system_config += "system->subdomain_diffusion_matrix = input_subdomain_diffusion_matrix;\n"
-            system_config += "system->stochic_matrix = input_N_dense;\n"
+            system_config += "system->stoichiometric_matrix = input_N_dense;\n"
             system_config += "system->chem_rxn_rhs_functions = ALLOC_ChemRxnFun();\n"
+            system_config += "system->stoch_rxn_propensity_functions = ALLOC_propensities();\n"
+            system_config += "system->species_names = input_species_names;\n";
 
         system_config += "system->dt = {0};\n".format(self.model.timestep_size)
         system_config += "system->nt = {0};\n".format(self.model.num_timesteps)
@@ -525,10 +528,8 @@ class Solver:
         init_rdme=''
         if(len(self.model.listOfSpecies) > 0):
             init_rdme = '''
-            initialize_rdme(system, NUM_VOXELS, NUM_SPECIES, NUM_REACTIONS, 
-                            input_irN, input_jcN, input_prN, input_irG,
-                            input_jcG, input_species_names, input_u0, 
-                            input_num_subdomain, input_subdomain_diffusion_matrix);'''
+            initialize_rdme(system, input_irN, input_jcN, input_prN, input_irG,
+                            input_jcG, input_u0 );'''
         propfilestr = propfilestr.replace("__INIT_RDME__", init_rdme)
 
 

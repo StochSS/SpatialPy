@@ -126,7 +126,8 @@ void find_neighbors(particle_t* me, system_t* system){
 }
 
 
-system_t* create_system(int num_types, int num_chem_species, int num_chem_rxns, int num_data_fn){
+system_t* create_system(size_t num_types, size_t num_chem_species, size_t num_chem_rxns, 
+                         size_t num_stoch_species, size_t num_stoch_rxns,size_t num_data_fn){
     system_t*s = malloc(sizeof(system_t));
     s->particle_list = create_linked_list();
     s->x_index = create_linked_list();
@@ -138,6 +139,8 @@ system_t* create_system(int num_types, int num_chem_species, int num_chem_rxns, 
     s->boundary_conditions[2] = 'n';
     s->rdme = NULL;
     s->static_domain = 0;
+    s->num_stoch_species = num_stoch_species;
+    s->num_stoch_rxns = num_stoch_rxns;
     s->num_chem_species = num_chem_species;
     s->num_chem_rxns = num_chem_rxns;
     s->num_types = num_types;

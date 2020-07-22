@@ -154,14 +154,20 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
     }
     //printf("pairwiseForce(id=%i) num_chem_rxns=%i\n",me->id,system->num_chem_rxns);
     //fflush(stdout);
+
     // after processing all neighbors
+    // process chemical reactions
+
+    double vol = (me->mass / me->rho);
+    double cur_time = system->current_step * system->dt;
     for(rxn=0; rxn < system->num_chem_rxns; rxn++){
+        //TODO: t (2nd arg) set to zero, fix
         //TODO, vol (3rd arg) set to zero, fix
         //TODO: data (4th arg) set to NULL, fix
-        double flux = (*system->chem_rxn_rhs_functions[rxn])(me->C,0.0, 0.0, NULL, me->type);
+        double flux = (*system->chem_rxn_rhs_functions[rxn])(me->C, cur_time, vol , me->data_fn, me->type);
         for(s=0; s< system->num_chem_species; s++){
             int k = system->num_chem_rxns * rxn + s;
-            me->Q[s] += system->stochic_matrix[k] * flux;
+            me->Q[s] += system->stoichiometric_matrix[k] * flux;
         }
     }
 

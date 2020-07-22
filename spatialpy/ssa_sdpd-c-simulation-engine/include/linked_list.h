@@ -97,7 +97,8 @@ void free_node(node*n);
 
 // in-place bubble sort
 void linked_list_sort(linked_list*ll, int sort_ndx);
-void orderd_list_sort(ordered_list_t*ll);
+void ordered_list_sort(ordered_list_t*ll);
+void ordered_list_add( ordered_list_t* ll, particle_t* data_in);
 
 
 #endif /* linked_list_h*/
