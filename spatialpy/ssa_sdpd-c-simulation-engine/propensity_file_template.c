@@ -9,6 +9,7 @@
 #include "particle.h"
 #include "propensities.h"
 #include "simulate.h"
+#include "dSFMT/dSFMT.h"
 
 /* Species names */
 __DEFINE_SPECIES__
@@ -55,6 +56,7 @@ void FREE_ChemRxnFun(ChemRxnFun* ptr){
 __INPUT_CONSTANTS__
 
 int debug_flag;
+dsfmt_t dsfmt;
 
 void init_create_particle(system_t* sys, int id, double x, double y, double z, int type, double nu, double mass, double rho, int solidTag){
     particle_t* p = create_particle(id);
@@ -109,11 +111,11 @@ int main(int argc, char**argv){
     __INIT_RDME__
 
     int num_threads = 1, sflag = 0, tflag = 0, opt;
-    long seed;
+    int seed;
     while ((opt = getopt(argc, argv, "s:t:")) != -1) {
         switch (opt) {
         case 's':
-            seed = atol(optarg);
+            seed = atoi(optarg);
             sflag = 1;
             break;
         case 't':
@@ -132,9 +134,9 @@ int main(int argc, char**argv){
     }
 
     if(sflag){
-        srand48(seed);
+        dsfmt_init_gen_rand(&dsfmt, seed);
     }else{
-        srand48((long int)time(NULL)+(long int)(1e9*clock()));
+        dsfmt_init_gen_rand(&dsfmt, (int)time(NULL)+(int)(1e9*clock()));
     }
 
     if(!tflag){

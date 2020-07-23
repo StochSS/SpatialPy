@@ -1,7 +1,9 @@
 CC = gcc
-CFLAGS = -O3 -Wall
+CFLAGS = -g -O3 -Wall
 LFLAGS = -pthread -lm
-INCDIR = $(ROOT)/include/
+DSFMTFLAGS = -DHAVE_SSE2 -DDSFMT_MEXP=521
+INCDIR = $(ROOT)/include/ $(ROOT)/external/
+INC_PARAMS = $(INCDIR:%=-I%)
 OBJ = linked_list.o particle.o simulate.o count_cores.o output.o simulate_rdme.o binheap.o simulate_threads.o model.o pthread_barrier.o
 
 
@@ -10,11 +12,10 @@ OBJ = linked_list.o particle.o simulate.o count_cores.o output.o simulate_rdme.o
 all: ssa_sdpd
 
 main.o:
-	$(CC) -c -o main.o $(MODEL) -I$(INCDIR) $(CFLAGS)
+	$(CC) -c -o main.o $(MODEL) $(INC_PARAMS) $(CFLAGS) $(DSFMTFLAGS)
 
 ssa_sdpd: $(OBJ) main.o
-	$(CC)  -o ssa_sdpd $(OBJ) main.o $(LFLAGS)
-
+	$(CC)  -o ssa_sdpd $(OBJ) $(ROOT)/external/dSFMT/dSFMT.c main.o $(DSFMTFLAGS) $(LFLAGS)
 
 %.o: $(ROOT)/src/%.c
-	$(CC) -c -o $@ $< -I$(INCDIR) $(CFLAGS)
+	$(CC) -c -o $@ $< $(INC_PARAMS) $(CFLAGS) $(DSFMTFLAGS)

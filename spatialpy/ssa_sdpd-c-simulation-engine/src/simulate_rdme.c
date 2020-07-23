@@ -3,6 +3,7 @@
 #include "output.h"
 #include "particle.h"
 #include "simulate_rdme.h"
+#include "dSFMT/dSFMT.h"
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
@@ -294,7 +295,7 @@ void nsm_core__initialize_heap(rdme_t* rdme){
     /* Calculate times to next event (reaction or diffusion)
      in each subvolume and initialize heap. */
     for (i = 0; i < rdme->Ncells; i++) {
-        rdme->rtimes[i] = -log(1.0-drand48())/(rdme->srrate[i]+rdme->sdrate[i]);
+        rdme->rtimes[i] = -log(1.0-SSA_RANDNUM)/(rdme->srrate[i]+rdme->sdrate[i]);
         rdme->heap[i] = rdme->node[i] = i;
     }
     initialize_heap(rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
@@ -490,7 +491,7 @@ void nsm_core__take_step(rdme_t* rdme, double current_time, double step_size){
         if(totrate <= 0){ // Sanity check, is there a non-zero reaction and diffusion propensity
             totrate = rdme->srrate[subvol]+rdme->sdrate[subvol];
             if (totrate > 0.0)
-                rdme->rtimes[0] = -log(1.0-drand48())/totrate+tt;
+                rdme->rtimes[0] = -log(1.0-SSA_RANDNUM)/totrate+tt;
             else
                 rdme->rtimes[0] = INFINITY;
             /* Update the heap. */
@@ -499,7 +500,7 @@ void nsm_core__take_step(rdme_t* rdme, double current_time, double step_size){
             continue;
         }
 
-        rand1 = drand48();
+        rand1 = SSA_RANDNUM;
 
         if (rand1 <= rdme->srrate[subvol]/totrate) { // use normalized floating point comparision
             /* Reaction event. */
@@ -629,7 +630,7 @@ void nsm_core__take_step(rdme_t* rdme, double current_time, double step_size){
 
             /* b) and then the direction of diffusion. */
             col = dof+spec;
-            double r2 = drand48();
+            double r2 = SSA_RANDNUM;
             rand2 = r2*rdme->Ddiag[col];
 
             /* Search for diffusion direction. */
@@ -713,7 +714,7 @@ void nsm_core__take_step(rdme_t* rdme, double current_time, double step_size){
         /* Compute time to new event for this subvolume. */
         totrate = rdme->srrate[subvol]+rdme->sdrate[subvol];
         if(totrate > 0.0){
-            rdme->rtimes[0] = -log(1.0-drand48())/totrate+tt;
+            rdme->rtimes[0] = -log(1.0-SSA_RANDNUM)/totrate+tt;
         }else{
             rdme->rtimes[0] = INFINITY;
         }
@@ -730,7 +731,7 @@ void nsm_core__take_step(rdme_t* rdme, double current_time, double step_size){
                     (old_rrate+old_drate)/totrate*(rdme->rtimes[rdme->heap[to_vol]]-tt)+tt;
                 }else{
                     /* generate a new waiting time */
-                    rdme->rtimes[rdme->heap[to_vol]] = -log(1.0-drand48())/totrate+tt;
+                    rdme->rtimes[rdme->heap[to_vol]] = -log(1.0-SSA_RANDNUM)/totrate+tt;
                 }
             }else{
                 rdme->rtimes[rdme->heap[to_vol]] = INFINITY;

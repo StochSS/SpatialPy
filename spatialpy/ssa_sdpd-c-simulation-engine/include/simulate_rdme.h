@@ -9,7 +9,14 @@ See the file LICENSE.txt for details.
 #define simulate_rdme_h
 #include "particle.h"
 #include "propensities.h"
+#include  "dSFMT/dSFMT.h"
 
+// Global flags
+extern dsfmt_t dsfmt;
+
+// Macro for ease of switching between PRNGs
+// Range [0, 1)
+#define SSA_RANDNUM dsfmt_genrand_close_open(&dsfmt)
 
 typedef struct __rdme_data_t rdme_t;
 
