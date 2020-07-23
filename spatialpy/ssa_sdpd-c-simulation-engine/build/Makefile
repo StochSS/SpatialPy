@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -O3 -Wall
+CFLAGS = -O3 -Wall
 LFLAGS = -pthread -lm
 DSFMTFLAGS = -DHAVE_SSE2 -DDSFMT_MEXP=521
 INCDIR = $(ROOT)/include/ $(ROOT)/external/
