@@ -1,8 +1,9 @@
-import spatialpy
+from spatialpy.BoundaryCondition import BoundaryCondition
 
 
 
-class DataFunction(spatialpy.BoundaryCondition):
+
+class DataFunction(BoundaryCondition):
     """ Abstract class used to constuct the data function. """
 
     def __init__(self, name=None):

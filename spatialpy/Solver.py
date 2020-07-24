@@ -490,7 +490,7 @@ class Solver:
         system_config += "system_t* system = create_system({0},{1},{2},{3},{4},{5});\n".format(
             len(self.model.listOfSubdomainIDs), len(self.model.listOfSpecies), 
             len(self.model.listOfReactions), len(self.model.listOfSpecies), 
-            len(self.model.listOfReactions), len(self.model.listOfDataFunctions)
+            len(self.model.listOfReactions), len(self.model.listOfDataFunctions))
         system_config += "system->static_domain = {0};\n".format(int(self.model.staticDomain))
         if(len(self.model.listOfSpecies) > 0):
             system_config += "system->subdomain_diffusion_matrix = input_subdomain_diffusion_matrix;\n"
