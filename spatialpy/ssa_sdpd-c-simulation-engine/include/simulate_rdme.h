@@ -76,7 +76,7 @@ void nsm_core__initialize_diff_propensities(rdme_t* rdme);
 void nsm_core__initialize_heap(rdme_t* rdme);
 
 
-void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system);
+//void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system);
 void nsm_core__destroy_diffusion_matrix(rdme_t*rdme);
 
 void nsm_core__take_step(system_t*system, double current_time, double step_size);

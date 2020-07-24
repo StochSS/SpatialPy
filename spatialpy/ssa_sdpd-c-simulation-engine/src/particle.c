@@ -16,7 +16,7 @@ void find_neighbors(particle_t* me, system_t* system){
     node*n;
     //clean out previous neighbors
     //printf("find_neighbors.empty_linked_list\n");
-    empty_linked_list(me->neighbors);
+    empty_neighbor_list(me->neighbors);
     // search for points forward: (assumes the list is sorted ascending)
     //printf("find_neighbors.search forward\n");
     for(n = me->x_index->next; n!=NULL; n=n->next){

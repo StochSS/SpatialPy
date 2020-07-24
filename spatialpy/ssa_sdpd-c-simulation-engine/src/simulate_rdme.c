@@ -339,9 +339,9 @@ void nsm_core__destroy(rdme_t*rdme){
 void nsm_core__initialize_chem_populations(rdme_t* rdme, const unsigned int*u0){
     /* Set xx to the initial state. xx will always hold the current solution. */
     //printf("malloc Ndofs = %li\n",rdme->Ndofs);
-    //TODO
-    rdme->xx = (unsigned int *)malloc(rdme->Ndofs*sizeof(unsigned int));
-    memcpy(rdme->xx,u0,rdme->Ndofs*sizeof(unsigned int));
+    //rdme->xx = (unsigned int *)malloc(rdme->Ndofs*sizeof(unsigned int));
+    //memcpy(rdme->xx,u0,rdme->Ndofs*sizeof(unsigned int));
+
     //printf("       Ndofs = %li\n",rdme->Ndofs);
     //printf("xx = [ ");
     //int i;
@@ -349,6 +349,15 @@ void nsm_core__initialize_chem_populations(rdme_t* rdme, const unsigned int*u0){
     //    printf("%u ",rdme->xx[i]);
     //}
     //printf("]\n");
+
+    node *n;
+    particle_t *p1;
+    int i=0;
+    int num_p = system->particle_list->count;
+    for(n=system->particle_list->head; n!=NULL; n=n->next){
+        p1 = n->data;
+        memcpy(p1->xx,&u0[i*num_p],system->num_stoch_species*sizeof(unsigned int));
+    }
 }
 
 
