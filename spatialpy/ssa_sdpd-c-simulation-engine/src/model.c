@@ -38,16 +38,16 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
     particle_t* pt_j;
 
     // Kernel function parameter
-    if (system->dimension == 3) {
-        alpha = 105 / (16 * M_PI * h * h * h);
-    }
-    else if (system->dimension == 2) {
-        alpha = 5 / (M_PI * h * h);
-    }
-    else {
-        printf("Error, only 3D or 2D domains are supported\n");
-        exit(1);
-    }
+    //if (system->dimension == 3) {
+    //    alpha = 105 / (16 * M_PI * h * h * h);
+    //}
+    //else if (system->dimension == 2) {
+    //    alpha = 5 / (M_PI * h * h);
+    //}
+    //else {
+    //    printf("Error, only 3D or 2D domains are supported\n");
+    //    exit(1);
+    //}
    
     // Zero tensors
     for (i = 0; i < 3; i++) {

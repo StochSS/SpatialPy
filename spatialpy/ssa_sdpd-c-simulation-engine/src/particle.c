@@ -11,6 +11,39 @@ See the file LICENSE.txt for details.
 #include <stdio.h>
 #include <math.h>
 
+int add_to_neighbor_list(particle_t*me, particle_t*neighbor, system_t*system){
+    double a = me->x[0] - neighbor->x[0];
+    double b = me->x[1] - neighbor->x[1];
+    double c = me->x[2] - neighbor->x[2];
+    double r2 =  ( a*a + b*b + c*c);
+    double r = sqrt(r2);
+
+    if(r > system->h){ return 0; } // do not add, out side support radius
+
+    // calculate dWdr
+    double h = system->h;
+    double R = r / h;
+    double alpha = 105 / (16 * M_PI * h * h * h); // 3D
+    //double alpha = 5 / (M_PI * h * h); // 2D
+    double dWdr = alpha * (-12 * r / (h * h)) * pow(1 - R, 2);
+    // calculate D_i_j
+
+    // Eq (13-14), Drawert et al 2019
+    double ih = 1.0 / h;
+    double ihsq = ih * ih;
+    double dhr = h - r;
+    double wfd = -25.066903536973515383e0 * dhr * dhr * ihsq * ihsq * ihsq * ih; //3D
+    // Eq 28 of Drawert et al 2019, Tartakovsky et. al., 2007, JCP
+    double D_i_j = -2.0*(me->mass*neighbor->mass)/(me->mass+neighbor->mass)*(me->rho+neighbor->rho)/(me->rho*neighbor->rho) * r2 * wfd / (r2+0.01*h*h);
+
+    neighbor_node_t*n = neighbor_list_add( me->neighbors, neighbor );
+    n->dist = r;
+    n->dWdr = dWdr;
+    n->D_i_j = D_i_k;
+
+    return 1;
+}
+
 
 void find_neighbors(particle_t* me, system_t* system){
     node*n;
@@ -23,7 +56,7 @@ void find_neighbors(particle_t* me, system_t* system){
         if(n->data->x[0] > (me->x[0] + system->h)) break; //stop searching
         if( (n->data->x[1] > (me->x[1] + system->h)) || (n->data->x[1] < (me->x[1] - system->h) ) ) continue;
         if( (n->data->x[2] > (me->x[2] + system->h)) || (n->data->x[2] < (me->x[2] - system->h) ) ) continue;
-        linked_list_add(me->neighbors, n->data);
+        add_to_neighbor_list(me, n->data, system);
         if(debug_flag>2){ 
             printf("find_neighbors(%i) forward found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
             me->id,n->data->id, particle_dist(me,n->data),
@@ -39,7 +72,7 @@ void find_neighbors(particle_t* me, system_t* system){
             if(n->data->x[0] > max_x) break; //stop searching
             if( (n->data->x[1] > (me->x[1] + system->h)) || (n->data->x[1] < (me->x[1] - system->h) ) ) continue;
             if( (n->data->x[2] > (me->x[2] + system->h)) || (n->data->x[2] < (me->x[2] - system->h) ) ) continue;
-            linked_list_add(me->neighbors, n->data);
+            add_to_neighbor_list(me, n->data, system);
             if(debug_flag){ 
                 printf("find_neighbors(%i) forward wrap around found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
                 me->id,n->data->id, particle_dist(me,n->data),
@@ -96,7 +129,7 @@ void find_neighbors(particle_t* me, system_t* system){
             //if(me->id==0){ printf("\tnode z is outside\n");}
             continue;
         }
-        linked_list_add(me->neighbors, n->data);
+        add_to_neighbor_list(me, n->data, system);
         if(debug_flag>2){ 
             printf("find_neighbors(%i) backwards found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
             me->id,n->data->id, particle_dist(me,n->data),
@@ -111,7 +144,7 @@ void find_neighbors(particle_t* me, system_t* system){
             if(n->data->x[0] < min_x) break; //stop searching
             if( (n->data->x[1] > (me->x[1] + system->h)) || (n->data->x[1] < (me->x[1] - system->h) ) ) continue;
             if( (n->data->x[2] > (me->x[2] + system->h)) || (n->data->x[2] < (me->x[2] - system->h) ) ) continue;
-            linked_list_add(me->neighbors, n->data);
+            add_to_neighbor_list(me, n->data, system);
             if(debug_flag){ 
                 printf("find_neighbors(%i) backwards wrap around found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
                 me->id,n->data->id, particle_dist(me,n->data),

@@ -76,8 +76,8 @@ void destroy_neighbor_list( neighbor_list* ll );
 void destroy_ordered_list( ordered_list* ll );
 // add a new node to the end of the linked list
 node* linked_list_add( linked_list* ll, particle_t* data_in);
-void neighbor_list_add( neighbor_list_t* ll, particle_t* data_in);
-void ordered_list_add( ordered_list_t* ll, particle_t* data_in);
+neighbor_node_t* neighbor_list_add( neighbor_list_t* ll, particle_t* data_in);
+ordered_node_t* ordered_list_add( ordered_list_t* ll, particle_t* data_in);
 // Delete a node from the linked list
 void linked_list_delete( linked_list* ll, node* to_delete);
 void neighbor_list_delete( neighbor_list_t* ll, node* to_delete);
