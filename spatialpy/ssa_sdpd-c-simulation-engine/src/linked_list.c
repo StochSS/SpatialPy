@@ -13,8 +13,8 @@ See the file LICENSE.txt for details.
 
 
 //constructor
-linked_list* create_linked_list(){
-    linked_list* ll = (linked_list*) malloc( sizeof(linked_list));
+linked_list_t* create_linked_list(){
+    linked_list_t* ll = (linked_list_t*) malloc( sizeof(linked_list_t));
     ll->count = 0;
     ll->head = NULL;
     ll->tail = NULL;
@@ -36,7 +36,7 @@ ordered_list_t* create_ordered_list_t(){
 }
 
 // destructor
-void destroy_linked_list( linked_list* ll ){
+void destroy_linked_list( linked_list_t* ll ){
     // empty the linked list
     empty_linked_list(ll);
     // un-allocate the memory
@@ -55,7 +55,7 @@ void destroy_ordered_list( ordered_list_t* ll ){
     free(ll);
 }
 // empty
-void empty_linked_list( linked_list*ll){
+void empty_linked_list( linked_list_t*ll){
     while( ll->count > 0){
         linked_list_delete( ll, ll->head );
     }
@@ -72,8 +72,8 @@ void empty_ordered_list( ordered_list_t*ll){
 }
 
 // add a new node to the end of the linked list
-node* linked_list_add( linked_list* ll, particle_t* data_in){
-    node* n = (node *) malloc( sizeof(node) );
+node_t* linked_list_add( linked_list_t* ll, particle_t* data_in){
+    node_t* n = (node_t *) malloc( sizeof(node_t) );
     n->data = data_in;
     n->next = NULL;
     n->prev = NULL;
@@ -90,7 +90,7 @@ node* linked_list_add( linked_list* ll, particle_t* data_in){
     ll->count++;
     return n;
 }
-void neighbor_list_add( neighbor_list_t* ll, particle_t* data_in){
+neighbor_node_t* neighbor_list_add( neighbor_list_t* ll, particle_t* data_in){
     neighbor_node_t* n = (neighbor_node_t *) malloc( sizeof(neighbor_node_t) );
     n->data = data_in;
     n->next = NULL;
@@ -106,8 +106,9 @@ void neighbor_list_add( neighbor_list_t* ll, particle_t* data_in){
     }
     // increase the size of the list
     ll->count++;
+    return n;
 }
-void ordered_list_add( ordered_list_t* ll, particle_t* data_in){
+ordered_node_t* ordered_list_add( ordered_list_t* ll, particle_t* data_in){
     ordered_node_t* n = (ordered_node_t *) malloc( sizeof(ordered_node_t) );
     n->data = data_in;
     n->next = NULL;
@@ -123,11 +124,12 @@ void ordered_list_add( ordered_list_t* ll, particle_t* data_in){
     }
     // increase the size of the list
     ll->count++;
+    return n;
 }
 
 // Delete a node from the linked list
-void linked_list_delete( linked_list* ll, node* to_delete){
-    node* prev_node;
+void linked_list_delete( linked_list_t* ll, node_t* to_delete){
+    node_t* prev_node;
     if( ll->head == NULL){
         printf("Error, linked_list_delete() empty list\n");
         return;
@@ -204,8 +206,8 @@ void ordered_list_delete( ordered_list_t* ll, ordered_node_t* to_delete){
 
 // search for a node by it's data field
 /*
-node* linked_list_search( linked_list* ll, char* search_string ){
-    node* n;
+node_t* linked_list_search( linked_list_t* ll, char* search_string ){
+    node_t* n;
     for( n=ll->head; n != NULL; n = n->next ){
         if( strcmp( n->data, search_string) == 0  ){
             break;
@@ -220,9 +222,9 @@ node* linked_list_search( linked_list* ll, char* search_string ){
 
 // get node by index
 /*
-node* linked_list_get( linked_list* ll, int index){
+node_t* linked_list_get( linked_list_t* ll, int index){
     int count = 0;
-    node* n = ll->head;
+    node_t* n = ll->head;
     if( ll->head == NULL){
         printf("Error, linked_list_get() empty list\n");
         return NULL;
@@ -243,7 +245,7 @@ node* linked_list_get( linked_list* ll, int index){
 // remove and return first node on list
 /*
 node * linked_list_pop( linked_list * ll){
-    node*n = ll->head;
+    node_t*n = ll->head;
     if( ll->head == NULL){
         return NULL;
     }
@@ -255,11 +257,11 @@ node * linked_list_pop( linked_list * ll){
 */
 
 
-node* linked_list_sort__sub(node* head, int sort_ndx){
-    node* min_node = head;
-    node* before = NULL;
-    node* ptr;
-    node* tmp;
+node_t* linked_list_sort__sub(node_t* head, int sort_ndx){
+    node_t* min_node = head;
+    node_t* before = NULL;
+    node_t* ptr;
+    node_t* tmp;
     if(head->next == NULL){
         return head;
     }
@@ -285,29 +287,29 @@ node* linked_list_sort__sub(node* head, int sort_ndx){
     return head;
 }
 
-void linked_list_sort(linked_list*ll, int sort_ndx){
+void linked_list_sort(linked_list_t*ll, int sort_ndx){
     ll->head = linked_list_sort__sub(ll->head, sort_ndx);
 }
 
-orderd_list_t* ordered_list_sort__sub(orderd_node_t* head){
-    orderd_list_t* min_orderd_list_t = head;
-    orderd_list_t* before = NULL;
-    orderd_list_t* ptr;
-    orderd_list_t* tmp;
+ordered_node_t* ordered_list_sort__sub(ordered_node_t* head){
+    ordered_node_t* min_ordered = head;
+    ordered_node_t* before = NULL;
+    ordered_node_t* ptr;
+    ordered_node_t* tmp;
     if(head->next == NULL){
         return head;
     }
     for(ptr = head; ptr->next != NULL; ptr = ptr->next){
-        if( ptr->next->tt < min_orderd_list_t->tt ){
-            min_orderd_list_t = ptr->next;
+        if( ptr->next->tt < min_ordered->tt ){
+            min_ordered = ptr->next;
             before = ptr;
         }
     }
-    if( min_orderd_list_t != head ){
+    if( min_ordered != head ){
         tmp = head;
-        head = min_orderd_list_t;
-        before->next = min_orderd_list_t->next;
-        if(min_orderd_list_t->next != NULL){ min_orderd_list_t->next->prev = before;}
+        head = min_ordered;
+        before->next = min_ordered->next;
+        if(min_ordered->next != NULL){ min_ordered->next->prev = before;}
         head->next = tmp;
         tmp->prev = head;
         head->prev = NULL;
@@ -319,7 +321,7 @@ orderd_list_t* ordered_list_sort__sub(orderd_node_t* head){
     return head;
 }
 
-void ordered_list_sort(ordered_list*ll){
+void ordered_list_sort(ordered_list_t*ll){
     ll->head = ordered_list_sort__sub(ll->head);
 }
 

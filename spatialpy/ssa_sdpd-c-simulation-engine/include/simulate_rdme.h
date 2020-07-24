@@ -7,6 +7,7 @@ See the file LICENSE.txt for details.
 ***************************************************************************** */
 #ifndef simulate_rdme_h
 #define simulate_rdme_h
+#include "linked_list.h"
 #include "particle.h"
 #include "propensities.h"
 
@@ -38,7 +39,7 @@ struct __rdme_data_t {
     //double *rtimes; // using  ordered_list_t*heap 
     //int *node;
     //int *heap;
-    ordered_list_t*heap; //TODO: check initialization of this
+    ordered_list_t*heap; // ordered list of reaction/diffusion times
 
 
     long int total_reactions;
@@ -52,7 +53,7 @@ struct __rdme_voxel_t {
     double* rrate;
     double sdrate;
     double* Ddiag;
-}
+};
 
 
 

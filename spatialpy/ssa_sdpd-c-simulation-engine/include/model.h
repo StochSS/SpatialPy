@@ -12,11 +12,11 @@ See the file LICENSE.txt for details.
 
 
 
-void filterDensity(particle_t* me, linked_list* neighbors, system_t* system);
+void filterDensity(particle_t* me, system_t* system);
 
-void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system);
+void pairwiseForce(particle_t* me, system_t* system);
 
-void computeBoundaryVolumeFraction(particle_t* me, linked_list* neighbors, system_t* system);
+void computeBoundaryVolumeFraction(particle_t* me, system_t* system);
 
 void applyBoundaryVolumeFraction(particle_t* me, system_t* system);
 

@@ -69,7 +69,6 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
     applyBoundaryConditions(me, system);
 
 
-    int i;
     //  Clean forces
     for (i = 0; i < 3; i++) {
         // Clean momentum force
@@ -101,7 +100,7 @@ void compute_forces(particle_t* me, system_t* system, unsigned int step)
     find_neighbors(me, system);
 
     // Step 2.3: Compute forces
-    pairwiseForce(me, me->neighbors, system);
+    pairwiseForce(me, system);
 
 }
 
@@ -120,23 +119,24 @@ void take_step2(particle_t* me, system_t* system, unsigned int step)
 
         // Update density using continuity equation and Shepard filter 
         if (step % 20 == 0) {
-            filterDensity(me, me->neighbors, system);
+            filterDensity(me, system);
+            me->rho = me->rho + 0.5 * system->dt * me->Frho;
+        }else{
             me->rho = me->rho + 0.5 * system->dt * me->Frho;
         }
-        else
-            me->rho = me->rho + 0.5 * system->dt * me->Frho;
     }
     else {
         // Filter density field (for fixed solid particles)
-        if (step % 20 == 0)
-            filterDensity(me, me->neighbors, system);
+        if (step % 20 == 0){
+            filterDensity(me, system);
+        }
     }
 
 
     // Step 3.2: Compute boundary volume fractions (bvf)
     // Step 3.3: Apply BVF 
     if (me->solidTag == 0) {
-        computeBoundaryVolumeFraction(me, me->neighbors, system);
+        computeBoundaryVolumeFraction(me,system);
         applyBoundaryVolumeFraction(me, system);
     }
 

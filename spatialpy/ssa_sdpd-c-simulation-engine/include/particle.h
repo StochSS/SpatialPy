@@ -37,7 +37,7 @@ struct __particle_t {
     double *C;  // concentration of chem species
     double *Q;  // flux of chem species
     // below here for simulation
-    node* x_index;  // 
+    node_t* x_index;  // 
     neighbor_list_t*neighbors;
     rdme_voxel_t*rdme;  // RDME solver data
 };
@@ -53,9 +53,9 @@ struct __system_t {
     double c0;
     double rho0;
     double P0;
-    linked_list* particle_list;
-    //linked_list* bond_list;
-    linked_list* x_index;
+    linked_list_t* particle_list;
+    //linked_list_t* bond_list;
+    linked_list_t* x_index;
 
     char boundary_conditions[3];
     int static_domain;

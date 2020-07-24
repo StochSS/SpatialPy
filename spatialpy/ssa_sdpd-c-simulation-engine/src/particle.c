@@ -39,14 +39,14 @@ int add_to_neighbor_list(particle_t*me, particle_t*neighbor, system_t*system){
     neighbor_node_t*n = neighbor_list_add( me->neighbors, neighbor );
     n->dist = r;
     n->dWdr = dWdr;
-    n->D_i_j = D_i_k;
+    n->D_i_j = D_i_j;
 
     return 1;
 }
 
 
 void find_neighbors(particle_t* me, system_t* system){
-    node*n;
+    node_t*n;
     //clean out previous neighbors
     //printf("find_neighbors.empty_linked_list\n");
     empty_neighbor_list(me->neighbors);
@@ -199,10 +199,10 @@ void add_particle(particle_t* me, system_t* system){
     me->x_index = linked_list_add(system->x_index, me);
     //me->y_index = linked_list_add(system->y_index, me);
     //me->z_index = linked_list_add(system->z_index, me);
-    me->neighbors = create_linked_list();
+    me->neighbors = create_neighbor_list();
     me->Q = (double*) calloc(system->num_chem_species, sizeof(double));
     me->C = (double*) calloc(system->num_chem_species, sizeof(double));
-    me->data_fn (double*) calloc(system->num_data_fn, sizeof(double));
+    me->data_fn = (double*) calloc(system->num_data_fn, sizeof(double));
 }
 
 double particle_dist(particle_t* p1, particle_t*p2){
@@ -218,14 +218,14 @@ double particle_dist_sqrd(particle_t* p1, particle_t*p2){
     return ( a*a + b*b + c*c);
 }
 
-bond_t* create_bond(particle_t*p1, particle_t*p2, double k, double rest_distance){
-    bond_t* me = malloc(sizeof(bond_t));
-    me->p1 = p1;
-    me->p2 = p2;
-    me->param_k = k;
-    me->rest_distance = rest_distance;
-    return me;
-}
+//bond_t* create_bond(particle_t*p1, particle_t*p2, double k, double rest_distance){
+//    bond_t* me = malloc(sizeof(bond_t));
+//    me->p1 = p1;
+//    me->p2 = p2;
+//    me->param_k = k;
+//    me->rest_distance = rest_distance;
+//    return me;
+//}
 
 
 

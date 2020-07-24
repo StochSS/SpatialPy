@@ -17,10 +17,10 @@ See the file LICENSE.txt for details.
 
 
 
-void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
+void pairwiseForce(particle_t* me, system_t* system)
 {
     // F, Frho and Fbp are output
-
+    neighbor_list_t* neighbors = me->neighbors;
     //printf("pairwiseForce(id=%i)\n",me->id);
     //fflush(stdout);
     
@@ -174,9 +174,10 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
 }
 
 
-void filterDensity(particle_t* me, linked_list* neighbors, system_t* system)
+void filterDensity(particle_t* me, system_t* system)
 {
-  node*n;
+  neighbor_list_t* neighbors = me->neighbors;
+  neighbor_node_t*n;
   particle_t* pt_j;
   double r, R, Wij, alpha, num, den;
   double h = system->h;
@@ -192,7 +193,7 @@ void filterDensity(particle_t* me, linked_list* neighbors, system_t* system)
 
   for(n=neighbors->head; n!=NULL; n = n->next){
       pt_j = n->data;
-      r = particle_dist(me, pt_j);
+      r = n->dist;
       R = r/h;
       if(R > 1.0) continue;
       if(r == 0.0) continue;
@@ -214,10 +215,10 @@ void filterDensity(particle_t* me, linked_list* neighbors, system_t* system)
 }
 
 
-void computeBoundaryVolumeFraction(particle_t* me, linked_list* neighbors,
-    system_t* system)
+void computeBoundaryVolumeFraction(particle_t* me, system_t* system)
 {
-    node* n;
+    neighbor_list_t* neighbors = me->neighbors;
+    neighbor_node_t* n;
     particle_t* pt_j;
     double r, R, Wij, dWdr, alpha, vos, vtot, nw[3], dx[3], norm_nw;
     int i;
@@ -247,7 +248,7 @@ void computeBoundaryVolumeFraction(particle_t* me, linked_list* neighbors,
     vtot = 0.0;
     for (n = neighbors->head; n != NULL; n = n->next) {
         pt_j = n->data;
-        r = particle_dist(me, pt_j);
+        r = n->dist;
         R = r / h;
         if (R > 1.0)
             continue;
@@ -256,7 +257,8 @@ void computeBoundaryVolumeFraction(particle_t* me, linked_list* neighbors,
         // Compute weight function and weight function derivative
         // Wij = (5/(M_PI*pow(h,2))) * (1+3*r/h) * pow((1-r/h),3) ;
         Wij = alpha * ((1 + 3 * R) * pow(1 - R, 3));
-        dWdr = alpha * (-12 * r / (h * h)) * pow(1 - R, 2);
+        //dWdr = alpha * (-12 * r / (h * h)) * pow(1 - R, 2);
+        dWdr = n->dWdr
 
         for (i = 0; i < system->dimension; i++) {
             dx[i] = (me->x[i] - pt_j->x[i]);
