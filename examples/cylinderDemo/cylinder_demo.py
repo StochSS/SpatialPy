@@ -18,7 +18,7 @@ class Edge2(spatialpy.Geometry):
 class Middle(spatialpy.Geometry):
     def inside(self, x, on_boundary):
         return abs(x[0] - MIN_X_DIM) >= 0.05
-class cylinderDemo3D(spatialpy.Geometry):
+class cylinderDemo3D(spatialpy.Model):
     def __init__(self, model_name="cylinder_demo3d"):
         spatialpy.Model.__init__(self, model_name)
 
@@ -36,9 +36,9 @@ class cylinderDemo3D(spatialpy.Geometry):
         self.mesh = spatialpy.Mesh.read_xml_mesh('cylinder.xml')
 
         # Define Types
-        self.set_type(Middle(), 1)
-        self.set_type(Edge1(), 2)
-        self.set_type(Edge2(), 3)
+        self.set_type(Middle(), mass=1.0, nu=1.0, type_id=1)
+        self.set_type(Edge1(), mass=1.0, nu=1.0, type_id=2)
+        self.set_type(Edge2(), mass=1.0, nu=1.0, type_id=3)
 
         # Restrict the movement of Chemical Species
         self.restrict(A,[1,2])
