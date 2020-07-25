@@ -27,7 +27,7 @@ neighbor_list_t* create_neighbor_list(){
     ll->tail = NULL;
     return ll;
 }
-ordered_list_t* create_ordered_list_t(){
+ordered_list_t* create_ordered_list(){
     ordered_list_t* ll = (ordered_list_t*) malloc( sizeof(ordered_list_t));
     ll->count = 0;
     ll->head = NULL;
@@ -326,6 +326,74 @@ void ordered_list_sort(ordered_list_t*ll){
 }
 
 
+// move a single element in an otherwise sorted list
+void ordered_list_bubble_up_down(ordered_list_t*ll, ordered_node_t*n){
+    ordered_node_t*n1;
+    // Remove node from current position
+    ordered_node_t*before = n->prev;
+    ordered_node_t*after  = n->next;
+    if(before != NULL){
+        before->next = after;
+    }
+    if(after != NULL){
+        after->prev = before;
+    }
+    // Find new position
+    //      Check if we move down, check S.C. move to the end, move down linearly
+    if(n->next != NULL && n->next->tt < n->tt){
+        if(n->tt >= ll->tail->tt){
+            // move to end
+            ll->tail->next = n;
+            n->prev = ll->tail;
+            n->next = NULL;
+            ll->tail = n;
+            return;
+        }else{
+            for(n1=n; n1!=NULL; n1=n1->next){ // find position after n1
+                if(n1->next == NULL || n->tt <= n1->next->tt){
+                    n->next = n1->next;
+                    n1->next = n;
+                    n->prev = n1;
+                    if(n->next == NULL){
+                        ll->tail = n;
+                    }else{
+                        n->next->prev = n;
+                    }
+                    return;
+                }
+            }
+        }
+
+    //      check if we move up, check S.C. move to the beginning, move up linearly
+    }else if(n->prev != NULL && n->prev->tt > n->tt){
+        if(n->tt <= ll->head->tt){
+            // move to beginning
+            ll->head->prev = n;
+            n->next = ll->head;
+            n->prev = NULL;
+            ll->head = n;
+            return;
+        }else{
+            for(n1=n->prev; n1!=NULL; n1=n1->prev){ // find position before n1
+                if(n1->prev == NULL || n->tt <= n1->tt){
+                    n->next = n1;
+                    n->prev = n1->prev;
+                    n1->prev = n;
+                    if(n->prev != NULL){
+                        ll->head = n;
+                    }else{
+                        n->prev->next = n;
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
+    printf("ERROR, should not get here., ordered_list_bubble_up_down, not inserted\n\n");
+    exit(1);
+
+}
 
 
 

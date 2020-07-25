@@ -17,11 +17,8 @@
 
 
 /**************************************************************************/
-void initialize_rdme(system_t*system, const int Ncells, const int Mspecies, const int Mreactions, 
-                        size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
-                        const char* const species_names[], const unsigned int*u0,
-                        const int num_subdomains, const double*subdomain_diffusion_matrix
-                        ){
+void initialize_rdme(system_t*system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
+                        const unsigned int*u0){
     if(debug_flag){printf("*************** initialize_rdme ******************\n");}
     nsm_core__create(system,irN,jcN,prN,irG,jcG);
 
@@ -200,7 +197,7 @@ void nsm_core__create(system_t*system, size_t *irN, size_t *jcN,int *prN, size_t
         p->rdme->sdrate = 0;
         p->rdme->Ddiag = (double*) malloc(system->num_stoch_species * sizeof(double));
 
-        ordered_list_add( rdme->heap, p );
+        p->rdme->heap_index = ordered_list_add( rdme->heap, p );
 
     }
 
@@ -484,13 +481,10 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
     int event,re,spec,errcode = 0;
     particle_t*subvol;
     size_t i,j = 0;
-    size_t to_node,to_vol = 0;
-    int dof,col;
     double old_rrate = 0.0,old_drate = 0.0;
     double rand1,rand2,cum2,old;
     double vol,diff_const;
     particle_t*dest_subvol = NULL;
-    ordered_node_t*on;
     neighbor_node_t*nn;
 
     /* Main loop. */
@@ -746,35 +740,37 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
         }
         /* Update the heap. */
         //update(0,rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
+        ordered_list_bubble_up_down(system->rdme->heap, subvol->rdme->heap_index);
 
         /* If it was a diffusion event, also update the other affected
          node. */
         if(event) {
+
             totrate = dest_subvol->rdme->srrate+dest_subvol->rdme->sdrate;
             if(totrate > 0.0) {
-                if(!isinf(nn->tt)){
-                    nn->tt =
-                    (old_rrate+old_drate)/totrate*(nn->tt - tt)+tt;
+                if(!isinf(dest_subvol->rdme->heap_index->tt)){
+                    dest_subvol->rdme->heap_index->tt =
+                    (old_rrate+old_drate)/totrate*(dest_subvol->rdme->heap_index->tt - tt)+tt;
                 }else{
                     /* generate a new waiting time */
-                    nn->tt = -log(1.0-drand48())/totrate+tt;
+                    dest_subvol->rdme->heap_index->tt = -log(1.0-drand48())/totrate+tt;
                 }
             }else{
-                nn->tt = INFINITY;
+                dest_subvol->rdme->heap_index->tt = INFINITY;
             }
 
             //update(rdme->heap[to_vol],rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
+            ordered_list_bubble_up_down(system->rdme->heap, dest_subvol->rdme->heap_index);
         }
 
         // re-sort the heap
-        ordered_list_sort(system->rdme->heap);
-        //herehere
+        //ordered_list_sort(system->rdme->heap);  // this resorts the whole list
 
         /* Check for error codes. */
         if (errcode) {
             /* Cannot continue. Clear this solution and exit. */
             printf("Exiting due to errcode %i\n",errcode);
-            print_current_state(subvol, rdme->xx,system->num_stoch_species);
+            print_current_state(subvol->id, subvol->xx,system->num_stoch_species);
             exit(1);
         }
     }

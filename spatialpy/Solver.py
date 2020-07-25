@@ -362,25 +362,25 @@ class Solver:
             outstr += "};"
             input_constants += outstr + "\n"
             # attache the vol to the model as well, for backwards compatablity
-            self.model.vol = self.model.mesh.get_vol()
-            outstr = "static double input_vol[{0}] = ".format(
-                self.model.mesh.get_vol().shape[0])
-            outstr += "{"
-            for i in range(self.model.mesh.get_vol().shape[0]):
-                if i > 0:
-                    outstr += ','
-                outstr += str(self.model.mesh.get_vol()[i])
-            outstr += "};"
-            input_constants += outstr + "\n"
-            outstr = "static int input_sd[{0}] = ".format(
-                self.model.mesh.sd.shape[0])
-            outstr += "{"
-            for i in range(self.model.mesh.sd.shape[0]):
-                if i > 0:
-                    outstr += ','
-                outstr += str(self.model.mesh.sd[i])
-            outstr += "};"
-            input_constants += outstr + "\n"
+            #self.model.vol = self.model.mesh.get_vol()
+            #outstr = "static double input_vol[{0}] = ".format(
+            #    self.model.mesh.get_vol().shape[0])
+            #outstr += "{"
+            #for i in range(self.model.mesh.get_vol().shape[0]):
+            #    if i > 0:
+            #        outstr += ','
+            #    outstr += str(self.model.mesh.get_vol()[i])
+            #outstr += "};"
+            #input_constants += outstr + "\n"
+            #outstr = "static int input_sd[{0}] = ".format(
+            #    self.model.mesh.sd.shape[0])
+            #outstr += "{"
+            #for i in range(self.model.mesh.sd.shape[0]):
+            #    if i > 0:
+            #        outstr += ','
+            #    outstr += str(self.model.mesh.sd[i])
+            #outstr += "};"
+            #input_constants += outstr + "\n"
 
         data_fn_defs = ""
         if len(self.model.listOfSpecies) > 0:

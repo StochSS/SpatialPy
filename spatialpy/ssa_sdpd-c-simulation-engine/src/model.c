@@ -24,7 +24,7 @@ void pairwiseForce(particle_t* me, system_t* system)
     //printf("pairwiseForce(id=%i)\n",me->id);
     //fflush(stdout);
     
-    double R, Pj, dv[3], dx[3], alpha, r, dWdr, dv_dx, fp, fv, fbp,
+    double R, Pj, dv[3], dx[3], r, dWdr, dv_dx, fp, fv, fbp,
         transportTensor[3][3], ft[3], pressure_gradient;
     dx[0] = 0.0;
     dx[1] = 0.0;
@@ -76,7 +76,7 @@ void pairwiseForce(particle_t* me, system_t* system)
         // Compute weight function and weight function derivative
         // dWdr = (5/(pi*(h^2))) * (-12*r/(h^2)) * (1 - r/h)^2;
         //dWdr = alpha * (-12 * r / (h * h)) * pow(1 - R, 2);
-        dWdr = n->dWdr
+        dWdr = n->dWdr;
         // Spatial deriviatives
         dv_dx = 0.0;
         for (i = 0; i < system->dimension; i++) {
@@ -258,7 +258,7 @@ void computeBoundaryVolumeFraction(particle_t* me, system_t* system)
         // Wij = (5/(M_PI*pow(h,2))) * (1+3*r/h) * pow((1-r/h),3) ;
         Wij = alpha * ((1 + 3 * R) * pow(1 - R, 3));
         //dWdr = alpha * (-12 * r / (h * h)) * pow(1 - R, 2);
-        dWdr = n->dWdr
+        dWdr = n->dWdr;
 
         for (i = 0; i < system->dimension; i++) {
             dx[i] = (me->x[i] - pt_j->x[i]);

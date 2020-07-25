@@ -53,14 +53,13 @@ struct __rdme_voxel_t {
     double* rrate;
     double sdrate;
     double* Ddiag;
+    ordered_node_t*heap_index;
 };
 
 
 
-void initialize_rdme(system_t*system, const int Ncells, const int Mspecies, const int Mreactions, 
-                        size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
-                        const char* const species_names[], const unsigned int*u0,
-                        const int num_subdomains, const double*subdomain_diffusion_matrix);
+void initialize_rdme(system_t*system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
+                        const unsigned int*u0);
 void simulate_rdme(system_t*system, unsigned int step);
 void destroy_rdme(system_t*system);
 

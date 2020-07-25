@@ -71,7 +71,7 @@ struct __system_t {
     size_t num_stoch_species;
     size_t num_stoch_rxns;
 
-    char** species_names; 
+    const char * const* species_names; 
 
     const double *subdomain_diffusion_matrix;
     //int *stochic_matrix;
