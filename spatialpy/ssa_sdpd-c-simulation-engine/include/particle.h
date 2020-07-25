@@ -33,7 +33,7 @@ struct __particle_t {
     // Data Function
     double* data_fn;
     // chem_rxn_system
-    int*xx; // populaion of discrete/stochastic species
+    unsigned int*xx; // populaion of discrete/stochastic species
     double *C;  // concentration of chem species
     double *Q;  // flux of chem species
     // below here for simulation

@@ -70,11 +70,11 @@ void destroy_rdme(system_t*system);
 void nsm_core__create(system_t*system, size_t *irN, size_t *jcN,int *prN, size_t *irG, size_t *jcG);
 void nsm_core__destroy(rdme_t*rdme);
 
-void nsm_core__initialize_chem_populations(rdme_t* rdme, const unsigned int*u0);
+void nsm_core__initialize_chem_populations(system_t*system, const unsigned int*u0);
 
-void nsm_core__initialize_rxn_propensities(rdme_t* rdme);
-void nsm_core__initialize_diff_propensities(rdme_t* rdme);
-void nsm_core__initialize_heap(rdme_t* rdme);
+void nsm_core__initialize_rxn_propensities(system_t*system);
+void nsm_core__initialize_diff_propensities(system_t*system);
+void nsm_core__initialize_heap(system_t*system);
 
 
 //void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system);
