@@ -352,7 +352,7 @@ class Solver:
         input_constants = ""
 
         if len(self.model.listOfSpecies) > 0:
-            outstr = "static unsigned int input_u0[{0}] = ".format(nspecies*ncells)
+            outstr = "unsigned int input_u0[{0}] = ".format(nspecies*ncells)
             outstr += "{"
             for i in range(ncells):
                 for s in range(nspecies):

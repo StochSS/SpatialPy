@@ -18,11 +18,15 @@
 
 /**************************************************************************/
 void initialize_rdme(system_t*system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
-                        const unsigned int*u0){
-    if(debug_flag){printf("*************** initialize_rdme ******************\n");}
+                        unsigned int*u0){
+    if(debug_flag){printf("*************** initialize_rdme ******************\n");fflush(stdout);}
+    //printf("nsm_core__create() BEGIN\n");fflush(stdout);
     nsm_core__create(system,irN,jcN,prN,irG,jcG);
+    //printf("nsm_core__create() END\n");fflush(stdout);
 
+    //printf("nsm_core__initialize_chem_populations() BEGIN\n");fflush(stdout);
     nsm_core__initialize_chem_populations(system, u0);
+    //printf("nsm_core__initialize_chem_populations() END\n");fflush(stdout);
 
 }
 
@@ -317,7 +321,7 @@ void nsm_core__destroy(rdme_t*rdme){
 }
 
 /**************************************************************************/
-void nsm_core__initialize_chem_populations(system_t*system, const unsigned int*u0){
+void nsm_core__initialize_chem_populations(system_t*system, unsigned int*u0){
     /* Set xx to the initial state. xx will always hold the current solution. */
     //printf("malloc Ndofs = %li\n",rdme->Ndofs);
     //rdme->xx = (unsigned int *)malloc(rdme->Ndofs*sizeof(unsigned int));
@@ -337,7 +341,8 @@ void nsm_core__initialize_chem_populations(system_t*system, const unsigned int*u
     int num_s = system->num_stoch_species;
     for(n=system->particle_list->head; n!=NULL; n=n->next){
         p1 = n->data;
-        memcpy(p1->xx,&u0[i*num_s],system->num_stoch_species*sizeof(unsigned int));
+        //memcpy(p1->xx,&u0[i*num_s],system->num_stoch_species*sizeof(unsigned int));
+        p1->xx = &u0[i*num_s];
         i++;
     }
 }
@@ -692,7 +697,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
             dest_subvol->xx[spec]++;
 
 
-            if(debug_flag){printf("nsm: tt=%e subvol=%i sd=%i",tt,subvol->id,subvol->type);}
+            if(debug_flag){printf("nsm: tt=%e subvol=%i type=%i ",tt,subvol->id,subvol->type);}
             if(debug_flag){printf("Diff %i->%i\n",subvol->id,dest_subvol->id);}
 
             /* Save reaction and diffusion rates. */

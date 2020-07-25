@@ -365,7 +365,7 @@ void ordered_list_bubble_up_down(ordered_list_t*ll, ordered_node_t*n){
         }
 
     //      check if we move up, check S.C. move to the beginning, move up linearly
-    }else if(n->prev != NULL && n->prev->tt > n->tt){
+    }else if(n->prev == NULL || (n->prev != NULL && n->prev->tt > n->tt)){
         if(n->tt <= ll->head->tt){
             // move to beginning
             ll->head->prev = n;
@@ -391,6 +391,10 @@ void ordered_list_bubble_up_down(ordered_list_t*ll, ordered_node_t*n){
     }
 
     printf("ERROR, should not get here., ordered_list_bubble_up_down, not inserted\n\n");
+    printf("n->id=%i, n->tt=%e\n",n->data->id, n->tt);
+    for(n1=ll->head;n1!=NULL;n1=n1->next){
+        printf("id=%i tt=%e\n",n1->data->id, n1->tt);
+    }
     exit(1);
 
 }

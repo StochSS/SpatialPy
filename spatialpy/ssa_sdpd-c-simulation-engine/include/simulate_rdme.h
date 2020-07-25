@@ -59,7 +59,7 @@ struct __rdme_voxel_t {
 
 
 void initialize_rdme(system_t*system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
-                        const unsigned int*u0);
+                        unsigned int*u0);
 void simulate_rdme(system_t*system, unsigned int step);
 void destroy_rdme(system_t*system);
 
@@ -69,7 +69,7 @@ void destroy_rdme(system_t*system);
 void nsm_core__create(system_t*system, size_t *irN, size_t *jcN,int *prN, size_t *irG, size_t *jcG);
 void nsm_core__destroy(rdme_t*rdme);
 
-void nsm_core__initialize_chem_populations(system_t*system, const unsigned int*u0);
+void nsm_core__initialize_chem_populations(system_t*system, unsigned int*u0);
 
 void nsm_core__initialize_rxn_propensities(system_t*system);
 void nsm_core__initialize_diff_propensities(system_t*system);
