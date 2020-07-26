@@ -504,7 +504,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
         tt = system->rdme->heap->head->tt;
         vol = (subvol->mass / subvol->rho);
 
-        if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}
+        //if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}
         /* First check if it is a reaction or a diffusion event. */
         totrate = subvol->rdme->srrate + subvol->rdme->sdrate;
 
@@ -551,7 +551,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
                     exit(1);
                 }
             }
-            if(debug_flag){printf("nsm: tt=%e subvol=%i sd=%i",tt,subvol->id,subvol->type);}
+            if(debug_flag){printf("nsm: tt=%e subvol=%i type=%i ",tt,subvol->id,subvol->type);}
             if(debug_flag){printf("Rxn %i \n",re);}
             /* b) Update the state of the subvolume subvol and sdrate[subvol]. */
             for (i = rdme->jcN[re]; i < rdme->jcN[re+1]; i++) {
