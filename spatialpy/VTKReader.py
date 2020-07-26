@@ -89,7 +89,10 @@ class VTKReader:
         numericlist = []
 
         for line in fd:
+            #print('line={0}'.format(line))
             l = line.strip().split()
+            if(len(l)==0):
+                break
             if self.isvalidnum(l[0]):
                 numericlist.extend(l)
             else:
@@ -227,6 +230,7 @@ class VTKReader:
             _, self.numpoints, self.pointdatatype = tmp.strip().split()
             self.numpoints = int(self.numpoints)
 
+            if self.debug: print("self.readpoints(numpoints={0})".format(self.numpoints),end='')
             self.points = self.readpoints(fd, self.numpoints, 3, self.pointdatatype)
             if self.debug: print("self.points.shape = {0}".format(self.points.shape))
 
