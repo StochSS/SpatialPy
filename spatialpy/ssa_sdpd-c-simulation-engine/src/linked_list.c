@@ -294,6 +294,40 @@ void linked_list_sort(linked_list_t*ll, int sort_ndx){
     ll->head = linked_list_sort__sub(ll->head, sort_ndx);
 }
 
+neighbor_node_t* neighbor_list_sort__sub(neighbor_node_t* head){
+    neighbor_node_t* min_neighbor = head;
+    neighbor_node_t* before = NULL;
+    neighbor_node_t* ptr;
+    neighbor_node_t* tmp;
+    if(head->next == NULL){
+        return head;
+    }
+    for(ptr = head; ptr->next != NULL; ptr = ptr->next){
+        if( ptr->next->dist < min_neighbor->dist ){
+            min_neighbor = ptr->next;
+            before = ptr;
+        }
+    }
+    if( min_neighbor != head ){
+        tmp = head;
+        head = min_neighbor;
+        before->next = min_neighbor->next;
+        if(min_neighbor->next != NULL){ min_neighbor->next->prev = before;}
+        head->next = tmp;
+        tmp->prev = head;
+        head->prev = NULL;
+    }
+    head->next = neighbor_list_sort__sub(head->next);
+    if(head->next != NULL){
+        head->next->prev = head;
+    }
+    return head;
+}
+
+void neighbor_list_sort(neighbor_list_t*ll){
+    ll->head = neighbor_list_sort__sub(ll->head);
+}
+
 ordered_node_t* ordered_list_sort__sub(ordered_node_t* head){
     ordered_node_t* min_ordered = head;
     ordered_node_t* before = NULL;

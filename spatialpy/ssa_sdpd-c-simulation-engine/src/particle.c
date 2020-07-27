@@ -154,8 +154,9 @@ void find_neighbors(particle_t* me, system_t* system){
             }
         }
     }*/
-    // return the neighbor list
-    //return me->neighbors;
+
+    // Sort the list:
+    neighbor_list_sort(me->neighbors);
 }
 
 
