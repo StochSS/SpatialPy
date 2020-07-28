@@ -526,7 +526,7 @@ class Solver:
         propfilestr = propfilestr.replace("__SYSTEM_CONFIG__", system_config)
 
         init_rdme=''
-        if(len(self.model.listOfSpecies) > 0):
+        if(self.model.enable_rdme and len(self.model.listOfSpecies) > 0):
             init_rdme = '''
             initialize_rdme(system, input_irN, input_jcN, input_prN, input_irG,
                             input_jcG, input_u0 );'''
