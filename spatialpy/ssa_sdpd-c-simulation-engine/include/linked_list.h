@@ -33,7 +33,7 @@ struct __linked_list_t {
 
 
 // Linked list structure for each particle to hold
-// the list of neighbors (including distance and 
+// the list of neighbors (including distance and
 // diffusion parameters: dWdr, D_i_j)
 struct __neighbor_node_t {
     particle_t* data;
@@ -50,13 +50,13 @@ struct __neighbor_list_t {
 };
 
 
-//Linked list structure to hold an ordered 
-// list (based on 'tt', smallest values at the head) 
+//Linked list structure to hold an ordered
+// list (based on 'tt', smallest values at the head)
 struct __ordered_node_t {
     particle_t* data;
     double tt;
-    ordered_node_t*prev;
-    ordered_node_t*next;
+    ordered_node_t* prev;
+    ordered_node_t* next;
 };
 struct __ordered_list_t {
     ordered_node_t* head;

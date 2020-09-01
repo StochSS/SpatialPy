@@ -197,7 +197,7 @@ void nsm_core__create(system_t*system, size_t *irN, size_t *jcN,int *prN, size_t
         p = n->data;
         p->rdme = (rdme_voxel_t*) malloc(sizeof(rdme_voxel_t));
         p->rdme->srrate = 0;
-        p->rdme->rrate = (double*) malloc(system->num_stoch_species * sizeof(double));
+        p->rdme->rrate = (double*) malloc(system->num_stoch_rxns * sizeof(double));
         p->rdme->sdrate = 0;
         p->rdme->Ddiag = (double*) malloc(system->num_stoch_species * sizeof(double));
 
@@ -246,7 +246,7 @@ void nsm_core__initialize_rxn_propensities(system_t*system){
     for(n=system->particle_list->head; n!=NULL; n=n->next){
         p = n->data;
         p->rdme->srrate = 0.0;
-        for (j = 0; j < system->num_stoch_species; j++) {
+        for (j = 0; j < system->num_stoch_rxns; j++) {
             //rrate[i*Mreactions+j] =
             //(*rfun[j])(&xx[i*Mspecies],tt,vol[i],&data[i*dsize],sd[i],i,xx,irK,jcK,prK);
             //srrate[i] += rrate[i*Mreactions+j];
@@ -414,12 +414,12 @@ void nsm_core__initialize_chem_populations(system_t*system, unsigned int*u0){
 //
 //                if(diff_const > 0.0){
 //                    //rdme->irD[irD_ndx++] = p2->id*system->num_stoch_species + s_ndx;
-//                    //rdme->prD[prD_ndx++] = diff_const * D_i_j;  
+//                    //rdme->prD[prD_ndx++] = diff_const * D_i_j;
 //                    off_diag_sum += diff_const * n2->D_i_j;
 //                }
 //            }
 //            //rdme->irD[irD_ndx++] = p1->id*system->num_stoch_species + s_ndx;
-//            rdme->prD[prD_ndx++] = -1*off_diag_sum; 
+//            rdme->prD[prD_ndx++] = -1*off_diag_sum;
 //            //rdme->jcD[jcD_ndx++] = prD_ndx;
 //        }
 //    }
@@ -528,8 +528,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
 
             /* a) Determine the reaction re that did occur (direct SSA). */
             double rand_rval = rand1 * subvol->rdme->srrate;
-            for (re = 0, cum = subvol->rdme->rrate[0]; re < system->num_stoch_rxns && rand_rval > cum; re++, cum += subvol->rdme->rrate[re])
-            ;
+            for (re = 0, cum = subvol->rdme->rrate[0]; re < system->num_stoch_rxns && rand_rval > cum; re++, cum += subvol->rdme->rrate[re]);
             if(re >= system->num_stoch_rxns){
                 if(cum != subvol->rdme->srrate){
                     printf("Reaction propensity mismatch in voxel %i. re=%i, srrate[subvol]=%e cum=%e rand_rval=%e\n",subvol->id,re,subvol->rdme->srrate,cum,rand_rval);
@@ -544,8 +543,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
 
                 double rand_rval2 = rand1 * subvol->rdme->srrate; // sum of propensitiess is not propensity sum, re-roll
 
-                for (re = 0, cum = subvol->rdme->rrate[0]; re < system->num_stoch_rxns && rand_rval2 > cum; re++, cum += subvol->rdme->rrate[re])
-                ;
+                for (re = 0, cum = subvol->rdme->rrate[0]; re < system->num_stoch_rxns && rand_rval2 > cum; re++, cum += subvol->rdme->rrate[re]);
                 if(re >= system->num_stoch_rxns){ // failed twice, problems!
                     printf("Propensity sum overflow, rand=%e rand_rval=%e rand_rval2=%e srrate[%i]=%e cum=%e\n",rand1,rand_rval,rand_rval2,subvol->id,subvol->rdme->srrate,cum);
                     exit(1);
@@ -559,7 +557,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
                 subvol->xx[rdme->irN[i]] += rdme->prN[i];
                 if (subvol->xx[rdme->irN[i]] < 0){
                     errcode = 1;
-                    printf("Netative state detected after reaction %i, subvol %i, species %zu at time %e (was %i now %i)\n",re,subvol->id,rdme->irN[i],tt,prev_val,subvol->xx[rdme->irN[i]]);
+                    printf("Negative state detected after reaction %i, subvol %i, species %zu at time %e (was %i now %i)\n",re,subvol->id,rdme->irN[i],tt,prev_val,subvol->xx[rdme->irN[i]]);
 
                     print_current_state(subvol->id,subvol->xx,system->num_stoch_species);
                     exit(1);
@@ -593,7 +591,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
             //for (spec = 0, dof = subvol*system->num_stoch_species, cum = rdme->Ddiag[dof]*rdme->xx[dof];
             //     spec < system->num_stoch_species && diff_rand > cum;
             //     spec++, cum += rdme->Ddiag[dof+spec]*rdme->xx[dof+spec]);
-            for (spec = 0, cum = subvol->rdme->Ddiag[spec]*subvol->xx[spec]; 
+            for (spec = 0, cum = subvol->rdme->Ddiag[spec]*subvol->xx[spec];
                  spec < system->num_stoch_species && diff_rand > cum;
                  spec++, cum += subvol->rdme->Ddiag[spec]*subvol->xx[spec]);
             if(spec >= system->num_stoch_species){
@@ -711,7 +709,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
                     j = rdme->irG[i];
                     // update this voxel's reactions
                     old = subvol->rdme->rrate[j];
-                    rdelta += 
+                    rdelta +=
                       (subvol->rdme->rrate[j] =
                         (*system->stoch_rxn_propensity_functions[j])(subvol->xx,tt,vol,subvol->data_fn,subvol->type)
                       )-old;
