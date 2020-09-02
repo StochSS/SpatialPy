@@ -197,7 +197,7 @@ void nsm_core__create(system_t*system, size_t *irN, size_t *jcN,int *prN, size_t
         p = n->data;
         p->rdme = (rdme_voxel_t*) malloc(sizeof(rdme_voxel_t));
         p->rdme->srrate = 0;
-        p->rdme->rrate = (double*) malloc(system->num_stoch_species * sizeof(double));
+        p->rdme->rrate = (double*) malloc(system->num_stoch_rxns * sizeof(double));
         p->rdme->sdrate = 0;
         p->rdme->Ddiag = (double*) malloc(system->num_stoch_species * sizeof(double));
 
@@ -246,7 +246,7 @@ void nsm_core__initialize_rxn_propensities(system_t*system){
     for(n=system->particle_list->head; n!=NULL; n=n->next){
         p = n->data;
         p->rdme->srrate = 0.0;
-        for (j = 0; j < system->num_stoch_species; j++) {
+        for (j = 0; j < system->num_stoch_rxns; j++) {
             //rrate[i*Mreactions+j] =
             //(*rfun[j])(&xx[i*Mspecies],tt,vol[i],&data[i*dsize],sd[i],i,xx,irK,jcK,prK);
             //srrate[i] += rrate[i*Mreactions+j];
