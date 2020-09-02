@@ -186,7 +186,8 @@ class Result(dict):
 
     def plot_species(self, species, t_ndx=0, concentration=False, deterministic=False, width=500, height=500, colormap=None, size=5, title=None,
                      animated=False, t_ndx_list=None, speed=1, f_duration=500, t_duration=300, return_plotly_figure=False,
-                     use_matplotlib=False, mpl_width=6.4, mpl_height=4.8):
+                     use_matplotlib=False, mpl_width=6.4, mpl_height=4.8,
+                     debug=False):
         """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
@@ -237,6 +238,8 @@ class Result(dict):
             Width in inches of output plot box
         mpl_height: int (default 4.8)
             Height in inches of output plot box
+        debug: bool
+            output debugging info
         """
         from plotly.offline import init_notebook_mode, iplot
 
@@ -250,7 +253,7 @@ class Result(dict):
 
         # read data at time point
         time_index = t_ndx_list[0] if animated else t_ndx
-        points, data = self.read_step(time_index)
+        points, data = self.read_step(time_index, debug=debug)
         
         if use_matplotlib:
             import matplotlib.pyplot as plt

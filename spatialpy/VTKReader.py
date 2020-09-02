@@ -153,7 +153,7 @@ class VTKReader:
 
 
         for line in fd:
-            if self.debug: print("line={0}".format(line),end='')
+            #if self.debug: print("line={0}".format(line),end='')
             if line.isspace():
                 continue
             try:
@@ -174,7 +174,7 @@ class VTKReader:
                 line = fd.readline()
                 arraydata.extend(line.strip().split())
 
-            if self.debug: print("populatearrays(name={0})".format(name))
+            #if self.debug: print("populatearrays(name={0})".format(name))
             self.populatearrays(vtkdata, arraydata, col, row, name, datatype)
 
 #
@@ -212,38 +212,38 @@ class VTKReader:
         with open(self.filename) as fd:
             if self.debug: print("open({0})".format(self.filename))
             tmp =  fd.readline()
-            if self.debug:  print("line={0}".format(tmp),end='')
+            #if self.debug:  print("line={0}".format(tmp),end='')
             tmp =  fd.readline()
-            if self.debug:  print("line={0}".format(tmp),end='')
+            #if self.debug:  print("line={0}".format(tmp),end='')
 
             # We only output ASCII so we can ignore BINARY
             tmp =  fd.readline()
-            if self.debug: print("line={0}".format(tmp),end='')
+            #if self.debug: print("line={0}".format(tmp),end='')
             if tmp.strip().upper() != "ASCII":
                 raise VTKReaderIOError("{0} doesn't look like a valid ASCII VTK file.".format(self.filename))
 
             tmp =  fd.readline()
-            if self.debug:  print("line={0}".format(tmp),end='')
+            #if self.debug:  print("line={0}".format(tmp),end='')
 
             tmp =  fd.readline()
-            if self.debug: print("line={0}".format(tmp),end='')
+            #if self.debug: print("line={0}".format(tmp),end='')
             _, self.numpoints, self.pointdatatype = tmp.strip().split()
             self.numpoints = int(self.numpoints)
 
-            if self.debug: print("self.readpoints(numpoints={0})".format(self.numpoints),end='')
+            #if self.debug: print("self.readpoints(numpoints={0})".format(self.numpoints),end='')
             self.points = self.readpoints(fd, self.numpoints, 3, self.pointdatatype)
-            if self.debug: print("self.points.shape = {0}".format(self.points.shape))
+            #if self.debug: print("self.points.shape = {0}".format(self.points.shape))
 
             for line in fd:
                 if line[:5] != "FIELD":
                     #print("skipping line: {0}".format(line),end='')
                     continue
                 else:
-                    if self.debug:  print("break skipping on line: {0}".format(line),end='')
+                    #if self.debug:  print("break skipping on line: {0}".format(line),end='')
                     break
 
             self.arrays = self.readarrays(fd)
-            if self.debug: print("self.arrays.keys = {0}".format(self.arrays.keys()))
+            #if self.debug: print("self.arrays.keys = {0}".format(self.arrays.keys()))
 
 
 class VTKReaderError(Exception):
