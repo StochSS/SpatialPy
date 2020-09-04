@@ -32,6 +32,12 @@ class Solver:
 
         self.SpatialPy_ROOT = os.path.dirname(
             os.path.abspath(__file__))+"/ssa_sdpd-c-simulation-engine"
+        self.SpatialPy_ROOTDIR =  self.SpatialPy_ROOT.replace(" ","\\ ");
+        self.SpatialPy_ROOTINC =  self.SpatialPy_ROOT.replace(" ","\\\\ ");
+        self.SpatialPy_ROOTPARAM =  self.SpatialPy_ROOT.replace(" ","?");
+        #print("SpatialPy_ROOTDIR = "+self.SpatialPy_ROOTDIR)
+        #print("SpatialPy_ROOTPARAM = "+self.SpatialPy_ROOTPARAM)
+
 
     def __del__(self):
         """ Deconstructor.  Removes the compiled solver."""
@@ -63,9 +69,8 @@ class Solver:
         self.create_propensity_file(file_name=self.prop_file_name)
 
         # Build the solver
-        makefile = self.SpatialPy_ROOT+'/build/Makefile'
-        cmd = " ".join(['cd', self.build_dir, ';', 'make', '-f', makefile, 'ROOT=' +
-                        self.SpatialPy_ROOT, 'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir])
+        makefile = self.SpatialPy_ROOTDIR+'/build/Makefile'
+        cmd = " ".join(['cd', self.build_dir, ';', 'make', '-f', makefile, 'ROOT="' + self.SpatialPy_ROOTPARAM+'"', 'ROOTINC="' + self.SpatialPy_ROOTINC+'"','MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir])
         if self.debug_level > 1:
             print("cmd: {0}\n".format(cmd))
         try:
