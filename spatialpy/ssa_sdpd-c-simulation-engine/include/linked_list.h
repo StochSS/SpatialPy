@@ -28,7 +28,7 @@ struct __node_t {
 struct __linked_list_t {
     node_t* head;
     node_t* tail;
-    int count;
+    size_t count;
 };
 
 
@@ -46,7 +46,7 @@ struct __neighbor_node_t {
 struct __neighbor_list_t {
     neighbor_node_t* head;
     neighbor_node_t* tail;
-    int count;
+    size_t count;
 };
 
 
@@ -61,7 +61,7 @@ struct __ordered_node_t {
 struct __ordered_list_t {
     ordered_node_t* head;
     ordered_node_t* tail;
-    int count;
+    size_t count;
 };
 
 // Functions to manipulate the linked list

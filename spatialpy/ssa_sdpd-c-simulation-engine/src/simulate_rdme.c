@@ -42,10 +42,11 @@ void simulate_rdme(system_t*system,unsigned int step){
 // All of below is replaced by code in find_neighbor()
 //            // if the  domain is not static, rebuild the diffusion matrix after movement
 //        if(!rdme->initialized){
-//            if(debug_flag) printf("Building diffusion matrix\n");
-//            if(debug_flag) printf("\tnsm_core__build_diffusion_matrix\n");
-//            nsm_core__build_diffusion_matrix(rdme,system);
-            rdme->initialized=1;
+          if(debug_flag) {
+            printf("\tnsm_core__build_diffusion_matrix\n");
+            nsm_core__build_diffusion_matrix(rdme,system);
+          }
+          rdme->initialized=1;
 //        }else{
 //            if(debug_flag) printf("Rebuilding diffusion matrix\n");
 //            if(debug_flag) printf("\tnsm_core__destroy_diffusion_matrix\n");
@@ -349,125 +350,135 @@ void nsm_core__initialize_chem_populations(system_t*system, unsigned int*u0){
 
 
 /**************************************************************************/
-//void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
-//    if(debug_flag){ printf("*************** build_diffusion_matrix ***************\n");fflush(stdout);}
-//    double off_diag_sum,diff_const,dist2;
-//    node *n;
-//    neighbor_node_t*n2;
-//    particle_t *p1,*p2;
-//    int s_ndx;
-//    double D_i_j;
-//    double ih,ihsq,wfd;
-//    double h = system->h;
-//
-    //size_t jcD_length = rdme->Ncells + 1;
-    //size_t irD_length = 0;
-    //size_t prD_length = 0;
+void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
+    printf("*************** build_diffusion_matrix ***************\n");fflush(stdout);
+    double off_diag_sum,diff_const,dist2;
+    node_t *n;
+    neighbor_node_t*n2;
+    particle_t *p1,*p2;
+    int s_ndx;
+    //double D_i_j;
+    double ih,ihsq,wfd;
+    double h = system->h;
+    printf("System->h = %e\n",system->h);
+    size_t Ncells = system->particle_list->count;
+    size_t jcD_length = Ncells + 1;
+    size_t irD_length = 0;
+    size_t prD_length = 0;
     // find total length of jc & pr arrays: O(n)
-    //for(n=system->particle_list->head; n!=NULL; n=n->next){
-    //    p1 = n->data;
-    //    if(p1->neighbors->count == 0){
-    //        //if(debug_flag){printf("find_neighbors(%i)\n",p1->id);}
-    //        find_neighbors(p1, system);
-    //    }
-    //    //if(debug_flag){printf("node %i # neighbors %i\n",p1->id,p1->neighbors->count);}
-    //    //irD_length += (p1->neighbors->count + 1);
-    //}
-    //prD_length = irD_length;
-    //if(debug_flag){printf("irD_length= %li\n",irD_length);fflush(stdout);}
-    //if(debug_flag){printf("jcD_length= %li\n",jcD_length);fflush(stdout);}
+    for(n=system->particle_list->head; n!=NULL; n=n->next){
+        p1 = n->data;
+        if(p1->neighbors->count == 0){
+            //if(debug_flag){printf("find_neighbors(%i)\n",p1->id);}
+            find_neighbors(p1, system);
+        }
+        //printf("node %i # neighbors %lu\n",p1->id,p1->neighbors->count);
+        irD_length += (p1->neighbors->count + 1);
+    }
+    prD_length = irD_length;
+    printf("irD_length= %li\n",irD_length);fflush(stdout);
+    printf("jcD_length= %li\n",jcD_length);fflush(stdout);
     // allocate space for each array
-    //printf("MALLOC rdme->irD [%li]\n",irD_length*system->num_stoch_species);
-    //rdme->irD = (size_t*) malloc(sizeof(size_t)*irD_length*system->num_stoch_species);
-    //size_t irD_ndx = 0;
-    //printf("MALLOC rdme->jcD [%li]\n",jcD_length*system->num_stoch_species);
-    //rdme->jcD = (size_t*) malloc(sizeof(size_t)*jcD_length*system->num_stoch_species);
-    //size_t jcD_ndx = 0;
-    //rdme->jcD[jcD_ndx++] = 0;
-    //printf("MALLOC rdme->prD [%li]\n",prD_length*system->num_stoch_species);
-    //rdme->prD = (double*) malloc(sizeof(double)*prD_length*system->num_stoch_species);
-    //size_t prD_ndx = 0;
+    printf("MALLOC rdme->irD [%li]\n",irD_length*system->num_stoch_species);
+    size_t*irD = (size_t*) malloc(sizeof(size_t)*irD_length*system->num_stoch_species);
+    size_t irD_ndx = 0;
+    printf("MALLOC rdme->jcD [%li]\n",jcD_length*system->num_stoch_species);
+    size_t*jcD = (size_t*) malloc(sizeof(size_t)*jcD_length*system->num_stoch_species);
+    size_t jcD_ndx = 0;
+    jcD[jcD_ndx++] = 0;
+    printf("MALLOC rdme->prD [%li]\n",prD_length*system->num_stoch_species);
+    double *prD = (double*) malloc(sizeof(double)*prD_length*system->num_stoch_species);
+    size_t prD_ndx = 0;
     // for each particle p, look at each neighbor p2
-//    for(n=system->particle_list->head; n!=NULL; n=n->next){
-//        p1 = n->data;
-//        if(p1->neighbors->count == 0){
-//            find_neighbors(p1, system);
-//        }
+    for(n=system->particle_list->head; n!=NULL; n=n->next){
+        p1 = n->data;
+        //if(p1->neighbors->count == 0){
+            find_neighbors(p1, system);
+        //}
         //Ordering is very inefficient here. Should do all species for a single p2. Requires reordering.
-//        for(s_ndx=0; s_ndx<system->num_stoch_species; s_ndx++){
-//            off_diag_sum = 0.0; // keep track of the total off diagonal sum
-//            for(n2=p1->neighbors->head; n2!=NULL; n2=n2->next){
-//                p2 = n2->data;
-//                diff_const = system->subdomain_diffusion_matrix[s_ndx*system->num_subdomains + (p2->type-1)];
-//                //
-//                //dist2 = particle_dist_sqrd(p1,p2);
-//                // Eq (13-14), Drawert et al 2019
-//                //ih = 1.0 / h;
-//                //ihsq = ih * ih;
-//                //wfd = h - sqrt(dist2);
-//                //if(wfd <= 0.0){
-//                //    continue; // outside support of basis function
-//                //}
-//                //wfd = -25.066903536973515383e0 * wfd * wfd * ihsq * ihsq * ihsq * ih; //3D
-//                // Eq 28 of Drawert et al 2019, Tartakovsky et. al., 2007, JCP
-//                //D_i_j = -2.0*(p1->mass*p2->mass)/(p1->mass+p2->mass)*(p1->rho+p2->rho)/(p1->rho*p2->rho) * dist2 * wfd / (dist2+0.01*h*h);
-//
-//                if(diff_const > 0.0){
-//                    //rdme->irD[irD_ndx++] = p2->id*system->num_stoch_species + s_ndx;
-//                    //rdme->prD[prD_ndx++] = diff_const * D_i_j;
-//                    off_diag_sum += diff_const * n2->D_i_j;
-//                }
-//            }
-//            //rdme->irD[irD_ndx++] = p1->id*system->num_stoch_species + s_ndx;
-//            rdme->prD[prD_ndx++] = -1*off_diag_sum;
-//            //rdme->jcD[jcD_ndx++] = prD_ndx;
-//        }
-//    }
-//    if(debug_flag){
-//        printf("irD_ndx (%li) length rdme->irD (%li)\n",irD_ndx,irD_length*system->num_stoch_species);
-//        printf("jcD_ndx (%li) length rdme->jcD (%li)\n",jcD_ndx,jcD_length*system->num_stoch_species);
-//        printf("prD_ndx (%li) length rdme->prD (%li)\n",prD_ndx,prD_length*system->num_stoch_species);
-//        if( prD_ndx != irD_ndx){
-//            printf("Assembly: prD_ndx (%zu) != irD_ndx (%zu)\n",prD_ndx,irD_ndx);
-//        }
-//        if( irD_ndx != irD_length*system->num_stoch_species ){
-//            printf("Assembly: irD_ndx (%zu) != irD_length*Mspecies (%li)\n", irD_ndx, irD_length*system->num_stoch_species);
-//        }
-//        char filename[256];
-//        time_t seconds;
-//        size_t i;
-//        seconds = time(NULL);
-//        sprintf(filename,"diffusion_matrix_%ld", seconds);
-//        printf("Writing out diffusion matrix to '%s'\n",filename);
-//        FILE*fp = fopen(filename,"w+");
-//        fprintf(fp, "irD = [");
-//        for(i=0;i<irD_ndx;i++){
-//            if(i>0){ fprintf(fp,",");}
-//            fprintf(fp, "%zu",rdme->irD[i]);
-//        }
-//        fprintf(fp, "]\n");
-//        fprintf(fp, "jcD = [");
-//        for(i=0;i<jcD_ndx;i++){
-//            if(i>0){ fprintf(fp,",");}
-//            fprintf(fp, "%zu",rdme->jcD[i]);
-//        }
-//        fprintf(fp, "]\n");
-//        fprintf(fp, "prD = [");
-//        for(i=0;i<prD_ndx;i++){
-//            if(i>0){ fprintf(fp,",");}
-//            fprintf(fp, "%e",rdme->prD[i]);
-//        }
-//        fprintf(fp, "]\n");
-//        fprintf(fp, "D = scipy.sparse.csc_matrix(prD,irD,jcD)\n");
-//        fclose(fp);
-//
-//    }
-
-//    int num_subdomains;
-//    const double*subdomain_diffusion_matrix;
+        for(s_ndx=0; s_ndx<system->num_stoch_species; s_ndx++){
+            off_diag_sum = 0.0; // keep track of the total off diagonal sum
+            for(n2=p1->neighbors->head; n2!=NULL; n2=n2->next){
+                p2 = n2->data;
+                //diff_const = system->subdomain_diffusion_matrix[s_ndx*system->num_subdomains + (p2->type-1)];
+                diff_const = system->subdomain_diffusion_matrix[s_ndx*system->num_types + (p2->type-1)];
+                dist2 = particle_dist_sqrd(p1,p2);
+                // Eq (13-14), Drawert et al 2019
+                ih = 1.0 / h;
+                ihsq = ih * ih;
+                wfd = h - sqrt(dist2);
+                if(wfd <= 0.0){
+                    continue; // outside support of basis function
+                }
+                wfd = -25.066903536973515383e0 * wfd * wfd * ihsq * ihsq * ihsq * ih; //3D
+                printf("wfd=%e\n",wfd);
+                // Eq 28 of Drawert et al 2019, Tartakovsky et. al., 2007, JCP
+                double tmp__D_i_j = -2.0*(p1->mass*p2->mass)/(p1->mass+p2->mass)*(p1->rho+p2->rho)/(p1->rho*p2->rho) * dist2 * wfd / (dist2+0.01*h*h);
 
 
-//}
+                printf("p1=%i p2=%i n2->D_i_j=%e D_i_j=%e\n",p1->id, p2->id, n2->D_i_j, tmp__D_i_j);
+                printf("n2->dist=%e\n",n2->dist);
+                printf("n2->dWdr=%e\n",n2->dWdr);
+                printf("dist2=%e sqr(dist2)=%e\n",dist2,sqrt(dist2));
+                printf("s_ndx=%i\n",s_ndx);
+                printf("p1->mass=%e p2->mass=%e\n",p1->mass,p2->mass);
+                printf("p1->rho=%e p2->rho=%e\n",p1->rho,p2->rho);
+
+                if(tmp__D_i_j != n2->D_i_j){
+                    printf("error! D_i_j not right\n");
+                    fflush(stdout);
+                    exit(1);
+                }
+
+                if(diff_const > 0.0){
+                    irD[irD_ndx++] = p2->id*system->num_stoch_species + s_ndx;
+                    prD[prD_ndx++] = diff_const * n2->D_i_j;
+                    off_diag_sum += diff_const * n2->D_i_j;
+                }
+            }
+            irD[irD_ndx++] = p1->id*system->num_stoch_species + s_ndx;
+            prD[prD_ndx++] = -1*off_diag_sum;
+            jcD[jcD_ndx++] = prD_ndx;
+        }
+    }
+    printf("irD_ndx (%li) length rdme->irD (%li)\n",irD_ndx,irD_length*system->num_stoch_species);
+    printf("jcD_ndx (%li) length rdme->jcD (%li)\n",jcD_ndx,jcD_length*system->num_stoch_species);
+    printf("prD_ndx (%li) length rdme->prD (%li)\n",prD_ndx,prD_length*system->num_stoch_species);
+    if( prD_ndx != irD_ndx){
+            printf("Assembly: prD_ndx (%zu) != irD_ndx (%zu)\n",prD_ndx,irD_ndx);
+    }
+    if( irD_ndx != irD_length*system->num_stoch_species ){
+        printf("Assembly: irD_ndx (%zu) != irD_length*Mspecies (%li)\n", irD_ndx, irD_length*system->num_stoch_species);
+    }
+    char filename[256];
+    time_t seconds;
+    size_t i;
+    seconds = time(NULL);
+    sprintf(filename,"diffusion_matrix_%ld", seconds);
+    printf("Writing out diffusion matrix to '%s'\n",filename);
+    FILE*fp = fopen(filename,"w+");
+    fprintf(fp, "irD = [");
+    for(i=0;i<irD_ndx;i++){
+        if(i>0){ fprintf(fp,",");}
+        fprintf(fp, "%zu",irD[i]);
+    }
+    fprintf(fp, "]\n");
+    fprintf(fp, "jcD = [");
+    for(i=0;i<jcD_ndx;i++){
+        if(i>0){ fprintf(fp,",");}
+        fprintf(fp, "%zu",jcD[i]);
+    }
+    fprintf(fp, "]\n");
+    fprintf(fp, "prD = [");
+    for(i=0;i<prD_ndx;i++){
+        if(i>0){ fprintf(fp,",");}
+        fprintf(fp, "%e",prD[i]);
+    }
+    fprintf(fp, "]\n");
+    fprintf(fp, "D = scipy.sparse.csc_matrix(prD,irD,jcD)\n");
+    fclose(fp);
+
+}
 
 /**************************************************************************/
 void nsm_core__destroy_diffusion_matrix(rdme_t*rdme){
