@@ -123,12 +123,12 @@ void take_step2(particle_t* me, system_t* system, unsigned int step)
         }
         me->rho = me->rho + 0.5 * system->dt * me->Frho;
 
-    //  // Solid (wall) particles should not change density
-    //}else if (me->solidTag == 1 && system->static_domain == 0) {
-    //    // Filter density field (for fixed solid particles)
-    //    if (step % 20 == 0) {
-    //        filterDensity(me, system);
-    //    }
+      // Solid (wall) particles should change density
+    }else if (me->solidTag == 1 && system->static_domain == 0) {
+        // Filter density field (for fixed solid particles)
+        if (step % 20 == 0) {
+            filterDensity(me, system);
+        }
     }
 
 
