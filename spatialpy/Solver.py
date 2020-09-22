@@ -70,7 +70,7 @@ class Solver:
 
         # Build the solver
         makefile = self.SpatialPy_ROOTDIR+'/build/Makefile'
-        cmd = " ".join(['cd', self.build_dir, ';', 'make', '-f', makefile, 'ROOT="' + self.SpatialPy_ROOTPARAM+'"', 'ROOTINC="' + self.SpatialPy_ROOTINC+'"','MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir])
+        cmd = " ".join(['cd', self.build_dir, '&&', 'make', '-f', makefile, 'ROOT="' + self.SpatialPy_ROOTPARAM+'"', 'ROOTINC="' + self.SpatialPy_ROOTINC+'"','MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir])
         if self.debug_level > 1:
             print("cmd: {0}\n".format(cmd))
         try:
@@ -149,7 +149,7 @@ class Solver:
             try:
                 start = time.monotonic()
                 return_code = None
-                with subprocess.Popen(solver_cmd, shell=True, stdout=subprocess.PIPE, preexec_fn=os.setsid) as process:
+                with subprocess.Popen(solver_cmd, shell=True, stdout=subprocess.PIPE, start_new_session=True) as process:
                     try:
                         if timeout is not None:
                             stdout, stderr = process.communicate(
