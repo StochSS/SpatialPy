@@ -10,7 +10,10 @@ See the file LICENSE.txt for details.
 #include "linked_list.h"
 #include "particle.h"
 #include "propensities.h"
+#include  "dSFMT/dSFMT.h"
 
+// Global flags
+extern dsfmt_t dsfmt;
 
 typedef struct __rdme_data_t rdme_t;
 
@@ -36,7 +39,7 @@ struct __rdme_data_t {
     //double *rrate;
     //double *sdrate;
     //double *Ddiag;
-    //double *rtimes; // using  ordered_list_t*heap 
+    //double *rtimes; // using  ordered_list_t*heap
     //int *node;
     //int *heap;
     ordered_list_t*heap; // ordered list of reaction/diffusion times

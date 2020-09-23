@@ -3,6 +3,7 @@
 #include "output.h"
 #include "particle.h"
 #include "simulate_rdme.h"
+#include "dSFMT/dSFMT.h"
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
@@ -307,10 +308,10 @@ void nsm_core__initialize_heap(system_t*system){
     particle_t*p;
     for(n=rdme->heap->head; n!=NULL; n=n->next){
     //for (i = 0; i < rdme->Ncells; i++) {
-        //rdme->rtimes[i] = -log(1.0-drand48())/(rdme->srrate[i]+rdme->sdrate[i]);
+        //rdme->rtimes[i] = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/(rdme->srrate[i]+rdme->sdrate[i]);
         //rdme->heap[i] = rdme->node[i] = i;
         p = n->data;
-        n->tt = -log(1.0-drand48())/(p->rdme->srrate+p->rdme->sdrate);
+        n->tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/(p->rdme->srrate+p->rdme->sdrate);
     }
     //initialize_heap(rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
     ordered_list_sort(rdme->heap);
@@ -522,7 +523,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
 //        if(totrate <= 0){ // Sanity check, is there a non-zero reaction and diffusion propensity
 //            totrate = rdme->srrate[subvol]+rdme->sdrate[subvol];
 //            if (totrate > 0.0)
-//                rdme->rtimes[0] = -log(1.0-drand48())/totrate+tt;
+//                rdme->rtimes[0] = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/totrate+tt;
 //            else
 //                rdme->rtimes[0] = INFINITY;
 //            /* Update the heap. */
@@ -531,7 +532,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
 //            continue;
 //        }
 
-        rand1 = drand48();
+        rand1 = dsfmt_genrand_close_open(&dsfmt);
 
         if (rand1 <= subvol->rdme->srrate/totrate) { // use normalized floating point comparision
             /* Reaction event. */
@@ -637,7 +638,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
 
 
             /* b) and then the direction of diffusion. */
-            double r2 = drand48();
+            double r2 = dsfmt_genrand_close_open(&dsfmt);
             rand2 = r2 * subvol->rdme->Ddiag[spec];
 
             /* Search for diffusion direction. */
@@ -748,7 +749,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
         /* Compute time to new event for this subvolume. */
         totrate = subvol->rdme->srrate+subvol->rdme->sdrate;
         if(totrate > 0.0){
-            system->rdme->heap->head->tt = -log(1.0-drand48())/totrate+tt;
+            system->rdme->heap->head->tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/totrate+tt;
         }else{
             system->rdme->heap->head->tt = INFINITY;
         }
@@ -767,7 +768,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
                     (old_rrate+old_drate)/totrate*(dest_subvol->rdme->heap_index->tt - tt)+tt;
                 }else{
                     /* generate a new waiting time */
-                    dest_subvol->rdme->heap_index->tt = -log(1.0-drand48())/totrate+tt;
+                    dest_subvol->rdme->heap_index->tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/totrate+tt;
                 }
             }else{
                 dest_subvol->rdme->heap_index->tt = INFINITY;
