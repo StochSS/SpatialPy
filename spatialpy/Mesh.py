@@ -15,7 +15,7 @@ class Mesh():
 
         self.vol = numpy.zeros((numpoints), dtype=float)
         self.mass = numpy.zeros((numpoints), dtype=float)
-        self.sd = numpy.zeros((numpoints), dtype=int)
+        self.type = numpy.zeros((numpoints), dtype=int)
         self.nu = numpy.zeros((numpoints), dtype=float)
         self.fixed = numpy.zeros((numpoints), dtype=bool)
 
@@ -185,7 +185,7 @@ class Mesh():
         if mesh.tag != 'mesh' or \
            mesh.attrib['celltype'] != 'tetrahedron' or \
            mesh.attrib['dim'] != '3':
-            raise MeshException("XML mesh format error")
+            raise MeshError("XML mesh format error")
         #
         vertices = mesh[0]
         cells = mesh[1]
@@ -257,7 +257,7 @@ class Mesh():
 
     @classmethod
     def create_3D_domain(cls, xlim, ylim, zlim, nx, ny, nz, type_id=1, mass=1.0, nu=1.0, fixed=False, **kwargs):
-        """ Create a filled 3D domain 
+        """ Create a filled 3D domain
         Args:
             xlim: (tuple) highest and lowest coordinate in the x dimension
             ylim: (tuple) highest and lowest coordinate in the y dimension
@@ -289,15 +289,15 @@ class Mesh():
             for y in y_list:
                 for z in z_list:
                     obj.vol[ndx] = totalvolume / numberparticles
-                    obj.vertices[ndx,0] = x        
+                    obj.vertices[ndx,0] = x
                     obj.vertices[ndx,1] = y
                     obj.vertices[ndx,2] = z
-                    obj.sd[ndx] = type_id
+                    obj.type[ndx] = type_id
                     obj.mass[ndx] = mass
                     obj.nu[ndx] = nu
                     obj.fixed[ndx] = fixed
                     ndx+=1
-                
+
         # return model ref
         return obj
 
@@ -332,15 +332,15 @@ class Mesh():
         for x in x_list:
             for y in y_list:
                 obj.vol[ndx] = totalvolume / numberparticles
-                obj.vertices[ndx,0] = x        
+                obj.vertices[ndx,0] = x
                 obj.vertices[ndx,1] = y
                 obj.vertices[ndx,2] = 0.0
-                obj.sd[ndx] = type_id
+                obj.type[ndx] = type_id
                 obj.mass[ndx] = mass
                 obj.nu[ndx] = nu
                 obj.fixed[ndx] = fixed
                 ndx+=1
-                
+
         # return model ref
         return obj
 

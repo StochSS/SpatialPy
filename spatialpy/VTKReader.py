@@ -28,16 +28,6 @@ class VTKReader:
 
         self.filename = filename
 
-    def getnumarrays(self):
-        """Get (int) number of arrays."""
-
-        length = len(self.arrays)
-
-        if length > 0:
-            return length
-        else:
-            return None
-
     def getarrayname(self, i):
         """Get (str) array name.
         Args:
@@ -145,13 +135,6 @@ class VTKReader:
         vtkdata = {}
         arraydata = []
 
-        #line = fd.readline()
-        #print("line={0}".format(line),end='')
-        #name, col, row, datatype = line.strip().split()
-        #col = int(col)
-        #row = int(row)
-
-
         for line in fd:
             #if self.debug: print("line={0}".format(line),end='')
             if line.isspace():
@@ -176,33 +159,6 @@ class VTKReader:
 
             #if self.debug: print("populatearrays(name={0})".format(name))
             self.populatearrays(vtkdata, arraydata, col, row, name, datatype)
-
-#
-#            #
-#
-#            # Array names MUST begin with a letter, but 'nan' is a letter, and strings are a valid value
-#            if line[:1].isalpha():
-#                print("populatearrays(name={0})".format(name))
-#                self.populatearrays(vtkdata, arraydata, col, row, name, datatype)
-#                arraydata = []
-#                try:
-#                    name, col, row, datatype = line.strip().split()
-#                except Exception as e:
-#                    print("Error: {1}".format(e))
-#                    print("on line >>>")
-#                    print(line, end='')
-#                    print("<<< {0}".format(fd.tell()))
-#                    raise e
-#                col = int(col)
-#                row = int(row)
-#
-#            elif line.lstrip("-")[:1].isnumeric():
-#                arraydata.extend(line.strip().split())
-#
-#            elif line.isspace():
-#                continue
-#
-#        self.populatearrays(vtkdata, arraydata, col, row, name, datatype)
 
         return vtkdata
 

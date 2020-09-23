@@ -13,7 +13,7 @@ class DataFunction(BoundaryCondition):
             raise Exception("DataFunction must have a 'name'")
 
     def expression(self):
-        """ 
+        """
         """
         raise Exception("DataFunction.expression() must be implemented.")
 
