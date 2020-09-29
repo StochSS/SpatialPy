@@ -19,7 +19,7 @@ struct arg {
     unsigned int num_threads;
     unsigned int num_my_particles;
     //unsigned int num_my_bonds;
-    node*my_first_particle;
+    node_t*my_first_particle;
     //bond*my_first_bond;
 };
 
@@ -47,7 +47,7 @@ void* output_system_thread(void* targ){
 }
 
 struct sarg {
-    linked_list*ll;
+    linked_list_t*ll;
     int sort_ndx;
 };
 
@@ -66,7 +66,7 @@ void* run_simulation_thread(void *targ_in){
     struct arg* targ = (struct arg*)targ_in;
     system_t* system = targ->system;
     unsigned int step;
-    node*n;
+    node_t*n;
     int i;
     int count = 0;
     // each thread will take a step with each of it's particles
@@ -123,7 +123,7 @@ void run_simulation(int num_threads, system_t* system){
     pthread_barrier_init(&end_step_barrier, NULL, num_threads+1);
     // create all the worker threads
     int num_particles_left = system->particle_list->count;
-    node*particle_list_ittr = system->particle_list->head;
+    node_t*particle_list_ittr = system->particle_list->head;
     for (i=0; i < num_threads; i++) {
         targs[i].system = system;
         targs[i].num_threads = num_threads;
@@ -191,7 +191,7 @@ void run_simulation(int num_threads, system_t* system){
         if(debug_flag) printf("[%i] Sort Index threads finished\n",step);
         if(debug_flag>2 && step==0){
             printf("x_index = [");
-            node*n;
+            node_t*n;
             for(n = system->x_index->head; n!=NULL; n=n->next){
                 printf("%e ",n->data->x[0]);
             }

@@ -30,12 +30,16 @@ struct __particle_t {
     double F[3];
     double Frho;
     double Fbp[3];
+    // Data Function
+    double* data_fn;
     // chem_rxn_system
+    unsigned int*xx; // populaion of discrete/stochastic species
     double *C;  // concentration of chem species
     double *Q;  // flux of chem species
     // below here for simulation
-    node* x_index;
-    linked_list*neighbors;
+    node_t* x_index;  // 
+    neighbor_list_t*neighbors;
+    rdme_voxel_t*rdme;  // RDME solver data
 };
 
 struct __system_t {
@@ -49,33 +53,45 @@ struct __system_t {
     double c0;
     double rho0;
     double P0;
-    linked_list* particle_list;
-    linked_list* bond_list;
-    linked_list* x_index;
+    linked_list_t* particle_list;
+    //linked_list_t* bond_list;
+    linked_list_t* x_index;
+
     char boundary_conditions[3];
-    rdme_t*rdme;
     int static_domain;
-    int num_chem_species;
-    int num_chem_rxns;
-    int num_types;
-    const double *subdomain_diffusion_matrix;
+    size_t num_types;
+    size_t num_data_fn;
+
     ChemRxnFun* chem_rxn_rhs_functions;
-    int *stochic_matrix;
+    size_t num_chem_species;
+    size_t num_chem_rxns;
+
+    rdme_t*rdme;
+    PropensityFun* stoch_rxn_propensity_functions;
+    size_t num_stoch_species;
+    size_t num_stoch_rxns;
+
+    const char * const* species_names; 
+
+    const double *subdomain_diffusion_matrix;
+    //int *stochic_matrix;
+    int *stoichiometric_matrix;
     double* gravity;
 
 };
 
-struct __bond_t {
-    unsigned int id;
-    particle_t* p1;
-    particle_t* p2;
-    double param_k;
-    double rest_distance;
-};
+//struct __bond_t {
+//    unsigned int id;
+//    particle_t* p1;
+//    particle_t* p2;
+//    double param_k;
+//    double rest_distance;
+//};
 
 
 void find_neighbors(particle_t* me, system_t* system);
-system_t* create_system(int num_types, int num_chem_species, int num_chem_rxns);
+system_t* create_system(size_t num_types, size_t num_chem_species, size_t num_chem_rxns, 
+                         size_t num_stoch_species, size_t num_stoch_rxns,size_t num_data_fn);
 particle_t* create_particle(int id);
 void add_particle(particle_t* me, system_t* system);
 double particle_dist(particle_t* p1, particle_t*p2);

@@ -8,7 +8,7 @@
 
 void output_csv(system_t*system, int current_step){
     char filename[256];
-    node* n;
+    node_t* n;
     particle_t* p;
     sprintf(filename,"output_%u.csv",current_step);
     FILE*fp = fopen(filename,"w+");
@@ -50,7 +50,7 @@ void output_vtk__sync_step(system_t*system, int current_step){
         }
     }
     int ncnt=0;
-    node*n;
+    node_t*n;
     for(n=system->particle_list->head; n!=NULL; n=n->next){
         memcpy( (void *) &output_buffer[ncnt++], (void *) n->data, sizeof(particle_t) );
         if(system->num_chem_species > 0){
@@ -61,33 +61,35 @@ void output_vtk__sync_step(system_t*system, int current_step){
     if(system->rdme != NULL){
         // make a copy of the RDME state vector xx
         if(output_buffer_xx_size==0){
-            output_buffer_xx_size = output_buffer_current_num_particles*system->rdme->Mspecies;
+            output_buffer_xx_size = output_buffer_current_num_particles*system->num_stoch_species;
             output_buffer_xx = (unsigned int*) malloc(sizeof(unsigned int)*output_buffer_xx_size);
-        }else if(output_buffer_xx_size < output_buffer_current_num_particles*system->rdme->Mspecies){
-            output_buffer_xx_size = output_buffer_current_num_particles*system->rdme->Mspecies;
+        }else if(output_buffer_xx_size < output_buffer_current_num_particles*system->num_stoch_species){
+            output_buffer_xx_size = output_buffer_current_num_particles*system->num_stoch_species;
             output_buffer_xx = realloc(output_buffer_xx, sizeof(unsigned int)*output_buffer_xx_size);
         }
         /*
-        printf("system->rdme->Mspecies*output_buffer_current_num_particles = %i\n",system->rdme->Mspecies*output_buffer_current_num_particles);
+        printf("system->num_stoch_species*output_buffer_current_num_particles = %i\n",system->num_stoch_species*output_buffer_current_num_particles);
         printf("output_buffer_current_num_particles = %i\n",output_buffer_current_num_particles);
-        printf("system->rdme->Mspecies = %i\n",system->rdme->Mspecies);
+        printf("system->num_stoch_species = %i\n",system->num_stoch_species);
         int i;
         printf("xx = [ ");
-        for(i=0;i<system->rdme->Mspecies*output_buffer_current_num_particles;i++){
+        for(i=0;i<system->num_stoch_species*output_buffer_current_num_particles;i++){
             printf("%i ",system->rdme->xx[i]);
         }
         printf("]\n");
         printf("output_buffer_xx = [ ");
-        for(i=0;i<system->rdme->Mspecies*output_buffer_current_num_particles;i++){
+        for(i=0;i<system->num_stoch_species*output_buffer_current_num_particles;i++){
             printf("%i ",output_buffer_xx[i]);
         }
         printf("]\n");
         */
         //memcpy( (void*) &output_buffer_xx, (void*) system->rdme->xx, 
-        //    sizeof(unsigned int)*system->rdme->Mspecies*output_buffer_current_num_particles);
-        for(int i=0;i<system->rdme->Mspecies*output_buffer_current_num_particles;i++){
-            //memcpy( (void*) &output_buffer_xx[i], (void*) system->rdme->xx[i], sizeof(unsigned int));
-            output_buffer_xx[i] =  system->rdme->xx[i];
+        //    sizeof(unsigned int)*system->num_stoch_species*output_buffer_current_num_particles);
+        //for(int i=0;i<system->num_stoch_species*output_buffer_current_num_particles;i++){
+        ncnt=0;
+        for(n=system->particle_list->head; n!=NULL; n=n->next){
+            memcpy( (void *) &output_buffer_xx[ncnt], (void *) n->data->xx, sizeof(unsigned int)*system->num_stoch_species );
+            ncnt += system->num_stoch_species;
         }
     }
 }
@@ -139,7 +141,7 @@ void output_vtk__async_step(system_t*system){
     fprintf(fp,"POINT_DATA %i\n", np);
     int num_fields = 7;
     if(system->rdme != NULL){
-        num_fields += system->rdme->Mspecies;
+        num_fields += system->num_stoch_species;
     }
     if(system->num_chem_species > 0){
         num_fields += system->num_chem_species;
@@ -192,7 +194,7 @@ void output_vtk__async_step(system_t*system){
     if(system->num_chem_species > 0){
         int s;
         for(s=0;s<system->num_chem_species;s++){
-            fprintf(fp,"C[%s] 1 %i double\n", system->rdme->species_names[s], np);
+            fprintf(fp,"C[%s] 1 %i double\n", system->species_names[s], np);
             for(i=0;i<np;i++){
                 fprintf(fp, "%lf ",output_buffer_chem[i*system->num_chem_species+s] );
                 if((i+1)%9==0){ fprintf(fp,"\n"); }
@@ -203,10 +205,10 @@ void output_vtk__async_step(system_t*system){
     // d - discrete
     if(system->rdme != NULL){
         int s;
-        for(s=0;s<system->rdme->Mspecies;s++){
-            fprintf(fp,"D[%s] 1 %i int\n", system->rdme->species_names[s], np);
+        for(s=0;s<system->num_stoch_species;s++){
+            fprintf(fp,"D[%s] 1 %i int\n", system->species_names[s], np);
             for(i=0;i<np;i++){
-                fprintf(fp, "%u ",output_buffer_xx[i*system->rdme->Mspecies+s] );
+                fprintf(fp, "%u ",output_buffer_xx[i*system->num_stoch_species+s] );
                 if((i+1)%9==0){ fprintf(fp,"\n"); }
             }
             fprintf(fp,"\n");

@@ -9,7 +9,7 @@ from spatialpy.Model import *
 from spatialpy.Solver import *
 from spatialpy.Geometry import *
 from spatialpy.Mesh import *
-from spatialpy.DataFunction import *
+from spatialpy.DataFunction import DataFunction
 from spatialpy.InitialCondition import *
 from spatialpy.BoundaryCondition import BoundaryCondition
 from spatialpy.VTKReader import *

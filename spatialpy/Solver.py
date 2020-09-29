@@ -32,6 +32,12 @@ class Solver:
 
         self.SpatialPy_ROOT = os.path.dirname(
             os.path.abspath(__file__))+"/ssa_sdpd-c-simulation-engine"
+        self.SpatialPy_ROOTDIR =  self.SpatialPy_ROOT.replace(" ","\\ ");
+        self.SpatialPy_ROOTINC =  self.SpatialPy_ROOT.replace(" ","\\\\ ");
+        self.SpatialPy_ROOTPARAM =  self.SpatialPy_ROOT.replace(" ","?");
+        #print("SpatialPy_ROOTDIR = "+self.SpatialPy_ROOTDIR)
+        #print("SpatialPy_ROOTPARAM = "+self.SpatialPy_ROOTPARAM)
+
 
     def __del__(self):
         """ Deconstructor.  Removes the compiled solver."""
@@ -63,9 +69,8 @@ class Solver:
         self.create_propensity_file(file_name=self.prop_file_name)
 
         # Build the solver
-        makefile = self.SpatialPy_ROOT+'/build/Makefile'
-        cmd = " ".join(['cd', self.build_dir, ';', 'make', '-f', makefile, 'ROOT=' +
-                        self.SpatialPy_ROOT, 'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir])
+        makefile = self.SpatialPy_ROOTDIR+'/build/Makefile'
+        cmd = " ".join(['cd', self.build_dir, '&&', 'make', '-f', makefile, 'ROOT="' + self.SpatialPy_ROOTPARAM+'"', 'ROOTINC="' + self.SpatialPy_ROOTINC+'"','MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir])
         if self.debug_level > 1:
             print("cmd: {0}\n".format(cmd))
         try:
@@ -144,7 +149,7 @@ class Solver:
             try:
                 start = time.monotonic()
                 return_code = None
-                with subprocess.Popen(solver_cmd, shell=True, stdout=subprocess.PIPE, preexec_fn=os.setsid) as process:
+                with subprocess.Popen(solver_cmd, shell=True, stdout=subprocess.PIPE, start_new_session=True) as process:
                     try:
                         if timeout is not None:
                             stdout, stderr = process.communicate(
@@ -245,7 +250,7 @@ class Solver:
             "__DEFINE_PARAMETERS__", str(parameters))
 
         # Reactions
-        funheader = "double __NAME__(const int *x, double t, const double vol, const double *data, int sd)"
+        funheader = "double __NAME__(const int *x, double t, const double vol, const double *data_fn, int sd)"
 
         funcs = ""
         funcinits = ""
@@ -287,7 +292,7 @@ class Solver:
         propfilestr = propfilestr.replace("__DEFINE_PROPFUNS__", funcinits)
 
         # TODO make deterministic chemical reaction functions work
-        funheader = "double det__NAME__(const double *x, double t, const double vol, const double *data, int sd)"
+        funheader = "double det__NAME__(const double *x, double t, const double vol, const double *data_fn, int sd)"
         deterministic_chem_rxn_functions = ""
         deterministic_chem_rxn_function_init = ""
         ############################################
@@ -351,7 +356,7 @@ class Solver:
         input_constants = ""
 
         if len(self.model.listOfSpecies) > 0:
-            outstr = "static unsigned int input_u0[{0}] = ".format(nspecies*ncells)
+            outstr = "unsigned int input_u0[{0}] = ".format(nspecies*ncells)
             outstr += "{"
             for i in range(ncells):
                 for s in range(nspecies):
@@ -361,53 +366,31 @@ class Solver:
             outstr += "};"
             input_constants += outstr + "\n"
             # attache the vol to the model as well, for backwards compatablity
-            self.model.vol = self.model.mesh.get_vol()
-            outstr = "static double input_vol[{0}] = ".format(
-                self.model.mesh.get_vol().shape[0])
-            outstr += "{"
-            for i in range(self.model.mesh.get_vol().shape[0]):
-                if i > 0:
-                    outstr += ','
-                outstr += str(self.model.mesh.get_vol()[i])
-            outstr += "};"
-            input_constants += outstr + "\n"
-            outstr = "static int input_sd[{0}] = ".format(
-                self.model.mesh.type.shape[0])
-            outstr += "{"
-            for i in range(self.model.mesh.type.shape[0]):
-                if i > 0:
-                    outstr += ','
-                outstr += str(self.model.mesh.type[i])
-            outstr += "};"
-            input_constants += outstr + "\n"
+            #self.model.vol = self.model.mesh.get_vol()
+            #outstr = "static double input_vol[{0}] = ".format(
+            #    self.model.mesh.get_vol().shape[0])
+            #outstr += "{"
+            #for i in range(self.model.mesh.get_vol().shape[0]):
+            #    if i > 0:
+            #        outstr += ','
+            #    outstr += str(self.model.mesh.get_vol()[i])
+            #outstr += "};"
+            #input_constants += outstr + "\n"
+            #outstr = "static int input_sd[{0}] = ".format(
+            #    self.model.mesh.type.shape[0])
+            #outstr += "{"
+            #for i in range(self.model.mesh.type.shape[0]):
+            #    if i > 0:
+            #        outstr += ','
+            #    outstr += str(self.model.mesh.type[i])
+            #outstr += "};"
+            #input_constants += outstr + "\n"
 
         data_fn_defs = ""
         if len(self.model.listOfSpecies) > 0:
-            if len(self.model.listOfDataFunctions) == 0:
-                outstr = "static int input_dsize = 1;"
-                input_constants += outstr + "\n"
-                outstr = "static double input_data[{0}] = ".format(ncells)
-                outstr += "{" + ",".join(['0']*80) + "};"
-                input_constants += outstr + "\n"
-            else:
-                outstr = "static int input_dsize = {0};".format(
-                    len(self.model.listOfDataFunctions))
-                input_constants += outstr + "\n"
-                outstr = "static double input_data[{0}] = ".format(
-                    ncells*len(self.model.listOfDataFunctions))
-                outstr += "{"
-                for v_ndx in range(ncells):
-                    for ndf in range(len(self.model.listOfDataFunctions)):
-                        if ndf+v_ndx > 0:
-                            outstr += ','
-                        outstr += "{0}".format(self.model.listOfDataFunctions[ndf].map(
-                            self.model.mesh.coordinates()[v_ndx, :]))
-                outstr += "};"
-                input_constants += outstr + "\n"
-
-                for ndf in range(len(self.model.listOfDataFunctions)):
-                    data_fn_defs += "#define {0} data[{1}]\n".format(
-                        self.model.listOfDataFunctions[ndf].name, ndf)
+            for ndf in range(len(self.model.listOfDataFunctions)):
+                data_fn_defs += "#define {0} data_fn[{1}]\n".format(
+                    self.model.listOfDataFunctions[ndf].name, ndf)
         propfilestr = propfilestr.replace(
             "__DATA_FUNCTION_DEFINITIONS__", data_fn_defs)
 
@@ -508,13 +491,17 @@ class Solver:
             "__INPUT_CONSTANTS__", input_constants)
 
         system_config = "debug_flag = {0};\n".format(self.debug_level)
-        system_config += "system_t* system = create_system({0},{1},{2});\n".format(len(
-            self.model.listOfTypeIDs), len(self.model.listOfSpecies), len(self.model.listOfReactions))
+        system_config += "system_t* system = create_system({0},{1},{2},{3},{4},{5});\n".format(
+            len(self.model.listOfTypeIDs), len(self.model.listOfSpecies),
+            len(self.model.listOfReactions), len(self.model.listOfSpecies),
+            len(self.model.listOfReactions), len(self.model.listOfDataFunctions))
         system_config += "system->static_domain = {0};\n".format(int(self.model.staticDomain))
         if(len(self.model.listOfSpecies) > 0):
             system_config += "system->subdomain_diffusion_matrix = input_subdomain_diffusion_matrix;\n"
-            system_config += "system->stochic_matrix = input_N_dense;\n"
+            system_config += "system->stoichiometric_matrix = input_N_dense;\n"
             system_config += "system->chem_rxn_rhs_functions = ALLOC_ChemRxnFun();\n"
+            system_config += "system->stoch_rxn_propensity_functions = ALLOC_propensities();\n"
+            system_config += "system->species_names = input_species_names;\n";
 
         system_config += "system->dt = {0};\n".format(self.model.timestep_size)
         system_config += "system->nt = {0};\n".format(self.model.num_timesteps)
@@ -543,20 +530,18 @@ class Solver:
         propfilestr = propfilestr.replace("__SYSTEM_CONFIG__", system_config)
 
         init_rdme=''
-        if(len(self.model.listOfSpecies) > 0):
+        if(self.model.enable_rdme and len(self.model.listOfSpecies) > 0):
             init_rdme = '''
-    initialize_rdme(system, NUM_VOXELS, NUM_SPECIES, NUM_REACTIONS, input_vol, input_sd,
-                    input_data, input_dsize, input_irN, input_jcN, input_prN, input_irG,
-                    input_jcG, input_species_names, input_u0, input_num_subdomain,
-                    input_subdomain_diffusion_matrix);
-
-'''
+            initialize_rdme(system, input_irN, input_jcN, input_prN, input_irG,
+                            input_jcG, input_u0 );'''
         propfilestr = propfilestr.replace("__INIT_RDME__", init_rdme)
 
 
         init_bc = ""
         for bc in self.model.listOfBoundaryConditions:
             init_bc += bc.expression()
+        for ndf, df in enumerate(self.model.listOfDataFunctions):
+            init_bc += "me->data_fn[{0}] = {1};\n".format(ndf,df.expression())
         propfilestr = propfilestr.replace("__BOUNDARY_CONDITIONS__", init_bc)
 
         #### Write the data to the file ####

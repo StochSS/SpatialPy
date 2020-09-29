@@ -17,14 +17,14 @@ See the file LICENSE.txt for details.
 
 
 
-void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
+void pairwiseForce(particle_t* me, system_t* system)
 {
     // F, Frho and Fbp are output
-
+    neighbor_list_t* neighbors = me->neighbors;
     //printf("pairwiseForce(id=%i)\n",me->id);
     //fflush(stdout);
     
-    double R, Pj, dv[3], dx[3], alpha, r, dWdr, dv_dx, fp, fv, fbp,
+    double R, Pj, dv[3], dx[3], r, dWdr, dv_dx, fp, fv, fbp,
         transportTensor[3][3], ft[3], pressure_gradient;
     dx[0] = 0.0;
     dx[1] = 0.0;
@@ -36,19 +36,18 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
     double Pi = P0 * (me->rho / rho0 - 1.0);
     int i, j, s, rxn;
     particle_t* pt_j;
-    node* n;
 
     // Kernel function parameter
-    if (system->dimension == 3) {
-        alpha = 105 / (16 * M_PI * h * h * h);
-    }
-    else if (system->dimension == 2) {
-        alpha = 5 / (M_PI * h * h);
-    }
-    else {
-        printf("Error, only 3D or 2D domains are supported\n");
-        exit(1);
-    }
+    //if (system->dimension == 3) {
+    //    alpha = 105 / (16 * M_PI * h * h * h);
+    //}
+    //else if (system->dimension == 2) {
+    //    alpha = 5 / (M_PI * h * h);
+    //}
+    //else {
+    //    printf("Error, only 3D or 2D domains are supported\n");
+    //    exit(1);
+    //}
    
     // Zero tensors
     for (i = 0; i < 3; i++) {
@@ -61,10 +60,12 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
     //fflush(stdout);
 
     // Compute force from each neighbor
+    neighbor_node_t* n;
     for (n = neighbors->head; n != NULL; n = n->next) {
         pt_j = n->data;
 
-        r = particle_dist(me, pt_j);
+        //r = particle_dist(me, pt_j);
+        r = n->dist;
         R = r / h;
         //printf("pairwiseForce(id=%i) pt_j->id=%i r=%e R=%e\n",me->id,pt_j->id,r,R);
         //fflush(stdout);
@@ -74,7 +75,8 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
             continue; // ignore sigularities
         // Compute weight function and weight function derivative
         // dWdr = (5/(pi*(h^2))) * (-12*r/(h^2)) * (1 - r/h)^2;
-        dWdr = alpha * (-12 * r / (h * h)) * pow(1 - R, 2);
+        //dWdr = alpha * (-12 * r / (h * h)) * pow(1 - R, 2);
+        dWdr = n->dWdr;
         // Spatial deriviatives
         dv_dx = 0.0;
         for (i = 0; i < system->dimension; i++) {
@@ -138,7 +140,7 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
         //printf("pairwiseForce(id=%i) system->num_chem_species = %i\n",me->id,system->num_chem_species);
         //fflush(stdout);
         for(s=0; s < system->num_chem_species; s++){
-            // Note about below:  do species types start at  1
+            // Note about below:  types start at  1
             int k = (system->num_chem_species) * (me->type - 1) + s;
             //printf("pairwiseForce(id=%i) s=%i, k=%i num_types=%i me->type=%i\n",me->id,s,k,system->num_types,me->type);
             //fflush(stdout);
@@ -152,23 +154,30 @@ void pairwiseForce(particle_t* me, linked_list* neighbors, system_t* system)
     }
     //printf("pairwiseForce(id=%i) num_chem_rxns=%i\n",me->id,system->num_chem_rxns);
     //fflush(stdout);
+
     // after processing all neighbors
+    // process chemical reactions
+
+    double vol = (me->mass / me->rho);
+    double cur_time = system->current_step * system->dt;
     for(rxn=0; rxn < system->num_chem_rxns; rxn++){
+        //TODO: t (2nd arg) set to zero, fix
         //TODO, vol (3rd arg) set to zero, fix
         //TODO: data (4th arg) set to NULL, fix
-        double flux = (*system->chem_rxn_rhs_functions[rxn])(me->C,0.0, 0.0, NULL, me->type);
+        double flux = (*system->chem_rxn_rhs_functions[rxn])(me->C, cur_time, vol , me->data_fn, me->type);
         for(s=0; s< system->num_chem_species; s++){
             int k = system->num_chem_rxns * rxn + s;
-            me->Q[s] += system->stochic_matrix[k] * flux;
+            me->Q[s] += system->stoichiometric_matrix[k] * flux;
         }
     }
 
 }
 
 
-void filterDensity(particle_t* me, linked_list* neighbors, system_t* system)
+void filterDensity(particle_t* me, system_t* system)
 {
-  node*n;
+  neighbor_list_t* neighbors = me->neighbors;
+  neighbor_node_t*n;
   particle_t* pt_j;
   double r, R, Wij, alpha, num, den;
   double h = system->h;
@@ -184,7 +193,7 @@ void filterDensity(particle_t* me, linked_list* neighbors, system_t* system)
 
   for(n=neighbors->head; n!=NULL; n = n->next){
       pt_j = n->data;
-      r = particle_dist(me, pt_j);
+      r = n->dist;
       R = r/h;
       if(R > 1.0) continue;
       if(r == 0.0) continue;
@@ -206,10 +215,10 @@ void filterDensity(particle_t* me, linked_list* neighbors, system_t* system)
 }
 
 
-void computeBoundaryVolumeFraction(particle_t* me, linked_list* neighbors,
-    system_t* system)
+void computeBoundaryVolumeFraction(particle_t* me, system_t* system)
 {
-    node* n;
+    neighbor_list_t* neighbors = me->neighbors;
+    neighbor_node_t* n;
     particle_t* pt_j;
     double r, R, Wij, dWdr, alpha, vos, vtot, nw[3], dx[3], norm_nw;
     int i;
@@ -239,7 +248,7 @@ void computeBoundaryVolumeFraction(particle_t* me, linked_list* neighbors,
     vtot = 0.0;
     for (n = neighbors->head; n != NULL; n = n->next) {
         pt_j = n->data;
-        r = particle_dist(me, pt_j);
+        r = n->dist;
         R = r / h;
         if (R > 1.0)
             continue;
@@ -248,7 +257,8 @@ void computeBoundaryVolumeFraction(particle_t* me, linked_list* neighbors,
         // Compute weight function and weight function derivative
         // Wij = (5/(M_PI*pow(h,2))) * (1+3*r/h) * pow((1-r/h),3) ;
         Wij = alpha * ((1 + 3 * R) * pow(1 - R, 3));
-        dWdr = alpha * (-12 * r / (h * h)) * pow(1 - R, 2);
+        //dWdr = alpha * (-12 * r / (h * h)) * pow(1 - R, 2);
+        dWdr = n->dWdr;
 
         for (i = 0; i < system->dimension; i++) {
             dx[i] = (me->x[i] - pt_j->x[i]);

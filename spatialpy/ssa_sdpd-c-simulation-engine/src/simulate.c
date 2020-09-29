@@ -33,13 +33,12 @@ unsigned int get_number_of_substeps(){
 
 
 // Step 1/3: First part of time step computation
-void take_step1(particle_t* me, system_t* system, unsigned int step)
-{
+void take_step1(particle_t* me, system_t* system, unsigned int step) {
     int i;
     //printf("particle id=%i Q[0]=%e\n",me->id,me->Q[0]);
 
     // Step 1.1: 
-    if(system->static_domain == 0){
+    if(step==0 || system->static_domain == 0){
         find_neighbors(me, system);
     }
 
@@ -69,19 +68,6 @@ void take_step1(particle_t* me, system_t* system, unsigned int step)
     applyBoundaryConditions(me, system);
 
 
-
-
-}
-
-// Step 2/3: Update the 'F' field of each partile attached to a bond
-// void compute_bond_forces(bond_t*bond, system_t*system, unsigned int step){
-//}
-
-
-// Step 2/3: Compute forces
-void compute_forces(particle_t* me, system_t* system, unsigned int step)
-{
-    int i;
     //  Clean forces
     for (i = 0; i < 3; i++) {
         // Clean momentum force
@@ -96,12 +82,25 @@ void compute_forces(particle_t* me, system_t* system, unsigned int step)
         me->Q[i] = 0.0;
     }
 
+
+}
+
+// Step 2/3: Update the 'F' field of each partile attached to a bond
+// void compute_bond_forces(bond_t*bond, system_t*system, unsigned int step){
+//}
+
+
+// Step 2/3: Compute forces
+void compute_forces(particle_t* me, system_t* system, unsigned int step) {
+
     //printf("compute_forces() particle id=%i Q[0]=%e\n",me->id,me->Q[0]);
     // Step 2.2: Find nearest neighbors
-    find_neighbors(me, system);
+    if(step>0 && system->static_domain == 0){
+        find_neighbors(me, system);
+    }
 
     // Step 2.3: Compute forces
-    pairwiseForce(me, me->neighbors, system);
+    pairwiseForce(me, system);
 
 }
 
@@ -113,30 +112,30 @@ void take_step2(particle_t* me, system_t* system, unsigned int step)
 
     // Step 3.1: Corrector step
     if (me->solidTag == 0 && system->static_domain == 0) {
+        // Update velocity using forces
         for (i = 0; i < 3; i++) {
-            // Update velocity using forces
             me->v[i] = me->v[i] + 0.5 * system->dt * me->F[i];
         }
 
         // Update density using continuity equation and Shepard filter 
         if (step % 20 == 0) {
-            filterDensity(me, me->neighbors, system);
-            me->rho = me->rho + 0.5 * system->dt * me->Frho;
+            filterDensity(me, system);
         }
-        else
-            me->rho = me->rho + 0.5 * system->dt * me->Frho;
-    }
-    else {
+        me->rho = me->rho + 0.5 * system->dt * me->Frho;
+
+      // Solid (wall) particles should change density
+    }else if (me->solidTag == 1 && system->static_domain == 0) {
         // Filter density field (for fixed solid particles)
-        if (step % 20 == 0)
-            filterDensity(me, me->neighbors, system);
+        if (step % 20 == 0) {
+            filterDensity(me, system);
+        }
     }
 
 
     // Step 3.2: Compute boundary volume fractions (bvf)
     // Step 3.3: Apply BVF 
-    if (me->solidTag == 0) {
-        computeBoundaryVolumeFraction(me, me->neighbors, system);
+    if (me->solidTag == 0 && system->static_domain == 0) {
+        computeBoundaryVolumeFraction(me,system);
         applyBoundaryVolumeFraction(me, system);
     }
 

@@ -22,13 +22,15 @@ class Model():
         # The name that the model is referenced by (should be a String)
         self.name = name
 
+        ######################
         # Dictionaries with Species, Reactions and Parameter objects.
         # Species, Reaction, and Parameter names are used as keys.
         self.listOfParameters = OrderedDict()
         self.listOfSpecies    = OrderedDict()
         self.listOfReactions  = OrderedDict()
 
-        # Dict that holds flattened parameters and species for
+        ######################
+        # Dict that holds flattended parameters and species for
         # evaluation of expressions in the scope of the model.
         self.namespace = OrderedDict([])
         self.species_map = {}
@@ -41,8 +43,12 @@ class Model():
         self.listOfInitialConditions = []
         self.listOfBoundaryConditions = []
 
-        self.staticDomain = True;
+        ######################
+        self.staticDomain = True
+        self.enable_rdme = True
+        self.enable_pde = True #TODO
 
+        ######################
         self.tspan = None
         self.timestep_size = 1e-5
         self.num_timesteps = None
