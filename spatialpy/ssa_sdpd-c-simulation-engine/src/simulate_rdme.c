@@ -43,10 +43,10 @@ void simulate_rdme(system_t*system,unsigned int step){
 // All of below is replaced by code in find_neighbor()
 //            // if the  domain is not static, rebuild the diffusion matrix after movement
 //        if(!rdme->initialized){
-          if(debug_flag) {
-            printf("\tnsm_core__build_diffusion_matrix\n");
-            nsm_core__build_diffusion_matrix(rdme,system);
-          }
+//          if(debug_flag) {
+//            printf("\tnsm_core__build_diffusion_matrix\n");
+//            nsm_core__build_diffusion_matrix(rdme,system);
+//          }
           rdme->initialized=1;
 //        }else{
 //            if(debug_flag) printf("Rebuilding diffusion matrix\n");
@@ -82,12 +82,20 @@ void destroy_rdme(system_t*system){
 // Adapted from PyURDME's nsmcore.c
 //===================================================
 
-void print_current_state(int subvol, unsigned int*xx,const size_t Mspecies){
+void print_current_state(particle_t*subvol, system_t*system){
     int i;
-    printf("Current state in voxel %i:\n",subvol);
-    for(i=0;i<Mspecies;i++){
-        printf("xx[%i] = %i\n",i,xx[subvol*Mspecies+i]);
+    printf("Current state in voxel %i:\n",subvol->id);
+    for(i=0;i<system->num_chem_species;i++){
+        printf("xx[%i] = %i\n",i,subvol->xx[i]);
     }
+    printf("Neighbors:\n");
+    neighbor_node_t*nn;
+    particle_t*p2;
+    for(nn=subvol->neighbors->head; nn!=NULL; nn=nn->next){
+        p2 = nn->data;
+        printf("%i: nn->D_i_j=%e \n",p2->id,nn->D_i_j);
+    }
+    
 }
 
 /*void nsm_core(const size_t *irD,const size_t *jcD,const double *prD,
@@ -571,7 +579,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
                     errcode = 1;
                     printf("Negative state detected after reaction %i, subvol %i, species %zu at time %e (was %i now %i)\n",re,subvol->id,rdme->irN[i],tt,prev_val,subvol->xx[rdme->irN[i]]);
 
-                    print_current_state(subvol->id,subvol->xx,system->num_stoch_species);
+                    print_current_state(subvol,system);
                     exit(1);
                 }
                 subvol->rdme->sdrate += subvol->rdme->Ddiag[rdme->irN[i]]*rdme->prN[i];
@@ -629,7 +637,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
                         spec--;
                         if(spec <=0){
                             printf("Error: diffusion event in voxel %i was selected, but no molecues to move\n",subvol->id);
-                            print_current_state(subvol->id,subvol->xx,system->num_stoch_species);
+                            print_current_state(subvol,system);
                             exit(1);
                         }
                     }
@@ -689,7 +697,11 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
                 }
                 if(nn==NULL){
                     printf("Error: overflow in trying to determine which destination voxel subvol=%i\n",subvol->id);
-                    print_current_state(subvol->id,subvol->xx,system->num_stoch_species);
+                    printf("subvol->id=%e ",subvol->id);
+                    printf("rand2=%e ",rand2);
+                    printf("cum2=%e ",cum2);
+                    fflush(stdout);
+                    print_current_state(subvol,system);
                     exit(1);
                 }
             }
@@ -700,7 +712,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
             if (subvol->xx[spec] < 0){
                     errcode = 1;
                     printf("Negative state detected after diffusion, voxel %i -> %i, species %i at time %e\n",subvol->id,dest_subvol->id,spec,tt);
-                    print_current_state(subvol->id,subvol->xx,system->num_stoch_species);
+                    print_current_state(subvol,system);
                     exit(1);
             }
 
@@ -785,7 +797,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
         if (errcode) {
             /* Cannot continue. Clear this solution and exit. */
             printf("Exiting due to errcode %i\n",errcode);
-            print_current_state(subvol->id, subvol->xx,system->num_stoch_species);
+            print_current_state(subvol,system);
             exit(1);
         }
     }

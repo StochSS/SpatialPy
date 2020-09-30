@@ -212,6 +212,8 @@ class Mesh():
             obj.tetrahedrons[ int(c.attrib['index']),3] = int(c.attrib['v3'])
         # volume
         obj.calculate_vol()
+        # set Mass equal to the volume
+        obj.mass = obj.vol
         # return model ref
         return obj
 

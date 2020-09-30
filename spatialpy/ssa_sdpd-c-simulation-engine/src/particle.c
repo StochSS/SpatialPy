@@ -25,7 +25,8 @@ int add_to_neighbor_list(particle_t*me, particle_t*neighbor, system_t*system){
     double R = r / h;
     double alpha = 105 / (16 * M_PI * h * h * h); // 3D
     //double alpha = 5 / (M_PI * h * h); // 2D
-    double dWdr = alpha * (-12 * r / (h * h)) * pow(1 - R, 2);
+    //double dWdr = alpha * (-12 * r / (h * h)) * pow(1 - R, 2);
+    double dWdr = alpha * (-12 * r / (h * h)) * ((1 - R)* (1 - R));
     // calculate D_i_j
 
     // Eq (13-14), Drawert et al 2019
@@ -35,6 +36,21 @@ int add_to_neighbor_list(particle_t*me, particle_t*neighbor, system_t*system){
     double wfd = -25.066903536973515383e0 * dhr * dhr * ihsq * ihsq * ihsq * ih; //3D
     // Eq 28 of Drawert et al 2019, Tartakovsky et. al., 2007, JCP
     double D_i_j = -2.0*(me->mass*neighbor->mass)/(me->mass+neighbor->mass)*(me->rho+neighbor->rho)/(me->rho*neighbor->rho) * r2 * wfd / (r2+0.01*h*h);
+    if(isnan(D_i_j)){
+        printf("Got NaN calculating D_i_j for me=%i, neighbor=%i\n",me->id, neighbor->id);
+        printf("r=%e ",r);
+        printf("h=%e ",h);
+        printf("alpha=%e ",alpha);
+        printf("dWdr=%e ",dWdr);
+        particle_t*p = me;
+        printf("me->mass=%e ",p->mass);
+        printf("me->rho=%e ",p->rho);
+        p = neighbor;
+        printf("n->mass=%e ",p->mass);
+        printf("n->rho=%e ",p->rho);
+
+        exit(1);
+    }
 
     neighbor_node_t*n = neighbor_list_add( me->neighbors, neighbor );
     n->dist = r;
