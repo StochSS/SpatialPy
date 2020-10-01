@@ -85,7 +85,7 @@ void destroy_rdme(system_t*system){
 void print_current_state(particle_t*subvol, system_t*system){
     int i;
     printf("Current state in voxel %i:\n",subvol->id);
-    for(i=0;i<system->num_chem_species;i++){
+    for(i=0;i<system->num_stoch_species;i++){
         printf("xx[%i] = %i\n",i,subvol->xx[i]);
     }
     printf("Neighbors:\n");
