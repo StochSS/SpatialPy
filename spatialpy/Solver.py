@@ -217,8 +217,23 @@ class Solver:
 
     def create_propensity_file(self, file_name=None):
         """ Generate the C propensity file that is used to compile the solvers.
-            Only mass action propensities are supported.
         """
+
+        num_types = len(self.model.listOfTypeIDs)
+        if self.model.enable_pde:
+            num_chem_species = len(self.model.listOfSpecies)
+            num_chem_rxns = len(self.model.listOfReactions)
+        else:
+            num_chem_species = 0
+            num_chem_rxns = 0
+        if self.model.enable_rdme:
+            num_stoch_species = len(self.model.listOfSpecies)
+            num_stoch_rxns = len(self.model.listOfReactions)
+        else:
+            num_stoch_species = 0
+            num_stoch_rxns = 0
+        num_data_fn = len(self.model.listOfDataFunctions)
+
 
         template = open(os.path.abspath(os.path.dirname(
             __file__)) + '/ssa_sdpd-c-simulation-engine/propensity_file_template.c', 'r')
@@ -342,10 +357,10 @@ class Solver:
             if self.model.mesh.type[i] == 0:
                 raise SimulationError(
                     "Not all particles have been defined in a type. Mass and other properties must be defined")
-            init_particles += "init_create_particle(sys,id++,{0},{1},{2},{3},{4},{5},{6},{7});".format(
+            init_particles += "init_create_particle(sys,id++,{0},{1},{2},{3},{4},{5},{6},{7},{8});".format(
                 self.model.mesh.coordinates()[i,0],self.model.mesh.coordinates()[i,1],self.model.mesh.coordinates()[i,2],
                 self.model.mesh.type[i],self.model.mesh.nu[i],self.model.mesh.mass[i],
-                (self.model.mesh.mass[i] / self.model.mesh.vol[i]),int(self.model.mesh.fixed[i]) )+"\n"
+                (self.model.mesh.mass[i] / self.model.mesh.vol[i]),int(self.model.mesh.fixed[i]),num_chem_species )+"\n"
         propfilestr = propfilestr.replace("__INIT_PARTICLES__", init_particles)
 
         # process initial conditions here
@@ -355,36 +370,16 @@ class Solver:
 
         input_constants = ""
 
+        outstr = "unsigned int input_u0[{0}] = ".format(nspecies*ncells)
+        outstr += "{"
         if len(self.model.listOfSpecies) > 0:
-            outstr = "unsigned int input_u0[{0}] = ".format(nspecies*ncells)
-            outstr += "{"
             for i in range(ncells):
                 for s in range(nspecies):
                     if i+s > 0:
                         outstr += ','
                     outstr += str(int(self.model.u0[s, i]))
-            outstr += "};"
-            input_constants += outstr + "\n"
-            # attache the vol to the model as well, for backwards compatablity
-            #self.model.vol = self.model.mesh.get_vol()
-            #outstr = "static double input_vol[{0}] = ".format(
-            #    self.model.mesh.get_vol().shape[0])
-            #outstr += "{"
-            #for i in range(self.model.mesh.get_vol().shape[0]):
-            #    if i > 0:
-            #        outstr += ','
-            #    outstr += str(self.model.mesh.get_vol()[i])
-            #outstr += "};"
-            #input_constants += outstr + "\n"
-            #outstr = "static int input_sd[{0}] = ".format(
-            #    self.model.mesh.type.shape[0])
-            #outstr += "{"
-            #for i in range(self.model.mesh.type.shape[0]):
-            #    if i > 0:
-            #        outstr += ','
-            #    outstr += str(self.model.mesh.type[i])
-            #outstr += "};"
-            #input_constants += outstr + "\n"
+        outstr += "};"
+        input_constants += outstr + "\n"
 
         data_fn_defs = ""
         if len(self.model.listOfSpecies) > 0:
@@ -492,9 +487,9 @@ class Solver:
 
         system_config = "debug_flag = {0};\n".format(self.debug_level)
         system_config += "system_t* system = create_system({0},{1},{2},{3},{4},{5});\n".format(
-            len(self.model.listOfTypeIDs), len(self.model.listOfSpecies),
-            len(self.model.listOfReactions), len(self.model.listOfSpecies),
-            len(self.model.listOfReactions), len(self.model.listOfDataFunctions))
+            num_types, num_chem_species, num_chem_rxns, 
+            num_stoch_species, num_stoch_rxns, num_data_fn
+            )
         system_config += "system->static_domain = {0};\n".format(int(self.model.staticDomain))
         if(len(self.model.listOfSpecies) > 0):
             system_config += "system->subdomain_diffusion_matrix = input_subdomain_diffusion_matrix;\n"

@@ -512,6 +512,28 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
     particle_t*dest_subvol = NULL;
     neighbor_node_t*nn;
 
+
+    // Check the integrety of the heap
+//    ordered_node_t*on,*bon,*aon;
+//    printf("========================================================\n");
+//    on= system->rdme->heap->head;
+//    bon=NULL;
+//    aon=system->rdme->heap->head->next;
+//    while(on!=NULL){
+//        if( on->prev != bon ||
+//            on->next != aon ){
+//            printf("next/prev mismatch\n");exit(1);
+//        }
+//        on = on->next;
+//        if(bon==NULL){bon=system->rdme->heap->head;}else{bon=bon->next;}
+//        if(aon!=NULL){aon=aon->next;}
+//    }
+//    if(system->rdme->heap->tail != bon){
+//        printf("tail mismatch\n");exit(1);
+//    }
+//    printf("========================================================\n");
+
+
     /* Main loop. */
     while(tt <= end_time){
 
@@ -697,7 +719,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
                 }
                 if(nn==NULL){
                     printf("Error: overflow in trying to determine which destination voxel subvol=%i\n",subvol->id);
-                    printf("subvol->id=%e ",subvol->id);
+                    printf("subvol->id=%u ",subvol->id);
                     printf("rand2=%e ",rand2);
                     printf("cum2=%e ",cum2);
                     fflush(stdout);
@@ -786,7 +808,6 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
                 dest_subvol->rdme->heap_index->tt = INFINITY;
             }
 
-            //update(rdme->heap[to_vol],rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
             ordered_list_bubble_up_down(system->rdme->heap, dest_subvol->rdme->heap_index);
         }
 
@@ -801,7 +822,6 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
             exit(1);
         }
     }
-
 
 
 }

@@ -292,6 +292,7 @@ node_t* linked_list_sort__sub(node_t* head, int sort_ndx){
 
 void linked_list_sort(linked_list_t*ll, int sort_ndx){
     ll->head = linked_list_sort__sub(ll->head, sort_ndx);
+    for(ll->tail = ll->head; ll->tail->next != NULL; ll->tail=ll->tail->next){}
 }
 
 neighbor_node_t* neighbor_list_sort__sub(neighbor_node_t* head){
@@ -326,6 +327,7 @@ neighbor_node_t* neighbor_list_sort__sub(neighbor_node_t* head){
 
 void neighbor_list_sort(neighbor_list_t*ll){
     ll->head = neighbor_list_sort__sub(ll->head);
+    for(ll->tail = ll->head; ll->tail->next != NULL; ll->tail=ll->tail->next){}
 }
 
 ordered_node_t* ordered_list_sort__sub(ordered_node_t* head){
@@ -360,6 +362,7 @@ ordered_node_t* ordered_list_sort__sub(ordered_node_t* head){
 
 void ordered_list_sort(ordered_list_t*ll){
     ll->head = ordered_list_sort__sub(ll->head);
+    for(ll->tail = ll->head; ll->tail->next != NULL ; ll->tail=ll->tail->next){}
 }
 
 
@@ -369,6 +372,7 @@ void ordered_list_bubble_up_down(ordered_list_t*ll, ordered_node_t*n){
 #ifdef DEBUG_UPDATE
     int cnt=0;
     for(n1=ll->head; n1!=NULL; n1=n1->next){ cnt++; }
+    printf("before:");for(n1=ll->head; n1!=NULL; n1=n1->next){ printf("%i,",n1->data->id); }printf("\n");
     printf("ordered_list_bubble_up_down() id=%i tt=%e\tcnt=%i\n",n->data->id, n->tt,cnt);
     printf("\t");
 #endif
@@ -379,7 +383,7 @@ void ordered_list_bubble_up_down(ordered_list_t*ll, ordered_node_t*n){
     if(before != NULL){
         before->next = after;
 #ifdef DEBUG_UPDATE
-        printf("n->prev->tt=%e ",n->prev->tt);
+        printf("n->prev->tt=%e (id=%i)",n->prev->tt,n->prev->data->id);
 #endif
     }else{
         ll->head = ll->head->next;
@@ -390,7 +394,7 @@ void ordered_list_bubble_up_down(ordered_list_t*ll, ordered_node_t*n){
     if(after != NULL){
         after->prev = before;
 #ifdef DEBUG_UPDATE
-        printf("n->next->tt=%e ",n->next->tt);
+        printf("n->next->tt=%e (id=%i)",n->next->tt,n->next->data->id);
 #endif
     }else{
         ll->tail = ll->tail->prev;
@@ -399,10 +403,12 @@ void ordered_list_bubble_up_down(ordered_list_t*ll, ordered_node_t*n){
 #endif
     }
 #ifdef DEBUG_UPDATE
-    printf("ll->head->tt=%e ",ll->head->tt);
-    printf("ll->tail->tt=%e ",ll->tail->tt);
+    printf("ll->head->tt=%e (id=%i)",ll->head->tt,ll->head->data->id);
+    printf("ll->tail->tt=%e (id=%i)",ll->tail->tt,ll->tail->data->id);
     fflush(stdout);
     int mvcnt=0;
+
+    printf("removed:");for(n1=ll->head; n1!=NULL; n1=n1->next){ printf("%i,",n1->data->id); }printf("\n");
 #endif
     // Find new position
     //      if tt==inf, move to end
@@ -416,6 +422,7 @@ void ordered_list_bubble_up_down(ordered_list_t*ll, ordered_node_t*n){
         printf("\tmoved to end\n");
         int ecnt=0;
         for(n1=ll->head; n1!=NULL; n1=n1->next){ ecnt++; } 
+        printf("after:");for(n1=ll->head; n1!=NULL; n1=n1->next){ printf("%i,",n1->data->id); }printf("\n");
         if(cnt!=ecnt){printf("count mismatch cnt=%i ecnt=%i\n",cnt,ecnt);exit(1);}
 #endif
         return;

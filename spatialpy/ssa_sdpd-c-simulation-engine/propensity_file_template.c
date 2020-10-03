@@ -58,7 +58,7 @@ __INPUT_CONSTANTS__
 int debug_flag;
 dsfmt_t dsfmt;
 
-void init_create_particle(system_t* sys, int id, double x, double y, double z, int type, double nu, double mass, double rho, int solidTag){
+void init_create_particle(system_t* sys, int id, double x, double y, double z, int type, double nu, double mass, double rho, int solidTag, int num_chem_species){
     particle_t* p = create_particle(id);
     p->x[0] = x;
     p->x[1] = y;
@@ -70,6 +70,11 @@ void init_create_particle(system_t* sys, int id, double x, double y, double z, i
     p->rho = rho;
     p->solidTag = solidTag;
     add_particle(p, sys);
+    if(num_chem_species > 0){
+        for(int i=0;i<num_chem_species;i++){
+            p->C[i] = (double) input_u0[id*num_chem_species+i];
+        }
+    }
 }
 
 
