@@ -330,7 +330,7 @@ class Mesh():
         y_list = numpy.linspace(ylim[0],ylim[1],ny)
         ndx = 0
         totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0])
-        print("totalvolume",totalvolume)
+        #print("totalvolume",totalvolume)
         for x in x_list:
             for y in y_list:
                 obj.vol[ndx] = totalvolume / numberparticles
