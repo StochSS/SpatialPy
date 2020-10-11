@@ -97,7 +97,7 @@ void ordered_list_delete( ordered_list_t* ll, ordered_node_t* to_delete);
 //node * linked_list_pop( linked_list * ll);
 
 // in-place bubble sort
-void linked_list_sort(linked_list_t*ll, int sort_ndx);
+void linked_list_sort(linked_list_t*ll);
 void neighbor_list_sort(neighbor_list_t*ll);
 void ordered_list_sort(ordered_list_t*ll);
 // move a single element in an otherwise sorted list

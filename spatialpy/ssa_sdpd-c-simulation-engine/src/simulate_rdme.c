@@ -14,7 +14,6 @@
 #include <string.h>
 
 #include "propensities.h"
-#include "binheap.h"
 
 
 /**************************************************************************/

@@ -11,6 +11,8 @@ See the file LICENSE.txt for details.
 #include "linked_list.h"
 #include "particle.h"
 #include <math.h>
+#include "dSFMT/dSFMT.h"
+
 
 //#define DEBUG_UPDATE
 
@@ -260,7 +262,7 @@ node * linked_list_pop( linked_list * ll){
 */
 
 
-/*node_t* linked_list_sort__sub(node_t* head, int sort_ndx){
+node_t* linked_list_sort__sub(node_t* head){
     node_t* min_node = head;
     node_t* before = NULL;
     node_t* ptr;
@@ -269,7 +271,7 @@ node * linked_list_pop( linked_list * ll){
         return head;
     }
     for(ptr = head; ptr->next != NULL; ptr = ptr->next){
-        if( ptr->next->data->x[sort_ndx] < min_node->data->x[sort_ndx] ){
+        if( ptr->next->data->x[0] < min_node->data->x[0] ){
             min_node = ptr->next;
             before = ptr;
         }
@@ -283,12 +285,12 @@ node * linked_list_pop( linked_list * ll){
         tmp->prev = head;
         head->prev = NULL;
     }
-    head->next = linked_list_sort__sub(head->next,sort_ndx);
+    head->next = linked_list_sort__sub(head->next);
     if(head->next != NULL){
         head->next->prev = head;
     }
     return head;
-}*/
+}
 
 
 static inline void linked_list_sort__swap(node_t* a, node_t* b){
@@ -300,28 +302,29 @@ static inline node_t* linked_list_sort__find_middle(node_t* min, node_t* max){
     node_t*left = min;
     node_t*right = max;
     while(left != right){
-        if(left != right && left->next != null){
+        if(left != right && left->next != NULL){
             left = left->next;
         }
-        if(left != right && right->prev != null){
+        if(left != right && right->prev != NULL){
             right = right->prev;
         }
     }
     return left;
 }
-node_t* linked_list_sort__partition(node_t* min, node_t* max, int sort_ndx){
+
+static inline node_t* linked_list_sort__partition_middle(node_t* min, node_t* max){
     node_t* middle = linked_list_sort__find_middle(min, max);
-    double partitionValue = middle->data->x[sort_ndx];
+    double partitionValue = middle->data->x[0];
     node_t*left = min;
     node_t*right = max;
     linked_list_sort__swap(middle,min);
     while(left!=right && right->next != left){
         // from left, search for an element that is > partitionValue
-        while(left!=right && left->data->x[sort_ndx] <= partitionValue){
+        while(left!=right && left->data->x[0] <= partitionValue){
             left = left->next;
         }
         // from right, search for an element that is < partitionValue
-        while(left!=right && right->data->x[sort_ndx] > partitionValue){
+        while(left!=right && right->data->x[0] > partitionValue){
             right = right->prev;
         }
         // swap elements
@@ -332,16 +335,97 @@ node_t* linked_list_sort__partition(node_t* min, node_t* max, int sort_ndx){
     linked_list_sort__swap(min,right);
     return right;
 }
-void linked_list_sort__quicksort(node_t* min, node_t* max, int sort_ndx){
-    if(min==NULL||max==NULL||min==max||max->next==min) return;
-    node_t*pivot = linked_list_sort__partition(min,max,sort_ndx);
-    linked_list_sort__quicksort(min, pivot->prev);
-    linked_list_sort__quicksort(pivot->next, max);
+static inline node_t* linked_list_sort__partition_avg(node_t* min, node_t* max){
+    double partitionValue = (min->data->x[0] + max->data->x[0])/2.0;
+    node_t*left = min;
+    node_t*right = max;
+    while(left!=right && right->next != left){
+        // from left, search for an element that is > partitionValue
+        while(left!=right && left->data->x[0] <= partitionValue){
+            left = left->next;
+        }
+        // from right, search for an element that is < partitionValue
+        while(left!=right && right->data->x[0] > partitionValue){
+            right = right->prev;
+        }
+        // swap elements
+        if(left!=right && right->next != left){
+            linked_list_sort__swap(left,right);
+        }
+    }
+    return right;
 }
-void linked_list_sort(linked_list_t*ll, int sort_ndx){
-    //ll->head = linked_list_sort__sub(ll->head, sort_ndx);
+void linked_list_sort__quicksort(node_t* min, node_t* max){
+    if(min==NULL||max==NULL||min==max||max->next==min) return;
+    node_t*pivot = linked_list_sort__partition_avg(min,max);
+    linked_list_sort__quicksort(min, pivot->prev );
+    linked_list_sort__quicksort(pivot->next, max );
+}
+
+
+
+static inline node_t* linked_list_sort__partition_rnd(node_t* min, node_t* max,
+                    int size, int*left_cnt, int*right_cnt){
+
+    // Choose a random node in the list as the pivot
+    double rand = dsfmt_genrand_close_open(&dsfmt);
+    node_t*middle;
+    if(rand > 0.5){  // start from tail
+        int hops = size*(1.0-rand);
+        middle = max;
+        while(hops>0){
+            hops--;
+            middle = middle->prev;
+        }
+        
+    }else{ // start from head
+        int hops = size*rand;
+        middle = min;
+        while(hops>0){
+            hops--;
+            middle = middle->next;
+        }
+    }
+    // partition value is the 
+    double partitionValue = middle->data->x[0];
+    node_t*left = min;
+    *left_cnt=0;
+    *right_cnt=0;
+    node_t*right = max;
+    linked_list_sort__swap(middle,min);
+    while(left!=right && right->next != left){
+        // from left, search for an element that is > partitionValue
+        while(left!=right && left->data->x[0] <= partitionValue){
+            left = left->next;
+            (*left_cnt)++;
+        }
+        // from right, search for an element that is < partitionValue
+        while(left!=right && right->data->x[0] > partitionValue){
+            right = right->prev;
+            (*right_cnt)++;
+        }
+        // swap elements
+        if(left!=right && right->next != left){
+            linked_list_sort__swap(left,right);
+        }
+    }
+    linked_list_sort__swap(min,right);
+    return right;
+}
+void linked_list_sort__quicksort_rnd(node_t* min, node_t* max, int size){
+    if(min==NULL||max==NULL||min==max||max->next==min) return;
+    int left_cnt, right_cnt;
+    node_t*pivot = linked_list_sort__partition_rnd(min,max,size,&left_cnt,&right_cnt);
+    linked_list_sort__quicksort_rnd(min, pivot->prev, left_cnt );
+    linked_list_sort__quicksort_rnd(pivot->next, max, right_cnt );
+}
+
+
+void linked_list_sort(linked_list_t*ll){
+    //ll->head = linked_list_sort__sub(ll->head );
     //for(ll->tail = ll->head; ll->tail->next != NULL; ll->tail=ll->tail->next){}
-    linked_list_sort__quicksort(ll->head, ll->tail, ll->count);
+    //linked_list_sort__quicksort(ll->head, ll->tail);
+    linked_list_sort__quicksort_rnd(ll->head, ll->tail, ll->count);
 }
 
 neighbor_node_t* neighbor_list_sort__sub(neighbor_node_t* head){

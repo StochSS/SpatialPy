@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/time.h>
 
 
 
@@ -56,8 +57,17 @@ void* sort_index_thread(void* targ_in){
     while(1){
         pthread_barrier_wait(&begin_sort_barrier);
         if(debug_flag) printf("[SORT] begin sort\n");
-        linked_list_sort(targ->ll,targ->sort_ndx);
-        if(debug_flag) printf("[SORT] sort complete\n");
+        struct timeval stop, start;
+        gettimeofday(&start, NULL);
+        //sort list
+        linked_list_sort(targ->ll);
+
+        gettimeofday(&stop, NULL);
+        if(debug_flag){
+            printf("[SORT] sort complete ");
+            printf("took %lu us\n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
+            exit(1);
+        }
         pthread_barrier_wait(&end_sort_barrier);
     }
 }
