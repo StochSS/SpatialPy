@@ -1,5 +1,4 @@
 import numpy, scipy
-from time import time
 from scipy.spatial import KDTree
 
 class Mesh():
@@ -124,13 +123,15 @@ class Mesh():
         return self.vertices.shape[0]
 
     def find_h(self):
-        start_t = time()
         max_dist = None
         kdtree = KDTree(self.vertices)
+        # Detect nearest neighbor distances for all points
+        # since each searched point is already included in
+        # the tree, we search 2 nearest neighbors, since
+        # the first is just the point itself
         distances, indexes = kdtree.query(self.vertices, 2)
+        # We only need the distances to the second (non-self) neighbor.
         max_dist = max(distances[:,1])
-        end_t = time()
-        elapsed = end_t - start_t
         h = 2.2*max_dist
         return h
 
