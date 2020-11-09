@@ -30,6 +30,14 @@ class Mesh():
         self.ylim = ylim
         self.zlim = zlim
 
+        def add_point(self, x, vol, mass, type, nu, fixed):	
+            self.vol = numpy.append(self.vol,vol)	
+            self.mass = numpy.append(self.mass,mass)	
+            self.type = numpy.append(self.type,type)	
+            self.nu = numpy.append(self.nu,nu)	
+            self.fixed = numpy.append(self.fixed,fixed)	
+
+            self.vertices = numpy.append(self.vertices, [x], axis=0)
 
     def find_boundary_points(self):
         if self.on_boundary is None:
