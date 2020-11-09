@@ -1,4 +1,4 @@
-import numpy, scipy
+import numpy
 from scipy.spatial import KDTree
 
 class Mesh():
