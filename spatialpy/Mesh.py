@@ -1,4 +1,6 @@
-import numpy
+import numpy, scipy
+from time import time
+from scipy.spatial import KDTree
 
 class Mesh():
     """ Mesh class for spatial py """
@@ -28,14 +30,6 @@ class Mesh():
         self.ylim = ylim
         self.zlim = zlim
 
-    def add_point(self, x, vol, mass, type, nu, fixed):
-        self.vol = numpy.append(self.vol,vol)
-        self.mass = numpy.append(self.mass,mass)
-        self.type = numpy.append(self.type,type)
-        self.nu = numpy.append(self.nu,nu)
-        self.fixed = numpy.append(self.fixed,fixed)
-
-        self.vertices = numpy.append(self.vertices, [x], axis=0)
 
     def find_boundary_points(self):
         if self.on_boundary is None:
@@ -122,26 +116,15 @@ class Mesh():
         return self.vertices.shape[0]
 
     def find_h(self):
+        start_t = time()
         max_dist = None
-        #print("find_h")
-        for i in range(self.vertices.shape[0]):
-            d = self.dist_to_closest_neighbor(i)
-            #print("\tdist_to_closest_neighbor({0})={1}".format(i,d))
-            if max_dist is None or d > max_dist:
-                max_dist = d
+        kdtree = KDTree(self.vertices)
+        distances, indexes = kdtree.query(self.vertices, 2)
+        max_dist = max(distances[:,1])
+        end_t = time()
+        elapsed = end_t - start_t
         h = 2.2*max_dist
-        #print("find_h = {0}".format(h))
         return h
-
-
-    def dist_to_closest_neighbor(self, v_ndx):
-        min_dist=None
-        for i in range(self.vertices.shape[0]):
-            if i==v_ndx: continue
-            d = numpy.linalg.norm( self.vertices[i,:]-self.vertices[v_ndx,:] )
-            if d > 0 and (min_dist is None or d < min_dist):
-                min_dist = d
-        return min_dist
 
     def get_bounding_box(self):
         xhi=None
