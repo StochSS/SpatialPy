@@ -123,7 +123,6 @@ class Mesh():
         return self.vertices.shape[0]
 
     def find_h(self):
-        max_dist = None
         kdtree = KDTree(self.vertices)
         # Detect nearest neighbor distances for all points
         # since each searched point is already included in
