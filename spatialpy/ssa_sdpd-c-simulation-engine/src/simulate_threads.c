@@ -64,9 +64,7 @@ void* sort_index_thread(void* targ_in){
 
         gettimeofday(&stop, NULL);
         if(debug_flag){
-            printf("[SORT] sort complete ");
-            printf("took %lu us\n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
-            exit(1);
+            printf("[SORT] sort complete %lu us\n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
         }
         pthread_barrier_wait(&end_sort_barrier);
     }
