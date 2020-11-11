@@ -257,8 +257,7 @@ class Result(dict):
 
         if use_matplotlib:
             import matplotlib.pyplot as plt
-            import matplotlib.cm as cm
-
+            
             if (deterministic or not concentration):
                 d = data[spec_name]
             else:
@@ -497,8 +496,7 @@ class Result(dict):
 
         if use_matplotlib:
             import matplotlib.pyplot as plt
-            import matplotlib.cm as cm
-
+            
             if (property_name == 'v'):
                 d = data[property_name]
                 d = [d[i][p_ndx] for i in range(0,len(d))]
