@@ -247,7 +247,7 @@ class Result(dict):
             t_ndx = len(self.get_timespan()) + t_ndx
 
         if animated and t_ndx_list is None:
-            t_ndx_list = [item for item in range(self.model.num_timesteps+1)]
+            t_ndx_list = list(range(int(self.model.num_timesteps/self.model.output_freq)+1))
 
         spec_name = "C[{0}]".format(species) if deterministic else "D[{0}]".format(species)
 
@@ -257,14 +257,17 @@ class Result(dict):
 
         if use_matplotlib:
             import matplotlib.pyplot as plt
+            import matplotlib.cm as cm
 
             if (deterministic or not concentration):
                 d = data[spec_name]
             else:
                 d = data[spec_name] / (data['mass'] / data['rho'])
+            if colormap is None:
+                colormap = "viridis"
 
             plt.figure(figsize=(mpl_width,mpl_height))
-            plt.scatter(points[:,0],points[:,1],c=d)
+            plt.scatter(points[:,0],points[:,1],c=d,cmap=colormap)
             plt.axis('scaled')
             plt.colorbar()
             if title is not None:
@@ -486,7 +489,7 @@ class Result(dict):
             t_ndx = len(self.get_timespan()) + t_ndx
 
         if animated and t_ndx_list is None:
-            t_ndx_list = [item for item in range(self.model.num_timesteps+1)]
+            t_ndx_list = list(range(int(self.model.num_timesteps/self.model.output_freq)+1))
 
         # read data at time point
         time_index = t_ndx_list[0] if animated else t_ndx
@@ -494,15 +497,18 @@ class Result(dict):
 
         if use_matplotlib:
             import matplotlib.pyplot as plt
+            import matplotlib.cm as cm
 
             if (property_name == 'v'):
                 d = data[property_name]
                 d = [d[i][p_ndx] for i in range(0,len(d))]
             else:
                 d = data[property_name]
+            if colormap is None:
+                colormap = "viridis"
 
             plt.figure(figsize=(mpl_width,mpl_height))
-            plt.scatter(points[:,0],points[:,1],c=d)
+            plt.scatter(points[:,0],points[:,1],c=d,cmap=colormap)
             plt.axis('scaled')
             plt.colorbar()
             if title is not None:
