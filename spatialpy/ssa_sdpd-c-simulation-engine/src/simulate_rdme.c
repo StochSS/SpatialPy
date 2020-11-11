@@ -321,7 +321,12 @@ void nsm_core__initialize_heap(system_t*system){
         n->tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/(p->rdme->srrate+p->rdme->sdrate);
     }
     //initialize_heap(rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
+    //HERE
+    printf("before sort\n");
+    print_heap(system);
     ordered_list_sort(rdme->heap);
+    printf("after sort\n");
+    print_heap(system);
 }
 
 /**************************************************************************/
@@ -497,6 +502,28 @@ void nsm_core__destroy_diffusion_matrix(rdme_t*rdme){
 
 
 /**************************************************************************/
+void print_heap(system_t*system){
+    ordered_node_t*on,*bon,*aon;
+    printf("========================================================\n");
+    on= system->rdme->heap->head;
+    bon=NULL;
+    aon=system->rdme->heap->head->next;
+    while(on!=NULL){
+        printf("tt=%e, ",on->tt);
+        if( on->prev != bon ||
+            on->next != aon ){
+            printf("next/prev mismatch\n");exit(1);
+        }
+        on = on->next;
+        if(bon==NULL){bon=system->rdme->heap->head;}else{bon=bon->next;}
+        if(aon!=NULL){aon=aon->next;}
+    }
+    if(system->rdme->heap->tail != bon){
+        printf("tail mismatch\n");exit(1);
+    }
+    printf("========================================================\n");
+}
+/**************************************************************************/
 void nsm_core__take_step(system_t*system, double current_time, double step_size){
     rdme_t*rdme = system->rdme;
     double tt = current_time;
@@ -512,26 +539,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
     neighbor_node_t*nn;
 
 
-    // Check the integrety of the heap
-//    ordered_node_t*on,*bon,*aon;
-//    printf("========================================================\n");
-//    on= system->rdme->heap->head;
-//    bon=NULL;
-//    aon=system->rdme->heap->head->next;
-//    while(on!=NULL){
-//        if( on->prev != bon ||
-//            on->next != aon ){
-//            printf("next/prev mismatch\n");exit(1);
-//        }
-//        on = on->next;
-//        if(bon==NULL){bon=system->rdme->heap->head;}else{bon=bon->next;}
-//        if(aon!=NULL){aon=aon->next;}
-//    }
-//    if(system->rdme->heap->tail != bon){
-//        printf("tail mismatch\n");exit(1);
-//    }
-//    printf("========================================================\n");
-
+    //print_heap(system);
 
     /* Main loop. */
     while(tt <= end_time){

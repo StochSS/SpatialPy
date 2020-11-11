@@ -11,7 +11,6 @@ See the file LICENSE.txt for details.
 #include "linked_list.h"
 #include "particle.h"
 #include <math.h>
-#include "dSFMT/dSFMT.h"
 
 
 //#define DEBUG_UPDATE
@@ -298,43 +297,6 @@ static inline void linked_list_sort__swap(node_t* a, node_t* b){
     b->data = a->data;
     a->data = tmp;
 }
-static inline node_t* linked_list_sort__find_middle(node_t* min, node_t* max){
-    node_t*left = min;
-    node_t*right = max;
-    while(left != right){
-        if(left != right && left->next != NULL){
-            left = left->next;
-        }
-        if(left != right && right->prev != NULL){
-            right = right->prev;
-        }
-    }
-    return left;
-}
-
-static inline node_t* linked_list_sort__partition_middle(node_t* min, node_t* max){
-    node_t* middle = linked_list_sort__find_middle(min, max);
-    double partitionValue = middle->data->x[0];
-    node_t*left = min;
-    node_t*right = max;
-    linked_list_sort__swap(middle,min);
-    while(left!=right && right->next != left){
-        // from left, search for an element that is > partitionValue
-        while(left!=right && left->data->x[0] <= partitionValue){
-            left = left->next;
-        }
-        // from right, search for an element that is < partitionValue
-        while(left!=right && right->data->x[0] > partitionValue){
-            right = right->prev;
-        }
-        // swap elements
-        if(left!=right && right->next != left){
-            linked_list_sort__swap(left,right);
-        }
-    }
-    linked_list_sort__swap(min,right);
-    return right;
-}
 static inline node_t* linked_list_sort__partition_avg(node_t* min, node_t* max){
     double partitionValue = (min->data->x[0] + max->data->x[0])/2.0;
     node_t*left = min;
@@ -362,73 +324,11 @@ void linked_list_sort__quicksort(node_t* min, node_t* max){
     linked_list_sort__quicksort(pivot->next, max );
 }
 
-
-
-static inline node_t* linked_list_sort__partition_rnd(node_t* min, node_t* max,
-                    int size, int*left_cnt, int*right_cnt){
-
-    // Choose a random node in the list as the pivot
-    double rand = dsfmt_genrand_close_open(&dsfmt);
-    node_t*middle;
-    if(rand > 0.5){  // start from tail
-        int hops = size*(1.0-rand);
-        middle = max;
-        while(hops>0){
-            hops--;
-            middle = middle->prev;
-        }
-        
-    }else{ // start from head
-        int hops = size*rand;
-        middle = min;
-        while(hops>0){
-            hops--;
-            middle = middle->next;
-        }
-    }
-    // partition value is the 
-    double partitionValue = middle->data->x[0];
-    node_t*left = min;
-    *left_cnt=0;
-    *right_cnt=0;
-    node_t*right = max;
-    linked_list_sort__swap(middle,min);
-    while(left!=right && right->next != left){
-        // from left, search for an element that is > partitionValue
-        while(left!=right && left->data->x[0] <= partitionValue){
-            left = left->next;
-            (*left_cnt)++;
-        }
-        // from right, search for an element that is < partitionValue
-        while(left!=right && right->data->x[0] > partitionValue){
-            right = right->prev;
-            (*right_cnt)++;
-        }
-        // swap elements
-        if(left!=right && right->next != left){
-            linked_list_sort__swap(left,right);
-        }
-    }
-    linked_list_sort__swap(min,right);
-    return right;
-}
-void linked_list_sort__quicksort_rnd(node_t* min, node_t* max, int size){
-    if(min==NULL||max==NULL||min==max||max->next==min) return;
-    int left_cnt, right_cnt;
-    node_t*pivot = linked_list_sort__partition_rnd(min,max,size,&left_cnt,&right_cnt);
-    linked_list_sort__quicksort_rnd(min, pivot->prev, left_cnt );
-    linked_list_sort__quicksort_rnd(pivot->next, max, right_cnt );
-}
-
-
 void linked_list_sort(linked_list_t*ll){
-    //ll->head = linked_list_sort__sub(ll->head );
-    //for(ll->tail = ll->head; ll->tail->next != NULL; ll->tail=ll->tail->next){}
-    //linked_list_sort__quicksort(ll->head, ll->tail);
-    linked_list_sort__quicksort_rnd(ll->head, ll->tail, ll->count);
+    linked_list_sort__quicksort(ll->head, ll->tail);
 }
 
-neighbor_node_t* neighbor_list_sort__sub(neighbor_node_t* head){
+/*neighbor_node_t* neighbor_list_sort__sub(neighbor_node_t* head){
     neighbor_node_t* min_neighbor = head;
     neighbor_node_t* before = NULL;
     neighbor_node_t* ptr;
@@ -456,14 +356,55 @@ neighbor_node_t* neighbor_list_sort__sub(neighbor_node_t* head){
         head->next->prev = head;
     }
     return head;
+}*/
+
+static inline void neighbor_list_sort__swap(neighbor_node_t* a, neighbor_node_t* b){
+    particle_t*tmp = b->data;
+    b->data = a->data;
+    a->data = tmp;
+    double t2;
+    t2= b->dist;
+    b->dist = a->dist;
+    a->dist = t2;
+    t2= b->dWdr;
+    b->dWdr = a->dWdr;
+    a->dWdr = t2;
+    t2= b->D_i_j;
+    b->D_i_j = a->D_i_j;
+    a->D_i_j = t2;
+}
+static inline neighbor_node_t* neighbor_list_sort__partition_avg(neighbor_node_t* min, neighbor_node_t* max){
+    double partitionValue = (min->dist + max->dist)/2.0;
+    neighbor_node_t*left = min;
+    neighbor_node_t*right = max;
+    while(left!=right && right->next != left){
+        // from left, search for an element that is > partitionValue
+        while(left!=right && left->dist <= partitionValue){
+            left = left->next;
+        }
+        // from right, search for an element that is < partitionValue
+        while(left!=right && right->dist > partitionValue){
+            right = right->prev;
+        }
+        // swap elements
+        if(left!=right && right->next != left){
+            neighbor_list_sort__swap(left,right);
+        }
+    }
+    return right;
+}
+void neighbor_list_sort__quicksort(neighbor_node_t* min, neighbor_node_t* max){
+    if(min==NULL||max==NULL||min==max||max->next==min) return;
+    neighbor_node_t*pivot = neighbor_list_sort__partition_avg(min,max);
+    neighbor_list_sort__quicksort(min, pivot->prev );
+    neighbor_list_sort__quicksort(pivot->next, max );
 }
 
 void neighbor_list_sort(neighbor_list_t*ll){
-    ll->head = neighbor_list_sort__sub(ll->head);
-    for(ll->tail = ll->head; ll->tail->next != NULL; ll->tail=ll->tail->next){}
+    neighbor_list_sort__quicksort(ll->head, ll->tail->next);
 }
 
-ordered_node_t* ordered_list_sort__sub(ordered_node_t* head){
+/*ordered_node_t* ordered_list_sort__sub(ordered_node_t* head){
     ordered_node_t* min_ordered = head;
     ordered_node_t* before = NULL;
     ordered_node_t* ptr;
@@ -491,11 +432,45 @@ ordered_node_t* ordered_list_sort__sub(ordered_node_t* head){
         head->next->prev = head;
     }
     return head;
+}*/
+static inline void ordered_list_sort__swap(ordered_node_t* a, ordered_node_t* b){
+    particle_t*tmp = b->data;
+    b->data = a->data;
+    a->data = tmp;
+    double t2;
+    t2= b->tt;
+    b->tt = a->tt;
+    a->tt = t2;
+}
+static inline ordered_node_t* ordered_list_sort__partition_avg(ordered_node_t* min, ordered_node_t* max){
+    double partitionValue = (min->tt + max->tt)/2.0;
+    ordered_node_t*left = min;
+    ordered_node_t*right = max;
+    while(left!=right && right->next != left){
+        // from left, search for an element that is > partitionValue
+        while(left!=right && left->tt <= partitionValue){
+            left = left->next;
+        }
+        // from right, search for an element that is < partitionValue
+        while(left!=right && right->tt > partitionValue){
+            right = right->prev;
+        }
+        // swap elements
+        if(left!=right && right->next != left){
+            ordered_list_sort__swap(left,right);
+        }
+    }
+    return right;
+}
+void ordered_list_sort__quicksort(ordered_node_t* min, ordered_node_t* max){
+    if(min==NULL||max==NULL||min==max||max->next==min) return;
+    ordered_node_t*pivot = ordered_list_sort__partition_avg(min,max);
+    ordered_list_sort__quicksort(min, pivot->prev );
+    ordered_list_sort__quicksort(pivot->next, max );
 }
 
 void ordered_list_sort(ordered_list_t*ll){
-    ll->head = ordered_list_sort__sub(ll->head);
-    for(ll->tail = ll->head; ll->tail->next != NULL ; ll->tail=ll->tail->next){}
+    ordered_list_sort__quicksort(ll->head, ll->tail);
 }
 
 
