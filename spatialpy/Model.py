@@ -55,7 +55,7 @@ class Model():
         self.output_freq = None
 
 
-    def run(self, number_of_trajectories=1, seed=None, number_of_threads=None, debug_level=0):
+    def run(self, number_of_trajectories=1, seed=None, number_of_threads=None, debug_level=0, debug=False, profile=False):
         """ Simulate the model.
         Args:
             number_of_trajectories: How many trajectories should be run.
@@ -68,7 +68,7 @@ class Model():
 
         sol = Solver(self, debug_level=debug_level)
 
-        return sol.run(number_of_trajectories=number_of_trajectories, seed=seed, number_of_threads=number_of_threads)
+        return sol.run(number_of_trajectories=number_of_trajectories, seed=seed, number_of_threads=number_of_threads, debug=debug, profile=profile)
 
 
     def set_timesteps(self, step_size, num_steps):
