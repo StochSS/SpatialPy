@@ -8,7 +8,7 @@ This package is intended to replace the PyURDME software https://github.com/pyur
 
 ### Docker environment
 
-You can use Docker to create a repeatable environment for developing and debugging spatialpy. The supplied Dockerfile starts a jupyter server with spatialpy dependencies installed.
+You can use Docker to create a repeatable environment for developing and debugging SpatialPy. The supplied Dockerfile starts a jupyter server with SpatialPy dependencies installed.
 
 If you have Docker Compose: `docker-compose build && docker-compose up`
 
@@ -19,8 +19,9 @@ docker build -t spatialpy:latest .
 docker run -v ./:/home/jovyan/spatialpy -v ./tmp:/tmp -p 8888:8888 -p 5000:5000
 ```
 
-The spatialpy repo is mounted into /home/jovyan so you can import it directly in the usual way supplied to examples. 
-Any changes you make in your local spatialpy codebase are reflected in the docker container. Note that you DO NOT need to restart the docker container or even re-import spatialpy to see source changes take effect in jupyter notebooks.
+The SpatialPy repo is mounted into /home/jovyan so you can import it in the usual way for development (see examples).
+
+Any changes you make to your local codebase are reflected in the docker container. Note that you DO NOT need to restart the docker container or even re-import spatialpy to see source changes take effect in jupyter notebooks.
 
 The `/tmp` directory is also mounted for easy access to build and result directories.
 
@@ -28,7 +29,7 @@ The `/tmp` directory is also mounted for easy access to build and result directo
 
 In order to compile the solver binary for use by the debugger, run `solver.compile()` with `debug=True`. This will inject the `-g` flag into the `gcc` command that compiles the solver, enabling gdb debug information.
 
-You can run `solver.run_debugger()` anytime after you instantiate a solver in Python to start up a new session of gdbgui. After that the debugger will be available at http://127.0.0.1:5000.
+You can invoke `solver.run_debugger()` anytime after you instantiate a solver in Python to start up a new session of gdbgui. The debugger will be available at http://127.0.0.1:5000.
 
 
 ### Profiling
