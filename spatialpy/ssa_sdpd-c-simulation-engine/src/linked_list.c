@@ -321,11 +321,20 @@ void linked_list_sort__quicksort(node_t* min, node_t* max){
     if(min==NULL||max==NULL||min==max||max->next==min) return;
     node_t*pivot = linked_list_sort__partition_avg(min,max);
     linked_list_sort__quicksort(min, pivot->prev );
-    linked_list_sort__quicksort(pivot->next, max );
+    linked_list_sort__quicksort(pivot, max );
 }
 
 void linked_list_sort(linked_list_t*ll){
     linked_list_sort__quicksort(ll->head, ll->tail);
+    node_t*node = ll->head->next;
+    while(node != NULL) {
+        if(node->prev->data->x[0] > node->data->x[0]) {
+            printf("===================================\n");
+            printf("The list was not properly sorted\n");
+            printf("===================================\n");
+        }
+        node = node->next;
+    }
 }
 
 /*neighbor_node_t* neighbor_list_sort__sub(neighbor_node_t* head){
@@ -397,7 +406,7 @@ void neighbor_list_sort__quicksort(neighbor_node_t* min, neighbor_node_t* max){
     if(min==NULL||max==NULL||min==max||max->next==min) return;
     neighbor_node_t*pivot = neighbor_list_sort__partition_avg(min,max);
     neighbor_list_sort__quicksort(min, pivot->prev );
-    neighbor_list_sort__quicksort(pivot->next, max );
+    neighbor_list_sort__quicksort(pivot, max );
 }
 
 void neighbor_list_sort(neighbor_list_t*ll){
@@ -466,7 +475,7 @@ void ordered_list_sort__quicksort(ordered_node_t* min, ordered_node_t* max){
     if(min==NULL||max==NULL||min==max||max->next==min) return;
     ordered_node_t*pivot = ordered_list_sort__partition_avg(min,max);
     ordered_list_sort__quicksort(min, pivot->prev );
-    ordered_list_sort__quicksort(pivot->next, max );
+    ordered_list_sort__quicksort(pivot, max );
 }
 
 void ordered_list_sort(ordered_list_t*ll){
