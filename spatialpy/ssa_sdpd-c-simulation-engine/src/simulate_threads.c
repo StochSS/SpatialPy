@@ -66,7 +66,6 @@ void* sort_index_thread(void* targ_in){
         if(debug_flag){
             printf("[SORT] sort complete ");
             printf("took %lu us\n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
-            exit(1);
         }
         pthread_barrier_wait(&end_sort_barrier);
     }
