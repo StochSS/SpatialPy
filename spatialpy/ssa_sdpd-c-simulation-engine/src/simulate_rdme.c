@@ -409,6 +409,7 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
             for(n2=p1->neighbors->head; n2!=NULL; n2=n2->next){
                 p2 = n2->data;
                 //diff_const = system->subdomain_diffusion_matrix[s_ndx*system->num_subdomains + (p2->type-1)];
+		printf("***NUM TYPES : %ld", system->num_types) ; 
                 diff_const = system->subdomain_diffusion_matrix[s_ndx*system->num_types + (p2->type-1)];
                 dist2 = particle_dist_sqrd(p1,p2);
                 // Eq (13-14), Drawert et al 2019
@@ -591,6 +592,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
                 }
             }
             if(debug_flag){printf("nsm: tt=%e subvol=%i type=%i ",tt,subvol->id,subvol->type);}
+            printf("nsm: tt=%e subvol=%i type=%i ",tt,subvol->id,subvol->type);
             if(debug_flag){printf("Rxn %i \n",re);}
             /* b) Update the state of the subvolume subvol and sdrate[subvol]. */
             for (i = rdme->jcN[re]; i < rdme->jcN[re+1]; i++) {
@@ -696,6 +698,9 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
             cum2 = 0.0;
             for(nn=subvol->neighbors->head; nn!=NULL; nn=nn->next){
                 p2 = nn->data;
+		printf("NUM TYPES IN NN SEARCH THINGY: %ld\n", system->num_types) ;
+		printf(" SPEC IS %d\n", spec) ;
+		printf(" p2->type is %d\n", p2->type) ;
                 diff_const = system->subdomain_diffusion_matrix[spec*system->num_types + (p2->type-1)];
                 cum2 += nn->D_i_j * diff_const;
                 if(cum2 > rand2){
