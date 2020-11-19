@@ -12,6 +12,7 @@ See the file LICENSE.txt for details.
 #include <math.h>
 
 int add_to_neighbor_list(particle_t*me, particle_t*neighbor, system_t*system){
+    if(neighbor==me){return 0;}
     double a = me->x[0] - neighbor->x[0];
     double b = me->x[1] - neighbor->x[1];
     double c = me->x[2] - neighbor->x[2];
@@ -187,7 +188,6 @@ system_t* create_system(size_t num_types, size_t num_chem_species, size_t num_ch
     s->boundary_conditions[0] = 'n';
     s->boundary_conditions[1] = 'n';
     s->boundary_conditions[2] = 'n';
-    s->rdme = NULL;
     s->static_domain = 0;
     s->num_stoch_species = num_stoch_species;
     s->num_stoch_rxns = num_stoch_rxns;

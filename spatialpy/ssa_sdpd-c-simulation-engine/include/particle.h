@@ -39,7 +39,11 @@ struct __particle_t {
     // below here for simulation
     node_t* x_index;  // 
     neighbor_list_t*neighbors;
-    rdme_voxel_t*rdme;  // RDME solver data
+    double srrate;
+    double* rrate;
+    double sdrate;
+    double* Ddiag;
+    ordered_node_t*heap_index;
 };
 
 struct __system_t {
@@ -66,7 +70,16 @@ struct __system_t {
     size_t num_chem_species;
     size_t num_chem_rxns;
 
-    rdme_t*rdme;
+    //rdme_t*rdme;
+    const size_t *irN;
+    const size_t *jcN;
+    const int *prN;
+    const size_t *irG;
+    const size_t *jcG;
+    int initialized;
+    ordered_list_t *heap;
+    long int total_reactions;
+    long int total_diffusions;
     PropensityFun* stoch_rxn_propensity_functions;
     size_t num_stoch_species;
     size_t num_stoch_rxns;

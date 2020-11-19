@@ -34,19 +34,18 @@ void initialize_rdme(system_t*system, size_t *irN, size_t *jcN,int *prN,size_t *
 // This function get called by the main simulation loop.  It advances the
 // state the of RDME system by dt
 void simulate_rdme(system_t*system,unsigned int step){
-    rdme_t*rdme = system->rdme;
-    if(rdme == NULL){
+    if(system->num_stoch_species == 0){
         return;
     }
-    if(!system->static_domain || !rdme->initialized){
+    if(!system->static_domain || !system->initialized){
 // All of below is replaced by code in find_neighbor()
 //            // if the  domain is not static, rebuild the diffusion matrix after movement
-//        if(!rdme->initialized){
+//        if(!initialized){
 //          if(debug_flag) {
 //            printf("\tnsm_core__build_diffusion_matrix\n");
 //            nsm_core__build_diffusion_matrix(rdme,system);
 //          }
-          rdme->initialized=1;
+          system->initialized=1;
 //        }else{
 //            if(debug_flag) printf("Rebuilding diffusion matrix\n");
 //            if(debug_flag) printf("\tnsm_core__destroy_diffusion_matrix\n");
@@ -64,19 +63,6 @@ void simulate_rdme(system_t*system,unsigned int step){
     if(debug_flag) printf("Simulating RDME for %e seconds\n",system->dt);
     nsm_core__take_step(system, system->dt*step, system->dt);
 }
-/**************************************************************************/
-void destroy_rdme(system_t*system){
-    if(system->rdme == NULL){
-        return;
-    }
-    if(debug_flag) printf("NSM: total # reacton events %lu\n",system->rdme->total_reactions);
-    if(debug_flag) printf("NSM: total # diffusion events %lu\n",system->rdme->total_diffusion);
-    nsm_core__destroy(system->rdme);
-}
-
-
-
-
 //===================================================
 // Adapted from PyURDME's nsmcore.c
 //===================================================
@@ -185,18 +171,16 @@ void print_current_state(particle_t*subvol, system_t*system){
 /**************************************************************************/
 void nsm_core__create(system_t*system, size_t *irN, size_t *jcN,int *prN, size_t *irG, size_t *jcG){
     /* Create the RDME object */
-    rdme_t* rdme = (rdme_t*) malloc(sizeof(rdme_t));
 
-    rdme->irN = irN;
-    rdme->jcN = jcN;
-    rdme->prN = prN;
-    rdme->irG = irG;
-    rdme->jcG = jcG;
-    rdme->total_reactions = 0;
-    rdme->total_diffusion = 0;
-    rdme->initialized = 0;
-
-    rdme->heap = create_ordered_list();
+    system->irN = irN;
+    system->jcN = jcN;
+    system->prN = prN;
+    system->irG = irG;
+    system->jcG = jcG;
+    system->total_reactions = 0;
+    system->total_diffusions = 0;
+    system->initialized = 0;
+    system->heap = create_ordered_list();
 
 
 
@@ -204,13 +188,12 @@ void nsm_core__create(system_t*system, size_t *irN, size_t *jcN,int *prN, size_t
     particle_t*p;
     for(n=system->particle_list->head; n!=NULL; n=n->next){
         p = n->data;
-        p->rdme = (rdme_voxel_t*) malloc(sizeof(rdme_voxel_t));
-        p->rdme->srrate = 0;
-        p->rdme->rrate = (double*) malloc(system->num_stoch_rxns * sizeof(double));
-        p->rdme->sdrate = 0;
-        p->rdme->Ddiag = (double*) malloc(system->num_stoch_species * sizeof(double));
+        p->srrate = 0;
+        p->rrate = (double*) malloc(system->num_stoch_rxns * sizeof(double));
+        p->sdrate = 0;
+        p->Ddiag = (double*) malloc(system->num_stoch_species * sizeof(double));
 
-        p->rdme->heap_index = ordered_list_add( rdme->heap, p );
+        p->heap_index = ordered_list_add( system->heap, p );
 
     }
 
@@ -219,29 +202,28 @@ void nsm_core__create(system_t*system, size_t *irN, size_t *jcN,int *prN, size_t
     /* Create reaction rate matrix (Mreactions X Ncells) and total rate
      vector. In rrate we store all propensities for chemical rections,
      and in srrate the sum of propensities in every subvolume. */
-    //rdme->rrate = (double *)malloc(system->num_stoch_rxn*rdme->Ncells*sizeof(double));
-    //rdme->srrate = (double *)malloc(rdme->Ncells*sizeof(double));
+    //rrate = (double *)malloc(system->num_stoch_rxn*Ncells*sizeof(double));
+    //srrate = (double *)malloc(Ncells*sizeof(double));
 
     //nsm_core__initialize_rxn_propensities(rdme);
 
     /* Total diffusion rate vector (length Mcells). It will hold
      the total diffusion rates in each subvolume. */
-    //rdme->sdrate = (double *)malloc(rdme->Ncells*sizeof(double));
+    //sdrate = (double *)malloc(Ncells*sizeof(double));
     /* The diagonal value of the D-matrix is used frequently. For
      efficiency, we store the negative of D's diagonal in Ddiag. */
-    //rdme->Ddiag = (double *)malloc(rdme->Ndofs*sizeof(double));
+    //Ddiag = (double *)malloc(Ndofs*sizeof(double));
 
     //nsm_core__initialize_diff_propensities(rdme);
 
     /* Create binary (min)heap. */
-    //rdme->rtimes = (double *)malloc(rdme->Ncells*sizeof(double));
-    //rdme->node = (int *)malloc(rdme->Ncells*sizeof(int));
-    //rdme->heap = (int *)malloc(rdme->Ncells*sizeof(int));
+    //rtimes = (double *)malloc(Ncells*sizeof(double));
+    //node = (int *)malloc(Ncells*sizeof(int));
+    //heap = (int *)malloc(Ncells*sizeof(int));
 
 
     /* return rdme structure */
    //return rdme;
-   system->rdme = rdme;
 }
 
 /**************************************************************************/
@@ -254,16 +236,17 @@ void nsm_core__initialize_rxn_propensities(system_t*system){
     particle_t*p;
     for(n=system->particle_list->head; n!=NULL; n=n->next){
         p = n->data;
-        p->rdme->srrate = 0.0;
+        p->srrate = 0.0;
         for (j = 0; j < system->num_stoch_rxns; j++) {
             //rrate[i*Mreactions+j] =
             //(*rfun[j])(&xx[i*Mspecies],tt,vol[i],&data[i*dsize],sd[i],i,xx,irK,jcK,prK);
             //srrate[i] += rrate[i*Mreactions+j];
-            //rdme->rrate[i*system->num_stoch_rxn+j] = (*rdme->rfun[j])(&rdme->xx[i*system->num_stoch_species],0.0,rdme->vol[i],&rdme->data[i*rdme->dsize],rdme->sd[i]);
-            //rdme->srrate[i] += rdme->rrate[i*system->num_stoch_rxn+j];
+            //rrate[i*system->num_stoch_rxn+j] = (*rfun[j])(&xx[i*system->num_stoch_species],0.0,vol[i],&data[i*dsize],sd[i]);
+            //srrate[i] += rrate[i*system->num_stoch_rxn+j];
             double vol = (p->mass / p->rho);
-            p->rdme->rrate[j] = (*system->stoch_rxn_propensity_functions[j])(p->xx,0.0,vol,p->data_fn,p->type);
-            p->rdme->srrate += p->rdme->rrate[j];
+            p->rrate[j] = (*system->stoch_rxn_propensity_functions[j])(p->xx,0.0,vol,p->data_fn,p->type);
+		
+            p->srrate += p->rrate[j];
         }
     }
 }
@@ -272,17 +255,17 @@ void nsm_core__initialize_rxn_propensities(system_t*system){
 void nsm_core__initialize_diff_propensities(system_t* system){
     int s_ndx;
 
-//    for (i = 0; i < rdme->Ndofs; i++) {
-//        rdme->Ddiag[i] = 0.0;
-//        for (j = rdme->jcD[i]; j < rdme->jcD[i+1]; j++)
-//        if (rdme->irD[j] == i) rdme->Ddiag[i] = -1*rdme->prD[j];
+//    for (i = 0; i < Ndofs; i++) {
+//        Ddiag[i] = 0.0;
+//        for (j = jcD[i]; j < jcD[i+1]; j++)
+//        if (irD[j] == i) Ddiag[i] = -1*prD[j];
 //    }
 //
 //    /* Calculate the total diffusion rate for each subvolume. */
-//    for(i = 0; i < rdme->Ncells; i++) {
-//        rdme->sdrate[i] = 0.0;
+//    for(i = 0; i < Ncells; i++) {
+//        sdrate[i] = 0.0;
 //        for(j = 0; j < system->num_stoch_species; j++)
-//        rdme->sdrate[i] += rdme->Ddiag[i*system->num_stoch_species+j]*rdme->xx[i*system->num_stoch_species+j];
+//        sdrate[i] += Ddiag[i*system->num_stoch_species+j]*xx[i*system->num_stoch_species+j];
 //    }
     node_t*n;
     neighbor_node_t*n2;
@@ -293,54 +276,50 @@ void nsm_core__initialize_diff_propensities(system_t* system){
         if(p->neighbors->count == 0){
             find_neighbors(p, system);
         }
-        p->rdme->sdrate = 0.0;
+        p->sdrate = 0.0;
         for(s_ndx=0; s_ndx<system->num_stoch_species; s_ndx++){
-            p->rdme->Ddiag[s_ndx] = 0.0;  //Ddiag is sum of (diff_const*n2->D_i_j)
+            p->Ddiag[s_ndx] = 0.0;  //Ddiag is sum of (diff_const*n2->D_i_j)
             for(n2=p->neighbors->head; n2!=NULL; n2=n2->next){
                 p2 = n2->data;
                 diff_const = system->subdomain_diffusion_matrix[s_ndx*system->num_types + (p2->type-1)];
-                p->rdme->Ddiag[s_ndx] += diff_const*n2->D_i_j;
+                p->Ddiag[s_ndx] += diff_const*n2->D_i_j;
             }
-            p->rdme->sdrate += p->rdme->Ddiag[s_ndx] * p->xx[s_ndx];
+            p->sdrate += p->Ddiag[s_ndx] * p->xx[s_ndx];
         }
     }
 }
 
 /**************************************************************************/
 void nsm_core__initialize_heap(system_t*system){
-    rdme_t* rdme = system->rdme;
     /* Calculate times to next event (reaction or diffusion)
      in each subvolume and initialize heap. */
     ordered_node_t*n;
     particle_t*p;
-    for(n=rdme->heap->head; n!=NULL; n=n->next){
-    //for (i = 0; i < rdme->Ncells; i++) {
-        //rdme->rtimes[i] = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/(rdme->srrate[i]+rdme->sdrate[i]);
-        //rdme->heap[i] = rdme->node[i] = i;
+    for(n=system->heap->head; n!=NULL; n=n->next){
+    //for (i = 0; i < Ncells; i++) {
+        //rtimes[i] = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/(srrate[i]+sdrate[i]);
+        //heap[i] = node[i] = i;
         p = n->data;
-        n->tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/(p->rdme->srrate+p->rdme->sdrate);
+        n->tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/(p->srrate+p->sdrate);
     }
-    //initialize_heap(rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
-    ordered_list_sort(rdme->heap);
-}
-
-/**************************************************************************/
-void nsm_core__destroy(rdme_t*rdme){
-    free(rdme);
+    //initialize_heap(rtimes,node,heap,Ncells);
+    printf("Before sort head is %f\n", system->heap->head->tt) ;
+    ordered_list_sort(system->heap);
+    printf("After sort head is %f\n", system->heap->head->tt) ;
 }
 
 /**************************************************************************/
 void nsm_core__initialize_chem_populations(system_t*system, unsigned int*u0){
     /* Set xx to the initial state. xx will always hold the current solution. */
-    //printf("malloc Ndofs = %li\n",rdme->Ndofs);
-    //rdme->xx = (unsigned int *)malloc(rdme->Ndofs*sizeof(unsigned int));
-    //memcpy(rdme->xx,u0,rdme->Ndofs*sizeof(unsigned int));
+    //printf("malloc Ndofs = %li\n",Ndofs);
+    //xx = (unsigned int *)malloc(Ndofs*sizeof(unsigned int));
+    //memcpy(xx,u0,Ndofs*sizeof(unsigned int));
 
-    //printf("       Ndofs = %li\n",rdme->Ndofs);
+    //printf("       Ndofs = %li\n",Ndofs);
     //printf("xx = [ ");
     //int i;
-    //for(i=0;i<rdme->Ndofs;i++){
-    //    printf("%u ",rdme->xx[i]);
+    //for(i=0;i<Ndofs;i++){
+    //    printf("%u ",xx[i]);
     //}
     //printf("]\n");
 
@@ -358,7 +337,7 @@ void nsm_core__initialize_chem_populations(system_t*system, unsigned int*u0){
 
 
 /**************************************************************************/
-void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
+void nsm_core__build_diffusion_matrix(system_t*system){
     printf("*************** build_diffusion_matrix ***************\n");fflush(stdout);
     double off_diag_sum,diff_const,dist2;
     node_t *n;
@@ -387,14 +366,14 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
     printf("irD_length= %li\n",irD_length);fflush(stdout);
     printf("jcD_length= %li\n",jcD_length);fflush(stdout);
     // allocate space for each array
-    printf("MALLOC rdme->irD [%li]\n",irD_length*system->num_stoch_species);
+    printf("MALLOC irD [%li]\n",irD_length*system->num_stoch_species);
     size_t*irD = (size_t*) malloc(sizeof(size_t)*irD_length*system->num_stoch_species);
     size_t irD_ndx = 0;
-    printf("MALLOC rdme->jcD [%li]\n",jcD_length*system->num_stoch_species);
+    printf("MALLOC jcD [%li]\n",jcD_length*system->num_stoch_species);
     size_t*jcD = (size_t*) malloc(sizeof(size_t)*jcD_length*system->num_stoch_species);
     size_t jcD_ndx = 0;
     jcD[jcD_ndx++] = 0;
-    printf("MALLOC rdme->prD [%li]\n",prD_length*system->num_stoch_species);
+    printf("MALLOC prD [%li]\n",prD_length*system->num_stoch_species);
     double *prD = (double*) malloc(sizeof(double)*prD_length*system->num_stoch_species);
     size_t prD_ndx = 0;
     // for each particle p, look at each neighbor p2
@@ -450,9 +429,9 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
             jcD[jcD_ndx++] = prD_ndx;
         }
     }
-    printf("irD_ndx (%li) length rdme->irD (%li)\n",irD_ndx,irD_length*system->num_stoch_species);
-    printf("jcD_ndx (%li) length rdme->jcD (%li)\n",jcD_ndx,jcD_length*system->num_stoch_species);
-    printf("prD_ndx (%li) length rdme->prD (%li)\n",prD_ndx,prD_length*system->num_stoch_species);
+    printf("irD_ndx (%li) length irD (%li)\n",irD_ndx,irD_length*system->num_stoch_species);
+    printf("jcD_ndx (%li) length jcD (%li)\n",jcD_ndx,jcD_length*system->num_stoch_species);
+    printf("prD_ndx (%li) length prD (%li)\n",prD_ndx,prD_length*system->num_stoch_species);
     if( prD_ndx != irD_ndx){
             printf("Assembly: prD_ndx (%zu) != irD_ndx (%zu)\n",prD_ndx,irD_ndx);
     }
@@ -489,17 +468,9 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
 
 }
 
-/**************************************************************************/
-void nsm_core__destroy_diffusion_matrix(rdme_t*rdme){
-    //free(rdme->irD);
-    //free(rdme->jcD);
-    //free(rdme->prD);
-}
-
 
 /**************************************************************************/
 void nsm_core__take_step(system_t*system, double current_time, double step_size){
-    rdme_t*rdme = system->rdme;
     double tt = current_time;
     double end_time = current_time + step_size;
     double totrate,cum,rdelta,rrdelta;
@@ -516,19 +487,19 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
     // Check the integrety of the heap
 //    ordered_node_t*on,*bon,*aon;
 //    printf("========================================================\n");
-//    on= system->rdme->heap->head;
+//    on= system->heap->head;
 //    bon=NULL;
-//    aon=system->rdme->heap->head->next;
+//    aon=system->heap->head->next;
 //    while(on!=NULL){
 //        if( on->prev != bon ||
 //            on->next != aon ){
 //            printf("next/prev mismatch\n");exit(1);
 //        }
 //        on = on->next;
-//        if(bon==NULL){bon=system->rdme->heap->head;}else{bon=bon->next;}
+//        if(bon==NULL){bon=system->heap->head;}else{bon=bon->next;}
 //        if(aon!=NULL){aon=aon->next;}
 //    }
-//    if(system->rdme->heap->tail != bon){
+//    if(system->heap->tail != bon){
 //        printf("tail mismatch\n");exit(1);
 //    }
 //    printf("========================================================\n");
@@ -540,54 +511,54 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
         /* Get the subvolume in which the next event occurred.
          This subvolume is on top of the heap. */
         //told = tt;
-        //tt   = rdme->rtimes[0];
-        //subvol = rdme->node[0];
-        subvol = system->rdme->heap->head->data;
-        tt = system->rdme->heap->head->tt;
+        //tt   = rtimes[0];
+        //subvol = node[0];
+        subvol = system->heap->head->data;
+        tt = system->heap->head->tt;
         vol = (subvol->mass / subvol->rho);
 
         //if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}
         /* First check if it is a reaction or a diffusion event. */
-        totrate = subvol->rdme->srrate + subvol->rdme->sdrate;
+        totrate = subvol->srrate + subvol->sdrate;
 
 //        if(totrate <= 0){ // Sanity check, is there a non-zero reaction and diffusion propensity
-//            totrate = rdme->srrate[subvol]+rdme->sdrate[subvol];
+//            totrate = srrate[subvol]+sdrate[subvol];
 //            if (totrate > 0.0)
-//                rdme->rtimes[0] = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/totrate+tt;
+//                rtimes[0] = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/totrate+tt;
 //            else
-//                rdme->rtimes[0] = INFINITY;
+//                rtimes[0] = INFINITY;
 //            /* Update the heap. */
-//            update(0,rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
+//            update(0,rtimes,node,heap,Ncells);
 //            // go to the next element
 //            continue;
 //        }
 
         rand1 = dsfmt_genrand_close_open(&dsfmt);
 
-        if (rand1 <= subvol->rdme->srrate/totrate) { // use normalized floating point comparision
+        if (rand1 <= subvol->srrate/totrate) { // use normalized floating point comparision
             /* Reaction event. */
             event = 0;
 
             /* a) Determine the reaction re that did occur (direct SSA). */
-            double rand_rval = rand1 * subvol->rdme->srrate;
-            for (re = 0, cum = subvol->rdme->rrate[0]; re < system->num_stoch_rxns && rand_rval > cum; re++, cum += subvol->rdme->rrate[re]);
+            double rand_rval = rand1 * subvol->srrate;
+            for (re = 0, cum = subvol->rrate[0]; re < system->num_stoch_rxns && rand_rval > cum; re++, cum += subvol->rrate[re]);
             if(re >= system->num_stoch_rxns){
-                if(cum != subvol->rdme->srrate){
-                    printf("Reaction propensity mismatch in voxel %i. re=%i, srrate[subvol]=%e cum=%e rand_rval=%e\n",subvol->id,re,subvol->rdme->srrate,cum,rand_rval);
+                if(cum != subvol->srrate){
+                    printf("Reaction propensity mismatch in voxel %i. re=%i, srrate[subvol]=%e cum=%e rand_rval=%e\n",subvol->id,re,subvol->srrate,cum,rand_rval);
                     rdelta = 0.0;
                     for (j=0;j<system->num_stoch_rxns; j++) {
-                        rdelta += (subvol->rdme->rrate[j] = (*system->stoch_rxn_propensity_functions[j])(subvol->xx,tt,vol,subvol->data_fn,subvol->type));
+                        rdelta += (subvol->rrate[j] = (*system->stoch_rxn_propensity_functions[j])(subvol->xx,tt,vol,subvol->data_fn,subvol->type));
                     }
-                    subvol->rdme->srrate = rdelta;
+                    subvol->srrate = rdelta;
                 }
-                if(subvol->rdme->srrate == 0.0){ continue; }
+                if(subvol->srrate == 0.0){ continue; }
 
 
-                double rand_rval2 = rand1 * subvol->rdme->srrate; // sum of propensitiess is not propensity sum, re-roll
+                double rand_rval2 = rand1 * subvol->srrate; // sum of propensitiess is not propensity sum, re-roll
 
-                for (re = 0, cum = subvol->rdme->rrate[0]; re < system->num_stoch_rxns && rand_rval2 > cum; re++, cum += subvol->rdme->rrate[re]);
+                for (re = 0, cum = subvol->rrate[0]; re < system->num_stoch_rxns && rand_rval2 > cum; re++, cum += subvol->rrate[re]);
                 if(re >= system->num_stoch_rxns){ // failed twice, problems!
-                    printf("Propensity sum overflow, rand=%e rand_rval=%e rand_rval2=%e srrate[%i]=%e cum=%e\n",rand1,rand_rval,rand_rval2,subvol->id,subvol->rdme->srrate,cum);
+                    printf("Propensity sum overflow, rand=%e rand_rval=%e rand_rval2=%e srrate[%i]=%e cum=%e\n",rand1,rand_rval,rand_rval2,subvol->id,subvol->srrate,cum);
                     exit(1);
                 }
             }
@@ -595,65 +566,65 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
             printf("nsm: tt=%e subvol=%i type=%i ",tt,subvol->id,subvol->type);
             if(debug_flag){printf("Rxn %i \n",re);}
             /* b) Update the state of the subvolume subvol and sdrate[subvol]. */
-            for (i = rdme->jcN[re]; i < rdme->jcN[re+1]; i++) {
-                int prev_val = subvol->xx[rdme->irN[i]];
-                subvol->xx[rdme->irN[i]] += rdme->prN[i];
-                if (subvol->xx[rdme->irN[i]] < 0){
+            for (i = system->jcN[re]; i < system->jcN[re+1]; i++) {
+                int prev_val = subvol->xx[system->irN[i]];
+                subvol->xx[system->irN[i]] += system->prN[i];
+                if (subvol->xx[system->irN[i]] < 0){
                     errcode = 1;
-                    printf("Negative state detected after reaction %i, subvol %i, species %zu at time %e (was %i now %i)\n",re,subvol->id,rdme->irN[i],tt,prev_val,subvol->xx[rdme->irN[i]]);
+                    printf("Negative state detected after reaction %i, subvol %i, species %zu at time %e (was %i now %i)\n",re,subvol->id,system->irN[i],tt,prev_val,subvol->xx[system->irN[i]]);
 
                     print_current_state(subvol,system);
                     exit(1);
                 }
-                subvol->rdme->sdrate += subvol->rdme->Ddiag[rdme->irN[i]]*rdme->prN[i];
+                subvol->sdrate += subvol->Ddiag[system->irN[i]]*system->prN[i];
             }
 
             /* c) Recalculate srrate[subvol] using dependency graph. */
-            for (i = rdme->jcG[system->num_stoch_species+re], rdelta = 0.0; i < rdme->jcG[system->num_stoch_species+re+1]; i++) {
-                old = subvol->rdme->rrate[rdme->irG[i]];
-                j = rdme->irG[i];
+            for (i = system->jcG[system->num_stoch_species+re], rdelta = 0.0; i < system->jcG[system->num_stoch_species+re+1]; i++) {
+                old = subvol->rrate[system->irG[i]];
+                j = system->irG[i];
                 rdelta +=
-                (subvol->rdme->rrate[j] =
-                 //(*rdme->rfun[j])(&rdme->xx[subvol*system->num_stoch_species],tt,rdme->vol[subvol],&rdme->data[subvol*rdme->dsize],rdme->sd[subvol])
+                (subvol->rrate[j] =
+                 //(*rfun[j])(&xx[subvol*system->num_stoch_species],tt,vol[subvol],&data[subvol*dsize],sd[subvol])
 
                  (*system->stoch_rxn_propensity_functions[j])(subvol->xx,tt,vol,subvol->data_fn,subvol->type)
                  )-old;
 
             }
-            subvol->rdme->srrate += rdelta;
+            subvol->srrate += rdelta;
 
-            rdme->total_reactions++; /* counter */
+            system->total_reactions++; /* counter */
         }
         else {
             /* Diffusion event. */
             event = 1;
 
             /* a) Determine which species... */
-            double diff_rand = rand1 * subvol->rdme->sdrate;
+            double diff_rand = rand1 * subvol->sdrate;
 
-            //for (spec = 0, dof = subvol*system->num_stoch_species, cum = rdme->Ddiag[dof]*rdme->xx[dof];
+            //for (spec = 0, dof = subvol*system->num_stoch_species, cum = Ddiag[dof]*xx[dof];
             //     spec < system->num_stoch_species && diff_rand > cum;
-            //     spec++, cum += rdme->Ddiag[dof+spec]*rdme->xx[dof+spec]);
-            for (spec = 0, cum = subvol->rdme->Ddiag[spec]*subvol->xx[spec];
+            //     spec++, cum += Ddiag[dof+spec]*xx[dof+spec]);
+            for (spec = 0, cum = subvol->Ddiag[spec]*subvol->xx[spec];
                  spec < system->num_stoch_species && diff_rand > cum;
-                 spec++, cum += subvol->rdme->Ddiag[spec]*subvol->xx[spec]);
+                 spec++, cum += subvol->Ddiag[spec]*subvol->xx[spec]);
             if(spec >= system->num_stoch_species){
                 //printf("Diffusion species overflow\n");
                 // try again, 'cum' is a better estimate of the propensity sum
-                if(cum != subvol->rdme->srrate){
-                    printf("Diffusion propensity mismatch in voxel %i. spec=%i, sdrate[subvol]=%e cum=%e diff_rand=%e\n",subvol->id,spec,subvol->rdme->sdrate,cum,diff_rand);
+                if(cum != subvol->srrate){
+                    printf("Diffusion propensity mismatch in voxel %i. spec=%i, sdrate[subvol]=%e cum=%e diff_rand=%e\n",subvol->id,spec,subvol->sdrate,cum,diff_rand);
                     rdelta = 0.0;
                     for(j = 0; j < system->num_stoch_species; j++){
-                        rdelta += subvol->rdme->Ddiag[j]*subvol->xx[j];
+                        rdelta += subvol->Ddiag[j]*subvol->xx[j];
                     }
-                    subvol->rdme->sdrate = rdelta;
+                    subvol->sdrate = rdelta;
                 }
-                if(subvol->rdme->sdrate == 0.0){ continue; }
+                if(subvol->sdrate == 0.0){ continue; }
 
                 diff_rand = cum *rand1;
-                for (spec = 0, cum = subvol->rdme->Ddiag[spec]*subvol->xx[spec];
+                for (spec = 0, cum = subvol->Ddiag[spec]*subvol->xx[spec];
                      spec < system->num_stoch_species && diff_rand > cum;
-                     spec++, cum += subvol->rdme->Ddiag[spec]*subvol->xx[spec]);
+                     spec++, cum += subvol->Ddiag[spec]*subvol->xx[spec]);
                 if(spec >= system->num_stoch_species){
                     spec--;
                     while(subvol->xx[spec] <= 0){
@@ -670,28 +641,28 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
 
             /* b) and then the direction of diffusion. */
             double r2 = dsfmt_genrand_close_open(&dsfmt);
-            rand2 = r2 * subvol->rdme->Ddiag[spec];
+            rand2 = r2 * subvol->Ddiag[spec];
 
             /* Search for diffusion direction. */
-//            for (i = rdme->jcD[col], cum2 = 0.0; i < rdme->jcD[col+1]; i++)
-//                if (rdme->irD[i] != col && (cum2 += rdme->prD[i]) > rand2)
+//            for (i = jcD[col], cum2 = 0.0; i < jcD[col+1]; i++)
+//                if (irD[i] != col && (cum2 += prD[i]) > rand2)
 //                    break;
 //
 //            /* paranoia fix: */
 //            // This paranoia fix creates errors if the final rate has a zero propensity.  It can cause negative populations.
-//            if (i >= rdme->jcD[col+1]){
+//            if (i >= jcD[col+1]){
 //                //printf("Diffusion direction overflow\n");
 //                // try again, 'cum2' is a better estimate of propensity sum
 //                rand2 = r2*cum2;
-//                for (i = rdme->jcD[col], cum2 = 0.0; i < rdme->jcD[col+1]; i++)
-//                    if (rdme->irD[i] != col && (cum2 += rdme->prD[i]) > rand2)
+//                for (i = jcD[col], cum2 = 0.0; i < jcD[col+1]; i++)
+//                    if (irD[i] != col && (cum2 += prD[i]) > rand2)
 //                        break;
-//                if (i >= rdme->jcD[col+1]){
+//                if (i >= jcD[col+1]){
 //                    i--;
 //                }
 //            }
 //
-//            to_node = rdme->irD[i];
+//            to_node = irD[i];
 //            to_vol = to_node/system->num_stoch_species;
 
             particle_t*p2;
@@ -749,74 +720,76 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
             if(debug_flag){printf("Diff %i->%i\n",subvol->id,dest_subvol->id);}
 
             /* Save reaction and diffusion rates. */
-            old_rrate = dest_subvol->rdme->srrate;
-            old_drate = dest_subvol->rdme->sdrate;
+            old_rrate = dest_subvol->srrate;
+            old_drate = dest_subvol->sdrate;
             /* Recalculate the reaction rates using dependency graph G. */
             if (system->num_stoch_rxns > 0){
-                for (i = rdme->jcG[spec], rdelta = 0.0, rrdelta = 0.0; i < rdme->jcG[spec+1]; i++) {
+                for (i = system->jcG[spec], rdelta = 0.0, rrdelta = 0.0; i < system->jcG[spec+1]; i++) {
 
 // herehere
-                    j = rdme->irG[i];
+                    j = system->irG[i];
                     // update this voxel's reactions
-                    old = subvol->rdme->rrate[j];
+                    old = subvol->rrate[j];
                     rdelta +=
-                      (subvol->rdme->rrate[j] =
+                      (subvol->rrate[j] =
                         (*system->stoch_rxn_propensity_functions[j])(subvol->xx,tt,vol,subvol->data_fn,subvol->type)
                       )-old;
 
 
                     // update dest voxel's reactions
-                    old = dest_subvol->rdme->rrate[j];
-                    rrdelta += (dest_subvol->rdme->rrate[j] =
+                    old = dest_subvol->rrate[j];
+                    rrdelta += (dest_subvol->rrate[j] =
                         (*system->stoch_rxn_propensity_functions[j])(dest_subvol->xx,tt,vol,dest_subvol->data_fn,dest_subvol->type)
                       )-old;
                 }
 
-                subvol->rdme->srrate += rdelta;
-                dest_subvol->rdme->srrate += rrdelta;
+                subvol->srrate += rdelta;
+                dest_subvol->srrate += rrdelta;
             }
 
             /* Adjust diffusion rates. */
-            subvol->rdme->sdrate -= subvol->rdme->Ddiag[spec];
-            dest_subvol->rdme->sdrate += dest_subvol->rdme->Ddiag[spec];
+            subvol->sdrate -= subvol->Ddiag[spec];
+            dest_subvol->sdrate += dest_subvol->Ddiag[spec];
 
-            rdme->total_diffusion++; /* counter */
+            system->total_diffusions++; /* counter */
 
         }
 
         /* Compute time to new event for this subvolume. */
-        totrate = subvol->rdme->srrate+subvol->rdme->sdrate;
+        totrate = subvol->srrate+subvol->sdrate;
         if(totrate > 0.0){
-            system->rdme->heap->head->tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/totrate+tt;
+            system->heap->head->tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/totrate+tt;
         }else{
-            system->rdme->heap->head->tt = INFINITY;
+            system->heap->head->tt = INFINITY;
         }
+	printf("head is %d, subvol is %d\n", system->heap->head->data->id, subvol->id) ;
+	printf("tts are %f, and %f\n", system->heap->head->tt, subvol->heap_index->tt) ;
         /* Update the heap. */
-        //update(0,rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
-        ordered_list_bubble_up_down(system->rdme->heap, subvol->rdme->heap_index);
+        //update(0,rtimes,node,heap,Ncells);
+        ordered_list_bubble_up_down(system->heap, subvol->heap_index);
 
         /* If it was a diffusion event, also update the other affected
          node. */
         if(event) {
 
-            totrate = dest_subvol->rdme->srrate+dest_subvol->rdme->sdrate;
+            totrate = dest_subvol->srrate+dest_subvol->sdrate;
             if(totrate > 0.0) {
-                if(!isinf(dest_subvol->rdme->heap_index->tt)){
-                    dest_subvol->rdme->heap_index->tt =
-                    (old_rrate+old_drate)/totrate*(dest_subvol->rdme->heap_index->tt - tt)+tt;
+                if(!isinf(dest_subvol->heap_index->tt)){
+                    dest_subvol->heap_index->tt =
+                    (old_rrate+old_drate)/totrate*(dest_subvol->heap_index->tt - tt)+tt;
                 }else{
                     /* generate a new waiting time */
-                    dest_subvol->rdme->heap_index->tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/totrate+tt;
+                    dest_subvol->heap_index->tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/totrate+tt;
                 }
             }else{
-                dest_subvol->rdme->heap_index->tt = INFINITY;
+                dest_subvol->heap_index->tt = INFINITY;
             }
 
-            ordered_list_bubble_up_down(system->rdme->heap, dest_subvol->rdme->heap_index);
+            ordered_list_bubble_up_down(system->heap, dest_subvol->heap_index);
         }
 
         // re-sort the heap
-        //ordered_list_sort(system->rdme->heap);  // this resorts the whole list
+        //ordered_list_sort(system->heap);  // this resorts the whole list
 
         /* Check for error codes. */
         if (errcode) {
