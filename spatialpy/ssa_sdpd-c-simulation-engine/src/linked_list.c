@@ -296,6 +296,8 @@ static inline void linked_list_sort__swap(node_t* a, node_t* b){
     particle_t*tmp = b->data;
     b->data = a->data;
     a->data = tmp;
+    a->data->x_index = a;
+    b->data->x_index = b;
 }
 static inline node_t* linked_list_sort__partition_avg(node_t* min, node_t* max){
     double partitionValue = (min->data->x[0] + max->data->x[0])/2.0;
@@ -410,7 +412,21 @@ void neighbor_list_sort__quicksort(neighbor_node_t* min, neighbor_node_t* max){
 }
 
 void neighbor_list_sort(neighbor_list_t*ll){
+    // neighbor_node_t*node1 = ll->head;
+    // while(node1 != NULL){
+    //     printf("%f\n", node1->dist);
+    //     node1 = node1->next;
+    // }
     neighbor_list_sort__quicksort(ll->head, ll->tail->next);
+    neighbor_node_t*node = ll->head->next;
+    while(node != NULL) {
+        if(node->prev->dist > node->dist) {
+            printf("===================================\n");
+            printf("The list was not properly sorted\n");
+            printf("===================================\n");
+        }
+        node = node->next;
+    }
 }
 
 /*ordered_node_t* ordered_list_sort__sub(ordered_node_t* head){
@@ -446,6 +462,8 @@ static inline void ordered_list_sort__swap(ordered_node_t* a, ordered_node_t* b)
     particle_t*tmp = b->data;
     b->data = a->data;
     a->data = tmp;
+    a->data->heap_index = a;
+    b->data->heap_index = b;
     double t2;
     t2= b->tt;
     b->tt = a->tt;
@@ -480,6 +498,15 @@ void ordered_list_sort__quicksort(ordered_node_t* min, ordered_node_t* max){
 
 void ordered_list_sort(ordered_list_t*ll){
     ordered_list_sort__quicksort(ll->head, ll->tail);
+    ordered_node_t*node = ll->head->next;
+    // while(node != NULL) {
+    //     if(node->prev->tt > node->tt) {
+    //         printf("===================================\n");
+    //         printf("The list was not properly sorted\n");
+    //         printf("===================================\n");
+    //     }
+    //     node = node->next;
+    // }
 }
 
 
