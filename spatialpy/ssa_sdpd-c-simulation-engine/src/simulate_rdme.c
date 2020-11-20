@@ -303,9 +303,7 @@ void nsm_core__initialize_heap(system_t*system){
         n->tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/(p->srrate+p->sdrate);
     }
     //initialize_heap(rtimes,node,heap,Ncells);
-    printf("Before sort head is %f\n", system->heap->head->tt) ;
     ordered_list_sort(system->heap);
-    printf("After sort head is %f\n", system->heap->head->tt) ;
 }
 
 /**************************************************************************/
@@ -563,7 +561,7 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
                 }
             }
             if(debug_flag){printf("nsm: tt=%e subvol=%i type=%i ",tt,subvol->id,subvol->type);}
-            printf("nsm: tt=%e subvol=%i type=%i ",tt,subvol->id,subvol->type);
+            //printf("nsm: tt=%e subvol=%i type=%i ",tt,subvol->id,subvol->type);
             if(debug_flag){printf("Rxn %i \n",re);}
             /* b) Update the state of the subvolume subvol and sdrate[subvol]. */
             for (i = system->jcN[re]; i < system->jcN[re+1]; i++) {
@@ -669,9 +667,6 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
             cum2 = 0.0;
             for(nn=subvol->neighbors->head; nn!=NULL; nn=nn->next){
                 p2 = nn->data;
-		printf("NUM TYPES IN NN SEARCH THINGY: %ld\n", system->num_types) ;
-		printf(" SPEC IS %d\n", spec) ;
-		printf(" p2->type is %d\n", p2->type) ;
                 diff_const = system->subdomain_diffusion_matrix[spec*system->num_types + (p2->type-1)];
                 cum2 += nn->D_i_j * diff_const;
                 if(cum2 > rand2){
@@ -762,8 +757,8 @@ void nsm_core__take_step(system_t*system, double current_time, double step_size)
         }else{
             system->heap->head->tt = INFINITY;
         }
-	printf("head is %d, subvol is %d\n", system->heap->head->data->id, subvol->id) ;
-	printf("tts are %f, and %f\n", system->heap->head->tt, subvol->heap_index->tt) ;
+	//printf("head is %d, subvol is %d\n", system->heap->head->data->id, subvol->id) ;
+	//printf("tts are %f, and %f\n", system->heap->head->tt, subvol->heap_index->tt) ;
         /* Update the heap. */
         //update(0,rtimes,node,heap,Ncells);
         ordered_list_bubble_up_down(system->heap, subvol->heap_index);
