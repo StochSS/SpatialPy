@@ -238,7 +238,6 @@ static inline node_t *lastNode(node_t *root){
     return root;
 }
 
-<<<<<<< HEAD
 
 static inline void linked_list_sort__swap(node_t* a, node_t* b){
     particle_t*tmp = b->data;
