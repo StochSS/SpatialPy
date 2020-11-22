@@ -305,11 +305,11 @@ static inline node_t* linked_list_sort__partition_avg(node_t* min, node_t* max){
     node_t*right = max;
     while(left!=right && right->next != left){
         // from left, search for an element that is > partitionValue
-        while(left!=right && left->data->x[0] <= partitionValue){
+        while(left!=right && right->next != left && left->data->x[0] <= partitionValue){
             left = left->next;
         }
         // from right, search for an element that is < partitionValue
-        while(left!=right && right->data->x[0] > partitionValue){
+        while(left!=right && right->next != left && right->data->x[0] > partitionValue){
             right = right->prev;
         }
         // swap elements
@@ -390,11 +390,11 @@ static inline neighbor_node_t* neighbor_list_sort__partition_avg(neighbor_node_t
     neighbor_node_t*right = max;
     while(left!=right && right->next != left){
         // from left, search for an element that is > partitionValue
-        while(left!=right && left->dist <= partitionValue){
+        while(left!=right && right->next != left && left->dist <= partitionValue){
             left = left->next;
         }
         // from right, search for an element that is < partitionValue
-        while(left!=right && right->dist > partitionValue){
+        while(left!=right && right->next != left && right->dist > partitionValue){
             right = right->prev;
         }
         // swap elements
@@ -475,11 +475,11 @@ static inline ordered_node_t* ordered_list_sort__partition_avg(ordered_node_t* m
     ordered_node_t*right = max;
     while(left!=right && right->next != left){
         // from left, search for an element that is > partitionValue
-        while(left!=right && left->tt <= partitionValue){
+        while(left!=right && right->next != left && left->tt <= partitionValue){
             left = left->next;
         }
         // from right, search for an element that is < partitionValue
-        while(left!=right && right->tt > partitionValue){
+        while(left!=right && right->next != left && right->tt > partitionValue){
             right = right->prev;
         }
         // swap elements
