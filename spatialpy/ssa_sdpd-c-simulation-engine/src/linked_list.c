@@ -11,6 +11,7 @@ See the file LICENSE.txt for details.
 #include "linked_list.h"
 #include "particle.h"
 #include <math.h>
+#include "dSFMT/dSFMT.h"
 
 
 //#define DEBUG_UPDATE
@@ -234,7 +235,7 @@ static inline void neighbor_list_sort__swap(neighbor_node_t* a, neighbor_node_t*
 
 static inline node_t *lastNode(node_t *root){
     while (root && root->next)
-	root = root->next;
+        root = root->next;
     return root;
 }
 
@@ -286,35 +287,6 @@ void linked_list_sort(linked_list_t*ll){
     }
 }
 
-/*neighbor_node_t* neighbor_list_sort__sub(neighbor_node_t* head){
-    neighbor_node_t* min_neighbor = head;
-    neighbor_node_t* before = NULL;
-    neighbor_node_t* ptr;
-    neighbor_node_t* tmp;
-    if(head->next == NULL){
-        return head;
-    }
-    for(ptr = head; ptr->next != NULL; ptr = ptr->next){
-        if( ptr->next->dist < min_neighbor->dist ){
-            min_neighbor = ptr->next;
-            before = ptr;
-        }
-    }
-    if( min_neighbor != head ){
-        tmp = head;
-        head = min_neighbor;
-        before->next = min_neighbor->next;
-        if(min_neighbor->next != NULL){ min_neighbor->next->prev = before;}
-        head->next = tmp;
-        tmp->prev = head;
-        head->prev = NULL;
-    }
-    head->next = neighbor_list_sort__sub(head->next);
-    if(head->next != NULL){
-        head->next->prev = head;
-    }
-    return head;
-}*/
 
 static inline void neighbor_list_sort__swap(neighbor_node_t* a, neighbor_node_t* b){
     particle_t*tmp = b->data;
@@ -359,11 +331,6 @@ void neighbor_list_sort__quicksort(neighbor_node_t* min, neighbor_node_t* max){
 }
 
 void neighbor_list_sort(neighbor_list_t*ll){
-    // neighbor_node_t*node1 = ll->head;
-    // while(node1 != NULL){
-    //     printf("%f\n", node1->dist);
-    //     node1 = node1->next;
-    // }
     neighbor_list_sort__quicksort(ll->head, ll->tail->next);
     neighbor_node_t*node = ll->head->next;
     while(node != NULL) {
@@ -376,35 +343,6 @@ void neighbor_list_sort(neighbor_list_t*ll){
     }
 }
 
-/*ordered_node_t* ordered_list_sort__sub(ordered_node_t* head){
-    ordered_node_t* min_ordered = head;
-    ordered_node_t* before = NULL;
-    ordered_node_t* ptr;
-    ordered_node_t* tmp;
-    if(head->next == NULL){
-        return head;
-    }
-    for(ptr = head; ptr->next != NULL; ptr = ptr->next){
-        if( ptr->next->tt < min_ordered->tt ){
-            min_ordered = ptr->next;
-            before = ptr;
-        }
-    }
-    if( min_ordered != head ){
-        tmp = head;
-        head = min_ordered;
-        before->next = min_ordered->next;
-        if(min_ordered->next != NULL){ min_ordered->next->prev = before;}
-        head->next = tmp;
-        tmp->prev = head;
-        head->prev = NULL;
-    }
-    head->next = ordered_list_sort__sub(head->next);
-    if(head->next != NULL){
-        head->next->prev = head;
-    }
-    return head;
-}*/
 static inline void ordered_list_sort__swap(ordered_node_t* a, ordered_node_t* b){
     particle_t*tmp = b->data;
     b->data = a->data;
@@ -465,25 +403,25 @@ void ordered_list_bubble_up_down(ordered_list_t*ll, ordered_node_t*n){
    
     ordered_node_t*before = n->prev;
     ordered_node_t*after  = n->next;
-    if(before != NULL){		// If node before, connect that to one after
+    if(before != NULL){ // If node before, connect that to one after
         before->next = after;
     }else{
-        ll->head = ll->head->next;	//else node is head
-	ll->head->prev = NULL ;
+        ll->head = ll->head->next; //else node is head
+        ll->head->prev = NULL ;
     }
-    if(after != NULL){		// If node after, connect that to one before
-        after->prev = before;		// else node is tail
-    }else{			// if nothing after (is tail), set tail to node before
+    if(after != NULL){ // If node after, connect that to one before
+        after->prev = before; // else node is tail
+    }else{ // if nothing after (is tail), set tail to node before
         ll->tail = ll->tail->prev;
-	ll->tail->next = NULL ;
+        ll->tail->next = NULL ;
     }
     // Find new position
     //      if tt==inf, move to end
     if(isinf(n->tt) || n->tt >= ll->tail->tt){
         // move to end
-	if(n == ll->head){
-		ll->head = n->next ;
-	}
+        if(n == ll->head){
+            ll->head = n->next ;
+        }
         ll->tail->next = n;
         n->prev = ll->tail;
         n->next = NULL;
@@ -499,23 +437,23 @@ void ordered_list_bubble_up_down(ordered_list_t*ll, ordered_node_t*n){
     }
     //      Check if we move down, move down linearly
     else if(n->next != NULL && n->next->tt < n->tt){
-	while(n1!=NULL && n1->tt < n->tt){
-	    n1=n1->next ;
-	}
-                n->next = n1;
-                n->prev = n1->prev;
-                n1->prev->next = n;
-                n1->prev = n;
+        while(n1!=NULL && n1->tt < n->tt){
+            n1=n1->next ;
+        }
+        n->next = n1;
+        n->prev = n1->prev;
+        n1->prev->next = n;
+        n1->prev = n;
     }
     else {
-	n1 = n->prev ;
-	while(n1!=NULL && n1->tt > n->tt){
-		n1=n1->prev ;
-	}
-                n->prev = n1;
-                n->next = n1->next;
-                n1->next->prev = n;
-                n1->next = n;
+        n1 = n->prev ;
+        while(n1!=NULL && n1->tt > n->tt){
+            n1=n1->prev ;
+        }
+        n->prev = n1;
+        n->next = n1->next;
+        n1->next->prev = n;
+        n1->next = n;
     }
 
 
