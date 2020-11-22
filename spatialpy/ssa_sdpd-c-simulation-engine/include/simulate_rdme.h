@@ -15,8 +15,9 @@ See the file LICENSE.txt for details.
 // Global flags
 extern dsfmt_t dsfmt;
 
-typedef struct __rdme_data_t rdme_t;
+//typedef struct __rdme_data_t rdme_t;
 
+/*
 struct __rdme_data_t {
     //size_t *irD; // replaced by neighbor_node_t->D_i_j
     //size_t *jcD;
@@ -49,7 +50,8 @@ struct __rdme_data_t {
     long int total_diffusion;
     //char** species_names; //  system->species_names
 };
-
+*/
+/*
 typedef struct __rdme_voxel_t rdme_voxel_t;
 struct __rdme_voxel_t {
     double srrate;
@@ -58,19 +60,18 @@ struct __rdme_voxel_t {
     double* Ddiag;
     ordered_node_t*heap_index;
 };
+*/
 
 
 
 void initialize_rdme(system_t*system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
                         unsigned int*u0);
 void simulate_rdme(system_t*system, unsigned int step);
-void destroy_rdme(system_t*system);
 
 
 /******************************************************************/
 
 void nsm_core__create(system_t*system, size_t *irN, size_t *jcN,int *prN, size_t *irG, size_t *jcG);
-void nsm_core__destroy(rdme_t*rdme);
 
 void nsm_core__initialize_chem_populations(system_t*system, unsigned int*u0);
 
@@ -79,9 +80,8 @@ void nsm_core__initialize_diff_propensities(system_t*system);
 void nsm_core__initialize_heap(system_t*system);
 
 
-void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system);
-void nsm_core__destroy_diffusion_matrix(rdme_t*rdme);
-void print_heap(system_t*system);
+void nsm_core__build_diffusion_matrix(system_t*system);
+
 void nsm_core__take_step(system_t*system, double current_time, double step_size);
 
 

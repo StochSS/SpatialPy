@@ -237,7 +237,6 @@ void run_simulation(int num_threads, system_t* system){
 
     //clean up
     if(debug_flag) printf("Cleaning up RDME\n");
-    destroy_rdme(system);
 
     // Kill threads and wait for them to finish
     /*

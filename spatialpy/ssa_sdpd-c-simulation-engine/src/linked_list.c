@@ -208,89 +208,37 @@ void ordered_list_delete( ordered_list_t* ll, ordered_node_t* to_delete){
     free(to_delete);
 }
 
-// search for a node by it's data field
-/*
-node_t* linked_list_search( linked_list_t* ll, char* search_string ){
-    node_t* n;
-    for( n=ll->head; n != NULL; n = n->next ){
-        if( strcmp( n->data, search_string) == 0  ){
-            break;
-        }
-    }
-    if( n == NULL){
-        return NULL;
-    }
-    // success, found the element
-    return n;
-}*/
-
-// get node by index
-/*
-node_t* linked_list_get( linked_list_t* ll, int index){
-    int count = 0;
-    node_t* n = ll->head;
-    if( ll->head == NULL){
-        printf("Error, linked_list_get() empty list\n");
-        return NULL;
-    }
-    while( count < index ){
-        if(n->next == NULL){
-            printf("Error, linked_list_get() list shorter than %i \n", index);
-            return NULL;
-        }
-        n = n->next;
-        count++;
-    }
-    return n;
-
-}
-*/
-
-// remove and return first node on list
-/*
-node * linked_list_pop( linked_list * ll){
-    node_t*n = ll->head;
-    if( ll->head == NULL){
-        return NULL;
-    }
-    ll->head = ll->head->next;
-    ll->head->prev = NULL;
-    ll->count--;
-    return n;
-}
-*/
-
-
-node_t* linked_list_sort__sub(node_t* head){
-    node_t* min_node = head;
-    node_t* before = NULL;
-    node_t* ptr;
-    node_t* tmp;
-    if(head->next == NULL){
-        return head;
-    }
-    for(ptr = head; ptr->next != NULL; ptr = ptr->next){
-        if( ptr->next->data->x[0] < min_node->data->x[0] ){
-            min_node = ptr->next;
-            before = ptr;
-        }
-    }
-    if( min_node != head ){
-        tmp = head;
-        head = min_node;
-        before->next = min_node->next;
-        if(min_node->next != NULL){ min_node->next->prev = before;}
-        head->next = tmp;
-        tmp->prev = head;
-        head->prev = NULL;
-    }
-    head->next = linked_list_sort__sub(head->next);
-    if(head->next != NULL){
-        head->next->prev = head;
-    }
-    return head;
+static inline void linked_list_sort__swap(node_t* a, node_t* b){
+    particle_t*tmp = a->data;
+    a->data = b->data;
+    b->data = tmp;
+    a->data->x_index = a ;
+    b->data->x_index = b ;
 }
 
+static inline void neighbor_list_sort__swap(neighbor_node_t* a, neighbor_node_t* b){
+    particle_t*tmp = a->data;
+    a->data = b->data;
+    b->data = tmp;
+    double t2;
+    t2 = a->dist;
+    a->dist = b->dist;
+    b->dist = t2;
+    t2 = a->dWdr;
+    a->dWdr = b->dWdr;
+    b->dWdr = t2;
+    t2 = a->D_i_j;
+    a->D_i_j = b->D_i_j;
+    b->D_i_j = t2;
+}
+
+static inline node_t *lastNode(node_t *root){
+    while (root && root->next)
+	root = root->next;
+    return root;
+}
+
+<<<<<<< HEAD
 
 static inline void linked_list_sort__swap(node_t* a, node_t* b){
     particle_t*tmp = b->data;
@@ -512,64 +460,35 @@ void ordered_list_sort(ordered_list_t*ll){
 
 // move a single element in an otherwise sorted list
 void ordered_list_bubble_up_down(ordered_list_t*ll, ordered_node_t*n){
-    ordered_node_t*n1;
-#ifdef DEBUG_UPDATE
-    int cnt=0;
-    for(n1=ll->head; n1!=NULL; n1=n1->next){ cnt++; }
-    printf("before:");for(n1=ll->head; n1!=NULL; n1=n1->next){ printf("%i,",n1->data->id); }printf("\n");
-    printf("ordered_list_bubble_up_down() id=%i tt=%e\tcnt=%i\n",n->data->id, n->tt,cnt);
-    printf("\t");
-#endif
+    ordered_node_t*n1 = n->next;
 
     // Remove node from current position
+   
     ordered_node_t*before = n->prev;
     ordered_node_t*after  = n->next;
-    if(before != NULL){
+    if(before != NULL){		// If node before, connect that to one after
         before->next = after;
-#ifdef DEBUG_UPDATE
-        printf("n->prev->tt=%e (id=%i)",n->prev->tt,n->prev->data->id);
-#endif
     }else{
-        ll->head = ll->head->next;
-#ifdef DEBUG_UPDATE
-        printf("n->prev=NULL ");
-#endif
+        ll->head = ll->head->next;	//else node is head
+	ll->head->prev = NULL ;
     }
-    if(after != NULL){
-        after->prev = before;
-#ifdef DEBUG_UPDATE
-        printf("n->next->tt=%e (id=%i)",n->next->tt,n->next->data->id);
-#endif
-    }else{
+    if(after != NULL){		// If node after, connect that to one before
+        after->prev = before;		// else node is tail
+    }else{			// if nothing after (is tail), set tail to node before
         ll->tail = ll->tail->prev;
-#ifdef DEBUG_UPDATE
-        printf("n->next=NULL ");
-#endif
+	ll->tail->next = NULL ;
     }
-#ifdef DEBUG_UPDATE
-    printf("ll->head->tt=%e (id=%i)",ll->head->tt,ll->head->data->id);
-    printf("ll->tail->tt=%e (id=%i)",ll->tail->tt,ll->tail->data->id);
-    fflush(stdout);
-    int mvcnt=0;
-
-    printf("removed:");for(n1=ll->head; n1!=NULL; n1=n1->next){ printf("%i,",n1->data->id); }printf("\n");
-#endif
     // Find new position
     //      if tt==inf, move to end
     if(isinf(n->tt) || n->tt >= ll->tail->tt){
         // move to end
+	if(n == ll->head){
+		ll->head = n->next ;
+	}
         ll->tail->next = n;
         n->prev = ll->tail;
         n->next = NULL;
         ll->tail = n;
-#ifdef DEBUG_UPDATE
-        printf("\tmoved to end\n");
-        int ecnt=0;
-        for(n1=ll->head; n1!=NULL; n1=n1->next){ ecnt++; } 
-        printf("after:");for(n1=ll->head; n1!=NULL; n1=n1->next){ printf("%i,",n1->data->id); }printf("\n");
-        if(cnt!=ecnt){printf("count mismatch cnt=%i ecnt=%i\n",cnt,ecnt);exit(1);}
-#endif
-        return;
     }
     //  check to move to beginning
     else if(n->tt <= ll->head->tt || isinf(ll->head->tt)){
@@ -578,72 +497,28 @@ void ordered_list_bubble_up_down(ordered_list_t*ll, ordered_node_t*n){
         n->next = ll->head;
         n->prev = NULL;
         ll->head = n;
-#ifdef DEBUG_UPDATE
-        printf("\tmoved to beginning\n");
-        int ecnt=0;
-        for(n1=ll->head; n1!=NULL; n1=n1->next){ ecnt++; } 
-        if(cnt!=ecnt){printf("count mismatch cnt=%i ecnt=%i\n",cnt,ecnt);exit(1);}
-#endif
-        return;
     }
     //      Check if we move down, move down linearly
     else if(n->next != NULL && n->next->tt < n->tt){
-        for(n1=n->next; n1!=NULL; n1=n1->next){ // find position before n1
-#ifdef DEBUG_UPDATE
-            mvcnt++;
-#endif
-            if(n1->next == NULL || n1->tt >= n->tt){
+	while(n1!=NULL && n1->tt < n->tt){
+	    n1=n1->next ;
+	}
                 n->next = n1;
                 n->prev = n1->prev;
                 n1->prev->next = n;
                 n1->prev = n;
-#ifdef DEBUG_UPDATE
-                printf("\tmoved down %i\n", mvcnt);
-                //printf("node: n->id=%i, n->tt=%e\n",n->data->id, n->tt);fflush(stdout);
-                //printf("list:\n");fflush(stdout);
-                //for(n1=ll->head;n1!=NULL;n1=n1->next){
-                //    printf("\tid=%i tt=%e\n",n1->data->id, n1->tt);fflush(stdout);
-                //}
-                int ecnt=0;
-                for(n1=ll->head; n1!=NULL; n1=n1->next){ ecnt++; } 
-                if(cnt!=ecnt){printf("count mismatch cnt=%i ecnt=%i\n",cnt,ecnt);exit(1);}
-#endif
-                return;
-            }
-        }
     }
-    //      check if we move up, move up linearly
-    //else if(n->prev != NULL && n->prev->tt >= n->tt){
     else {
-        for(n1=n->prev; n1!=NULL; n1=n1->prev){ // find position after n1 
-            if(n1->prev == NULL || n1->tt <= n->tt){
+	n1 = n->prev ;
+	while(n1!=NULL && n1->tt > n->tt){
+		n1=n1->prev ;
+	}
                 n->prev = n1;
                 n->next = n1->next;
                 n1->next->prev = n;
                 n1->next = n;
-#ifdef DEBUG_UPDATE
-                printf("\tmoved up %i\n", mvcnt);
-                int ecnt=0;
-                for(n1=ll->head; n1!=NULL; n1=n1->next){ ecnt++; } 
-                if(cnt!=ecnt){printf("count mismatch cnt=%i ecnt=%i\n",cnt,ecnt);exit(1);}
-#endif
-                return;
-            }
-#ifdef DEBUG_UPDATE
-            mvcnt++;
-#endif
-        }
     }
 
-    printf("ERROR, should not get here, ordered_list_bubble_up_down, node not inserted.\n");
-#ifdef DEBUG_UPDATE
-    printf("node: n->id=%i, n->tt=%e\n",n->data->id, n->tt);
-    printf("list:\n");
-    for(n1=ll->head;n1!=NULL;n1=n1->next){
-        printf("\tid=%i tt=%e\n",n1->data->id, n1->tt);
-    }
-#endif
-    exit(1);
 
 }
 
