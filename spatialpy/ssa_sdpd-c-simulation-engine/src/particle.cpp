@@ -45,18 +45,21 @@ namespace Spatialpy{
 	x[0] = x[1] = x[2] = 0.0;
 	v[0] = v[1] = v[2] = 0.0;
     }
+
     double Particle::particle_dist(Particle p2){
         double a = x[0] - p2.x[0];
         double b = x[1] - p2.x[1];
         double c = x[2] - p2.x[2];
         return sqrt( a*a + b*b + c*c);
     }
+
     double Particle::particle_dist_sqrd(Particle p2){
         double a = x[0] - p2.x[0];
         double b = x[1] - p2.x[1];
         double c = x[2] - p2.x[2];
         return ( a*a + b*b + c*c);
-}
+    }
+
     int Particle::add_to_neighbor_list(Particle neighbor, ParticleSystem system){
         double a = x[0] - neighbor.x[0];
 	double b = x[1] - neighbor.x[1];
@@ -97,18 +100,12 @@ namespace Spatialpy{
 	    exit(1);
 	}
 
-	NeighborNode n;
-	n.dist = r ;
-	n.dWdr = dWdr ;
-	n.D_i_j = D_i_j ;
-	
-	neighbors.push(n) ;
+	neighbors.push({neighbor, r, dWdr, D_i_j}) ;
 
 	return 1;
     }
 
     void Particle::find_neighbors(ParticleSystem system){
-	// TODO REWRITE TO MATCH HEAP
 	//clean out previous neighbors
 	//printf("find_neighbors.empty_linked_list\n");
 	//TODO: empty_neighbor_list(neighbors);
@@ -150,7 +147,6 @@ namespace Spatialpy{
 	    }
 	}
     }
-    
 
 }
 
