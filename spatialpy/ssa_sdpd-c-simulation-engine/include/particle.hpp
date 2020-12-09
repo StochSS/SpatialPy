@@ -20,9 +20,9 @@ namespace Spatialpy{
 	    double c0;
 	    double rho0;
 	    double P0;
-	    std::vector<Particle> particle_vec;
-	    std::vector<EventNode> event_vec;
-	    std::vector<Particle> x_index;
+	    std::vector<Particle> particles;
+            std::priority_queue<Particle, vector<Particle>, CompareX> x_index;
+            std::priority_queue<EventNode, vector<EventNode>, CompareTT> event_q;
 
 	    char boundary_conditions[3];
 	    int static_domain;
@@ -68,8 +68,7 @@ namespace Spatialpy{
 	    double *C;  // concentration of chem species
 	    double *Q;  // flux of chem species
 	    // below here for simulation
-	    node_t* x_index;  // 
-	    std::vector<NeighborNode> neighbors;
+	    std::priority_queue<NeighborNode, vector<NeighborNode>, CompareDist> neighbors ;
 
 	    double particle_dist(Particle p2);
 	    double particle_dist_sqrd(Particle p2);
@@ -88,6 +87,31 @@ namespace Spatialpy{
 	double dWdr ;
 	double D_i_j ;
     }
+
+    struct CompareTT { 
+        bool operator()(EventNode const& e1, EventNode const& e2) 
+        { 
+            // return "false" if "e1" is ordered  
+            // before "e2", for example: 
+            return e1.tt > e2.tt ; 
+        } 
+    }; 
+    struct CompareDist { 
+        bool operator()(NeighborNode const& n1, NeighborNode const& n2) 
+        { 
+            // return "false" if "n1" is ordered  
+            // before "n2", for example: 
+            return n1.dist > n2.dist ; 
+        } 
+    }; 
+    struct CompareX { 
+        bool operator()(Particle const& p1, Particle const& p2) 
+        { 
+            // return "false" if "p1" is ordered  
+            // before "p2", for example: 
+            return p1.x[0] > p2.x[0] ; 
+        } 
+    }; 
 }
 
 /**
