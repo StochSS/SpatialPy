@@ -45,8 +45,6 @@ namespace Spatialpy{
 	    double* gravity;
 
 	    void add_particle(Particle me);
-	    double particle_dist(Particle p1, Particle p2);
-	    double particle_dist_sqrd(Particle p1, Particle p2);
     }
     struct Particle{
 	    unsigned int id;
@@ -73,6 +71,8 @@ namespace Spatialpy{
 	    node_t* x_index;  // 
 	    std::vector<NeighborNode> neighbors;
 
+	    double particle_dist(Particle p2);
+	    double particle_dist_sqrd(Particle p2);
 	    void find_neighbors(ParticleSystem system);
 	    int add_to_neighbor_list(Particle neighbor, ParticleSystem system) ;
     }
