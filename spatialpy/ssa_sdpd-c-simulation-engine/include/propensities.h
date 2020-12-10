@@ -6,12 +6,12 @@
 /* A. Hellander 2012-06-05 (rev). */  
 /* B. Drawert   2012-09-08 */
 
-#include "particle.h"
-
-
 #ifndef PROPENSITIES__H
 #define PROPENSITIES__H
 
+#include "particle.hpp"
+
+namespace Spatialpy{
 
 /* Global variable that can be used to pass parameters to the propensity functions. */
 extern double *parameters;  //TODO: can we delete this?
@@ -28,8 +28,8 @@ PropensityFun *ALLOC_propensities(void);
 ChemRxnFun *ALLOC_ChemRxnFun(void);
 void FREE_propensities(PropensityFun* ptr);
 
-void applyBoundaryConditions(particle_t* me, system_t* system);
-
+void applyBoundaryConditions(Particle me, ParticleSystem system);
+}
 
 
 #endif 

@@ -9,6 +9,9 @@ See the file LICENSE.txt for details.
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <cstdlib>
+#include <vector>
+#include <queue>
 
 namespace Spatialpy{
     ParticleSystem::ParticleSystem(size_t num_types, size_t num_chem_species, size_t num_chem_rxns, 

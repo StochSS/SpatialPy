@@ -6,11 +6,13 @@
 #include <time.h>
 #include <unistd.h>
 #include "count_cores.h"
-#include "particle.h"
+#include "particle.hpp"
 #include "propensities.h"
-#include "simulate.h"
+#include "simulate.hpp"
 #include "dSFMT/dSFMT.h"
 
+
+namespace Spatialpy{
 /* Species names */
 __DEFINE_SPECIES__
 
@@ -159,7 +161,7 @@ void applyBoundaryConditions(particle_t* me, system_t* system){
 __BOUNDARY_CONDITIONS__
 }
 
-
+}
 
 
 
