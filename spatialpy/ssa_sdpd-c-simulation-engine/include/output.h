@@ -7,7 +7,7 @@ See the file LICENSE.txt for details.
 ***************************************************************************** */
 #ifndef output_h
 #define output_h
-#include "particle.h"
+#include "particle.hpp"
 
 
 

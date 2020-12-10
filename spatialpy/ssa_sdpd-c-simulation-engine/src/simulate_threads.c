@@ -1,8 +1,8 @@
 #include "linked_list.h"
 #include "model.h"
 #include "output.h"
-#include "particle.h"
-#include "simulate.h"
+#include "particle.hpp"
+#include "simulate.hpp"
 #include "simulate_rdme.h"
 #include <errno.h>
 #include <pthread.h>

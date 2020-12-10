@@ -1,5 +1,6 @@
-CC = gcc
-CFLAGS = -O3 -Wall
+CC = g++
+CFLAGS = -c -std=c++14 -Wall -O3
+SIMFLAGS = -l. -std=c++14 -Wall -O3
 LFLAGS = -pthread -lm
 DSFMTFLAGS = -DHAVE_SSE2 -DDSFMT_MEXP=521
 INCDIR = $(ROOTINC)/include/ $(ROOTINC)/external/

@@ -236,7 +236,7 @@ class Solver:
 
 
         template = open(os.path.abspath(os.path.dirname(
-            __file__)) + '/ssa_sdpd-c-simulation-engine/propensity_file_template.c', 'r')
+            __file__)) + '/ssa_sdpd-c-simulation-engine/propensity_file_template.cpp', 'r')
         propfile = open(file_name, "w")
         propfilestr = template.read()
 

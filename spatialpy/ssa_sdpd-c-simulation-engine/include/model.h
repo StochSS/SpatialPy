@@ -7,8 +7,7 @@ See the file LICENSE.txt for details.
 ***************************************************************************** */
 #ifndef model_h
 #define model_h
-#include "linked_list.h"
-#include "particle.h"
+#include "particle.hpp"
 
 
 
