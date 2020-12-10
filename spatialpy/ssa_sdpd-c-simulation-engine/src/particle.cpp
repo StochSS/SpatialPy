@@ -70,7 +70,7 @@ namespace Spatialpy{
 	double r2 =  ( a*a + b*b + c*c);
 	double r = sqrt(r2);
 
-	if(r > system->h){ return 0; } // do not add, out side support radius
+	if(r > system.h){ return 0; } // do not add, out side support radius
 
 	// calculate dWdr
 	double h = system.h;
