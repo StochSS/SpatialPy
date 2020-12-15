@@ -51,7 +51,14 @@ class Solver:
         except Exception as e:
             pass
 
-    def compile(self):
+    def run_debugger(self):
+        """ Start a gdbgui debugger at port 5000. """
+        self.debugger_url = 'http://127.0.0.1:5000'
+        if not hasattr(self, 'debugger_process'):
+            self.debugger_process = subprocess.Popen('gdbgui -r', shell=True)
+        print(f'Your debugger is running at {self.debugger_url}')
+
+    def compile(self, debug=False, profile=False):
         """ Compile the model."""
 
         # Create a unique directory each time call to compile.
@@ -70,7 +77,12 @@ class Solver:
 
         # Build the solver
         makefile = self.SpatialPy_ROOTDIR+'/build/Makefile'
-        cmd = " ".join(['cd', self.build_dir, '&&', 'make', '-f', makefile, 'ROOT="' + self.SpatialPy_ROOTPARAM+'"', 'ROOTINC="' + self.SpatialPy_ROOTINC+'"','MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir])
+        cmd_list = ['cd', self.build_dir, '&&', 'make', '-f', makefile, 'ROOT="' + self.SpatialPy_ROOTPARAM+'"', 'ROOTINC="' + self.SpatialPy_ROOTINC+'"','MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir]
+        if profile:
+          cmd_list.append('GPROFFLAG=-pg')
+        if profile or debug:
+          cmd_list.append('GDB_FLAG=-g')
+        cmd = " ".join(cmd_list)
         if self.debug_level > 1:
             print("cmd: {0}\n".format(cmd))
         try:
@@ -99,13 +111,16 @@ class Solver:
 
         self.is_compiled = True
 
-    def run(self, number_of_trajectories=1, seed=None, timeout=None, number_of_threads=None):
+
+    def run(self, number_of_trajectories=1, seed=None, timeout=None, number_of_threads=None, debug=False, profile=False):
         """ Run one simulation of the model.
         Args:
             number_of_trajectories: (int) How many trajectories should be simulated.
             seed: (int) the random number seed (incremented by one for multiple runs).
             timeout: (int) maximum number of seconds the solver can run.
             number_of_threads: (int) the number threads the solver will use.
+            debug: (bool) start a gdbgui debugger (also compiles with debug symbols if compilation hasn't happened)
+            profile: (bool) output gprof profiling data if available
         Returns:
             Result object.
                 or, if number_of_trajectories > 1
@@ -115,7 +130,7 @@ class Solver:
             result_list = []
         # Check if compiled, call compile() if not.
         if not self.is_compiled:
-            self.compile()
+            self.compile(debug=debug, profile=profile)
 
         # Execute the solver
         for run_ndx in range(number_of_trajectories):
@@ -204,6 +219,8 @@ class Solver:
                     "Solver execution failed, return code = {0}".format(return_code))
 
             result["Status"] = "Success"
+            if profile:
+                self.read_profile_info(result)
             if stdout is not None:
                 result.stdout = stdout.decode('utf-8')
             if stderr is not None:
@@ -214,6 +231,17 @@ class Solver:
                 return result
 
         return result_list
+
+    def read_profile_info(self, result):
+        profile_data_path = os.path.join(result.result_dir, 'gmon.out')
+        exe_path = os.path.join(self.build_dir, self.executable_name)
+        cmd = f'gprof {exe_path} {profile_data_path}'
+        print(cmd)
+        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        stdout, stderr = proc.communicate()
+        proc.wait()
+        print(f'Gprof report for {result.result_dir}')
+        print(stdout.decode('utf-8'))
 
     def create_propensity_file(self, file_name=None):
         """ Generate the C propensity file that is used to compile the solvers.
