@@ -54,6 +54,24 @@ struct sarg {
     // int sort_ndx;
 };
 
+void buildKDTree(ParticleSystem& system) {
+    // cleanup KD Tree
+    if(system.kdTree_initialized) {
+        annDeallocPts(system.kdTree_pts);
+        delete [] system.kdTree;
+        annClose();
+    }
+    int nPts = system.particles.size();
+    system.kdTree_pts = annAllocPts(nPts, system.dimension);
+    for(int i = 0; i < nPts; i++) {
+        for(int j = 0; j < system.dimension; j++) {
+            system.kdTree_pts[i][j] = system.particles[i].x[j];
+        }
+    }
+    system.kdTree = new ANNkd_tree(system.kdTree_pts, nPts, system.dimension);
+    system.kdTree_initialized = true;
+}
+
 void* sort_index_thread(void* targ_in){
     struct sarg* targ = (struct sarg*) targ_in;
     while(1){
