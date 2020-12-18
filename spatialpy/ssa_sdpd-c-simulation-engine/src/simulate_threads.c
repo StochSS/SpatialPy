@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+// Include ANN KD Tree
+#include <ANN/ANN.h>
 
 
 
@@ -47,8 +49,9 @@ void* output_system_thread(void* targ){
 }
 
 struct sarg {
-    linked_list_t*ll;
-    int sort_ndx;
+    ParticleSystem* system;
+    // linked_list_t*ll;
+    // int sort_ndx;
 };
 
 void* sort_index_thread(void* targ_in){
@@ -56,7 +59,9 @@ void* sort_index_thread(void* targ_in){
     while(1){
         pthread_barrier_wait(&begin_sort_barrier);
         if(debug_flag) printf("[SORT] begin sort\n");
-        linked_list_sort(targ->ll,targ->sort_ndx);
+        // linked_list_sort(targ->ll,targ->sort_ndx);
+        // ANN KD Tree
+        buildKDTree(targ->system);
         if(debug_flag) printf("[SORT] sort complete\n");
         pthread_barrier_wait(&end_sort_barrier);
     }

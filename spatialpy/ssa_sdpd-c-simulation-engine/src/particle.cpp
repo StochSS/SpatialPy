@@ -28,6 +28,7 @@ namespace Spatialpy{
         num_types = num_types;
         gravity = calloc(3,sizeof(double));
         num_data_fn = num_data_fn;
+        kdTree_initialize = false;
     }
 
     void ParticleSystem::add_particle(Particle me){

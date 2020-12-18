@@ -12,6 +12,8 @@ See the file LICENSE.txt for details.
 #include <vector>
 #include <queue>
 #include "propensities.h"
+// Include ANN KD Tree
+#include <ANN/ANN.h>
 
 namespace Spatialpy{
 
@@ -114,8 +116,8 @@ namespace Spatialpy{
 	    double rho0;
 	    double P0;
 	    std::vector<Particle> particles;
-            std::priority_queue<Particle> x_index;
-            std::priority_queue<EventNode> event_q;
+        // std::priority_queue<Particle> x_index;
+        std::priority_queue<EventNode> event_q;
 
 	    char boundary_conditions[3];
 	    int static_domain;
@@ -138,6 +140,10 @@ namespace Spatialpy{
 	    double* gravity;
 
 	    void add_particle(Particle me);
+
+        ANNkd_tree kdTree;
+        ANNpointArray kdTree_pts;
+        bool kdTree_initialized;
     };
 
 }
