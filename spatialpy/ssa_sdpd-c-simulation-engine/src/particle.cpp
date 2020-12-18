@@ -71,7 +71,11 @@ namespace Spatialpy{
     	// double b = x[1] - neighbor.x[1];
     	// double c = x[2] - neighbor.x[2];
     	// double r2 =  ( a*a + b*b + c*c);
-    	double r = sqrt(r2);
+    	// Make sure the distance was actually set by the annkFRSearch
+        if(r2 == ANN_DIST_INF) {
+            r2 = particle_dist_sqrd(neighbor)
+        }
+        double r = sqrt(r2);
 
     	if(r > system.h){ return 0; } // do not add, out side support radius
 
