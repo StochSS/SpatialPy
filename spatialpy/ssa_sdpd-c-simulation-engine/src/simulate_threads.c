@@ -57,6 +57,7 @@ struct sarg {
 void buildKDTree(ParticleSystem& system) {
     // cleanup KD Tree
     if(system.kdTree_initialized) {
+        if(system.static_domain) {return;} // do not rebuild tree for static domains
         annDeallocPts(system.kdTree_pts);
         delete [] system.kdTree;
         annClose();

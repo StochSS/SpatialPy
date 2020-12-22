@@ -120,7 +120,7 @@ namespace Spatialpy{
         std::priority_queue<EventNode> event_q;
 
 	    char boundary_conditions[3];
-	    int static_domain;
+	    bool static_domain;
 	    size_t num_types;
 	    size_t num_data_fn;
 
