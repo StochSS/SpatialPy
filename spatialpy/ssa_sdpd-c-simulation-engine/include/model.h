@@ -11,13 +11,13 @@ See the file LICENSE.txt for details.
 
 
 
-void filterDensity(particle_t* me, ParticleSystem* system);
+void filterDensity(Particle* me, ParticleSystem* system);
 
-void pairwiseForce(particle_t* me, ParticleSystem* system);
+void pairwiseForce(Particle* me, ParticleSystem* system);
 
-void computeBoundaryVolumeFraction(particle_t* me, ParticleSystem* system);
+void computeBoundaryVolumeFraction(Particle* me, ParticleSystem* system);
 
-void applyBoundaryVolumeFraction(particle_t* me, ParticleSystem* system);
+void applyBoundaryVolumeFraction(Particle* me, ParticleSystem* system);
 
 
 #endif //model_h

@@ -9,7 +9,7 @@
 void output_csv(ParticleSystem*system, int current_step){
     char filename[256];
     node_t* n;
-    particle_t* p;
+    Particle* p;
     sprintf(filename,"output_%u.csv",current_step);
     FILE*fp = fopen(filename,"w+");
     fprintf(fp, "id, x, y, z, vx, vy, vz, type, mass, rho, bvf_phi\n");
@@ -23,7 +23,7 @@ void output_csv(ParticleSystem*system, int current_step){
 }
 
 
-particle_t*output_buffer;
+Particle*output_buffer;
 int output_buffer_size = 0;
 int output_buffer_current_step;
 int output_buffer_current_num_particles;
@@ -36,9 +36,9 @@ void output_vtk__sync_step(ParticleSystem*system, int current_step){
     output_buffer_current_step = current_step;
     if(output_buffer_size == 0){
         output_buffer_size = system->particle_list->count;
-        output_buffer = (particle_t*) malloc(sizeof(particle_t)*output_buffer_size);
+        output_buffer = (Particle*) malloc(sizeof(Particle)*output_buffer_size);
     }else if(output_buffer_size < system->particle_list->count){
-        output_buffer = realloc(output_buffer, sizeof(particle_t)*output_buffer_size);
+        output_buffer = realloc(output_buffer, sizeof(Particle)*output_buffer_size);
     }
     if(system->num_chem_species > 0){
         if(output_buffer_chem_size==0){
@@ -52,7 +52,7 @@ void output_vtk__sync_step(ParticleSystem*system, int current_step){
     int ncnt=0;
     node_t*n;
     for(n=system->particle_list->head; n!=NULL; n=n->next){
-        memcpy( (void *) &output_buffer[ncnt++], (void *) n->data, sizeof(particle_t) );
+        memcpy( (void *) &output_buffer[ncnt++], (void *) n->data, sizeof(Particle) );
         if(system->num_chem_species > 0){
             memcpy( (void *) &output_buffer_chem[n->data->id*system->num_chem_species], (void *) n->data->C, sizeof(double)*system->num_chem_species );
         }

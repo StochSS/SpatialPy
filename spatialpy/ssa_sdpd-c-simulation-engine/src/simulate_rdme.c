@@ -82,7 +82,7 @@ void destroy_rdme(ParticleSystem*system){
 // Adapted from PyURDME's nsmcore.c
 //===================================================
 
-void print_current_state(particle_t*subvol, ParticleSystem*system){
+void print_current_state(Particle*subvol, ParticleSystem*system){
     int i;
     printf("Current state in voxel %i:\n",subvol->id);
     for(i=0;i<system->num_stoch_species;i++){
@@ -90,7 +90,7 @@ void print_current_state(particle_t*subvol, ParticleSystem*system){
     }
     printf("Neighbors:\n");
     neighbor_node_t*nn;
-    particle_t*p2;
+    Particle*p2;
     for(nn=subvol->neighbors->head; nn!=NULL; nn=nn->next){
         p2 = nn->data;
         printf("%i: nn->D_i_j=%e \n",p2->id,nn->D_i_j);
@@ -202,7 +202,7 @@ void nsm_core__create(ParticleSystem*system, size_t *irN, size_t *jcN,int *prN, 
 
 
     node_t*n;
-    particle_t*p;
+    Particle*p;
     for(n=system->particle_list->head; n!=NULL; n=n->next){
         p = n->data;
         p->rdme = (rdme_voxel_t*) malloc(sizeof(rdme_voxel_t));
@@ -252,7 +252,7 @@ void nsm_core__initialize_rxn_propensities(ParticleSystem*system){
      subvolume. Store the sum of the reaction intensities in each
      subvolume in srrate. */
     node_t*n;
-    particle_t*p;
+    Particle*p;
     for(n=system->particle_list->head; n!=NULL; n=n->next){
         p = n->data;
         p->rdme->srrate = 0.0;
@@ -287,7 +287,7 @@ void nsm_core__initialize_diff_propensities(ParticleSystem* system){
 //    }
     node_t*n;
     neighbor_node_t*n2;
-    particle_t*p,*p2;
+    Particle*p,*p2;
     double diff_const;
     for(n=system->particle_list->head; n!=NULL; n=n->next){
         p=n->data;
@@ -313,7 +313,7 @@ void nsm_core__initialize_heap(ParticleSystem*system){
     /* Calculate times to next event (reaction or diffusion)
      in each subvolume and initialize heap. */
     ordered_node_t*n;
-    particle_t*p;
+    Particle*p;
     for(n=rdme->heap->head; n!=NULL; n=n->next){
     //for (i = 0; i < rdme->Ncells; i++) {
         //rdme->rtimes[i] = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/(rdme->srrate[i]+rdme->sdrate[i]);
@@ -346,7 +346,7 @@ void nsm_core__initialize_chem_populations(ParticleSystem*system, unsigned int*u
     //printf("]\n");
 
     node_t *n;
-    particle_t *p1;
+    Particle *p1;
     int i=0;
     int num_s = system->num_stoch_species;
     for(n=system->particle_list->head; n!=NULL; n=n->next){
@@ -364,7 +364,7 @@ void nsm_core__build_diffusion_matrix(rdme_t*rdme,ParticleSystem*system){
     double off_diag_sum,diff_const,dist2;
     node_t *n;
     neighbor_node_t*n2;
-    particle_t *p1,*p2;
+    Particle *p1,*p2;
     int s_ndx;
     //double D_i_j;
     double ih,ihsq,wfd;
@@ -505,12 +505,12 @@ void nsm_core__take_step(ParticleSystem*system, double current_time, double step
     double end_time = current_time + step_size;
     double totrate,cum,rdelta,rrdelta;
     int event,re,spec,errcode = 0;
-    particle_t*subvol;
+    Particle*subvol;
     size_t i,j = 0;
     double old_rrate = 0.0,old_drate = 0.0;
     double rand1,rand2,cum2,old;
     double vol,diff_const;
-    particle_t*dest_subvol = NULL;
+    Particle*dest_subvol = NULL;
     neighbor_node_t*nn;
 
 
@@ -694,7 +694,7 @@ void nsm_core__take_step(ParticleSystem*system, double current_time, double step
 //            to_node = rdme->irD[i];
 //            to_vol = to_node/system->num_stoch_species;
 
-            particle_t*p2;
+            Particle*p2;
             cum2 = 0.0;
             for(nn=subvol->neighbors->head; nn!=NULL; nn=nn->next){
                 p2 = nn->data;

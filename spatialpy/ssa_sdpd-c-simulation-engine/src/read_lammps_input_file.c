@@ -71,7 +71,7 @@ void read_lammps_input_file(const char*filename, ParticleSystem*system){
     s=fgets(buffer,1024,fp);
     int id,type,is_solid;
     double rho,x,y,z;
-    particle_t*me;
+    Particle*me;
     for(i=0;i<natoms;i++){
         s=fgets(buffer,1024,fp);
         r = sscanf(buffer, "%d 0 %d %lf %lf %lf %lf %d",&id,&type,&rho,&x,&y,&z,&is_solid);

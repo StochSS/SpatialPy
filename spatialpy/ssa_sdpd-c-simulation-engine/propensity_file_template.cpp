@@ -61,7 +61,7 @@ int debug_flag;
 dsfmt_t dsfmt;
 
 void init_create_particle(ParticleSystem* sys, int id, double x, double y, double z, int type, double nu, double mass, double rho, int solidTag, int num_chem_species){
-    particle_t* p = create_particle(id);
+    Particle* p = create_particle(id);
     p->x[0] = x;
     p->x[1] = y;
     p->x[2] = z;

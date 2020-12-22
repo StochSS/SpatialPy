@@ -17,7 +17,7 @@ See the file LICENSE.txt for details.
 
 
 
-void pairwiseForce(particle_t* me, ParticleSystem* system)
+void pairwiseForce(Particle* me, ParticleSystem* system)
 {
     // F, Frho and Fbp are output
     neighbor_list_t* neighbors = me->neighbors;
@@ -35,7 +35,7 @@ void pairwiseForce(particle_t* me, ParticleSystem* system)
     double c0 = system->c0;
     double Pi = P0 * (me->rho / rho0 - 1.0);
     int i, j, s, rxn;
-    particle_t* pt_j;
+    Particle* pt_j;
 
     // Kernel function parameter
     //if (system->dimension == 3) {
@@ -174,11 +174,11 @@ void pairwiseForce(particle_t* me, ParticleSystem* system)
 }
 
 
-void filterDensity(particle_t* me, ParticleSystem* system)
+void filterDensity(Particle* me, ParticleSystem* system)
 {
   neighbor_list_t* neighbors = me->neighbors;
   neighbor_node_t*n;
-  particle_t* pt_j;
+  Particle* pt_j;
   double r, R, Wij, alpha, num, den;
   double h = system->h;
   if(system->dimension==3){
@@ -215,11 +215,11 @@ void filterDensity(particle_t* me, ParticleSystem* system)
 }
 
 
-void computeBoundaryVolumeFraction(particle_t* me, ParticleSystem* system)
+void computeBoundaryVolumeFraction(Particle* me, ParticleSystem* system)
 {
     neighbor_list_t* neighbors = me->neighbors;
     neighbor_node_t* n;
-    particle_t* pt_j;
+    Particle* pt_j;
     double r, R, Wij, dWdr, alpha, vos, vtot, nw[3], dx[3], norm_nw;
     int i;
     double h = system->h;
@@ -297,7 +297,7 @@ void computeBoundaryVolumeFraction(particle_t* me, ParticleSystem* system)
 }
 
 
-void applyBoundaryVolumeFraction(particle_t* me, ParticleSystem* system)
+void applyBoundaryVolumeFraction(Particle* me, ParticleSystem* system)
 {
     int i;
     double v_dot_normal;
