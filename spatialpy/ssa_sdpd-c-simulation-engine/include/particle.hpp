@@ -46,6 +46,13 @@ namespace Spatialpy{
 	    // below here for simulation
 	    std::priority_queue<NeighborNode> neighbors ;
 
+        // Moved from rdme_voxel_t
+        double srrate;
+        double* rrate;
+        double sdrate;
+        double* Ddiag;
+        ordered_node_t*heap_index;
+
 	    double particle_dist(Particle p2);
 	    double particle_dist_sqrd(Particle p2);
 	    void find_neighbors(ParticleSystem system);
@@ -118,6 +125,17 @@ namespace Spatialpy{
 	    std::vector<Particle> particles;
         // std::priority_queue<Particle> x_index;
         std::priority_queue<EventNode> event_q;
+
+        // Moved from rdme_t
+        const size_t *irN;
+        const size_t *jcN;
+        const int *prN;
+        const size_t *irG;
+        const size_t *jcG;
+        int initialized;
+        ordered_list_t*heap; // not sure if we need this
+        long int total_reactions;
+        long int total_diffusion;
 
 	    char boundary_conditions[3];
 	    bool static_domain;
