@@ -157,7 +157,7 @@ int main(int argc, char**argv){
 }
 
 
-void applyBoundaryConditions(particle_t* me, system_t* system){
+void applyBoundaryConditions(Particle* me, ParticleSystem* system){
 __BOUNDARY_CONDITIONS__
 }
 
