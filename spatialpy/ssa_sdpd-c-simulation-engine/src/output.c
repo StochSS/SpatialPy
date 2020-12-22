@@ -6,7 +6,7 @@
 
 
 
-void output_csv(system_t*system, int current_step){
+void output_csv(ParticleSystem*system, int current_step){
     char filename[256];
     node_t* n;
     particle_t* p;
@@ -32,7 +32,7 @@ int output_buffer_xx_size = 0;
 double* output_buffer_chem;
 int output_buffer_chem_size = 0;
 
-void output_vtk__sync_step(system_t*system, int current_step){
+void output_vtk__sync_step(ParticleSystem*system, int current_step){
     output_buffer_current_step = current_step;
     if(output_buffer_size == 0){
         output_buffer_size = system->particle_list->count;
@@ -93,7 +93,7 @@ void output_vtk__sync_step(system_t*system, int current_step){
         }
     }
 }
-void output_vtk__async_step(system_t*system){
+void output_vtk__async_step(ParticleSystem*system){
     FILE*fp;
     int i;
     char filename[256];

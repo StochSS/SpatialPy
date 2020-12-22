@@ -10,7 +10,7 @@ See the file LICENSE.txt for details.
 #include "linked_list.h"
 #include "particle.h"
 
-void read_lammps_input_file(const char*filename, system_t*system);
+void read_lammps_input_file(const char*filename, ParticleSystem*system);
 
 
 #endif //read_lammps_input_file_h

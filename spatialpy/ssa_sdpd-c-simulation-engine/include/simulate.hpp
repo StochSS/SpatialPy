@@ -14,7 +14,7 @@ using namespace Spatialpy ;
 // void run_simulation(int num_threads, ParticleSystem system);
 
 
-void take_step(Particle me, ParticleSystem, unsigned int step, unsigned int substep);
+void take_step(Particle me, ParticleSystem system, unsigned int step, unsigned int substep);
 
 unsigned int get_number_of_substeps();
 

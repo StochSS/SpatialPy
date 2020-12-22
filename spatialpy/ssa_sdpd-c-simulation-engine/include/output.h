@@ -11,9 +11,9 @@ See the file LICENSE.txt for details.
 
 
 
-void output_csv(system_t*system, int current_step);
+void output_csv(ParticleSystem*system, int current_step);
 
-void output_vtk__sync_step(system_t*system, int current_step);
+void output_vtk__sync_step(ParticleSystem*system, int current_step);
 void output_vtk__async_step();
 
 #endif // output_h

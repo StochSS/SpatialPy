@@ -60,7 +60,7 @@ __INPUT_CONSTANTS__
 int debug_flag;
 dsfmt_t dsfmt;
 
-void init_create_particle(system_t* sys, int id, double x, double y, double z, int type, double nu, double mass, double rho, int solidTag, int num_chem_species){
+void init_create_particle(ParticleSystem* sys, int id, double x, double y, double z, int type, double nu, double mass, double rho, int solidTag, int num_chem_species){
     particle_t* p = create_particle(id);
     p->x[0] = x;
     p->x[1] = y;
@@ -80,7 +80,7 @@ void init_create_particle(system_t* sys, int id, double x, double y, double z, i
 }
 
 
-int init_all_particles(system_t* sys){
+int init_all_particles(ParticleSystem* sys){
     int id=0;
     __INIT_PARTICLES__
     return id;
@@ -89,7 +89,7 @@ int init_all_particles(system_t* sys){
 
 int main(int argc, char**argv){
     //debug_flag = 1;
-    //system_t* system = create_system();
+    //ParticleSystem* system = create_system();
     // Fix particles in space
     //system->static_domain = 1;
     //CONFIG =

@@ -18,7 +18,7 @@
 
 
 /**************************************************************************/
-void initialize_rdme(system_t*system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
+void initialize_rdme(ParticleSystem*system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
                         unsigned int*u0){
     if(debug_flag){printf("*************** initialize_rdme ******************\n");fflush(stdout);}
     //printf("nsm_core__create() BEGIN\n");fflush(stdout);
@@ -34,7 +34,7 @@ void initialize_rdme(system_t*system, size_t *irN, size_t *jcN,int *prN,size_t *
 /**************************************************************************/
 // This function get called by the main simulation loop.  It advances the
 // state the of RDME system by dt
-void simulate_rdme(system_t*system,unsigned int step){
+void simulate_rdme(ParticleSystem*system,unsigned int step){
     rdme_t*rdme = system->rdme;
     if(rdme == NULL){
         return;
@@ -66,7 +66,7 @@ void simulate_rdme(system_t*system,unsigned int step){
     nsm_core__take_step(system, system->dt*step, system->dt);
 }
 /**************************************************************************/
-void destroy_rdme(system_t*system){
+void destroy_rdme(ParticleSystem*system){
     if(system->rdme == NULL){
         return;
     }
@@ -82,7 +82,7 @@ void destroy_rdme(system_t*system){
 // Adapted from PyURDME's nsmcore.c
 //===================================================
 
-void print_current_state(particle_t*subvol, system_t*system){
+void print_current_state(particle_t*subvol, ParticleSystem*system){
     int i;
     printf("Current state in voxel %i:\n",subvol->id);
     for(i=0;i<system->num_stoch_species;i++){
@@ -184,7 +184,7 @@ void print_current_state(particle_t*subvol, system_t*system){
  */
 
 /**************************************************************************/
-void nsm_core__create(system_t*system, size_t *irN, size_t *jcN,int *prN, size_t *irG, size_t *jcG){
+void nsm_core__create(ParticleSystem*system, size_t *irN, size_t *jcN,int *prN, size_t *irG, size_t *jcG){
     /* Create the RDME object */
     rdme_t* rdme = (rdme_t*) malloc(sizeof(rdme_t));
 
@@ -246,7 +246,7 @@ void nsm_core__create(system_t*system, size_t *irN, size_t *jcN,int *prN, size_t
 }
 
 /**************************************************************************/
-void nsm_core__initialize_rxn_propensities(system_t*system){
+void nsm_core__initialize_rxn_propensities(ParticleSystem*system){
     int j;
     /* Calculate the propensity for every reaction and every
      subvolume. Store the sum of the reaction intensities in each
@@ -270,7 +270,7 @@ void nsm_core__initialize_rxn_propensities(system_t*system){
 }
 
 /**************************************************************************/
-void nsm_core__initialize_diff_propensities(system_t* system){
+void nsm_core__initialize_diff_propensities(ParticleSystem* system){
     int s_ndx;
 
 //    for (i = 0; i < rdme->Ndofs; i++) {
@@ -308,7 +308,7 @@ void nsm_core__initialize_diff_propensities(system_t* system){
 }
 
 /**************************************************************************/
-void nsm_core__initialize_heap(system_t*system){
+void nsm_core__initialize_heap(ParticleSystem*system){
     rdme_t* rdme = system->rdme;
     /* Calculate times to next event (reaction or diffusion)
      in each subvolume and initialize heap. */
@@ -331,7 +331,7 @@ void nsm_core__destroy(rdme_t*rdme){
 }
 
 /**************************************************************************/
-void nsm_core__initialize_chem_populations(system_t*system, unsigned int*u0){
+void nsm_core__initialize_chem_populations(ParticleSystem*system, unsigned int*u0){
     /* Set xx to the initial state. xx will always hold the current solution. */
     //printf("malloc Ndofs = %li\n",rdme->Ndofs);
     //rdme->xx = (unsigned int *)malloc(rdme->Ndofs*sizeof(unsigned int));
@@ -359,7 +359,7 @@ void nsm_core__initialize_chem_populations(system_t*system, unsigned int*u0){
 
 
 /**************************************************************************/
-void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system){
+void nsm_core__build_diffusion_matrix(rdme_t*rdme,ParticleSystem*system){
     printf("*************** build_diffusion_matrix ***************\n");fflush(stdout);
     double off_diag_sum,diff_const,dist2;
     node_t *n;
@@ -498,7 +498,8 @@ void nsm_core__destroy_diffusion_matrix(rdme_t*rdme){
 
 
 /**************************************************************************/
-void nsm_core__take_step(system_t*system, double current_time, double step_size){
+// Update to use priority queue
+void nsm_core__take_step(ParticleSystem*system, double current_time, double step_size){
     rdme_t*rdme = system->rdme;
     double tt = current_time;
     double end_time = current_time + step_size;

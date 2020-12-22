@@ -16,7 +16,7 @@
 
 
 struct arg {
-    system_t* system;
+    ParticleSystem* system;
     unsigned int thread_id;
     unsigned int num_threads;
     unsigned int num_my_particles;
@@ -34,7 +34,7 @@ pthread_barrier_t end_output_barrier;
 unsigned int current_step;
 
 void* output_system_thread(void* targ){
-    system_t* system = (system_t*) targ;
+    ParticleSystem* system = (ParticleSystem*) targ;
     while(1){
         pthread_barrier_wait(&begin_output_barrier);
         //output_csv(system, current_step);
@@ -88,7 +88,7 @@ void* sort_index_thread(void* targ_in){
 
 void* run_simulation_thread(void *targ_in){
     struct arg* targ = (struct arg*)targ_in;
-    system_t* system = targ->system;
+    ParticleSystem* system = targ->system;
     unsigned int step;
     node_t*n;
     int i;
@@ -134,7 +134,7 @@ void* run_simulation_thread(void *targ_in){
     return NULL;
 }
 
-void run_simulation(int num_threads, system_t* system){
+void run_simulation(int num_threads, ParticleSystem* system){
     //
     int i,j;
     int num_particles_per_thread = system->particle_list->count / num_threads;

@@ -17,7 +17,7 @@ See the file LICENSE.txt for details.
 
 
 
-void pairwiseForce(particle_t* me, system_t* system)
+void pairwiseForce(particle_t* me, ParticleSystem* system)
 {
     // F, Frho and Fbp are output
     neighbor_list_t* neighbors = me->neighbors;
@@ -174,7 +174,7 @@ void pairwiseForce(particle_t* me, system_t* system)
 }
 
 
-void filterDensity(particle_t* me, system_t* system)
+void filterDensity(particle_t* me, ParticleSystem* system)
 {
   neighbor_list_t* neighbors = me->neighbors;
   neighbor_node_t*n;
@@ -215,7 +215,7 @@ void filterDensity(particle_t* me, system_t* system)
 }
 
 
-void computeBoundaryVolumeFraction(particle_t* me, system_t* system)
+void computeBoundaryVolumeFraction(particle_t* me, ParticleSystem* system)
 {
     neighbor_list_t* neighbors = me->neighbors;
     neighbor_node_t* n;
@@ -297,7 +297,7 @@ void computeBoundaryVolumeFraction(particle_t* me, system_t* system)
 }
 
 
-void applyBoundaryVolumeFraction(particle_t* me, system_t* system)
+void applyBoundaryVolumeFraction(particle_t* me, ParticleSystem* system)
 {
     int i;
     double v_dot_normal;

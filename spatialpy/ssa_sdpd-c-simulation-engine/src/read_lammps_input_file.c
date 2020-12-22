@@ -11,7 +11,7 @@ See the file LICENSE.txt for details.
 
 
 
-void read_lammps_input_file(const char*filename, system_t*system){
+void read_lammps_input_file(const char*filename, ParticleSystem*system){
     char* s;
     FILE* fp = fopen(filename, "r");
     if(fp == NULL){

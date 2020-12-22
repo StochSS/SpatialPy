@@ -17,6 +17,7 @@ extern dsfmt_t dsfmt;
 
 typedef struct __rdme_data_t rdme_t;
 
+// Move to ParticleSystem
 struct __rdme_data_t {
     //size_t *irD; // replaced by neighbor_node_t->D_i_j
     //size_t *jcD;
@@ -50,6 +51,7 @@ struct __rdme_data_t {
     //char** species_names; //  system->species_names
 };
 
+// Move to Particle
 typedef struct __rdme_voxel_t rdme_voxel_t;
 struct __rdme_voxel_t {
     double srrate;
@@ -61,28 +63,28 @@ struct __rdme_voxel_t {
 
 
 
-void initialize_rdme(system_t*system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
+void initialize_rdme(ParticleSystem*system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
                         unsigned int*u0);
-void simulate_rdme(system_t*system, unsigned int step);
-void destroy_rdme(system_t*system);
+void simulate_rdme(ParticleSystem*system, unsigned int step);
+void destroy_rdme(ParticleSystem*system);
 
 
 /******************************************************************/
 
-void nsm_core__create(system_t*system, size_t *irN, size_t *jcN,int *prN, size_t *irG, size_t *jcG);
+void nsm_core__create(ParticleSystem*system, size_t *irN, size_t *jcN,int *prN, size_t *irG, size_t *jcG);
 void nsm_core__destroy(rdme_t*rdme);
 
-void nsm_core__initialize_chem_populations(system_t*system, unsigned int*u0);
+void nsm_core__initialize_chem_populations(ParticleSystem*system, unsigned int*u0);
 
-void nsm_core__initialize_rxn_propensities(system_t*system);
-void nsm_core__initialize_diff_propensities(system_t*system);
-void nsm_core__initialize_heap(system_t*system);
+void nsm_core__initialize_rxn_propensities(ParticleSystem*system);
+void nsm_core__initialize_diff_propensities(ParticleSystem*system);
+void nsm_core__initialize_heap(ParticleSystem*system);
 
 
-void nsm_core__build_diffusion_matrix(rdme_t*rdme,system_t*system);
+void nsm_core__build_diffusion_matrix(rdme_t*rdme,ParticleSystem*system);
 void nsm_core__destroy_diffusion_matrix(rdme_t*rdme);
 
-void nsm_core__take_step(system_t*system, double current_time, double step_size);
+void nsm_core__take_step(ParticleSystem*system, double current_time, double step_size);
 
 
 
