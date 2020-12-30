@@ -201,10 +201,9 @@ void nsm_core__create(ParticleSystem*system, size_t *irN, size_t *jcN,int *prN, 
 
 
 
-    node_t*n;
     Particle*p;
-    for(n=system->particle_list->head; n!=NULL; n=n->next){
-        p = n->data;
+    for(int i = 0; i < system->particles.size(); i++){
+        p = system->particles[i];
         // p->rdme = (rdme_voxel_t*) malloc(sizeof(rdme_voxel_t));
         p->srrate = 0;
         p->rrate = (double*) malloc(system->num_stoch_rxns * sizeof(double));
@@ -251,10 +250,9 @@ void nsm_core__initialize_rxn_propensities(ParticleSystem*system){
     /* Calculate the propensity for every reaction and every
      subvolume. Store the sum of the reaction intensities in each
      subvolume in srrate. */
-    node_t*n;
     Particle*p;
-    for(n=system->particle_list->head; n!=NULL; n=n->next){
-        p = n->data;
+    for(int i = 0; i < system->particles.size(); i++){
+        p = system->particles[i];
         p->srrate = 0.0;
         for (j = 0; j < system->num_stoch_rxns; j++) {
             //rrate[i*Mreactions+j] =
@@ -285,12 +283,11 @@ void nsm_core__initialize_diff_propensities(ParticleSystem* system){
 //        for(j = 0; j < system->num_stoch_species; j++)
 //        rdme->sdrate[i] += rdme->Ddiag[i*system->num_stoch_species+j]*rdme->xx[i*system->num_stoch_species+j];
 //    }
-    node_t*n;
     neighbor_node_t*n2;
     Particle*p,*p2;
     double diff_const;
-    for(n=system->particle_list->head; n!=NULL; n=n->next){
-        p=n->data;
+    for(int i = 0; i < system->particles.size(); i++){
+        p=system->particles[i];
         if(p->neighbors->count == 0){
             find_neighbors(p, system);
         }
@@ -345,12 +342,11 @@ void nsm_core__initialize_chem_populations(ParticleSystem*system, unsigned int*u
     //}
     //printf("]\n");
 
-    node_t *n;
     Particle *p1;
     int i=0;
     int num_s = system->num_stoch_species;
-    for(n=system->particle_list->head; n!=NULL; n=n->next){
-        p1 = n->data;
+    for(int i = 0; i < system->particles.size(); i++){
+        p1 = system->particles[i];
         //memcpy(p1->xx,&u0[i*num_s],system->num_stoch_species*sizeof(unsigned int));
         p1->xx = &u0[i*num_s];
         i++;
@@ -362,7 +358,6 @@ void nsm_core__initialize_chem_populations(ParticleSystem*system, unsigned int*u
 void nsm_core__build_diffusion_matrix(ParticleSystem*system){
     printf("*************** build_diffusion_matrix ***************\n");fflush(stdout);
     double off_diag_sum,diff_const,dist2;
-    node_t *n;
     neighbor_node_t*n2;
     Particle *p1,*p2;
     int s_ndx;
@@ -370,13 +365,13 @@ void nsm_core__build_diffusion_matrix(ParticleSystem*system){
     double ih,ihsq,wfd;
     double h = system->h;
     printf("System->h = %e\n",system->h);
-    size_t Ncells = system->particle_list->count;
+    size_t Ncells = system->particles.size();
     size_t jcD_length = Ncells + 1;
     size_t irD_length = 0;
     size_t prD_length = 0;
     // find total length of jc & pr arrays: O(n)
-    for(n=system->particle_list->head; n!=NULL; n=n->next){
-        p1 = n->data;
+    for(int i = 0; i < system->particles.size(); i++){
+        p1 = system->particles[i];
         if(p1->neighbors->count == 0){
             //if(debug_flag){printf("find_neighbors(%i)\n",p1->id);}
             find_neighbors(p1, system);
@@ -399,8 +394,8 @@ void nsm_core__build_diffusion_matrix(ParticleSystem*system){
     double *prD = (double*) malloc(sizeof(double)*prD_length*system->num_stoch_species);
     size_t prD_ndx = 0;
     // for each particle p, look at each neighbor p2
-    for(n=system->particle_list->head; n!=NULL; n=n->next){
-        p1 = n->data;
+    for(int i = 0; i < system->particles.size(); i++){
+        p1 = system->particles[i];
         //if(p1->neighbors->count == 0){
             find_neighbors(p1, system);
         //}

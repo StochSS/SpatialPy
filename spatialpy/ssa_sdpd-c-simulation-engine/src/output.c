@@ -8,13 +8,12 @@
 
 void output_csv(ParticleSystem*system, int current_step){
     char filename[256];
-    node_t* n;
     Particle* p;
     sprintf(filename,"output_%u.csv",current_step);
     FILE*fp = fopen(filename,"w+");
     fprintf(fp, "id, x, y, z, vx, vy, vz, type, mass, rho, bvf_phi\n");
-    for(n=system->particle_list->head; n!=NULL; n=n->next){
-        p = n->data;
+    for(int i = 0; i < system->particles.size(); i++){
+        p = system->particles[i];
         fprintf(fp,"%u, %lf, %lf, %lf, %lf, %lf, %lf, %i, %lf, %lf, %lf\n",
             p->id, p->x[0], p->x[1], p->x[2], p->v[0], p->v[1], p->v[2],
             p->type, p->mass, p->rho, p->bvf_phi);
@@ -35,26 +34,27 @@ int output_buffer_chem_size = 0;
 void output_vtk__sync_step(ParticleSystem*system, int current_step){
     output_buffer_current_step = current_step;
     if(output_buffer_size == 0){
-        output_buffer_size = system->particle_list->count;
+        output_buffer_size = system->particles.size();
         output_buffer = (Particle*) malloc(sizeof(Particle)*output_buffer_size);
-    }else if(output_buffer_size < system->particle_list->count){
+    }else if(output_buffer_size < system->particles.size()){
         output_buffer = realloc(output_buffer, sizeof(Particle)*output_buffer_size);
     }
     if(system->num_chem_species > 0){
         if(output_buffer_chem_size==0){
-            output_buffer_chem_size = system->particle_list->count * system->num_chem_species;
+            output_buffer_chem_size = system->particles.size() * system->num_chem_species;
             output_buffer_chem = (double*) malloc(sizeof(double)*output_buffer_chem_size);
-        }else if(output_buffer_chem_size < system->particle_list->count * system->num_chem_species){
-            output_buffer_chem_size = system->particle_list->count * system->num_chem_species;
+        }else if(output_buffer_chem_size < system->particles.size() * system->num_chem_species){
+            output_buffer_chem_size = system->particles.size() * system->num_chem_species;
             output_buffer_chem = realloc(output_buffer_chem, sizeof(double)*output_buffer_chem_size);
         }
     }
     int ncnt=0;
-    node_t*n;
-    for(n=system->particle_list->head; n!=NULL; n=n->next){
-        memcpy( (void *) &output_buffer[ncnt++], (void *) n->data, sizeof(Particle) );
+    Particle* p;
+    for(int i = 0; i < system->particles.size(); i++){
+        p = system->particles[i]
+        memcpy( (void *) &output_buffer[ncnt++], (void *) p, sizeof(Particle) );
         if(system->num_chem_species > 0){
-            memcpy( (void *) &output_buffer_chem[n->data->id*system->num_chem_species], (void *) n->data->C, sizeof(double)*system->num_chem_species );
+            memcpy( (void *) &output_buffer_chem[p->id*system->num_chem_species], (void *) p->C, sizeof(double)*system->num_chem_species );
         }
     }
     output_buffer_current_num_particles = ncnt;
@@ -87,8 +87,9 @@ void output_vtk__sync_step(ParticleSystem*system, int current_step){
         //    sizeof(unsigned int)*system->num_stoch_species*output_buffer_current_num_particles);
         //for(int i=0;i<system->num_stoch_species*output_buffer_current_num_particles;i++){
         ncnt=0;
-        for(n=system->particle_list->head; n!=NULL; n=n->next){
-            memcpy( (void *) &output_buffer_xx[ncnt], (void *) n->data->xx, sizeof(unsigned int)*system->num_stoch_species );
+        for(int i = 0; i < system->particles.size(); i++){
+            p = system->particles[i]
+            memcpy( (void *) &output_buffer_xx[ncnt], (void *) p->xx, sizeof(unsigned int)*system->num_stoch_species );
             ncnt += system->num_stoch_species;
         }
     }

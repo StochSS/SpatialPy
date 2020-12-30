@@ -137,7 +137,7 @@ void* run_simulation_thread(void *targ_in){
 void run_simulation(int num_threads, ParticleSystem* system){
     //
     int i,j;
-    int num_particles_per_thread = system->particle_list->count / num_threads;
+    int num_particles_per_thread = system->particles.size() / num_threads;
     //int num_bonds_per_thread = system->bond_list->count / num_threads;
     // start worked threads
     struct arg*targs = (struct arg*) malloc(sizeof(struct arg)*num_threads);
@@ -146,7 +146,7 @@ void run_simulation(int num_threads, ParticleSystem* system){
     pthread_barrier_init(&begin_step_barrier, NULL, num_threads+1);
     pthread_barrier_init(&end_step_barrier, NULL, num_threads+1);
     // create all the worker threads
-    int num_particles_left = system->particle_list->count;
+    int num_particles_left = system->particles.size();
     node_t*particle_list_ittr = system->particle_list->head;
     for (i=0; i < num_threads; i++) {
         targs[i].system = system;
