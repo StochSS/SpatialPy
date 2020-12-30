@@ -58,7 +58,7 @@ void output_vtk__sync_step(ParticleSystem*system, int current_step){
         }
     }
     output_buffer_current_num_particles = ncnt;
-    if(system->rdme != NULL){
+    if(system->initialized){
         // make a copy of the RDME state vector xx
         if(output_buffer_xx_size==0){
             output_buffer_xx_size = output_buffer_current_num_particles*system->num_stoch_species;
@@ -140,7 +140,7 @@ void output_vtk__async_step(ParticleSystem*system){
     fprintf(fp,"\n");
     fprintf(fp,"POINT_DATA %i\n", np);
     int num_fields = 7;
-    if(system->rdme != NULL){
+    if(system->initialized){
         num_fields += system->num_stoch_species;
     }
     if(system->num_chem_species > 0){
@@ -203,7 +203,7 @@ void output_vtk__async_step(ParticleSystem*system){
         }
     }
     // d - discrete
-    if(system->rdme != NULL){
+    if(system->initialized){
         int s;
         for(s=0;s<system->num_stoch_species;s++){
             fprintf(fp,"D[%s] 1 %i int\n", system->species_names[s], np);
