@@ -28,7 +28,7 @@ PropensityFun *ALLOC_propensities(void);
 ChemRxnFun *ALLOC_ChemRxnFun(void);
 void FREE_propensities(PropensityFun* ptr);
 
-void applyBoundaryConditions(Particle me, ParticleSystem system);
+void applyBoundaryConditions(Particle* me, ParticleSystem* system);
 }
 
 

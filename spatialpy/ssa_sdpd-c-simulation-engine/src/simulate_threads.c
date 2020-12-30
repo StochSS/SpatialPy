@@ -21,7 +21,7 @@ struct arg {
     unsigned int num_threads;
     unsigned int num_my_particles;
     //unsigned int num_my_bonds;
-    node_t*my_first_particle;
+    int my_first_particle;
     //bond*my_first_bond;
 };
 
@@ -90,7 +90,7 @@ void* run_simulation_thread(void *targ_in){
     struct arg* targ = (struct arg*)targ_in;
     ParticleSystem* system = targ->system;
     unsigned int step;
-    node_t*n;
+    Particle* p;
     int i;
     int count = 0;
     // each thread will take a step with each of it's particles
@@ -103,12 +103,10 @@ void* run_simulation_thread(void *targ_in){
         for(int substep=0;substep < nsubsteps; substep++){
             // take_step
             count = 0;
-            n=targ->my_first_particle;
             for(i=0; i<targ->num_my_particles; i++){
-                if(n==NULL) break;
-                take_step(n->data,system,step,substep);
+                p = system->particles[i+targ->my_first_particle]
+                take_step(p,step,substep);
                 count++;
-                n=n->next;
             }
             // block on the end barrier
             if(debug_flag)printf("[WORKER %i] completed step %i, substep %i/%i, processed %i particles\n",targ->thread_id,step,substep,nsubsteps,count);
@@ -147,7 +145,7 @@ void run_simulation(int num_threads, ParticleSystem* system){
     pthread_barrier_init(&end_step_barrier, NULL, num_threads+1);
     // create all the worker threads
     int num_particles_left = system->particles.size();
-    node_t*particle_list_ittr = system->particle_list->head;
+    int particle_list_ittr = 0;
     for (i=0; i < num_threads; i++) {
         targs[i].system = system;
         targs[i].num_threads = num_threads;
@@ -159,8 +157,8 @@ void run_simulation(int num_threads, ParticleSystem* system){
             targs[i].num_my_particles = num_particles_per_thread;
             num_particles_left -= num_particles_per_thread;
             for(j=0;j<num_particles_per_thread;j++){
-                particle_list_ittr = particle_list_ittr->next;
-                if(particle_list_ittr == NULL){
+                particle_list_ittr++;
+                if(particle_list_ittr >= system->particles.size()){
                     printf("ERROR: particle_list_ittr was unexpectly NULL\n");
                     exit(1);
                 }

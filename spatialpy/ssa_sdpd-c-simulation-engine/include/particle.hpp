@@ -44,14 +44,14 @@ namespace Spatialpy{
 	    double *C;  // concentration of chem species
 	    double *Q;  // flux of chem species
 	    // below here for simulation
-	    std::priority_queue<NeighborNode> neighbors ;
+	    std::vector<NeighborNode> neighbors ;
 
         // Moved from rdme_voxel_t
         double srrate;
         double* rrate;
         double sdrate;
         double* Ddiag;
-        ordered_node_t*heap_index;
+        EventNode*heap_index;
 
 	    double particle_dist(Particle p2);
 	    double particle_dist_sqrd(Particle p2);
@@ -64,18 +64,18 @@ namespace Spatialpy{
     };
 
     struct EventNode{
-	Particle data ;
-	double tt ;
+    	Particle* data ;
+    	double tt ;
         bool operator<(EventNode const& e2){ 
             return tt > e2.tt ; 
         } 
     };
 
     struct NeighborNode{
-	Particle data ;
-	double dist ;
-	double dWdr ;
-	double D_i_j ;
+    	Particle* data ;
+    	double dist ;
+    	double dWdr ;
+    	double D_i_j ;
 
         bool operator<(NeighborNode const& n2){ 
             return dist > n2.dist ; 
@@ -133,7 +133,6 @@ namespace Spatialpy{
         const size_t *irG;
         const size_t *jcG;
         int initialized;
-        ordered_list_t*heap; // not sure if we need this
         long int total_reactions;
         long int total_diffusion;
 
