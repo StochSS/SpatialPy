@@ -19,7 +19,7 @@ main.o:
 dSFMT.o:
 	$(CC) -c -o dSFMT.o $(ROOTINC)/external/dSFMT/dSFMT.c $(INCDIRPARAMS) $(CFLAGS) $(DSFMTFLAGS)
 
-%.o: $(ROOT)/src/%.c
+%.o: $(ROOT)/src/%.cpp
 	$(CC) -c -o $@ "$<" $(INCDIRPARAMS) $(CFLAGS) $(DSFMTFLAGS)
 
 ssa_sdpd: main.o dSFMT.o $(OBJ)
