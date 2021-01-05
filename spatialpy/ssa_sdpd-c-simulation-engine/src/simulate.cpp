@@ -1,7 +1,7 @@
 #include "simulate.hpp"
 #include "output.h"
 #include "particle.hpp"
-#include "simulate_rdme.h"
+#include "simulate_rdme.hpp"
 #include "model.h"
 #include <errno.h>
 #include "pthread_barrier.h"

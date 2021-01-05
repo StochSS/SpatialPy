@@ -11,7 +11,7 @@ See the file LICENSE.txt for details.
 #include <cstdlib>
 #include <vector>
 #include <queue>
-#include "propensities.h"
+#include "propensities.hpp"
 // Include ANN KD Tree
 #include <ANN/ANN.h>
 

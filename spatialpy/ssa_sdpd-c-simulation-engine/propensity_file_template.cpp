@@ -7,8 +7,9 @@
 #include <unistd.h>
 #include "count_cores.h"
 #include "particle.hpp"
-#include "propensities.h"
+#include "propensities.hpp"
 #include "simulate.hpp"
+#include "simulate_rdme.hpp"
 #include "dSFMT/dSFMT.h"
 
 
@@ -60,27 +61,27 @@ __INPUT_CONSTANTS__
 int debug_flag;
 dsfmt_t dsfmt;
 
-void init_create_particle(ParticleSystem* sys, int id, double x, double y, double z, int type, double nu, double mass, double rho, int solidTag, int num_chem_species){
-    Particle* p = create_particle(id);
-    p->x[0] = x;
-    p->x[1] = y;
-    p->x[2] = z;
-    p->id = id;
-    p->type = type;
-    p->nu = nu;
-    p->mass = mass;
-    p->rho = rho;
-    p->solidTag = solidTag;
-    add_particle(p, sys);
+void init_create_particle(ParticleSystem sys, unsigned int id, double x, double y, double z, int type, double nu, double mass, double rho, int solidTag, int num_chem_species){
+    Particle p  = {id};
+    p.x[0] = x;
+    p.x[1] = y;
+    p.x[2] = z;
+    p.id = id;
+    p.type = type;
+    p.nu = nu;
+    p.mass = mass;
+    p.rho = rho;
+    p.solidTag = solidTag;
+    sys.add_particle(p);
     if(num_chem_species > 0){
         for(int i=0;i<num_chem_species;i++){
-            p->C[i] = (double) input_u0[id*num_chem_species+i];
+            p.C[i] = (double) input_u0[id*num_chem_species+i];
         }
     }
 }
 
 
-int init_all_particles(ParticleSystem* sys){
+int init_all_particles(ParticleSystem sys){
     int id=0;
     __INIT_PARTICLES__
     return id;

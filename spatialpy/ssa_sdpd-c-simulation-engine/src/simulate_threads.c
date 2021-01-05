@@ -3,7 +3,7 @@
 #include "output.h"
 #include "particle.hpp"
 #include "simulate.hpp"
-#include "simulate_rdme.h"
+#include "simulate_rdme.hpp"
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>

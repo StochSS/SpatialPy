@@ -11,7 +11,7 @@ See the file LICENSE.txt for details.
 
 using namespace Spatialpy ;
 
-// void run_simulation(int num_threads, ParticleSystem system);
+void run_simulation(int num_threads, ParticleSystem system);
 
 
 void take_step(Particle* me, ParticleSystem* system, unsigned int step, unsigned int substep);
