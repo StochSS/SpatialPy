@@ -23,6 +23,7 @@ namespace Spatialpy{
     struct EventNode ;
 
     struct Particle{
+        Particle(unsigned int id) ;
 	    unsigned int id;
 	    int type;
 	    double x[3];
@@ -56,7 +57,7 @@ namespace Spatialpy{
 	    double particle_dist(Particle p2);
 	    double particle_dist_sqrd(Particle p2);
 	    void find_neighbors(ParticleSystem system);
-	    int add_to_neighbor_list(Particle neighbor, ParticleSystem system) ;
+	    int add_to_neighbor_list(Particle neighbor, ParticleSystem system, double r2) ;
 
             bool operator<(Particle const& p2){ 
                 return x[0] > p2.x[0] ; 
@@ -72,10 +73,11 @@ namespace Spatialpy{
     };
 
     struct NeighborNode{
-    	Particle* data ;
-    	double dist ;
-    	double dWdr ;
-    	double D_i_j ;
+	    NeighborNode(const Particle &data, double dist, double dWdr, double D_i_j) ;
+        Particle data ;
+        double dist ;
+        double dWdr ;
+        double D_i_j ;
 
         bool operator<(NeighborNode const& n2){ 
             return dist > n2.dist ; 
@@ -112,17 +114,19 @@ namespace Spatialpy{
 **/
  
     struct ParticleSystem{
-	    int dimension;
-	    double dt;
-	    unsigned int nt; 
-	    unsigned int current_step;
-	    unsigned int output_freq;
-	    double xlo, xhi, ylo, yhi, zlo, zhi;
-	    double h;
-	    double c0;
-	    double rho0;
-	    double P0;
-	    std::vector<Particle> particles;
+        ParticleSystem(size_t num_types, size_t num_chem_species, size_t num_chem_rxns, 
+                         size_t num_stoch_species, size_t num_stoch_rxns,size_t num_data_fn) ;
+	int dimension;
+	double dt;
+	unsigned int nt; 
+	unsigned int current_step;
+	unsigned int output_freq;
+	double xlo, xhi, ylo, yhi, zlo, zhi;
+	double h;
+	double c0;
+	double rho0;
+	double P0;
+	std::vector<Particle> particles;
         // std::priority_queue<Particle> x_index;
         std::priority_queue<EventNode> event_q;
 
@@ -136,27 +140,27 @@ namespace Spatialpy{
         long int total_reactions;
         long int total_diffusion;
 
-	    char boundary_conditions[3];
-	    bool static_domain;
-	    size_t num_types;
-	    size_t num_data_fn;
+	char boundary_conditions[3];
+	bool static_domain;
+	size_t num_types;
+	size_t num_data_fn;
 
-	    ChemRxnFun* chem_rxn_rhs_functions;
-	    size_t num_chem_species;
-	    size_t num_chem_rxns;
+	ChemRxnFun* chem_rxn_rhs_functions;
+	size_t num_chem_species;
+	size_t num_chem_rxns;
 
-	    PropensityFun* stoch_rxn_propensity_functions;
-	    size_t num_stoch_species;
-	    size_t num_stoch_rxns;
+	PropensityFun* stoch_rxn_propensity_functions;
+	size_t num_stoch_species;
+	size_t num_stoch_rxns;
 
-	    const char * const* species_names; 
+	const char * const* species_names; 
 
-	    const double *subdomain_diffusion_matrix;
-	    //int *stochic_matrix;
-	    int *stoichiometric_matrix;
-	    double* gravity;
+	const double *subdomain_diffusion_matrix;
+	//int *stochic_matrix;
+	int *stoichiometric_matrix;
+	double* gravity;
 
-	    void add_particle(Particle me);
+	void add_particle(Particle me);
 
         ANNkd_tree kdTree;
         ANNpointArray kdTree_pts;

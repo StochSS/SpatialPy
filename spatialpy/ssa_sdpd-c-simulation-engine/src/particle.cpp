@@ -28,21 +28,21 @@ namespace Spatialpy{
         num_chem_species = num_chem_species;
         num_chem_rxns = num_chem_rxns;
         num_types = num_types;
-        gravity = calloc(3,sizeof(double));
+        gravity = (double*) calloc(3,sizeof(double));
         num_data_fn = num_data_fn;
-        kdTree_initialize = false;
+        kdTree_initialized = false;
     }
 
     void ParticleSystem::add_particle(Particle me){
-    	x_index.push(me) ;
+    	// x_index.push(me) ;
     	particles.push_back(me) ;
     	// TODO: does this need to change? 
-    	Q = (double*) calloc(system->num_chem_species, sizeof(double));
-    	C = (double*) calloc(system->num_chem_species, sizeof(double));
-    	data_fn = (double*) calloc(system->num_data_fn, sizeof(double));
+    	me.Q = (double*) calloc(num_chem_species, sizeof(double));
+    	me.C = (double*) calloc(num_chem_species, sizeof(double));
+    	me.data_fn = (double*) calloc(num_data_fn, sizeof(double));
     }
 
-    Particle::Particle(int id){
+    Particle::Particle(unsigned int id){
     	id = id;
     	nu = 0.01; 
     	mass = 1;
@@ -73,7 +73,7 @@ namespace Spatialpy{
     	// double r2 =  ( a*a + b*b + c*c);
     	// Make sure the distance was actually set by the annkFRSearch
         if(r2 == ANN_DIST_INF) {
-            r2 = particle_dist_sqrd(neighbor)
+            r2 = particle_dist_sqrd(neighbor) ;
         }
         double r = sqrt(r2);
 
@@ -95,22 +95,26 @@ namespace Spatialpy{
     	double D_i_j = -2.0*(mass*neighbor.mass)/(mass+neighbor.mass)*(rho+neighbor.rho)/(rho*neighbor.rho) * r2 * wfd / (r2+0.01*h*h);
 
     	if(isnan(D_i_j)){
-    	    printf("Got NaN calculating D_i_j for me=%i, neighbor=%i\n",id, neighbor->id);
+    	    printf("Got NaN calculating D_i_j for me=%i, neighbor=%i\n",id, neighbor.id);
     	    printf("r=%e ",r);
     	    printf("h=%e ",h);
     	    printf("alpha=%e ",alpha);
     	    printf("dWdr=%e ",dWdr);
-    	    Particle p = me;
-    	    printf("mass=%e ",p->mass);
-    	    printf("rho=%e ",p->rho);
-    	    p = neighbor;
-    	    printf("n->mass=%e ",p->mass);
-    	    printf("n->rho=%e ",p->rho);
+    	    printf("mass=%e ",mass);
+    	    printf("rho=%e ",rho);
+    	    Particle p = neighbor;
+    	    printf("n->mass=%e ",p.mass);
+    	    printf("n->rho=%e ",p.rho);
 
     	    exit(1);
     	}
 
-    	neighbors.push({neighbor, r, dWdr, D_i_j}) ;
+	NeighborNode n = NeighborNode ;
+        n.data = neighbor ;
+        n.dist = r ;
+        n.dWdr = dWdr ;
+        n.D_i_j = D_i_j ;
+    	neighbors.push_back(n) ;
 
     	return 1;
     }
