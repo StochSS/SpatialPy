@@ -65,7 +65,7 @@ namespace Spatialpy{
         int get_k__exact(ANNpoint queryPt, ANNdist dist, ParticleSystem system) ;
         void find_neighbors(ParticleSystem *system, bool use_exact_k=true) ;
 
-            bool operator<(Particle const& p2){ 
+            bool operator<(const Particle& p2){ 
                 return x[0] > p2.x[0] ; 
             } 
     };
@@ -73,7 +73,7 @@ namespace Spatialpy{
     struct EventNode{
     	Particle* data ;
     	double tt ;
-        bool operator<(EventNode const& e2){ 
+        bool operator< (const EventNode& e2){ 
             return tt > e2.tt ; 
         } 
     };
@@ -85,7 +85,7 @@ namespace Spatialpy{
         double D_i_j ;
 	    NeighborNode(Particle *data, double dist, double dWdr, double D_i_j) ;
 
-        bool operator<(NeighborNode const& n2){ 
+        bool operator<(const NeighborNode& n2){ 
             return dist > n2.dist ; 
         } 
     };
@@ -133,8 +133,9 @@ namespace Spatialpy{
 	double rho0;
 	double P0;
 	std::vector<Particle> particles;
-        // std::priority_queue<Particle> x_index;
-        std::priority_queue<EventNode> event_q;
+	std::vector<EventNode> event_v;
+    // std::priority_queue<Particle> x_index;
+    //std::priority_queue<EventNode> event_q;
 
         // Moved from rdme_t
         const size_t *irN;

@@ -9,7 +9,7 @@ See the file LICENSE.txt for details.
 #define model_h
 #include "particle.hpp"
 
-
+using namespace Spatialpy ;
 
 void filterDensity(Particle* me, ParticleSystem* system);
 

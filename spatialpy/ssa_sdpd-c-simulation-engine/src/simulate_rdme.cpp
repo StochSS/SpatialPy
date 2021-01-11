@@ -315,12 +315,7 @@ void nsm_core__initialize_heap(ParticleSystem*system){
     /* Calculate times to next event (reaction or diffusion)
      in each subvolume and initialize heap. */
     Particle *p;
-    std::vector<EventNode> sorted_events ;
-    while(!system->event_q.empty()){
-        sorted_events.push_back(system->event_q.top()) ;
-        system->event_q.pop() ;
-    }
-    for(auto e=sorted_events.begin(); e!=sorted_events.end(); ++e){
+    for(auto e=system->event_v.begin(); e!=system->event_v.end(); ++e){
     //for (i = 0; i < rdme->Ncells; i++) {
         //rdme->rtimes[i] = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/(rdme->srrate[i]+rdme->sdrate[i]);
         //rdme->heap[i] = rdme->node[i] = i;
@@ -548,8 +543,8 @@ void nsm_core__take_step(ParticleSystem*system, double current_time, double step
         //told = tt;
         //tt   = rdme->rtimes[0];
         //subvol = rdme->node[0];
-        subvol = system->event_q.top().data;
-        tt = system->event_q.top().tt;
+        subvol = system->event_v.front().data;
+        tt = system->event_v.front().tt;
         vol = (subvol->mass / subvol->rho);
 
         //if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}
@@ -605,7 +600,7 @@ void nsm_core__take_step(ParticleSystem*system, double current_time, double step
                 subvol->xx[system->irN[i]] += system->prN[i];
                 if (subvol->xx[system->irN[i]] < 0){
                     errcode = 1;
-                    printf("Negative state detected after reaction %i, subvol %li, species %zu at time %e (was %i now %i)\n",re,subvol->id,system->irN[i],tt,prev_val,subvol->xx[system->irN[i]]);
+                    printf("Negative state detected after reaction %li, subvol %i, species %li at time %e (was %i now %i)\n",re,subvol->id,system->irN[i],tt,prev_val,subvol->xx[system->irN[i]]);
 
                     print_current_state(subvol,system);
                     exit(1);
@@ -789,13 +784,16 @@ void nsm_core__take_step(ParticleSystem*system, double current_time, double step
         /* Compute time to new event for this subvolume. */
         totrate = subvol->srrate+subvol->sdrate;
         if(totrate > 0.0){
-            system->event_q.top().tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/totrate+tt;
+            system->event_v.front().tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/totrate+tt;
         }else{
-            system->event_q.top().tt = INFINITY;
+            system->event_v.front().tt = INFINITY;
         }
         /* Update the heap. */
         //update(0,rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
-        ordered_list_bubble_up_down(system->event_q, subvol->heap_index);
+
+
+        // TODO: REPLACE BUBBLE_UP_DOWN
+        //ordered_list_bubble_up_down(system->event_v, subvol->heap_index);
 
         /* If it was a diffusion event, also update the other affected
          node. */
@@ -814,7 +812,9 @@ void nsm_core__take_step(ParticleSystem*system, double current_time, double step
                 dest_subvol->heap_index->tt = INFINITY;
             }
 
-            ordered_list_bubble_up_down(system->heap, dest_subvol->heap_index);
+
+            //TODO: REPLACE BUBBLE_UP_DOWN
+            //ordered_list_bubble_up_down(system->heap, dest_subvol->heap_index);
         }
 
         // re-sort the heap

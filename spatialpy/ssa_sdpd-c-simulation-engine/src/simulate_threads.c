@@ -1,4 +1,3 @@
-#include "linked_list.h"
 #include "model.h"
 #include "output.h"
 #include "particle.hpp"
@@ -13,7 +12,7 @@
 // Include ANN KD Tree
 #include <ANN/ANN.h>
 
-
+using namespace Spatialpy ;
 
 struct arg {
     ParticleSystem* system;
@@ -59,7 +58,7 @@ void buildKDTree(ParticleSystem& system) {
     if(system.kdTree_initialized) {
         if(system.static_domain) {return;} // do not rebuild tree for static domains
         annDeallocPts(system.kdTree_pts);
-        delete [] system.kdTree;
+        delete [] &system.kdTree;
         annClose();
     }
     int nPts = system.particles.size();
