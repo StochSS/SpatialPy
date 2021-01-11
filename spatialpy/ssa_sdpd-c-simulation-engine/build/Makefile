@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -c -std=c++14 -Wall -O3
+CFLAGS = -c -std=c++14 -Wall -O3 -g
 SIMFLAGS = -l. -std=c++14 -Wall -O3
 LFLAGS = -pthread -lm
 DSFMTFLAGS = -DHAVE_SSE2 -DDSFMT_MEXP=521
@@ -18,6 +18,9 @@ main.o:
 
 dSFMT.o:
 	$(CC) -c -o dSFMT.o $(ROOTINC)/external/dSFMT/dSFMT.c $(INCDIRPARAMS) $(CFLAGS) $(DSFMTFLAGS)
+
+%.o: $(ROOT)/src/%.c
+	$(CC) -c -o $@ "$<" $(INCDIRPARAMS) $(CFLAGS) $(DSFMTFLAGS)
 
 %.o: $(ROOT)/src/%.cpp
 	$(CC) -c -o $@ "$<" $(INCDIRPARAMS) $(CFLAGS) $(DSFMTFLAGS)

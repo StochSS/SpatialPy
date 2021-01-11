@@ -5,14 +5,15 @@
 #include <string.h>
 
 
+
 void output_csv(ParticleSystem*system, int current_step){
     char filename[256];
     Particle* p;
     sprintf(filename,"output_%u.csv",current_step);
     FILE*fp = fopen(filename,"w+");
     fprintf(fp, "id, x, y, z, vx, vy, vz, type, mass, rho, bvf_phi\n");
-    for(long unsigned int i = 0; i < system->particles.size(); i++){
-        p = &system->particles[i];
+    for(int i = 0; i < system->particles.size(); i++){
+        p = system->particles[i];
         fprintf(fp,"%u, %lf, %lf, %lf, %lf, %lf, %lf, %i, %lf, %lf, %lf\n",
             p->id, p->x[0], p->x[1], p->x[2], p->v[0], p->v[1], p->v[2],
             p->type, p->mass, p->rho, p->bvf_phi);
@@ -21,14 +22,14 @@ void output_csv(ParticleSystem*system, int current_step){
 }
 
 
-Particle *output_buffer;
-long unsigned int output_buffer_size = 0;
+Particle*output_buffer;
+int output_buffer_size = 0;
 int output_buffer_current_step;
 int output_buffer_current_num_particles;
 unsigned int* output_buffer_xx;
-long unsigned int output_buffer_xx_size = 0;
+int output_buffer_xx_size = 0;
 double* output_buffer_chem;
-long unsigned int output_buffer_chem_size = 0;
+int output_buffer_chem_size = 0;
 
 void output_vtk__sync_step(ParticleSystem*system, int current_step){
     output_buffer_current_step = current_step;
@@ -36,7 +37,7 @@ void output_vtk__sync_step(ParticleSystem*system, int current_step){
         output_buffer_size = system->particles.size();
         output_buffer = (Particle*) malloc(sizeof(Particle)*output_buffer_size);
     }else if(output_buffer_size < system->particles.size()){
-        output_buffer = new Particle[output_buffer_size];
+        output_buffer = realloc(output_buffer, sizeof(Particle)*output_buffer_size);
     }
     if(system->num_chem_species > 0){
         if(output_buffer_chem_size==0){
@@ -44,13 +45,13 @@ void output_vtk__sync_step(ParticleSystem*system, int current_step){
             output_buffer_chem = (double*) malloc(sizeof(double)*output_buffer_chem_size);
         }else if(output_buffer_chem_size < system->particles.size() * system->num_chem_species){
             output_buffer_chem_size = system->particles.size() * system->num_chem_species;
-            output_buffer_chem = new double[output_buffer_chem_size] ;
+            output_buffer_chem = realloc(output_buffer_chem, sizeof(double)*output_buffer_chem_size);
         }
     }
     int ncnt=0;
     Particle* p;
-    for(long unsigned int i = 0; i < system->particles.size(); i++){
-        p = &system->particles[i] ;
+    for(int i = 0; i < system->particles.size(); i++){
+        p = system->particles[i]
         memcpy( (void *) &output_buffer[ncnt++], (void *) p, sizeof(Particle) );
         if(system->num_chem_species > 0){
             memcpy( (void *) &output_buffer_chem[p->id*system->num_chem_species], (void *) p->C, sizeof(double)*system->num_chem_species );
@@ -64,7 +65,7 @@ void output_vtk__sync_step(ParticleSystem*system, int current_step){
             output_buffer_xx = (unsigned int*) malloc(sizeof(unsigned int)*output_buffer_xx_size);
         }else if(output_buffer_xx_size < output_buffer_current_num_particles*system->num_stoch_species){
             output_buffer_xx_size = output_buffer_current_num_particles*system->num_stoch_species;
-            output_buffer_xx = new unsigned int[output_buffer_xx_size] ;
+            output_buffer_xx = realloc(output_buffer_xx, sizeof(unsigned int)*output_buffer_xx_size);
         }
         /*
         printf("system->num_stoch_species*output_buffer_current_num_particles = %i\n",system->num_stoch_species*output_buffer_current_num_particles);
@@ -86,8 +87,8 @@ void output_vtk__sync_step(ParticleSystem*system, int current_step){
         //    sizeof(unsigned int)*system->num_stoch_species*output_buffer_current_num_particles);
         //for(int i=0;i<system->num_stoch_species*output_buffer_current_num_particles;i++){
         ncnt=0;
-        for(long unsigned int i = 0; i < system->particles.size(); i++){
-            p = &system->particles[i] ;
+        for(int i = 0; i < system->particles.size(); i++){
+            p = system->particles[i]
             memcpy( (void *) &output_buffer_xx[ncnt], (void *) p->xx, sizeof(unsigned int)*system->num_stoch_species );
             ncnt += system->num_stoch_species;
         }
@@ -192,7 +193,7 @@ void output_vtk__async_step(ParticleSystem*system){
     // loop here to check for continous species
     // c - concentration or continous? clarify at meeting
     if(system->num_chem_species > 0){
-        long unsigned int s;
+        int s;
         for(s=0;s<system->num_chem_species;s++){
             fprintf(fp,"C[%s] 1 %i double\n", system->species_names[s], np);
             for(i=0;i<np;i++){
@@ -204,7 +205,7 @@ void output_vtk__async_step(ParticleSystem*system){
     }
     // d - discrete
     if(system->initialized){
-        long unsigned int s;
+        int s;
         for(s=0;s<system->num_stoch_species;s++){
             fprintf(fp,"D[%s] 1 %i int\n", system->species_names[s], np);
             for(i=0;i<np;i++){

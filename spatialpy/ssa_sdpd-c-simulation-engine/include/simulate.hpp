@@ -21,7 +21,7 @@ unsigned int get_number_of_substeps();
 
 void take_step1(Particle* me, ParticleSystem* system, unsigned int step);
 void take_step2(Particle* me, ParticleSystem* system, unsigned int step);
-void compute_forces(Particle me, ParticleSystem system, unsigned int step);
+void compute_forces(Particle* me, ParticleSystem* system, unsigned int step);
 //void compute_bond_forces(bond_t* this_bond, system_t*system, unsigned int step);
 
 #endif // simulate_h

@@ -23,7 +23,7 @@ namespace Spatialpy{
     struct EventNode ;
 
     struct Particle{
-        Particle(unsigned int id) ;
+        Particle(unsigned int id=0) ;
 	    unsigned int id;
 	    int type;
 	    double x[3];
@@ -56,8 +56,14 @@ namespace Spatialpy{
 
 	    double particle_dist(Particle p2);
 	    double particle_dist_sqrd(Particle p2);
-	    void find_neighbors(ParticleSystem system);
 	    int add_to_neighbor_list(Particle neighbor, ParticleSystem system, double r2) ;
+
+        // KD TREE FUNCTIONS
+        void get_k_cleanup(ANNidxArray nn_idx, ANNdistArray dists) ;
+        void search_cleanup(ANNpoint queryPt, ANNidxArray nn_idx, ANNdistArray dists) ;
+        int get_k__approx(ParticleSystem system) ;
+        int get_k__exact(ANNpoint queryPt, ANNdist dist, ParticleSystem system) ;
+        void find_neighbors(ParticleSystem *system, bool use_exact_k=true) ;
 
             bool operator<(Particle const& p2){ 
                 return x[0] > p2.x[0] ; 
@@ -73,11 +79,11 @@ namespace Spatialpy{
     };
 
     struct NeighborNode{
-	    NeighborNode(const Particle &data, double dist, double dWdr, double D_i_j) ;
-        Particle data ;
+        Particle *data ;
         double dist ;
         double dWdr ;
         double D_i_j ;
+	    NeighborNode(Particle *data, double dist, double dWdr, double D_i_j) ;
 
         bool operator<(NeighborNode const& n2){ 
             return dist > n2.dist ; 

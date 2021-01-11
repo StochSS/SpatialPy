@@ -42,7 +42,7 @@ namespace Spatialpy{
     	me.data_fn = (double*) calloc(num_data_fn, sizeof(double));
     }
 
-    Particle::Particle(unsigned int id){
+    Particle::Particle(unsigned int id):id(id){
     	id = id;
     	nu = 0.01; 
     	mass = 1;
@@ -51,6 +51,9 @@ namespace Spatialpy{
     	x[0] = x[1] = x[2] = 0.0;
     	v[0] = v[1] = v[2] = 0.0;
     }
+
+
+    NeighborNode::NeighborNode(Particle *data, double dist, double dWdr, double D_i_j):data(data), dist(dist), dWdr(dWdr), D_i_j(D_i_j){}
 
     double Particle::particle_dist(Particle p2){
         double a = x[0] - p2.x[0];
@@ -109,11 +112,7 @@ namespace Spatialpy{
     	    exit(1);
     	}
 
-	NeighborNode n = NeighborNode ;
-        n.data = neighbor ;
-        n.dist = r ;
-        n.dWdr = dWdr ;
-        n.D_i_j = D_i_j ;
+	NeighborNode n(&neighbor, r, dWdr, D_i_j) ;
     	neighbors.push_back(n) ;
 
     	return 1;
@@ -142,7 +141,7 @@ namespace Spatialpy{
         return k;
     }
 
-    void Particle::find_neighbors(ParticleSystem system, bool use_exact_k=true){
+    void Particle::find_neighbors(ParticleSystem *system, bool use_exact_k){
     	//clean out previous neighbors
     	//printf("find_neighbors.empty_linked_list\n");
     	//TODO: empty_neighbor_list(neighbors);
@@ -150,28 +149,28 @@ namespace Spatialpy{
     	//printf("find_neighbors.search forward\n");
     	
         // ANN KD Tree k fixed radius nearest neighbor search
-        ANNpoint queryPt = annAllocPt(system.dimension);
-        for(int i = 0; i < system.dimension; i++) {
+        ANNpoint queryPt = annAllocPt(system->dimension);
+        for(int i = 0; i < system->dimension; i++) {
             queryPt[i] = x[i];
         }
         // Squared radius
-        ANNdist dist = system.h * system.h;
+        ANNdist dist = system->h * system->h;
         // Number of neighbors to search for
         int k;
         if(use_exact_k) {
-            k = get_k__exact(queryPt, dist, system);    
+            k = get_k__exact(queryPt, dist, *system);    
         }else{
-            k = get_k__approx(system);
+            k = get_k__approx(*system);
         }
         // Holds indicies that identify the neighbor in system.kdTree_pts
         ANNidxArray nn_idx = new ANNidx[k];
         // Holds squared distances to the neighbor (r2)
         ANNdistArray dists = new ANNdist[k];
         // Search for k nearest neighbors in the fixed squared radius dist from queryPt
-        system.kdTree.annkFRSearch(queryPt, dist, k, nn_idx, dists);
+        system->kdTree.annkFRSearch(queryPt, dist, k, nn_idx, dists);
         for(int i = 0; i < k && nn_idx[i] != ANN_NULL_IDX; i++) {
-            Particle neighbor = system.particles[nn_idx[i]];
-            add_to_neighbor_list(neighbor, system, dists[i]);
+            Particle neighbor = system->particles[nn_idx[i]];
+            add_to_neighbor_list(neighbor, *system, dists[i]);
             if(debug_flag > 2) {
                 printf("find_neighbors(%i) forward found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
                     id,neighbor.id, sqrt(dists[i]),
@@ -180,9 +179,9 @@ namespace Spatialpy{
                     x[2] - neighbor.x[2]);
                 }
             }
-        }
         // Cleanup after the search
         search_cleanup(queryPt, nn_idx, dists);
+        }
 
         // Brute force neighbor look-up
         //  for(Particle n : system.x_index){
@@ -220,7 +219,6 @@ namespace Spatialpy{
     	// 	    x[2] - n->data.x[2]);
     	//     }
     	// }
-    }
 
 }
 

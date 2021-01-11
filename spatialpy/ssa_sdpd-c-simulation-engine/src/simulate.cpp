@@ -40,7 +40,7 @@ void take_step1(Particle* me, ParticleSystem* system, unsigned int step) {
 
     // Step 1.1: 
     if(step==0 || system->static_domain == 0){
-        me.find_neighbors(system);
+        me->find_neighbors(system);
     }
 
     // Step 1.2: Predictor step
@@ -60,7 +60,7 @@ void take_step1(Particle* me, ParticleSystem* system, unsigned int step) {
     }
     // update half-state of chem rxn
     if(step > 0){
-        for(i=0; i< system->num_chem_species; i++){
+        for(i=0; i < int(system->num_chem_species); i++){
             me->C[i] += me->Q[i] * system->dt * 0.5;
         }
     }
@@ -79,7 +79,7 @@ void take_step1(Particle* me, ParticleSystem* system, unsigned int step) {
     // Clean mass flux term
     me->Frho = 0.0;
     // Clean chem rxn flux
-    for(i=0; i< system.num_chem_species; i++){
+    for(i=0; i < int(system->num_chem_species); i++){
         me->Q[i] = 0.0;
     }
 
@@ -97,11 +97,11 @@ void compute_forces(Particle me, ParticleSystem system, unsigned int step) {
     //printf("compute_forces() particle id=%i Q[0]=%e\n",me.id,me.Q[0]);
     // Step 2.2: Find nearest neighbors
     if(step>0 && system.static_domain == 0){
-        me.find_neighbors(system);
+        me.find_neighbors(&system);
     }
 
     // Step 2.3: Compute forces
-    pairwiseForce(me, system);
+    pairwiseForce(&me, &system);
 
 }
 
@@ -142,7 +142,7 @@ void take_step2(Particle* me, ParticleSystem* system, unsigned int step)
 
     //  Solve deterministic/stochastic reaction-diffusion system
     // update half-state of chem rxn
-    for(i=0; i< system.num_chem_species; i++){
+    for(i=0; i < int(system->num_chem_species); i++){
         me->C[i] += me->Q[i] * system->dt * 0.5;
     }
     // Apply boundary conditions
