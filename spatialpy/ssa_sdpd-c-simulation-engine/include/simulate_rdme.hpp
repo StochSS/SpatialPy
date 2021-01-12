@@ -61,7 +61,7 @@ extern dsfmt_t dsfmt;
 // };
 
 
-namespace SpatialPy{
+namespace Spatialpy{
 void initialize_rdme(ParticleSystem system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
                         unsigned int*u0);
 void simulate_rdme(ParticleSystem*system, unsigned int step);

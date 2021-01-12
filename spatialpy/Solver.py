@@ -63,7 +63,7 @@ class Solver:
 
         # Write the propensity file
         self.propfilename = self.model_name + '_generated_model'
-        self.prop_file_name = self.build_dir + '/' + self.propfilename + '.c'
+        self.prop_file_name = self.build_dir + '/' + self.propfilename + '.cpp'
         if self.debug_level > 1:
             print("Creating propensity file {0}".format(self.prop_file_name))
         self.create_propensity_file(file_name=self.prop_file_name)
@@ -527,7 +527,7 @@ class Solver:
         init_rdme=''
         if(self.model.enable_rdme and len(self.model.listOfSpecies) > 0):
             init_rdme = '''
-            SpatialPy::initialize_rdme(system, input_irN, input_jcN, input_prN, input_irG,
+            initialize_rdme(system, input_irN, input_jcN, input_prN, input_irG,
                             input_jcG, input_u0 );'''
         propfilestr = propfilestr.replace("__INIT_RDME__", init_rdme)
 

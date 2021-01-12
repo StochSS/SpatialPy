@@ -49,8 +49,8 @@ void* output_system_thread(void* targ){
 
 struct sarg {
     ParticleSystem* system;
-    // linked_list_t*ll;
-    // int sort_ndx;
+    std::vector<Particle> ll;
+    int sort_ndx;
 };
 
 void buildKDTree(ParticleSystem& system) {
@@ -68,7 +68,7 @@ void buildKDTree(ParticleSystem& system) {
             system.kdTree_pts[i][j] = system.particles[i].x[j];
         }
     }
-    system.kdTree = new ANNkd_tree(system.kdTree_pts, nPts, system.dimension);
+    system.kdTree = {system.kdTree_pts, nPts, system.dimension};
     system.kdTree_initialized = true;
 }
 
@@ -79,7 +79,7 @@ void* sort_index_thread(void* targ_in){
         if(debug_flag) printf("[SORT] begin sort\n");
         // linked_list_sort(targ->ll,targ->sort_ndx);
         // ANN KD Tree
-        buildKDTree(targ->system);
+        buildKDTree(*targ->system);
         if(debug_flag) printf("[SORT] sort complete\n");
         pthread_barrier_wait(&end_sort_barrier);
     }
@@ -90,7 +90,7 @@ void* run_simulation_thread(void *targ_in){
     ParticleSystem* system = targ->system;
     unsigned int step;
     Particle* p;
-    int i;
+    unsigned int i;
     int count = 0;
     // each thread will take a step with each of it's particles
     for(step=0; step < system->nt; step++){
@@ -99,12 +99,12 @@ void* run_simulation_thread(void *targ_in){
         pthread_barrier_wait(&begin_step_barrier);
         //---------------------------------------
         unsigned int nsubsteps = get_number_of_substeps();
-        for(int substep=0;substep < nsubsteps; substep++){
+        for(unsigned int substep=0;substep < nsubsteps; substep++){
             // take_step
             count = 0;
             for(i=0; i<targ->num_my_particles; i++){
-                p = system->particles[i+targ->my_first_particle]
-                take_step(p,step,substep);
+                p = &system->particles[i+targ->my_first_particle] ;
+                take_step(p,system,step,substep);
                 count++;
             }
             // block on the end barrier
@@ -144,7 +144,7 @@ void run_simulation(int num_threads, ParticleSystem* system){
     pthread_barrier_init(&end_step_barrier, NULL, num_threads+1);
     // create all the worker threads
     int num_particles_left = system->particles.size();
-    int particle_list_ittr = 0;
+    long unsigned int particle_list_ittr = 0;
     for (i=0; i < num_threads; i++) {
         targs[i].system = system;
         targs[i].num_threads = num_threads;
@@ -171,7 +171,7 @@ void run_simulation(int num_threads, ParticleSystem* system){
     pthread_barrier_init(&begin_sort_barrier, NULL, 2);
     pthread_barrier_init(&end_sort_barrier, NULL, 2);
     struct sarg sort_args[1];
-    sort_args[0].ll = system->x_index;
+    sort_args[0].ll = system->particles;
     sort_args[0].sort_ndx = 0;
     pthread_create(&sort_thread_handles[0], NULL, sort_index_thread, &sort_args[0]);
     if(debug_flag) printf("Creating thread to update x-position index\n");
@@ -190,7 +190,7 @@ void run_simulation(int num_threads, ParticleSystem* system){
     if(debug_flag) printf("Creating thread to create output files\n");
 
     // Start simulation, coordinate simulation
-    int step,next_output_step = 0;
+    unsigned int step,next_output_step = 0;
     for(step=0; step < system->nt; step++){
         // Release the Sort Index threads
         if(debug_flag) printf("[%i] Starting the Sort Index threads\n",step);
@@ -212,14 +212,13 @@ void run_simulation(int num_threads, ParticleSystem* system){
         if(debug_flag) printf("[%i] Sort Index threads finished\n",step);
         if(debug_flag>2 && step==0){
             printf("x_index = [");
-            node_t*n;
-            for(n = system->x_index->head; n!=NULL; n=n->next){
-                printf("%e ",n->data->x[0]);
+            for(auto n = system->particles.begin(); n!=system->particles.end(); ++n){
+                printf("%e ",n->x[0]);
             }
             printf("]\n");
             printf("x_index_id = [");
-            for(n = system->x_index->head; n!=NULL; n=n->next){
-                printf("%i ",n->data->id);
+            for(auto n = system->particles.begin(); n!=system->particles.end(); ++n){
+                printf("%i ",n->id);
             }
             printf("]\n");
         }
@@ -228,7 +227,7 @@ void run_simulation(int num_threads, ParticleSystem* system){
         if(debug_flag) printf("[%i] Starting the Worker threads\n",step);
         pthread_barrier_wait(&begin_step_barrier);
         unsigned int nsubsteps = get_number_of_substeps();
-        for(int substep=0;substep < nsubsteps; substep++){
+        for(unsigned int substep=0;substep < nsubsteps; substep++){
             // Wait until worker threads are done
             pthread_barrier_wait(&end_step_barrier);
             if(debug_flag) printf("[%i] Worker threads finished substep %i/%i\n",step,substep,nsubsteps);

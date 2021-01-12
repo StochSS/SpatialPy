@@ -92,7 +92,6 @@ void print_current_state(Particle*subvol, ParticleSystem*system){
     printf("Neighbors:\n");
     Particle *p2;
     for(auto nn: subvol->neighbors){
-    //for(std::vector<NeighborNode>::iterator nn=subvol->neighbors.begin(); nn!=subvol->neighbors.end(); ++nn){
         p2 = nn.data;
         printf("%i: nn->D_i_j=%e \n",p2->id,nn.D_i_j);
     }
@@ -377,7 +376,7 @@ void nsm_core__build_diffusion_matrix(ParticleSystem*system){
     for(long unsigned int i = 0; i < system->particles.size(); i++){
         p1 = &system->particles[i];
         if(p1->neighbors.size() == 0){
-            //if(debug_flag){printf("find_neighbors(%i)\n",p1->id);}
+            if(debug_flag){printf("find_neighbors(%i)\n",p1->id);}
             p1->find_neighbors(system);
         }
         //printf("node %i # neighbors %lu\n",p1->id,p1->neighbors->count);
@@ -511,7 +510,7 @@ void nsm_core__take_step(ParticleSystem*system, double current_time, double step
     double rand1,rand2,cum2,old;
     double vol,diff_const;
     Particle *dest_subvol = NULL;
-    NeighborNode *nn;
+    NeighborNode *nn = NULL;
 
 
     // Check the integrety of the heap
@@ -547,7 +546,7 @@ void nsm_core__take_step(ParticleSystem*system, double current_time, double step
         tt = system->event_v.front().tt;
         vol = (subvol->mass / subvol->rho);
 
-        //if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}
+        if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}
         /* First check if it is a reaction or a diffusion event. */
         totrate = subvol->srrate + subvol->sdrate;
 

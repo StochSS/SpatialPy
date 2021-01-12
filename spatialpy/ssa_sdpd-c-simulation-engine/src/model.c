@@ -7,20 +7,19 @@ Based on a Matlab program by Bruno Jacob (UCSB)
 This program is distributed under the terms of the GNU General Public License.
 See the file LICENSE.txt for details.
 ***************************************************************************** */
-#include "linked_list.h"
-#include "particle.h"
+#include "particle.hpp"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 
-
+using namespace Spatialpy ;
 
 
 void pairwiseForce(Particle* me, ParticleSystem* system)
 {
     // F, Frho and Fbp are output
-    neighbor_list_t* neighbors = me->neighbors;
+    std::vector<NeighborNode> neighbors = me->neighbors;
     //printf("pairwiseForce(id=%i)\n",me->id);
     //fflush(stdout);
     
@@ -34,7 +33,8 @@ void pairwiseForce(Particle* me, ParticleSystem* system)
     double P0 = system->P0;
     double c0 = system->c0;
     double Pi = P0 * (me->rho / rho0 - 1.0);
-    int i, j, s, rxn;
+    int i, j ;
+    long unsigned int s, rxn;
     Particle* pt_j;
 
     // Kernel function parameter
@@ -60,8 +60,7 @@ void pairwiseForce(Particle* me, ParticleSystem* system)
     //fflush(stdout);
 
     // Compute force from each neighbor
-    neighbor_node_t* n;
-    for (n = neighbors->head; n != NULL; n = n->next) {
+    for (auto n = neighbors.begin(); n != neighbors.end(); n = ++n) {
         pt_j = n->data;
 
         //r = particle_dist(me, pt_j);
@@ -176,8 +175,7 @@ void pairwiseForce(Particle* me, ParticleSystem* system)
 
 void filterDensity(Particle* me, ParticleSystem* system)
 {
-  neighbor_list_t* neighbors = me->neighbors;
-  neighbor_node_t*n;
+  std::vector<NeighborNode> neighbors = me->neighbors;
   Particle* pt_j;
   double r, R, Wij, alpha, num, den;
   double h = system->h;
@@ -191,7 +189,7 @@ void filterDensity(Particle* me, ParticleSystem* system)
   num = 0.0;
   den = 0.0;
 
-  for(n=neighbors->head; n!=NULL; n = n->next){
+  for(auto n=neighbors.begin(); n!=neighbors.end(); n = ++n){
       pt_j = n->data;
       r = n->dist;
       R = r/h;
@@ -217,8 +215,7 @@ void filterDensity(Particle* me, ParticleSystem* system)
 
 void computeBoundaryVolumeFraction(Particle* me, ParticleSystem* system)
 {
-    neighbor_list_t* neighbors = me->neighbors;
-    neighbor_node_t* n;
+    std::vector<NeighborNode> neighbors = me->neighbors;
     Particle* pt_j;
     double r, R, Wij, dWdr, alpha, vos, vtot, nw[3], dx[3], norm_nw;
     int i;
@@ -246,7 +243,7 @@ void computeBoundaryVolumeFraction(Particle* me, ParticleSystem* system)
     me->bvf_phi = 0.0;
     vos = 0.0;
     vtot = 0.0;
-    for (n = neighbors->head; n != NULL; n = n->next) {
+    for (auto n = neighbors.begin(); n != neighbors.end(); ++n) {
         pt_j = n->data;
         r = n->dist;
         R = r / h;

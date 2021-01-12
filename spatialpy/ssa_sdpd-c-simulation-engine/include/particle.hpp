@@ -122,20 +122,20 @@ namespace Spatialpy{
     struct ParticleSystem{
         ParticleSystem(size_t num_types, size_t num_chem_species, size_t num_chem_rxns, 
                          size_t num_stoch_species, size_t num_stoch_rxns,size_t num_data_fn) ;
-	int dimension;
-	double dt;
-	unsigned int nt; 
-	unsigned int current_step;
-	unsigned int output_freq;
-	double xlo, xhi, ylo, yhi, zlo, zhi;
-	double h;
-	double c0;
-	double rho0;
-	double P0;
-	std::vector<Particle> particles;
-	std::vector<EventNode> event_v;
-    // std::priority_queue<Particle> x_index;
-    //std::priority_queue<EventNode> event_q;
+        int dimension;
+        double dt;
+        unsigned int nt; 
+        unsigned int current_step;
+        unsigned int output_freq;
+        double xlo, xhi, ylo, yhi, zlo, zhi;
+        double h;
+        double c0;
+        double rho0;
+        double P0;
+        std::vector<Particle> particles;
+        std::vector<EventNode> event_v;
+        // std::priority_queue<Particle> x_index;
+        //std::priority_queue<EventNode> event_q;
 
         // Moved from rdme_t
         const size_t *irN;
@@ -147,34 +147,32 @@ namespace Spatialpy{
         long int total_reactions;
         long int total_diffusion;
 
-	char boundary_conditions[3];
-	bool static_domain;
-	size_t num_types;
-	size_t num_data_fn;
+        char boundary_conditions[3];
+        bool static_domain;
+        size_t num_types;
+        size_t num_data_fn;
 
-	ChemRxnFun* chem_rxn_rhs_functions;
-	size_t num_chem_species;
-	size_t num_chem_rxns;
+        ChemRxnFun* chem_rxn_rhs_functions;
+        size_t num_chem_species;
+        size_t num_chem_rxns;
 
-	PropensityFun* stoch_rxn_propensity_functions;
-	size_t num_stoch_species;
-	size_t num_stoch_rxns;
+        PropensityFun* stoch_rxn_propensity_functions;
+        size_t num_stoch_species;
+        size_t num_stoch_rxns;
 
-	const char * const* species_names; 
+        const char * const* species_names; 
 
-	const double *subdomain_diffusion_matrix;
-	//int *stochic_matrix;
-	int *stoichiometric_matrix;
-	double* gravity;
+        const double *subdomain_diffusion_matrix;
+        //int *stochic_matrix;
+        int *stoichiometric_matrix;
+        double* gravity;
 
-	void add_particle(Particle me);
+        void add_particle(Particle me);
 
         ANNkd_tree kdTree;
         ANNpointArray kdTree_pts;
         bool kdTree_initialized;
     };
-
-}
 
 /**
 system_t* create_system(size_t num_types, size_t num_chem_species, size_t num_chem_rxns, 
@@ -187,6 +185,8 @@ particle_t* create_particle(int id);
 
 // Global flags
 extern int debug_flag;
+
+}
 
 
 #endif //particle_h
