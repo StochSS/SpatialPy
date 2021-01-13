@@ -2,7 +2,8 @@
 #include "output.h"
 #include "particle.hpp"
 #include "simulate_rdme.hpp"
-#include "dSFMT/dSFMT.h"
+//#include "dSFMT/dSFMT.h"
+#include <random>
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
@@ -18,6 +19,9 @@
 
 /**************************************************************************/
 namespace SpatialPy{
+//TODO: MOVE RNG INSTANTIATION AND INCLUDE SEED
+std::mt19937_64 rng((int)time(NULL)+(int)(1e9*clock())) ;
+
 void initialize_rdme(ParticleSystem system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
                         unsigned int*u0){
     if(debug_flag){printf("*************** initialize_rdme ******************\n");fflush(stdout);}
@@ -319,7 +323,7 @@ void nsm_core__initialize_heap(ParticleSystem*system){
         //rdme->rtimes[i] = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/(rdme->srrate[i]+rdme->sdrate[i]);
         //rdme->heap[i] = rdme->node[i] = i;
         p = e->data;
-        e->tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/(p->srrate+p->sdrate);
+        e->tt = -log(1.0-rng())/(p->srrate+p->sdrate);
     }
     //initialize_heap(rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
     // ordered_list_sort(system->heap);
@@ -562,7 +566,7 @@ void nsm_core__take_step(ParticleSystem*system, double current_time, double step
 //            continue;
 //        }
 
-        rand1 = dsfmt_genrand_close_open(&dsfmt);
+        rand1 = rng();
 
         if (rand1 <= subvol->srrate/totrate) { // use normalized floating point comparision
             /* Reaction event. */
@@ -668,7 +672,7 @@ void nsm_core__take_step(ParticleSystem*system, double current_time, double step
 
 
             /* b) and then the direction of diffusion. */
-            double r2 = dsfmt_genrand_close_open(&dsfmt);
+            double r2 = rng();
             rand2 = r2 * subvol->Ddiag[spec];
 
             /* Search for diffusion direction. */
@@ -783,7 +787,7 @@ void nsm_core__take_step(ParticleSystem*system, double current_time, double step
         /* Compute time to new event for this subvolume. */
         totrate = subvol->srrate+subvol->sdrate;
         if(totrate > 0.0){
-            system->event_v.front().tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/totrate+tt;
+            system->event_v.front().tt = -log(1.0-rng())/totrate+tt;
         }else{
             system->event_v.front().tt = INFINITY;
         }
@@ -805,7 +809,7 @@ void nsm_core__take_step(ParticleSystem*system, double current_time, double step
                     (old_rrate+old_drate)/totrate*(dest_subvol->heap_index->tt - tt)+tt;
                 }else{
                     /* generate a new waiting time */
-                    dest_subvol->heap_index->tt = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/totrate+tt;
+                    dest_subvol->heap_index->tt = -log(1.0-rng())/totrate+tt;
                 }
             }else{
                 dest_subvol->heap_index->tt = INFINITY;

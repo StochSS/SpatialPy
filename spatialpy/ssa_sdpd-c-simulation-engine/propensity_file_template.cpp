@@ -10,7 +10,8 @@
 #include "propensities.hpp"
 #include "simulate.hpp"
 #include "simulate_rdme.hpp"
-#include "dSFMT/dSFMT.h"
+//#include "dSFMT/dSFMT.h"
+#include <random>
 
 
 namespace Spatialpy{
@@ -59,7 +60,7 @@ void FREE_ChemRxnFun(ChemRxnFun* ptr){
 __INPUT_CONSTANTS__
 
 int debug_flag;
-dsfmt_t dsfmt;
+//dsfmt_t dsfmt;
 
 void init_create_particle(ParticleSystem sys, unsigned int id, double x, double y, double z, int type, double nu, double mass, double rho, int solidTag, int num_chem_species){
     Particle p  = {id};
@@ -147,11 +148,13 @@ int main(int argc, char**argv){
             break;
         }
     }
-
-    /*if(sflag){
-        dsfmt_init_gen_rand(&dsfmt, seed);
+    /*
+    if(sflag){
+        std::mt19937_64 rng(seed) ;
+        //dsfmt_init_gen_rand(&dsfmt, seed);
     }else{
-        dsfmt_init_gen_rand(&dsfmt, (int)time(NULL)+(int)(1e9*clock()));
+        std::mt19937_64 rng((int)time(NULL)+(int)(1e9*clock())) ;
+        //dsfmt_init_gen_rand(&dsfmt, (int)time(NULL)+(int)(1e9*clock()));
     }*/
 
     if(!tflag){

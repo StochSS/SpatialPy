@@ -9,10 +9,11 @@ See the file LICENSE.txt for details.
 #define simulate_rdme_h
 #include "particle.hpp"
 #include "propensities.hpp"
-#include  "dSFMT/dSFMT.h"
+#include <random>
+//#include  "dSFMT/dSFMT.h"
 
 // Global flags
-extern dsfmt_t dsfmt;
+extern std::mt19937_64 rng;
 
 // typedef struct __rdme_data_t rdme_t;
 
