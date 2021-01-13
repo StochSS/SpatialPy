@@ -9,7 +9,6 @@
 #ifndef PROPENSITIES__H
 #define PROPENSITIES__H
 
-
 namespace Spatialpy{
 
 /* Global variable that can be used to pass parameters to the propensity functions. */

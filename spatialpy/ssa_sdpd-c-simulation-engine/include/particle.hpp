@@ -15,6 +15,8 @@ See the file LICENSE.txt for details.
 // Include ANN KD Tree
 #include <ANN/ANN.h>
 
+extern int debug_flag ;
+
 namespace Spatialpy{
 
     struct Particle ;
@@ -183,8 +185,6 @@ particle_t* create_particle(int id);
 //bond_t* create_bond(particle p1, particle p2, double k, double rest_distance);
 
 
-// Global flags
-extern int debug_flag;
 
 }
 

@@ -10,59 +10,9 @@ See the file LICENSE.txt for details.
 #include "particle.hpp"
 #include "propensities.hpp"
 #include <random>
-//#include  "dSFMT/dSFMT.h"
-
-// Global flags
-extern std::mt19937_64 rng;
-
-// typedef struct __rdme_data_t rdme_t;
-
-// Moved to ParticleSystem
-// struct __rdme_data_t {
-//     //size_t *irD; // replaced by neighbor_node_t->D_i_j
-//     //size_t *jcD;
-//     //double *prD;
-//     const size_t *irN;
-//     const size_t *jcN;
-//     const int *prN;
-//     const size_t *irG;
-//     const size_t *jcG;
-//     //int num_subdomains;  // system->num_types
-//     //const double*subdomain_diffusion_matrix;  // in system
-//     //size_t Ncells; // system->particle_list->count
-//     //size_t Mspecies;  //   system->num_stoch_species
-//     //size_t Mreactions; //  system->num_stoch_rxn
-//     //size_t Ndofs;  // deprecated
-//     // unsigned int *xx; // moved to particle_t->xx
-//     int initialized;
-//     //PropensityFun *rfun; // system->stoch_rxn_propensity_functions
-//     //double *srrate; // moved to rdme_voxel_t
-//     //double *rrate;
-//     //double *sdrate;
-//     //double *Ddiag;
-//     //double *rtimes; // using  ordered_list_t*heap
-//     //int *node;
-//     //int *heap;
-//     ordered_list_t*heap; // ordered list of reaction/diffusion times
-
-
-//     long int total_reactions;
-//     long int total_diffusion;
-//     //char** species_names; //  system->species_names
-// };
-
-// // Moved to Particle
-// typedef struct __rdme_voxel_t rdme_voxel_t;
-// struct __rdme_voxel_t {
-//     double srrate;
-//     double* rrate;
-//     double sdrate;
-//     double* Ddiag;
-//     ordered_node_t*heap_index;
-// };
-
 
 namespace Spatialpy{
+
 void initialize_rdme(ParticleSystem system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
                         unsigned int*u0);
 void simulate_rdme(ParticleSystem*system, unsigned int step);

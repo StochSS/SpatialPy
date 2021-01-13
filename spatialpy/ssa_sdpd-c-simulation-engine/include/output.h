@@ -9,12 +9,10 @@ See the file LICENSE.txt for details.
 #define output_h
 #include "particle.hpp"
 
-using namespace Spatialpy ;
-
-void output_csv(ParticleSystem*system, int current_step);
-
-void output_vtk__sync_step(ParticleSystem*system, int current_step);
-void output_vtk__async_step(ParticleSystem *system);
-
+namespace Spatialpy{
+    void output_csv(ParticleSystem*system, int current_step);
+    void output_vtk__sync_step(ParticleSystem*system, int current_step);
+    void output_vtk__async_step(ParticleSystem *system);
+}
 #endif // output_h
 

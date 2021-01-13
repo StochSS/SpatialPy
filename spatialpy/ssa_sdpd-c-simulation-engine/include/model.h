@@ -9,15 +9,14 @@ See the file LICENSE.txt for details.
 #define model_h
 #include "particle.hpp"
 
-using namespace Spatialpy ;
+namespace Spatialpy{
+    void filterDensity(Particle* me, ParticleSystem* system);
 
-void filterDensity(Particle* me, ParticleSystem* system);
+    void pairwiseForce(Particle* me, ParticleSystem* system);
 
-void pairwiseForce(Particle* me, ParticleSystem* system);
+    void computeBoundaryVolumeFraction(Particle* me, ParticleSystem* system);
 
-void computeBoundaryVolumeFraction(Particle* me, ParticleSystem* system);
-
-void applyBoundaryVolumeFraction(Particle* me, ParticleSystem* system);
-
+    void applyBoundaryVolumeFraction(Particle* me, ParticleSystem* system);
+}
 
 #endif //model_h
