@@ -88,6 +88,13 @@ int init_all_particles(ParticleSystem sys){
 }
 
 
+void applyBoundaryConditions(Particle* me, ParticleSystem* system){
+__BOUNDARY_CONDITIONS__
+}
+
+}/*end namespace*/
+
+
 int main(int argc, char**argv){
     //debug_flag = 1;
     //ParticleSystem* system = create_system();
@@ -141,11 +148,11 @@ int main(int argc, char**argv){
         }
     }
 
-    if(sflag){
+    /*if(sflag){
         dsfmt_init_gen_rand(&dsfmt, seed);
     }else{
         dsfmt_init_gen_rand(&dsfmt, (int)time(NULL)+(int)(1e9*clock()));
-    }
+    }*/
 
     if(!tflag){
         num_threads = get_num_processors();
@@ -154,13 +161,6 @@ int main(int argc, char**argv){
 
     run_simulation(num_threads, system);
     exit(0);
-
-}
-
-
-void applyBoundaryConditions(Particle* me, ParticleSystem* system){
-__BOUNDARY_CONDITIONS__
-}
 
 }
 

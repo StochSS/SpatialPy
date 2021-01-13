@@ -19,9 +19,6 @@ all: ssa_sdpd
 main.o:
 	$(CC) -c -o main.o $(MODEL) $(INCDIRPARAMS) $(CFLAGS) $(DSFMTFLAGS)
 
-dSFMT.o:
-	$(CC) -c -o dSFMT.o $(ROOTINC)/external/dSFMT/dSFMT.c $(INCDIRPARAMS) $(CFLAGS) $(DSFMTFLAGS)
-
 ANN.o:
 	$(CC) -c -o ANN.o $(ROOTINC)/external/ANN/src/ANN.cpp $(INCDIRPARAMS) $(CFLAGS)
 
@@ -31,5 +28,5 @@ ANN.o:
 %.o: $(ROOT)/src/%.c
 	$(CC) -c -o $@ "$<" $(INCDIRPARAMS) $(CFLAGS) $(DSFMTFLAGS)
 
-ssa_sdpd: ANN.o dSFMT.o main.o $(OBJ)
-	$(CC) -o ssa_sdpd $(OBJ)  main.o dSFMT.o ANN.o $(LFLAGS)
+ssa_sdpd: ANN.o main.o $(OBJ)
+	$(CC) -o ssa_sdpd $(OBJ)  main.o ANN.o $(LFLAGS)
