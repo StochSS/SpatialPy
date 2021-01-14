@@ -18,13 +18,14 @@ ANN:
 	make -f $(ROOTINC)/external/ANN/src/Makefile.spatialpy ROOTINC=$(ROOTINC)
 
 main.o:
-	$(CC) -c -o main.o $(MODEL) $(INCDIRPARAMS) $(CFLAGS)
+	$(CC) -c $(GPROFFLAG) $(GDB_FLAG) -o main.o $(MODEL) $(INCDIRPARAMS) $(CFLAGS)
 
 %.o: $(ROOT)/src/%.cpp
-	$(CC) -c -o $@ "$<" $(INCDIRPARAMS) $(CFLAGS)
+	$(CC) -c $(GPROFFLAG) $(GDB_FLAG) -o $@ "$<" $(INCDIRPARAMS) $(CFLAGS)
 
 %.o: $(ROOT)/src/%.c
-	$(CC) -c -o $@ "$<" $(INCDIRPARAMS) $(CFLAGS)
+	$(CC) -c $(GPROFFLAG) $(GDB_FLAG) -o $@ "$<" $(INCDIRPARAMS) $(CFLAGS)
 
 ssa_sdpd: ANN main.o $(OBJ)
-	$(CC) -o ssa_sdpd $(OBJ)  main.o $(ANNOBJECTS) $(LFLAGS)
+	$(CC) $(GPROFFLAG) $(GDB_FLAG) -o ssa_sdpd $(OBJ)  main.o $(ANNOBJECTS) $(LFLAGS)
+
