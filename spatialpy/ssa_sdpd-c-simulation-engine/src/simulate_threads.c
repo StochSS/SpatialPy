@@ -130,10 +130,10 @@ namespace Spatialpy{
         return NULL;
     }
 
-    void run_simulation(int num_threads, ParticleSystem system){
+    void run_simulation(int num_threads, ParticleSystem *system){
         //
         int i,j;
-        int num_particles_per_thread = system.particles.size() / num_threads;
+        int num_particles_per_thread = system->particles.size() / num_threads;
         //int num_bonds_per_thread = system->bond_list->count / num_threads;
         // start worked threads
         struct arg*targs = (struct arg*) malloc(sizeof(struct arg)*num_threads);
@@ -142,10 +142,10 @@ namespace Spatialpy{
         pthread_barrier_init(&begin_step_barrier, NULL, num_threads+1);
         pthread_barrier_init(&end_step_barrier, NULL, num_threads+1);
         // create all the worker threads
-        int num_particles_left = system.particles.size();
+        int num_particles_left = system->particles.size();
         long unsigned int particle_list_ittr = 0;
         for (i=0; i < num_threads; i++) {
-            targs[i].system = &system;
+            targs[i].system = system;
             targs[i].num_threads = num_threads;
             targs[i].thread_id = i;
             targs[i].my_first_particle = particle_list_ittr;
@@ -156,7 +156,7 @@ namespace Spatialpy{
                 num_particles_left -= num_particles_per_thread;
                 for(j=0;j<num_particles_per_thread;j++){
                     particle_list_ittr++;
-                    if(particle_list_ittr >= system.particles.size()){
+                    if(particle_list_ittr >= system->particles.size()){
                         printf("ERROR: particle_list_ittr was unexpectly NULL\n");
                         exit(1);
                     }
@@ -170,7 +170,7 @@ namespace Spatialpy{
         pthread_barrier_init(&begin_sort_barrier, NULL, 2);
         pthread_barrier_init(&end_sort_barrier, NULL, 2);
         struct sarg sort_args[1];
-        sort_args[0].ll = system.particles;
+        sort_args[0].ll = system->particles;
         sort_args[0].sort_ndx = 0;
         pthread_create(&sort_thread_handles[0], NULL, sort_index_thread, &sort_args[0]);
         if(debug_flag) printf("Creating thread to update x-position index\n");
@@ -185,12 +185,12 @@ namespace Spatialpy{
         pthread_t* output_thread_handles = (pthread_t*) malloc(sizeof(pthread_t)*1);
         pthread_barrier_init(&begin_output_barrier, NULL, 2);
         pthread_barrier_init(&end_output_barrier, NULL, 2);
-        pthread_create(&output_thread_handles[0], NULL, output_system_thread, &system);
+        pthread_create(&output_thread_handles[0], NULL, output_system_thread, system);
         if(debug_flag) printf("Creating thread to create output files\n");
 
         // Start simulation, coordinate simulation
         unsigned int step,next_output_step = 0;
-        for(step=0; step < system.nt; step++){
+        for(step=0; step < system->nt; step++){
             // Release the Sort Index threads
             if(debug_flag) printf("[%i] Starting the Sort Index threads\n",step);
             pthread_barrier_wait(&begin_sort_barrier);
@@ -200,7 +200,7 @@ namespace Spatialpy{
                 current_step = step;
                 if(debug_flag) printf("[%i] Starting the Output threads\n",step);
                 pthread_barrier_wait(&begin_output_barrier);
-                next_output_step += system.output_freq;
+                next_output_step += system->output_freq;
                 // Wait until output threads are done
                 pthread_barrier_wait(&end_output_barrier);
                 if(debug_flag) printf("[%i] Output threads finished\n",step);
@@ -211,12 +211,12 @@ namespace Spatialpy{
             if(debug_flag) printf("[%i] Sort Index threads finished\n",step);
             if(debug_flag>2 && step==0){
                 printf("x_index = [");
-                for(auto n = system.particles.begin(); n!=system.particles.end(); ++n){
+                for(auto n = system->particles.begin(); n!=system->particles.end(); ++n){
                     printf("%e ",n->x[0]);
                 }
                 printf("]\n");
                 printf("x_index_id = [");
-                for(auto n = system.particles.begin(); n!=system.particles.end(); ++n){
+                for(auto n = system->particles.begin(); n!=system->particles.end(); ++n){
                     printf("%i ",n->id);
                 }
                 printf("]\n");
@@ -233,7 +233,7 @@ namespace Spatialpy{
             }
             // Solve RDME 
             if(debug_flag) printf("[%i] starting RDME simulation\n",step);
-            simulate_rdme(&system, step);
+            simulate_rdme(system, step);
             if(debug_flag) printf("[%i] Finish RDME simulation\n",step);
         }
         // Record final timepoint

@@ -514,40 +514,40 @@ class Solver:
             "__INPUT_CONSTANTS__", input_constants)
 
         system_config = "debug_flag = {0};\n".format(self.debug_level)
-        system_config += "ParticleSystem system = {{{0},{1},{2},{3},{4},{5}}};\n".format(
+        system_config += "ParticleSystem *system = new ParticleSystem({0},{1},{2},{3},{4},{5});\n".format(
             num_types, num_chem_species, num_chem_rxns, 
             num_stoch_species, num_stoch_rxns, num_data_fn
             )
-        system_config += "system.static_domain = {0};\n".format(int(self.model.staticDomain))
+        system_config += "system->static_domain = {0};\n".format(int(self.model.staticDomain))
         if(len(self.model.listOfSpecies) > 0):
-            system_config += "system.subdomain_diffusion_matrix = input_subdomain_diffusion_matrix;\n"
-            system_config += "system.stoichiometric_matrix = input_N_dense;\n"
-            system_config += "system.chem_rxn_rhs_functions = ALLOC_ChemRxnFun();\n"
-            system_config += "system.stoch_rxn_propensity_functions = ALLOC_propensities();\n"
-            system_config += "system.species_names = input_species_names;\n";
+            system_config += "system->subdomain_diffusion_matrix = input_subdomain_diffusion_matrix;\n"
+            system_config += "system->stoichiometric_matrix = input_N_dense;\n"
+            system_config += "system->chem_rxn_rhs_functions = ALLOC_ChemRxnFun();\n"
+            system_config += "system->stoch_rxn_propensity_functions = ALLOC_propensities();\n"
+            system_config += "system->species_names = input_species_names;\n";
 
-        system_config += "system.dt = {0};\n".format(self.model.timestep_size)
-        system_config += "system.nt = {0};\n".format(self.model.num_timesteps)
-        system_config += "system.output_freq = {0};\n".format(self.model.output_freq)
+        system_config += "system->dt = {0};\n".format(self.model.timestep_size)
+        system_config += "system->nt = {0};\n".format(self.model.num_timesteps)
+        system_config += "system->output_freq = {0};\n".format(self.model.output_freq)
         if self.h is None:
             self.h = self.model.mesh.find_h()
         if self.h == 0.0:
             raise ModelError('h (basis function width) can not be zero.')
-        system_config +="system.h = {0};\n".format(self.h)
-        system_config +="system.rho0 = {0};\n".format(self.model.mesh.rho0)
-        system_config +="system.c0 = {0};\n".format(self.model.mesh.c0)
-        system_config +="system.P0 = {0};\n".format(self.model.mesh.P0)
+        system_config +="system->h = {0};\n".format(self.h)
+        system_config +="system->rho0 = {0};\n".format(self.model.mesh.rho0)
+        system_config +="system->c0 = {0};\n".format(self.model.mesh.c0)
+        system_config +="system->P0 = {0};\n".format(self.model.mesh.P0)
         #// bounding box
-        system_config += "system.xlo = {0};\n".format(self.model.mesh.xlim[0])
-        system_config += "system.xhi = {0};\n".format(self.model.mesh.xlim[1])
-        system_config += "system.ylo = {0};\n".format(self.model.mesh.ylim[0])
-        system_config += "system.yhi = {0};\n".format(self.model.mesh.ylim[1])
-        system_config += "system.zlo = {0};\n".format(self.model.mesh.zlim[0])
-        system_config += "system.zhi = {0};\n".format(self.model.mesh.zlim[1])
+        system_config += "system->xlo = {0};\n".format(self.model.mesh.xlim[0])
+        system_config += "system->xhi = {0};\n".format(self.model.mesh.xlim[1])
+        system_config += "system->ylo = {0};\n".format(self.model.mesh.ylim[0])
+        system_config += "system->yhi = {0};\n".format(self.model.mesh.ylim[1])
+        system_config += "system->zlo = {0};\n".format(self.model.mesh.zlim[0])
+        system_config += "system->zhi = {0};\n".format(self.model.mesh.zlim[1])
         #
         if self.model.mesh.gravity is not None:
             for i in range(3):
-                system_config += "system.gravity[{0}] = {1};\n".format(i,self.model.mesh.gravity[i])
+                system_config += "system->gravity[{0}] = {1};\n".format(i,self.model.mesh.gravity[i])
 
 
         propfilestr = propfilestr.replace("__SYSTEM_CONFIG__", system_config)

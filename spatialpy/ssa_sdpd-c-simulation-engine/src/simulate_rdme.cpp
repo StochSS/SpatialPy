@@ -22,15 +22,15 @@ namespace Spatialpy{
     //TODO: MOVE RNG INSTANTIATION AND INCLUDE SEED
     std::mt19937_64 rng((int)time(NULL)+(int)(1e9*clock())) ;
 
-    void initialize_rdme(ParticleSystem system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
+    void initialize_rdme(ParticleSystem *system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
                             unsigned int*u0){
         if(debug_flag){printf("*************** initialize_rdme ******************\n");fflush(stdout);}
         //printf("nsm_core__create() BEGIN\n");fflush(stdout);
-        nsm_core__create(&system,irN,jcN,prN,irG,jcG);
+        nsm_core__create(system,irN,jcN,prN,irG,jcG);
         //printf("nsm_core__create() END\n");fflush(stdout);
 
         //printf("nsm_core__initialize_chem_populations() BEGIN\n");fflush(stdout);
-        nsm_core__initialize_chem_populations(&system, u0);
+        nsm_core__initialize_chem_populations(system, u0);
         //printf("nsm_core__initialize_chem_populations() END\n");fflush(stdout);
 
     }

@@ -18,8 +18,8 @@ extern double *parameters;  //TODO: can we delete this?
 // double rfun(const int *x, double t, const double vol, const double *data, int sd, int voxel, int *xx, const size_t *irK, const size_t *jcK, const double *prK)
 //typedef double (*PropensityFun)(const int *, double, double, const double *, int, int, int *, const size_t *, const size_t *, const double *);
 // double rfun(const int *x, double t, const double vol, const double *data, int sd)
-typedef double (*PropensityFun)(const unsigned int *, double, double, const double *, int);
-typedef double (*ChemRxnFun)(const double *, double, double, const double *, int);
+typedef double (*PropensityFun)(const unsigned int *, double, double, double*, int);
+typedef double (*ChemRxnFun)(double*, double, double, double*, int);
 
 /* Declaration of allocation and deallocation of propensity list. */
 struct Particle ;

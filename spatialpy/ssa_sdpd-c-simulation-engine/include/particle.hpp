@@ -11,6 +11,7 @@ See the file LICENSE.txt for details.
 #include <cstdlib>
 #include <vector>
 #include <queue>
+#include <memory>
 #include "propensities.hpp"
 // Include ANN KD Tree
 #include <ANN/ANN.h>
@@ -25,7 +26,8 @@ namespace Spatialpy{
     struct EventNode ;
 
     struct Particle{
-        Particle(unsigned int id=0) ;
+        Particle(ParticleSystem *sys, unsigned int id=0) ;
+        ParticleSystem *sys ;
 	    unsigned int id;
 	    int type;
 	    double x[3];
@@ -41,11 +43,14 @@ namespace Spatialpy{
 	    double Frho;
 	    double Fbp[3];
 	    // Data Function
-	    double* data_fn;
+        double * data_fn ;
+	    //std::shared_ptr<double[]> data_fn;
 	    // chem_rxn_system
 	    unsigned int*xx; // populaion of discrete/stochastic species
-	    double *C;  // concentration of chem species
-	    double *Q;  // flux of chem species
+        double *C ;
+        double *Q ;
+	    //std::shared_ptr<double[]> C;  // concentration of chem species
+	    //std::shared_ptr<double[]> Q;  // flux of chem species
 	    // below here for simulation
 	    std::vector<NeighborNode> neighbors ;
 
@@ -124,6 +129,7 @@ namespace Spatialpy{
     struct ParticleSystem{
         ParticleSystem(size_t num_types, size_t num_chem_species, size_t num_chem_rxns, 
                          size_t num_stoch_species, size_t num_stoch_rxns,size_t num_data_fn) ;
+        ~ParticleSystem() ;
         int dimension;
         double dt;
         unsigned int nt; 

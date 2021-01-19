@@ -12,46 +12,45 @@ See the file LICENSE.txt for details.
 #include <cstdlib>
 #include <vector>
 #include <queue>
+#include <memory>
 // Include ANN KD Tree
 #include <ANN/ANN.h>
 
 namespace Spatialpy{
     ParticleSystem::ParticleSystem(size_t num_types, size_t num_chem_species, size_t num_chem_rxns, 
-                         size_t num_stoch_species, size_t num_stoch_rxns,size_t num_data_fn){
+                         size_t num_stoch_species, size_t num_stoch_rxns,size_t num_data_fn): 
+                            num_types(num_types), num_chem_species(num_chem_species), 
+                            num_chem_rxns(num_chem_rxns), num_stoch_species(num_stoch_species), 
+                            num_stoch_rxns(num_stoch_rxns), num_data_fn(num_data_fn){
         dimension = 3;
         boundary_conditions[0] = 'n';
         boundary_conditions[1] = 'n';
         boundary_conditions[2] = 'n';
         static_domain = 0;
-        num_stoch_species = num_stoch_species;
-        num_stoch_rxns = num_stoch_rxns;
-        num_chem_species = num_chem_species;
-        num_chem_rxns = num_chem_rxns;
-        num_types = num_types;
         gravity = (double*) calloc(3,sizeof(double));
-        num_data_fn = num_data_fn;
         kdTree_initialized = false;
     }
 
     void ParticleSystem::add_particle(Particle me){
     	// x_index.push(me) ;
     	particles.push_back(me) ;
-    	// TODO: does this need to change? 
-    	me.Q = (double*) calloc(num_chem_species, sizeof(double));
-    	me.C = (double*) calloc(num_chem_species, sizeof(double));
-    	me.data_fn = (double*) calloc(num_data_fn, sizeof(double));
     }
+    ParticleSystem::~ParticleSystem(){}
 
-    Particle::Particle(unsigned int id):id(id){
-    	id = id;
+    Particle::Particle(ParticleSystem *sys, unsigned int id):sys(sys), id(id){
     	nu = 0.01; 
     	mass = 1;
     	rho = 1;
     	solidTag = 0;
     	x[0] = x[1] = x[2] = 0.0;
     	v[0] = v[1] = v[2] = 0.0;
+    	Q = (double*) calloc(sys->num_chem_species, sizeof(double));
+    	C = (double*) calloc(sys->num_chem_species, sizeof(double));
+    	data_fn = (double*) calloc(sys->num_data_fn, sizeof(double));
+        //Q = std::make_shared<double[]>(sys.num_chem_species) ;
+        //C = std::make_shared<double[]>(sys.num_chem_species) ;
+        //data_fn = std::make_shared<double[]>(sys.num_data_fn) ;
     }
-
 
     NeighborNode::NeighborNode(Particle *data, double dist, double dWdr, double D_i_j):data(data), dist(dist), dWdr(dWdr), D_i_j(D_i_j){}
 
