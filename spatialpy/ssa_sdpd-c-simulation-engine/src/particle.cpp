@@ -54,21 +54,21 @@ namespace Spatialpy{
 
     NeighborNode::NeighborNode(Particle *data, double dist, double dWdr, double D_i_j):data(data), dist(dist), dWdr(dWdr), D_i_j(D_i_j){}
 
-    double Particle::particle_dist(Particle p2){
-        double a = x[0] - p2.x[0];
-        double b = x[1] - p2.x[1];
-        double c = x[2] - p2.x[2];
+    double Particle::particle_dist(Particle *p2){
+        double a = x[0] - p2->x[0];
+        double b = x[1] - p2->x[1];
+        double c = x[2] - p2->x[2];
         return sqrt( a*a + b*b + c*c);
     }
 
-    double Particle::particle_dist_sqrd(Particle p2){
-        double a = x[0] - p2.x[0];
-        double b = x[1] - p2.x[1];
-        double c = x[2] - p2.x[2];
+    double Particle::particle_dist_sqrd(Particle *p2){
+        double a = x[0] - p2->x[0];
+        double b = x[1] - p2->x[1];
+        double c = x[2] - p2->x[2];
         return ( a*a + b*b + c*c);
     }
 
-    int Particle::add_to_neighbor_list(Particle neighbor, ParticleSystem system, double r2){
+    int Particle::add_to_neighbor_list(Particle *neighbor, ParticleSystem *system, double r2){
      //    double a = x[0] - neighbor.x[0];
     	// double b = x[1] - neighbor.x[1];
     	// double c = x[2] - neighbor.x[2];
@@ -79,10 +79,10 @@ namespace Spatialpy{
         }
         double r = sqrt(r2);
 
-    	if(r > system.h){ return 0; } // do not add, out side support radius
+    	if(r > system->h){ return 0; } // do not add, out side support radius
 
     	// calculate dWdr
-    	double h = system.h;
+    	double h = system->h;
     	double R = r / h;
     	double alpha = 105 / (16 * M_PI * h * h * h); // 3D
     	double dWdr = alpha * (-12 * r / (h * h)) * ((1 - R)* (1 - R));
@@ -94,24 +94,22 @@ namespace Spatialpy{
     	double dhr = h - r;
     	double wfd = -25.066903536973515383e0 * dhr * dhr * ihsq * ihsq * ihsq * ih; //3D
     	// Eq 28 of Drawert et al 2019, Tartakovsky et. al., 2007, JCP
-    	double D_i_j = -2.0*(mass*neighbor.mass)/(mass+neighbor.mass)*(rho+neighbor.rho)/(rho*neighbor.rho) * r2 * wfd / (r2+0.01*h*h);
+    	double D_i_j = -2.0*(mass*neighbor->mass)/(mass+neighbor->mass)*(rho+neighbor->rho)/(rho*neighbor->rho) * r2 * wfd / (r2+0.01*h*h);
 
     	if(isnan(D_i_j)){
-    	    printf("Got NaN calculating D_i_j for me=%i, neighbor=%i\n",id, neighbor.id);
+    	    printf("Got NaN calculating D_i_j for me=%i, neighbor=%i\n",id, neighbor->id);
     	    printf("r=%e ",r);
     	    printf("h=%e ",h);
     	    printf("alpha=%e ",alpha);
     	    printf("dWdr=%e ",dWdr);
     	    printf("mass=%e ",mass);
     	    printf("rho=%e ",rho);
-    	    Particle p = neighbor;
-    	    printf("n->mass=%e ",p.mass);
-    	    printf("n->rho=%e ",p.rho);
+    	    printf("n->mass=%e ", neighbor->mass);
+    	    printf("n->rho=%e ", neighbor->rho);
 
     	    exit(1);
     	}
-
-	NeighborNode n(&neighbor, r, dWdr, D_i_j) ;
+	NeighborNode n(neighbor, r, dWdr, D_i_j) ;
     	neighbors.push_back(n) ;
 
     	return 1;
@@ -127,16 +125,19 @@ namespace Spatialpy{
         annDeallocPt(queryPt);
     }
 
-    int Particle::get_k__approx(ParticleSystem system) {
-        return system.kdTree.nPoints();
+    int Particle::get_k__approx(ParticleSystem *system) {
+        return system->kdTree->nPoints();
     }
 
-    int Particle::get_k__exact(ANNpoint queryPt, ANNdist dist, ParticleSystem system) {
-        int k = 0;
+    int Particle::get_k__exact(ANNpoint queryPt, ANNdist dist, ParticleSystem *system) {
+        printf("***TOP OF GET_K__EXACT***\n") ;
+        printf("USING DIST %f...", dist) ;
+        int k = system->particles.size();
         ANNidxArray nn_idx = new ANNidx[k];
         ANNdistArray dists = new ANNdist[k];
-        k = system.kdTree.annkFRSearch(queryPt, dist, k, nn_idx, dists);
+        k = system->kdTree->annkFRSearch(queryPt, dist, k, nn_idx, dists);
         get_k_cleanup(nn_idx, dists);
+        printf("Found %i neighbors!\n", k) ;
         return k;
     }
 
@@ -157,25 +158,33 @@ namespace Spatialpy{
         // Number of neighbors to search for
         int k;
         if(use_exact_k) {
-            k = get_k__exact(queryPt, dist, *system);    
+            k = get_k__exact(queryPt, dist, system);    
         }else{
-            k = get_k__approx(*system);
+            k = get_k__approx(system);
         }
         // Holds indicies that identify the neighbor in system.kdTree_pts
         ANNidxArray nn_idx = new ANNidx[k];
         // Holds squared distances to the neighbor (r2)
         ANNdistArray dists = new ANNdist[k];
         // Search for k nearest neighbors in the fixed squared radius dist from queryPt
-        system->kdTree.annkFRSearch(queryPt, dist, k, nn_idx, dists);
+        printf("Searching for Neighbors...\n") ;
+        printf("Point at (%f, %f, %f), dist %f, finding %i neighbors out of %i indices and %i dists\n",
+                    queryPt[0], queryPt[1], queryPt[2], dist, k, sizeof(nn_idx), sizeof(dists)) ;
+        printf("CURRENT SIZE OF PARTICLES: %i\n", system->particles.size()) ;
+        printf("NPOINTS IN KDTREE: %i\n", system->kdTree->nPoints()) ;
+        printf("SEARCH RETURNED %i\n", system->kdTree->annkFRSearch(queryPt, dist, k, nn_idx, dists));
+        printf("Neighbor search complete!\n") ;
         for(int i = 0; i < k && nn_idx[i] != ANN_NULL_IDX; i++) {
-            Particle neighbor = system->particles[nn_idx[i]];
-            add_to_neighbor_list(neighbor, *system, dists[i]);
+            printf("Adding neighbor %i to list.  Index of neighbor: %i with dist: %f\n", i, nn_idx[i], dists[i]) ;
+            Particle *neighbor = &system->particles[nn_idx[i]];
+            add_to_neighbor_list(neighbor, system, dists[i]);
+            printf("ADDED!\n") ;
             if(debug_flag > 2) {
                 printf("find_neighbors(%i) forward found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
-                    id,neighbor.id, sqrt(dists[i]),
-                    x[0] - neighbor.x[0],
-                    x[1] - neighbor.x[1],
-                    x[2] - neighbor.x[2]);
+                    id, neighbor->id, sqrt(dists[i]),
+                    x[0] - neighbor->x[0],
+                    x[1] - neighbor->x[1],
+                    x[2] - neighbor->x[2]);
                 }
             }
         // Cleanup after the search

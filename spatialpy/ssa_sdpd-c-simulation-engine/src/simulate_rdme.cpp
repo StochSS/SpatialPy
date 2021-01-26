@@ -413,7 +413,7 @@ namespace Spatialpy{
                     p2 = n2->data;
                     //diff_const = system->subdomain_diffusion_matrix[s_ndx*system->num_subdomains + (p2->type-1)];
                     diff_const = system->subdomain_diffusion_matrix[s_ndx*system->num_types + (p2->type-1)];
-                    dist2 = p1->particle_dist_sqrd(*p2);
+                    dist2 = p1->particle_dist_sqrd(p2);
                     // Eq (13-14), Drawert et al 2019
                     ih = 1.0 / h;
                     ihsq = ih * ih;

@@ -47,38 +47,39 @@ namespace Spatialpy{
     }
 
     struct sarg {
-        ParticleSystem* system;
-        std::vector<Particle> ll;
+        ParticleSystem *system;
+        std::vector<Particle> *ll;
         int sort_ndx;
     };
 
-    void buildKDTree(ParticleSystem& system) {
+    void buildKDTree(ParticleSystem *system) {
         // cleanup KD Tree
-        if(system.kdTree_initialized) {
-            if(system.static_domain) {return;} // do not rebuild tree for static domains
-            annDeallocPts(system.kdTree_pts);
-            delete [] &system.kdTree;
+        if(system->kdTree_initialized) {
+            if(system->static_domain) {
+                return;} // do not rebuild tree for static domains
+            annDeallocPts(system->kdTree_pts);
+            delete [] system->kdTree;
             annClose();
         }
-        int nPts = system.particles.size();
-        system.kdTree_pts = annAllocPts(nPts, system.dimension);
+        int nPts = system->particles.size();
+        system->kdTree_pts = annAllocPts(nPts, system->dimension);
         for(int i = 0; i < nPts; i++) {
-            for(int j = 0; j < system.dimension; j++) {
-                system.kdTree_pts[i][j] = system.particles[i].x[j];
+            for(int j = 0; j < system->dimension; j++) {
+                system->kdTree_pts[i][j] = system->particles[i].x[j];
             }
         }
-        system.kdTree = {system.kdTree_pts, nPts, system.dimension};
-        system.kdTree_initialized = true;
+        system->kdTree = new ANNkd_tree(system->kdTree_pts, nPts, system->dimension);
+        system->kdTree_initialized = true;
     }
 
     void* sort_index_thread(void* targ_in){
-        struct sarg* targ = (struct sarg*) targ_in;
+        struct sarg *targ = (struct sarg*) targ_in;
         while(1){
             pthread_barrier_wait(&begin_sort_barrier);
             if(debug_flag) printf("[SORT] begin sort\n");
             // linked_list_sort(targ->ll,targ->sort_ndx);
             // ANN KD Tree
-            buildKDTree(*targ->system);
+            buildKDTree(targ->system);
             if(debug_flag) printf("[SORT] sort complete\n");
             pthread_barrier_wait(&end_sort_barrier);
         }
@@ -86,7 +87,7 @@ namespace Spatialpy{
 
     void* run_simulation_thread(void *targ_in){
         struct arg* targ = (struct arg*)targ_in;
-        ParticleSystem* system = targ->system;
+        ParticleSystem *system = targ->system;
         unsigned int step;
         Particle* p;
         unsigned int i;
@@ -170,7 +171,8 @@ namespace Spatialpy{
         pthread_barrier_init(&begin_sort_barrier, NULL, 2);
         pthread_barrier_init(&end_sort_barrier, NULL, 2);
         struct sarg sort_args[1];
-        sort_args[0].ll = system->particles;
+        sort_args[0].system = system ;
+        sort_args[0].ll = &system->particles;
         sort_args[0].sort_ndx = 0;
         pthread_create(&sort_thread_handles[0], NULL, sort_index_thread, &sort_args[0]);
         if(debug_flag) printf("Creating thread to update x-position index\n");

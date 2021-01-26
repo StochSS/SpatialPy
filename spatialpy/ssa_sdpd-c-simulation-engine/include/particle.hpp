@@ -61,15 +61,15 @@ namespace Spatialpy{
         double* Ddiag;
         EventNode*heap_index;
 
-	    double particle_dist(Particle p2);
-	    double particle_dist_sqrd(Particle p2);
-	    int add_to_neighbor_list(Particle neighbor, ParticleSystem system, double r2) ;
+	    double particle_dist(Particle *p2);
+	    double particle_dist_sqrd(Particle *p2);
+	    int add_to_neighbor_list(Particle *neighbor, ParticleSystem *system, double r2) ;
 
         // KD TREE FUNCTIONS
         void get_k_cleanup(ANNidxArray nn_idx, ANNdistArray dists) ;
         void search_cleanup(ANNpoint queryPt, ANNidxArray nn_idx, ANNdistArray dists) ;
-        int get_k__approx(ParticleSystem system) ;
-        int get_k__exact(ANNpoint queryPt, ANNdist dist, ParticleSystem system) ;
+        int get_k__approx(ParticleSystem *system) ;
+        int get_k__exact(ANNpoint queryPt, ANNdist dist, ParticleSystem *system) ;
         void find_neighbors(ParticleSystem *system, bool use_exact_k=true) ;
 
             bool operator<(const Particle& p2){ 
@@ -177,7 +177,7 @@ namespace Spatialpy{
 
         void add_particle(Particle me);
 
-        ANNkd_tree kdTree;
+        ANNkd_tree *kdTree;
         ANNpointArray kdTree_pts;
         bool kdTree_initialized;
     };

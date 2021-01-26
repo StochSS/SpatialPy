@@ -64,9 +64,7 @@ namespace Spatialpy{
     //dsfmt_t dsfmt;
 
     void init_create_particle(ParticleSystem *sys, unsigned int id, double x, double y, double z, int type, double nu, double mass, double rho, int solidTag, int num_chem_species){
-        printf("top of init_create_particle for particle %i\n", id) ;
         Particle *p  = new Particle(sys, id) ;
-        printf("after new particle %i\n", id) ;
         p->x[0] = x;
         p->x[1] = y;
         p->x[2] = z;
@@ -78,19 +76,10 @@ namespace Spatialpy{
         p->solidTag = solidTag;
         if(num_chem_species > 0){
             for(int i=0;i<num_chem_species;i++){
-                printf("On step %i out of %i - adding value %d\n", i+1, num_chem_species, input_u0[id*num_chem_species+1]) ;
                 p->C[i] = (double) input_u0[id*num_chem_species+i];
-                printf("SUCCESSFULLY ADDED to p->C\n") ;
-                printf("Values of p->C:\n") ;
-                for(int j=0;j<=i;j++){
-                    printf("%f ", p->C[j]) ;
-                }
-                printf("\n") ;
             }
         }
-        printf("BEFORE ADD_PARTICLE\n") ;
         sys->add_particle(*p);
-        printf("AFTER ADD_PARTICLE\n") ;
     }
 
 
