@@ -1,16 +1,12 @@
-#include "NRMConstant_v4.hpp"
+#include "NRMConstant_v5.hpp"
 #include <cmath>
 
-NRMConstant_v4::NRMConstant_v4() : previousFiringTime(0.0), exponential(1) {
-#ifdef PROFILE
-    callsToRebuild=0;
-    rebuildCost=0.0;
-#endif
+NRMConstant_v5::NRMConstant_v5() : previousFiringTime(0.0), exponential(1) {
 
 }
 
 
-void NRMConstant_v4::printHashTable() {
+void NRMConstant_v5::printHashTable() {
     std::cout << "minBin=" << minBin << std::endl;
     std::cout << "lower bound="<<currentLowerBound << std::endl;
     std::cout << "upper bound="<<currentUpperBound << std::endl;
@@ -24,20 +20,11 @@ void NRMConstant_v4::printHashTable() {
     }
 }
 
-NRMConstant_v4::timeIndexPair NRMConstant_v4::selectReaction() {
-//std::cout << "in selectReaction...\n";
+NRMConstant_v5::timeIndexPair NRMConstant_v5::selectReaction() {
+//    std::cout << "in selectReaction...\n";
     //while front of queue is empty, pop it
-#ifdef PROFILE
-    std::chrono::time_point<std::chrono::system_clock> selectTimeStart, selectTimeEnd;
-    std::chrono::duration<double> elapsed;
-    selectTimeStart=std::chrono::system_clock::now();
-    std::size_t emptySearchBinCount=1;//start counting at 1
-#endif
     while (theHashTable[minBin].size()==0) {
         ++minBin;
-#ifdef PROFILE
-        ++emptySearchBinCount;
-#endif
         if (minBin==theHashTable.size()) {
 //            std::cout << "rebuilding...\n";
             if (!rebuild()) {
@@ -45,6 +32,7 @@ NRMConstant_v4::timeIndexPair NRMConstant_v4::selectReaction() {
             }
         }
     }
+//    std::cout << "minBin="<<minBin<<std::endl;
     //now that we have a bin with elements, find minimum
     int minTimeRxnIndex=0;
     for (std::size_t i=1;i<theHashTable[minBin].size(); ++i) {
@@ -53,30 +41,18 @@ NRMConstant_v4::timeIndexPair NRMConstant_v4::selectReaction() {
         }
     }
 
-#ifdef PROFILE
-//    std::cout << "pushing emptySearchBinCount=" << emptySearchBinCount << std::endl;
-//    std::cout << "pushing searchDepth=" << theHashTable[minBin].size() << std::endl;
-    searchBins.push_back(emptySearchBinCount);
-    searchDepth.push_back(theHashTable[minBin].size());
-#endif
-
     
     previousFiringTime=theHashTable[minBin][minTimeRxnIndex].first;
     ++rxnCountThisBuildOrRebuild;
 //    std::cout << "returning time=" <<theHashTable[minBin][minTimeRxnIndex].first<<", reaction index=" << theHashTable[minBin][minTimeRxnIndex].second << " in selectReaction\n";
-#ifdef PROFILE
-    selectTimeEnd=std::chrono::system_clock::now();
-    elapsed=selectTimeEnd-selectTimeStart;
-    selectCost+=elapsed.count();
-#endif
 
     return theHashTable[minBin][minTimeRxnIndex];
 }
 
-NRMConstant_v4::~NRMConstant_v4() {
+NRMConstant_v5::~NRMConstant_v5() {
 }
 
-int NRMConstant_v4::computeBinIndex(double firingTime) {
+int NRMConstant_v5::computeBinIndex(double firingTime) {
     if (firingTime>currentUpperBound) {
 //        std::cout << "computeBinIndex("<<firingTime<<") returning binIndex=" << -1 << std::endl;
         return -1;
@@ -88,14 +64,8 @@ int NRMConstant_v4::computeBinIndex(double firingTime) {
 }
 
 //returns false if all propensities are 0
-bool NRMConstant_v4::rebuild() {
+bool NRMConstant_v5::rebuild() {
 //    std::cout << "in rebuild...\n";
-
-#ifdef PROFILE
-    std::chrono::time_point<std::chrono::system_clock> rebuildTimeStart, rebuildTimeEnd;
-    std::chrono::duration<double> elapsed;
-    rebuildTimeStart=std::chrono::system_clock::now();
-#endif
 
     //estimate propensitySum based on number of steps since last build or rebuild
     double propensitySumEstimate;
@@ -114,7 +84,7 @@ bool NRMConstant_v4::rebuild() {
 //        std::cout << "previousBinWidth was " << previousBinWidth <<"\n";
     }
     
-    setBinNumberAndBounds(currentUpperBound,propensitySumEstimate);//
+    setBinNumberAndBounds(currentUpperBound,propensitySumEstimate,activeChannelCounter);//
     minBin=0;
     
     std::vector<std::pair<double, std::size_t> > emptyVector;
@@ -122,21 +92,24 @@ bool NRMConstant_v4::rebuild() {
     //theHashTable.clear();
     theHashTable.resize(numberOfBins,emptyVector);
     
-    //std::cout << "inserting into hash table...\n";
     bool allPropensitiesZero=true;
-    for (std::size_t i=0; i!=nextFiringTime.size(); ++i) {
+    //std::cout << "inserting into hash table...\n";
+    //for (std::size_t i=0; i!=nextFiringTime.size(); ++i) {
+    for (auto it = nextFiringTime.cbegin(); it != nextFiringTime.end(); it++) {
         //insert into hashTable
-        if (!std::isinf(nextFiringTime[i])) {
+
+        if (allPropensitiesZero && it->second!=std::numeric_limits<double>::infinity()) {
             allPropensitiesZero=false;
         }
-        int bin=computeBinIndex(nextFiringTime[i]);
+        
+        int bin=computeBinIndex(it->second); // it->second is firing time
         if (bin>=0) {
 //            std::cout << "inserting into bin " << bin << std::endl;
-            theHashTable[bin].push_back(std::make_pair(nextFiringTime[i],i));//place this rxn at back of bin
-            binIndexAndPositionInBin[i]=std::make_pair(bin,theHashTable[bin].size()-1);
+            theHashTable[bin].push_back(std::make_pair(it->second,it->first));//place this rxn at back of bin
+            binIndexAndPositionInBin[it->first]=std::make_pair(bin,theHashTable[bin].size()-1);
         }
         else {
-            binIndexAndPositionInBin[i]=std::make_pair<int,int>(-1,-1);
+            binIndexAndPositionInBin[it->first]=std::make_pair<int,int>(-1,-1);
         }
     }
     
@@ -148,13 +121,6 @@ bool NRMConstant_v4::rebuild() {
     //set rxn counter to 0
     rxnCountThisBuildOrRebuild=0;
 
-#ifdef PROFILE
-    ++callsToRebuild;
-    rebuildTimeEnd=std::chrono::system_clock::now();
-    elapsed=rebuildTimeEnd-rebuildTimeStart;
-    rebuildCost+=elapsed.count();
-#endif
-
 //    std::cout << "after rebuild, hash table:\n";
 //    printHashTable();
     
@@ -163,26 +129,26 @@ bool NRMConstant_v4::rebuild() {
 
 //fixed number of bins
 //currentUpperBound=
-void NRMConstant_v4::setBinNumberAndBounds(double newLowerBound, double propensitySum) {
+void NRMConstant_v5::setBinNumberAndBounds(double newLowerBound, double propensitySum, int activeChannels) {
+    if (activeChannels==0) {
+        std::cout << "ERROR: setBinNumberAndBounds not set up to handle activeChannels=0\n";
+        exit(1);
+    }
+
 //    std::cout << "...in setBinNumberAndBounds...newLowerBound=" << newLowerBound << std::endl;
     currentLowerBound=newLowerBound;
     if (currentLowerBound>endTime) {
         std::cerr << "ERROR: calling rebuild when simulation end time exceeded. Terminating.\n";
         exit(1);
     }
-    std::size_t NumberOfChannels=nextFiringTime.size();//
     
 //    std::cout << "propensitySum is " << propensitySum << ", so step size is " << 1.0/propensitySum << "\n";
     double binWidth=16.0/propensitySum;
 //    std::cout << "binWidth=" << binWidth << "\n";
   
-    //sanft: temporary change for testing, edit: permanent change for v4
-//    std::size_t maxNumberOfBins=(std::size_t)20.0*sqrt(NumberOfChannels);
-//    std::size_t maxNumberOfBins=(std::size_t)3.0*sqrt(NumberOfChannels);
-    //use active channels instead of total channels
-    std::size_t maxNumberOfBins=(std::size_t)20.0*sqrt(activeChannelCounter);
+    // heuristic
+    std::size_t maxNumberOfBins=(std::size_t)20.0*sqrt(activeChannels);
     
-//    std::cout << "activeChannels=" << activeChannelCounter << "\n";
 //    std::cout << "maxNumberOfBins=" << maxNumberOfBins << "\n";
     
     //how many bins to get beyond end time?
@@ -203,7 +169,7 @@ void NRMConstant_v4::setBinNumberAndBounds(double newLowerBound, double propensi
     //if max bins gets us very close to the simulation end time, bump it up beyond max to avoid
     //an additional rebuild
     if (endTime<std::numeric_limits<double>::max()) {
-        std::cout << "checking to see if we can use fewer than max bins...\n";
+//        std::cout << "checking to see if we can use fewer than max bins...\n";
         if (currentUpperBound<endTime && ((double)(endTimeBins-maxNumberOfBins)/((double)numberOfBins))<.2) {
             numberOfBins=endTimeBins;
             currentUpperBound=currentLowerBound+binWidth*(double)numberOfBins;
@@ -214,37 +180,3 @@ void NRMConstant_v4::setBinNumberAndBounds(double newLowerBound, double propensi
 //    std::cout << "binWidth=" << binWidth << std::endl;
 //    std::cout << "numberOfBins=" << numberOfBins << std::endl;
 }
-
-
-#ifdef PROFILE
-double NRMConstant_v4::getBuildCost() {
-    return buildCost;
-}
-
-double NRMConstant_v4::getRebuildCost() {
-    return rebuildCost;
-}
-
-std::size_t NRMConstant_v4::getCallsToRebuild() {
-    return callsToRebuild;
-}
-
-double NRMConstant_v4::getUpdateCost() {
-    return updateCost;
-}
-
-double NRMConstant_v4::getSelectCost() {
-    return selectCost;
-}
-
-std::vector<std::size_t>& NRMConstant_v4::getSearchBinsRef() {
-    return searchBins;
-}
-std::vector<std::size_t>& NRMConstant_v4::getSearchDepthRef() {
-    return searchDepth;
-}
-
-
-}
-#endif
-
