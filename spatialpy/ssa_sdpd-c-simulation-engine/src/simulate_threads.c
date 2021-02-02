@@ -48,7 +48,6 @@ namespace Spatialpy{
 
     struct sarg {
         ParticleSystem *system;
-        std::vector<Particle> *ll;
         int sort_ndx;
     };
 
@@ -77,7 +76,6 @@ namespace Spatialpy{
         while(1){
             pthread_barrier_wait(&begin_sort_barrier);
             if(debug_flag) printf("[SORT] begin sort\n");
-            // linked_list_sort(targ->ll,targ->sort_ndx);
             // ANN KD Tree
             buildKDTree(targ->system);
             if(debug_flag) printf("[SORT] sort complete\n");
@@ -134,6 +132,7 @@ namespace Spatialpy{
     void run_simulation(int num_threads, ParticleSystem *system){
         //
         int i,j;
+        num_threads = 1 ;
         int num_particles_per_thread = system->particles.size() / num_threads;
         //int num_bonds_per_thread = system->bond_list->count / num_threads;
         // start worked threads
@@ -172,7 +171,6 @@ namespace Spatialpy{
         pthread_barrier_init(&end_sort_barrier, NULL, 2);
         struct sarg sort_args[1];
         sort_args[0].system = system ;
-        sort_args[0].ll = &system->particles;
         sort_args[0].sort_ndx = 0;
         pthread_create(&sort_thread_handles[0], NULL, sort_index_thread, &sort_args[0]);
         if(debug_flag) printf("Creating thread to update x-position index\n");

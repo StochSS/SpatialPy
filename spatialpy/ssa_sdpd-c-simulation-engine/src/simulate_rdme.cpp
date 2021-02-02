@@ -20,7 +20,6 @@
 /**************************************************************************/
 namespace Spatialpy{
     //TODO: MOVE RNG INSTANTIATION AND INCLUDE SEED
-    std::mt19937_64 rng((int)time(NULL)+(int)(1e9*clock())) ;
 
     void initialize_rdme(ParticleSystem *system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
                             unsigned int*u0){
@@ -317,13 +316,18 @@ namespace Spatialpy{
         // rdme_t* rdme = system->rdme;
         /* Calculate times to next event (reaction or diffusion)
          in each subvolume and initialize heap. */
-        Particle *p;
-        for(auto e=system->event_v.begin(); e!=system->event_v.end(); ++e){
+        for(long unsigned int i=0; i<system->particles.size(); i++){
         //for (i = 0; i < rdme->Ncells; i++) {
             //rdme->rtimes[i] = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/(rdme->srrate[i]+rdme->sdrate[i]);
             //rdme->heap[i] = rdme->node[i] = i;
-            p = e->data;
-            e->tt = -log(1.0-rng())/(p->srrate+p->sdrate);
+            Particle *p ;
+            p = &system->particles[i] ;
+            //p = e->data;
+            printf("RNG: %li\n", rng()) ;
+            double tt = -log(1.0-rng())/(p->srrate+p->sdrate);
+            printf("p->srrate: %f, p->sdrate: %f\n", p->srrate, p->sdrate) ;
+            printf("random numerator = %f\n", -log(1.0-rng())) ;
+            system->event_v.emplace_back(p, tt) ;
         }
         //initialize_heap(rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
         // ordered_list_sort(system->heap);
@@ -350,12 +354,13 @@ namespace Spatialpy{
         //}
         //printf("]\n");
 
-        Particle *p1;
         int num_s = system->num_stoch_species;
-        for(unsigned long int i = 0; i < system->particles.size(); i++){
-            p1 = &system->particles[i];
+        int i = 0 ;
+        for(auto p = system->particles.begin(); p!=system->particles.end(); p++){
+        //for(unsigned long int i = 0; i < system->particles.size(); i++){
+            //p1 = &system->particles[i];
             //memcpy(p1->xx,&u0[i*num_s],system->num_stoch_species*sizeof(unsigned int));
-            p1->xx = &u0[i*num_s];
+            p->xx = &u0[i*num_s];
             i++;
         }
     }
@@ -502,6 +507,7 @@ namespace Spatialpy{
     /**************************************************************************/
     // Update to use priority queue
     void nsm_core__take_step(ParticleSystem*system, double current_time, double step_size){
+        printf("Top of nsm_core__take_step\n") ;
         // rdme_t*rdme = system->rdme;
         double tt = current_time;
         double end_time = current_time + step_size;
@@ -515,6 +521,7 @@ namespace Spatialpy{
         double vol,diff_const;
         Particle *dest_subvol = NULL;
         NeighborNode *nn = NULL;
+        printf("Bottom of take_step assignments...\n") ;
 
 
         // Check the integrety of the heap
@@ -541,13 +548,17 @@ namespace Spatialpy{
         /* Main loop. */
         while(tt <= end_time){
 
+            printf("Top of while loop...\n") ;
             /* Get the subvolume in which the next event occurred.
              This subvolume is on top of the heap. */
             //told = tt;
             //tt   = rdme->rtimes[0];
             //subvol = rdme->node[0];
+            printf("Size of event_v: %li\n", system->event_v.size()) ;
             subvol = system->event_v.front().data;
+            printf("Setting subvol to %i\n", subvol->id) ;
             tt = system->event_v.front().tt;
+            printf("Setting tt to %f\n", tt) ;
             vol = (subvol->mass / subvol->rho);
 
             if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}

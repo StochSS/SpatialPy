@@ -31,9 +31,9 @@ namespace Spatialpy{
         kdTree_initialized = false;
     }
 
-    void ParticleSystem::add_particle(Particle me){
+    void ParticleSystem::add_particle(Particle *me){
     	// x_index.push(me) ;
-    	particles.push_back(me) ;
+    	particles.push_back(*me) ;
     }
     ParticleSystem::~ParticleSystem(){}
 
@@ -53,6 +53,7 @@ namespace Spatialpy{
     }
 
     NeighborNode::NeighborNode(Particle *data, double dist, double dWdr, double D_i_j):data(data), dist(dist), dWdr(dWdr), D_i_j(D_i_j){}
+    EventNode::EventNode(Particle *data, double tt):data(data), tt(tt){}
 
     double Particle::particle_dist(Particle *p2){
         double a = x[0] - p2->x[0];
@@ -109,8 +110,7 @@ namespace Spatialpy{
 
     	    exit(1);
     	}
-	NeighborNode n(neighbor, r, dWdr, D_i_j) ;
-    	neighbors.push_back(n) ;
+    	neighbors.emplace_back(neighbor, r, dWdr, D_i_j) ;
 
     	return 1;
     }
@@ -121,23 +121,23 @@ namespace Spatialpy{
     }
 
     void Particle::search_cleanup(ANNpoint queryPt, ANNidxArray nn_idx, ANNdistArray dists) {
+        //printf("***TOP OF SEARCH CLEANUP***\n") ;
         get_k_cleanup(nn_idx, dists);
         annDeallocPt(queryPt);
+        //printf("***BOTTOM OF SEARCH CLEANUP***\n") ;
     }
 
     int Particle::get_k__approx(ParticleSystem *system) {
         return system->kdTree->nPoints();
     }
 
-    int Particle::get_k__exact(ANNpoint queryPt, ANNdist dist, ParticleSystem *system) {
-        printf("***TOP OF GET_K__EXACT***\n") ;
-        printf("USING DIST %f...", dist) ;
-        int k = system->particles.size();
-        ANNidxArray nn_idx = new ANNidx[k];
-        ANNdistArray dists = new ANNdist[k];
-        k = system->kdTree->annkFRSearch(queryPt, dist, k, nn_idx, dists);
-        get_k_cleanup(nn_idx, dists);
-        printf("Found %i neighbors!\n", k) ;
+    int Particle::get_k__exact(ANNpoint queryPt, ANNdist dist, ANNkd_tree *tree) {
+        //printf("***TOP OF GET_K__EXACT***\n") ;
+        //printf("USING DIST %f...", dist) ;
+        for(int i = 0; i < 3; i++){
+        }
+        int k = tree->annkFRSearch(queryPt, dist, 0);
+        //printf("Found %i neighbors!\n", k) ;
         return k;
     }
 
@@ -158,7 +158,7 @@ namespace Spatialpy{
         // Number of neighbors to search for
         int k;
         if(use_exact_k) {
-            k = get_k__exact(queryPt, dist, system);    
+            k = get_k__exact(queryPt, dist, system->kdTree);    
         }else{
             k = get_k__approx(system);
         }
@@ -167,6 +167,7 @@ namespace Spatialpy{
         // Holds squared distances to the neighbor (r2)
         ANNdistArray dists = new ANNdist[k];
         // Search for k nearest neighbors in the fixed squared radius dist from queryPt
+        /*
         printf("Searching for Neighbors...\n") ;
         printf("Point at (%f, %f, %f), dist %f, finding %i neighbors out of %i indices and %i dists\n",
                     queryPt[0], queryPt[1], queryPt[2], dist, k, sizeof(nn_idx), sizeof(dists)) ;
@@ -174,11 +175,13 @@ namespace Spatialpy{
         printf("NPOINTS IN KDTREE: %i\n", system->kdTree->nPoints()) ;
         printf("SEARCH RETURNED %i\n", system->kdTree->annkFRSearch(queryPt, dist, k, nn_idx, dists));
         printf("Neighbor search complete!\n") ;
+        */
+        system->kdTree->annkFRSearch(queryPt, dist, k, nn_idx, dists);
         for(int i = 0; i < k && nn_idx[i] != ANN_NULL_IDX; i++) {
-            printf("Adding neighbor %i to list.  Index of neighbor: %i with dist: %f\n", i, nn_idx[i], dists[i]) ;
+            //printf("Adding neighbor %i to list.  Index of neighbor: %i with dist: %f\n", i, nn_idx[i], dists[i]) ;
             Particle *neighbor = &system->particles[nn_idx[i]];
             add_to_neighbor_list(neighbor, system, dists[i]);
-            printf("ADDED!\n") ;
+            //printf("ADDED %i with dist %f!\n", nn_idx[i], dists[i]) ;
             if(debug_flag > 2) {
                 printf("find_neighbors(%i) forward found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
                     id, neighbor->id, sqrt(dists[i]),

@@ -82,7 +82,8 @@ public:
 		}
 
 	~ANNmin_k()							// destructor
-		{ delete [] mk; }
+		{ 
+            delete [] mk; }
 	
 	PQKkey ANNmin_key()					// return minimum key
 		{ return (n > 0 ? mk[0].key : PQ_NULL_KEY); }

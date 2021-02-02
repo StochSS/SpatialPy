@@ -69,7 +69,7 @@ namespace Spatialpy{
         void get_k_cleanup(ANNidxArray nn_idx, ANNdistArray dists) ;
         void search_cleanup(ANNpoint queryPt, ANNidxArray nn_idx, ANNdistArray dists) ;
         int get_k__approx(ParticleSystem *system) ;
-        int get_k__exact(ANNpoint queryPt, ANNdist dist, ParticleSystem *system) ;
+        int get_k__exact(ANNpoint queryPt, ANNdist dist, ANNkd_tree *tree) ;
         void find_neighbors(ParticleSystem *system, bool use_exact_k=true) ;
 
             bool operator<(const Particle& p2){ 
@@ -80,6 +80,7 @@ namespace Spatialpy{
     struct EventNode{
     	Particle* data ;
     	double tt ;
+        EventNode(Particle *data, double tt) ;
         bool operator< (const EventNode& e2){ 
             return tt > e2.tt ; 
         } 
@@ -175,7 +176,7 @@ namespace Spatialpy{
         int *stoichiometric_matrix;
         double* gravity;
 
-        void add_particle(Particle me);
+        void add_particle(Particle *me);
 
         ANNkd_tree *kdTree;
         ANNpointArray kdTree_pts;

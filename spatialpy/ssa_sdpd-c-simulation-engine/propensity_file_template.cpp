@@ -17,6 +17,7 @@
 int debug_flag ;
 
 namespace Spatialpy{
+
     /* Species names */
     __DEFINE_SPECIES__
 
@@ -79,7 +80,7 @@ namespace Spatialpy{
                 p->C[i] = (double) input_u0[id*num_chem_species+i];
             }
         }
-        sys->add_particle(*p);
+        sys->add_particle(p);
     }
 
 
@@ -96,6 +97,8 @@ namespace Spatialpy{
 
     }/*end namespace*/
 
+
+    std::mt19937_64 rng ;
 
     int main(int argc, char**argv){
         using namespace Spatialpy ;
@@ -150,14 +153,18 @@ namespace Spatialpy{
                 break;
             }
         }
+        //std::mt19937_64 rng ;
+        rng = sflag ? std::mt19937_64(seed) : std::mt19937_64((int)time(NULL)+(int)(1e9*clock())) ;
         /*
         if(sflag){
-            std::mt19937_64 rng(seed) ;
+            rng = std::mt19937_64(seed) ;
             //dsfmt_init_gen_rand(&dsfmt, seed);
         }else{
-            std::mt19937_64 rng((int)time(NULL)+(int)(1e9*clock())) ;
+            rng = std::mt19937_64((int)time(NULL)+(int)(1e9*clock())) ;
             //dsfmt_init_gen_rand(&dsfmt, (int)time(NULL)+(int)(1e9*clock()));
         }*/
+
+        printf("Test: %li\n", rng()) ;
 
         if(!tflag){
             num_threads = get_num_processors();
