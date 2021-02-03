@@ -164,6 +164,7 @@ class NRMConstant_v5 {
         for (std::size_t i=0; i!=particles.size(); ++i) {
             double firingTime;
             double this_propensity = particles[i].srrate+particles[i].sdrate;
+            unsigned this_id = particles[i].id;
             if (this_propensity==0.0) {
                 firingTime=std::numeric_limits<double>::infinity();
             }
@@ -172,15 +173,15 @@ class NRMConstant_v5 {
                 ++active_channel_count;
             }
             
-            nextFiringTime[i]=firingTime;//.insert(std::make_pair<reactionIndexT,firingTimeT>(i,firingTime));
+            nextFiringTime[this_id]=firingTime;//.insert(std::make_pair<reactionIndexT,firingTimeT>(i,firingTime));
             //            std::cout << "nextFiringTime["<<i<<"]="<<nextFiringTime[i]<<"\n";
             //insert into hashTable
             int bin=computeBinIndex(firingTime);
             if (bin>=0) {
-                theHashTable[bin].push_back(std::make_pair(firingTime,i));//place this rxn at back of bin
-                binIndexAndPositionInBin[i]=std::make_pair(bin,theHashTable[bin].size()-1);
+                theHashTable[bin].push_back(std::make_pair(firingTime,this_id));//place this rxn at back of bin
+                binIndexAndPositionInBin[this_id]=std::make_pair(bin,theHashTable[bin].size()-1);
             } else {
-                binIndexAndPositionInBin[i]=std::make_pair<int,int>(-1,-1);// bin (and index within bin) is -1 if not in the hash table
+                binIndexAndPositionInBin[this_id]=std::make_pair<int,int>(-1,-1);// bin (and index within bin) is -1 if not in the hash table
             }
         }
         
@@ -207,6 +208,7 @@ class NRMConstant_v5 {
 
     timeIndexPair selectReaction(); // returns pair of firing time, rxn index
 
+    // reactionIndex is particle id
     template <typename generatorType>
     void update(std::size_t reactionIndex, double newPropensity, double currentTime, generatorType& generator) {
 //        std::cout << "updating reactionIndex=" << reactionIndex << ", newPropensity=" << newPropensity << ", currentTime=" << currentTime << std::endl;
