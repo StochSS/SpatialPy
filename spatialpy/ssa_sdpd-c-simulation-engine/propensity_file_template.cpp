@@ -153,7 +153,7 @@ namespace Spatialpy{
                 break;
             }
         }
-        //std::mt19937_64 rng ;
+
         rng = sflag ? std::mt19937_64(seed) : std::mt19937_64((int)time(NULL)+(int)(1e9*clock())) ;
         /*
         if(sflag){
@@ -163,8 +163,6 @@ namespace Spatialpy{
             rng = std::mt19937_64((int)time(NULL)+(int)(1e9*clock())) ;
             //dsfmt_init_gen_rand(&dsfmt, (int)time(NULL)+(int)(1e9*clock()));
         }*/
-
-        printf("Test: %li\n", rng()) ;
 
         if(!tflag){
             num_threads = get_num_processors();

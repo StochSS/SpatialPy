@@ -323,10 +323,11 @@ namespace Spatialpy{
             Particle *p ;
             p = &system->particles[i] ;
             //p = e->data;
-            printf("RNG: %li\n", rng()) ;
-            double tt = -log(1.0-rng())/(p->srrate+p->sdrate);
-            printf("p->srrate: %f, p->sdrate: %f\n", p->srrate, p->sdrate) ;
-            printf("random numerator = %f\n", -log(1.0-rng())) ;
+            
+            long unsigned int srng = rng() ;
+            long unsigned int rng_max = rng.max() ;
+            double tt = -log(1.0-(rng() * 1.0 / rng.max())) / (p->srrate+p->sdrate);
+
             system->event_v.emplace_back(p, tt) ;
         }
         //initialize_heap(rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
@@ -507,7 +508,6 @@ namespace Spatialpy{
     /**************************************************************************/
     // Update to use priority queue
     void nsm_core__take_step(ParticleSystem*system, double current_time, double step_size){
-        printf("Top of nsm_core__take_step\n") ;
         // rdme_t*rdme = system->rdme;
         double tt = current_time;
         double end_time = current_time + step_size;
@@ -516,12 +516,11 @@ namespace Spatialpy{
         long unsigned int re, spec = 0 ;
         Particle*subvol;
         size_t i,j = 0;
-        double old_rrate = 0.0,old_drate = 0.0;
+        //double old_rrate = 0.0,old_drate = 0.0;
         double rand1,rand2,cum2,old;
         double vol,diff_const;
         Particle *dest_subvol = NULL;
         NeighborNode *nn = NULL;
-        printf("Bottom of take_step assignments...\n") ;
 
 
         // Check the integrety of the heap
@@ -548,17 +547,13 @@ namespace Spatialpy{
         /* Main loop. */
         while(tt <= end_time){
 
-            printf("Top of while loop...\n") ;
             /* Get the subvolume in which the next event occurred.
              This subvolume is on top of the heap. */
             //told = tt;
             //tt   = rdme->rtimes[0];
             //subvol = rdme->node[0];
-            printf("Size of event_v: %li\n", system->event_v.size()) ;
             subvol = system->event_v.front().data;
-            printf("Setting subvol to %i\n", subvol->id) ;
             tt = system->event_v.front().tt;
-            printf("Setting tt to %f\n", tt) ;
             vol = (subvol->mass / subvol->rho);
 
             if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}
@@ -577,7 +572,7 @@ namespace Spatialpy{
     //            continue;
     //        }
 
-            rand1 = rng();
+            rand1 = rng() * 1.0 / rng.max();
 
             if (rand1 <= subvol->srrate/totrate) { // use normalized floating point comparision
                 /* Reaction event. */
@@ -683,7 +678,7 @@ namespace Spatialpy{
 
 
                 /* b) and then the direction of diffusion. */
-                double r2 = rng();
+                double r2 = rng() * 1.0 / rng.max();
                 rand2 = r2 * subvol->Ddiag[spec];
 
                 /* Search for diffusion direction. */
@@ -723,16 +718,18 @@ namespace Spatialpy{
                     // try again, 'cum2' is a better estimate of propensity sum
                     rand2 = r2*cum2;
                     cum2 = 0.0;
-                    for(auto nn=subvol->neighbors.begin(); nn!=subvol->neighbors.end(); ++nn){
-                        p2 = nn->data;
+                    NeighborNode *n = NULL;
+                    for(auto nn : subvol->neighbors){
+                        p2 = nn.data;
+                        n = &nn ;
                         diff_const = system->subdomain_diffusion_matrix[spec*system->num_types + (p2->type-1)];
-                        cum2 += nn->D_i_j * diff_const;
+                        cum2 += nn.D_i_j * diff_const;
                         if(cum2 > rand2){
                             dest_subvol = p2;
                             break;
                         }
                     }
-                    if(nn==NULL){
+                    if(n==NULL){
                         printf("Error: overflow in trying to determine which destination voxel subvol=%i\n",subvol->id);
                         printf("subvol->id=%u ",subvol->id);
                         printf("rand2=%e ",rand2);
@@ -760,8 +757,8 @@ namespace Spatialpy{
                 if(debug_flag){printf("Diff %i->%i\n",subvol->id,dest_subvol->id);}
 
                 /* Save reaction and diffusion rates. */
-                old_rrate = dest_subvol->srrate;
-                old_drate = dest_subvol->sdrate;
+                //old_rrate = dest_subvol->srrate;
+                //old_drate = dest_subvol->sdrate;
                 /* Recalculate the reaction rates using dependency graph G. */
                 if (system->num_stoch_rxns > 0){
                     for (i = system->jcG[spec], rdelta = 0.0, rrdelta = 0.0; i < system->jcG[spec+1]; i++) {
@@ -798,7 +795,7 @@ namespace Spatialpy{
             /* Compute time to new event for this subvolume. */
             totrate = subvol->srrate+subvol->sdrate;
             if(totrate > 0.0){
-                system->event_v.front().tt = -log(1.0-rng())/totrate+tt;
+                system->event_v.front().tt = -log(1.0-(rng() * 1.0 / rng.max()))/totrate+tt;
             }else{
                 system->event_v.front().tt = INFINITY;
             }
@@ -814,22 +811,26 @@ namespace Spatialpy{
             if(event) {
 
                 totrate = dest_subvol->srrate+dest_subvol->sdrate;
+/*
                 if(totrate > 0.0) {
+                    printf("dest_subvol->heap_index->tt: %f\n", dest_subvol->heap_index->tt) ;
                     if(!isinf(dest_subvol->heap_index->tt)){
                         dest_subvol->heap_index->tt =
                         (old_rrate+old_drate)/totrate*(dest_subvol->heap_index->tt - tt)+tt;
                     }else{
-                        /* generate a new waiting time */
-                        dest_subvol->heap_index->tt = -log(1.0-rng())/totrate+tt;
+                        // generate a new waiting time
+                        dest_subvol->heap_index->tt = -log(1.0-(rng() * 1.0 / rng.max()))/totrate+tt;
                     }
-                }else{
+*/
+                }
+           /*
+            else{
                     dest_subvol->heap_index->tt = INFINITY;
                 }
-
-
                 //TODO: REPLACE BUBBLE_UP_DOWN
                 //ordered_list_bubble_up_down(system->heap, dest_subvol->heap_index);
             }
+            */
 
             // re-sort the heap
             //ordered_list_sort(system->rdme->heap);  // this resorts the whole list
