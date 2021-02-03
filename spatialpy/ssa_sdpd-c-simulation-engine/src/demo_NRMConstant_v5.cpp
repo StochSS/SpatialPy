@@ -2,10 +2,11 @@
 // run: a.out
 #include <iostream>
 #include <random>
-#include "NRMConstant_v4.hpp"
+#include "NRMConstant_v5.hpp"
 
 int main() {
-    
+    std::cout << "testing v5...(doesn't use ParticleSystem!)" << "\n";
+
     /* SET UP RANDOM NUMBER GENERATOR AND "MODEL" */
     // gen is the random number generator
     std::mt19937 gen;
@@ -32,8 +33,8 @@ int main() {
     std::cout << "propensitySum=" << propensitySum << "\n";
     std::cout << "activeChannels=" << activeChannels << "\n";
     
-    /* HERE IS THE PRIORITY QUEUE "NRMConstant_v4" */
-    NRMConstant_v4 reactionGenerator;
+    /* HERE IS THE PRIORITY QUEUE "NRMConstant_v5" */
+    NRMConstant_v5 reactionGenerator;
     // set up the priority queue:
     reactionGenerator.build(propensities, gen, propensitySum, activeChannels);
     
