@@ -28,31 +28,34 @@ namespace Spatialpy{
     struct Particle{
         Particle(ParticleSystem *sys, unsigned int id=0) ;
         ParticleSystem *sys ;
-	    unsigned int id;
-	    int type;
-	    double x[3];
-	    double v[3];
-	    double vt[3];
-	    double mass;
-	    double rho;
-	    double nu;
-	    int solidTag;
-	    double bvf_phi;
-	    double normal[3];
-	    double F[3];
-	    double Frho;
-	    double Fbp[3];
-	    // Data Function
+        unsigned int id;
+        int type;
+        double old_x[3];
+        double old_v[3];
+        double old_rho;
+        double x[3];
+        double v[3];
+        double vt[3];
+        double mass;
+        double rho;
+        double nu;
+        int solidTag;
+        double bvf_phi;
+        double normal[3];
+        double F[3];
+        double Frho;
+        double Fbp[3];
+        // Data Function
         double * data_fn ;
-	    //std::shared_ptr<double[]> data_fn;
-	    // chem_rxn_system
-	    unsigned int*xx; // populaion of discrete/stochastic species
+        //std::shared_ptr<double[]> data_fn;
+        // chem_rxn_system
+        unsigned int*xx; // populaion of discrete/stochastic species
         double *C ;
         double *Q ;
-	    //std::shared_ptr<double[]> C;  // concentration of chem species
-	    //std::shared_ptr<double[]> Q;  // flux of chem species
-	    // below here for simulation
-	    std::vector<NeighborNode> neighbors ;
+        //std::shared_ptr<double[]> C;  // concentration of chem species
+        //std::shared_ptr<double[]> Q;  // flux of chem species
+        // below here for simulation
+        std::vector<NeighborNode> neighbors ;
 
         // Moved from rdme_voxel_t
         double srrate;
@@ -61,9 +64,11 @@ namespace Spatialpy{
         double* Ddiag;
         EventNode*heap_index;
 
-	    double particle_dist(Particle *p2);
-	    double particle_dist_sqrd(Particle *p2);
-	    int add_to_neighbor_list(Particle *neighbor, ParticleSystem *system, double r2) ;
+        void check_particle_nan();
+
+        double particle_dist(Particle *p2);
+        double particle_dist_sqrd(Particle *p2);
+        int add_to_neighbor_list(Particle *neighbor, ParticleSystem *system, double r2) ;
 
         // KD TREE FUNCTIONS
         void get_k_cleanup(ANNidxArray nn_idx, ANNdistArray dists) ;
@@ -78,8 +83,8 @@ namespace Spatialpy{
     };
 
     struct EventNode{
-    	Particle* data ;
-    	double tt ;
+        Particle* data ;
+        double tt ;
         EventNode(Particle *data, double tt) ;
         bool operator< (const EventNode& e2){ 
             return tt > e2.tt ; 
@@ -91,7 +96,7 @@ namespace Spatialpy{
         double dist ;
         double dWdr ;
         double D_i_j ;
-	    NeighborNode(Particle *data, double dist, double dWdr, double D_i_j) ;
+        NeighborNode(Particle *data, double dist, double dWdr, double D_i_j) ;
 
         bool operator<(const NeighborNode& n2){ 
             return dist > n2.dist ; 

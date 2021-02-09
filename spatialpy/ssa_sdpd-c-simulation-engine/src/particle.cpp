@@ -55,6 +55,52 @@ namespace Spatialpy{
     NeighborNode::NeighborNode(Particle *data, double dist, double dWdr, double D_i_j):data(data), dist(dist), dWdr(dWdr), D_i_j(D_i_j){}
     EventNode::EventNode(Particle *data, double tt):data(data), tt(tt){}
 
+    void Particle::check_particle_nan(){
+        if(
+            isnan(x[0]) || !isfinite(x[0]) || 
+            isnan(x[1]) || !isfinite(x[1]) ||
+            isnan(x[2]) || !isfinite(x[2]) ||
+            isnan(v[0]) || !isfinite(v[0]) ||
+            isnan(v[1]) || !isfinite(v[1]) ||
+            isnan(v[2]) || !isfinite(v[2]) ||
+            isnan(rho)  || !isfinite(rho) ){
+            printf("ERROR: nan/inf detected!!!\n");
+            printf("id=%i\n",id);
+            printf("x[0]=%e\n",x[0]);
+            printf("x[1]=%e\n",x[1]);
+            printf("x[2]=%e\n",x[2]);
+            printf("v[0]=%e\n",v[0]);
+            printf("v[1]=%e\n",v[1]);
+            printf("v[2]=%e\n",v[2]);
+            printf("vt[0]=%e\n",vt[0]);
+            printf("vt[1]=%e\n",vt[1]);
+            printf("vt[2]=%e\n",vt[2]);
+            printf("F[0]=%e\n",F[0]);
+            printf("F[1]=%e\n",F[1]);
+            printf("F[2]=%e\n",F[2]);
+            printf("Fbp[0]=%e\n",Fbp[0]);
+            printf("Fbp[1]=%e\n",Fbp[1]);
+            printf("Fbp[2]=%e\n",Fbp[2]);
+            printf("old_x[0]=%e\n",old_x[0]);
+            printf("old_x[1]=%e\n",old_x[1]);
+            printf("old_x[2]=%e\n",old_x[2]);
+            printf("old_v[0]=%e\n",old_v[0]);
+            printf("old_v[1]=%e\n",old_v[1]);
+            printf("old_v[2]=%e\n",old_v[2]);
+            printf("sys->current_step=%i\n",sys->current_step);
+            printf("sys->dt=%e\n",sys->dt);
+            exit(1);
+
+        }
+        old_x[0] =  x[0];
+        old_x[1] =  x[1];
+        old_x[2] =  x[2];
+        old_v[0] =  v[0];
+        old_v[1] =  v[1];
+        old_v[2] =  v[2];
+        old_rho =  rho;
+    }
+
     double Particle::particle_dist(Particle *p2){
         double a = x[0] - p2->x[0];
         double b = x[1] - p2->x[1];

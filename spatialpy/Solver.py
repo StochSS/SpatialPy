@@ -148,75 +148,77 @@ class Solver:
 
             if self.debug_level > 1:
                 print('cmd: {0}\n'.format(solver_cmd))
-            stdout = ''
-            stderr = ''
-#            try:
-#                if self.debug_level >= 1:  #stderr & stdout to the terminal
-#                    handle = subprocess.Popen(solver_cmd, shell=True)
-#                else:
-#                    handle = subprocess.Popen(solver_cmd, stderr=subprocess.PIPE,
-#                                              stdout=subprocess.PIPE, shell=True)
-#                    stdout, stderr = handle.communicate()
-#                return_code = handle.wait()
-#            except OSError as e:
-#                print("Error, execution of solver raised an exception: {0}".format(e))
-#                print("cmd = {0}".format(solver_cmd))
-            try:
-                start = time.monotonic()
-                return_code = None
-                with subprocess.Popen(solver_cmd, shell=True, stdout=subprocess.PIPE, start_new_session=True) as process:
-                    try:
-                        if timeout is not None:
-                            stdout, stderr = process.communicate(
-                                timeout=timeout)
-                        else:
+            stdout = None
+            stderr = None
+            if True: 
+                try:
+                    print("cmd = {0}".format(solver_cmd))
+                    print("got here1-")
+                    process = subprocess.Popen(solver_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,  shell=True, start_new_session=True)
+                    for line in process.stdout:
+                        sys.stdout.write(line)
+                    print("got here2")
+                    return_code = process.wait()
+                    print("got here3")
+                except OSError as e:
+                    print("Error, execution of solver raised an exception: {0}".format(e))
+            else:
+                try:
+                    start = time.monotonic()
+                    return_code = None
+                    with subprocess.Popen(solver_cmd, shell=True, stdout=subprocess.PIPE, start_new_session=True) as process:
+                        try:
+                            if timeout is not None:
+                                stdout, stderr = process.communicate(
+                                    timeout=timeout)
+                            else:
+                                stdout, stderr = process.communicate()
+                            return_code = process.wait()
+                            if self.debug_level >= 1:  # stderr & stdout to the terminal
+                                print('Elapsed seconds: {:.2f}'.format(
+                                    time.monotonic() - start))
+                                if stdout is not None:
+                                    print(stdout.decode('utf-8'))
+                                if stderr is not None:
+                                    print(stderr.decode('utf-8'))
+                        except KeyboardInterrupt:
+                            print('Terminated by user after seconds: {:.2f}'.format(
+                                time.monotonic() - start))
+                            os.killpg(process.pid, signal.SIGINT)
+                            #return_code = process.wait()
                             stdout, stderr = process.communicate()
-                        return_code = process.wait()
-                        if self.debug_level >= 1:  # stderr & stdout to the terminal
-                            print('Elapsed seconds: {:.2f}'.format(
-                                time.monotonic() - start))
+                            if self.debug_level >= 1:  # stderr & stdout to the terminal
+                                print('Elapsed seconds: {:.2f}'.format(
+                                    time.monotonic() - start))
+                                if stdout is not None:
+                                    print(stdout.decode('utf-8'))
+                                if stderr is not None:
+                                    print(stderr.decode('utf-8'))
+                        except subprocess.TimeoutExpired:
+                            # send signal to the process group
+                            os.killpg(process.pid, signal.SIGINT)
+                            stdout, stderr = process.communicate()
+                            message = "SpatialPy solver timeout exceded. "
                             if stdout is not None:
-                                print(stdout.decode('utf-8'))
+                                message += stdout.decode('utf-8')
                             if stderr is not None:
-                                print(stderr.decode('utf-8'))
-                    except KeyboardInterrupt:
-                        print('Terminated by user after seconds: {:.2f}'.format(
-                            time.monotonic() - start))
-                        os.killpg(process.pid, signal.SIGINT)
-                        #return_code = process.wait()
-                        stdout, stderr = process.communicate()
-                        if self.debug_level >= 1:  # stderr & stdout to the terminal
-                            print('Elapsed seconds: {:.2f}'.format(
-                                time.monotonic() - start))
-                            if stdout is not None:
-                                print(stdout.decode('utf-8'))
-                            if stderr is not None:
-                                print(stderr.decode('utf-8'))
-                    except subprocess.TimeoutExpired:
-                        # send signal to the process group
-                        os.killpg(process.pid, signal.SIGINT)
-                        stdout, stderr = process.communicate()
-                        message = "SpatialPy solver timeout exceded. "
-                        if stdout is not None:
-                            message += stdout.decode('utf-8')
-                        if stderr is not None:
-                            message += stderr.decode('utf-8')
-                        #raise SimulationTimeout(message)
-            except OSError as e:
-                print(
-                    "Error, execution of solver raised an exception: {0}".format(e))
-                print("cmd = {0}".format(solver_cmd))
+                                message += stderr.decode('utf-8')
+                            #raise SimulationTimeout(message)
+                except OSError as e:
+                    print(
+                        "Error, execution of solver raised an exception: {0}".format(e))
+                    print("cmd = {0}".format(solver_cmd))
 
-            if return_code is not None and return_code != 0:
-                if self.debug_level >= 1:
-                    try:
-                        print(stderr)
-                        print(stdout)
-                    except Exception as e:
-                        pass
-                print("solver_cmd = {0}".format(solver_cmd))
-                raise SimulationError(
-                    "Solver execution failed, return code = {0}".format(return_code))
+                if return_code is not None and return_code != 0:
+                    if self.debug_level >= 1:
+                        try:
+                            print(stderr)
+                            print(stdout)
+                        except Exception as e:
+                            pass
+                    print("solver_cmd = {0}".format(solver_cmd))
+                    raise SimulationError(
+                        "Solver execution failed, return code = {0}".format(return_code))
 
             result["Status"] = "Success"
             if profile:

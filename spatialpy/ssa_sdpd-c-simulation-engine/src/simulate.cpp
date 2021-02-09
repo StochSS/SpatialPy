@@ -16,6 +16,7 @@ namespace Spatialpy{
         //printf("take_step(me.id=%i step=%i substep=%i)\n",me2->id, step, substep);
         //fflush(stdout);
         if(substep==0){
+            me->check_particle_nan();  // check if particle is NaN
             take_step1(me, system, step);
         }else if(substep==1){
             compute_forces(me, system, step);
@@ -118,17 +119,17 @@ namespace Spatialpy{
             }
 
             // Update density using continuity equation and Shepard filter 
-            if (step % 20 == 0) {
-                filterDensity(me, system);
-            }
+            //if (step % 20 == 0) {
+            //    filterDensity(me, system);
+            //}
             me->rho = me->rho + 0.5 * system->dt * me->Frho;
 
           // Solid (wall) particles should change density
         }else if (me->solidTag == 1 && system->static_domain == 0) {
             // Filter density field (for fixed solid particles)
-            if (step % 20 == 0) {
-                filterDensity(me, system);
-            }
+            //if (step % 20 == 0) {
+            //    filterDensity(me, system);
+            //}
         }
 
 
