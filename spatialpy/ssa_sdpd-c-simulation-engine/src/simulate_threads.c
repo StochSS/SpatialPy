@@ -53,20 +53,30 @@ namespace Spatialpy{
 
     void buildKDTree(ParticleSystem *system) {
         // cleanup KD Tree
+        if(debug_flag) printf("\tstarting buildKDTree()\n");
+        
         if(system->kdTree_initialized) {
+            if(debug_flag) printf("\tsystem->kdTree_initialized=True\n");
             if(system->static_domain) {
                 return;} // do not rebuild tree for static domains
+            if(debug_flag) printf("\tannDeallocPts()\n");
             annDeallocPts(system->kdTree_pts);
-            delete [] system->kdTree;
-            annClose();
+            if(debug_flag) printf("\tdeleting system->kdTree (no close)\n"); fflush(stdout);
+            delete system->kdTree; // NO [] on your delete!!!!
+            if(debug_flag) printf("\tdone deleting system->kdTree (no close)\n"); fflush(stdout);
+            //if(debug_flag) printf("\tannClose()\n");
+            //annClose();
         }
+        if(debug_flag) printf("\tsystem->particles.size()\n");fflush(stdout);
         int nPts = system->particles.size();
+        if(debug_flag) printf("\tannAllocPts()\n");fflush(stdout);
         system->kdTree_pts = annAllocPts(nPts, system->dimension);
         for(int i = 0; i < nPts; i++) {
             for(int j = 0; j < system->dimension; j++) {
                 system->kdTree_pts[i][j] = system->particles[i].x[j];
             }
         }
+        if(debug_flag) printf("\tsystem->kdTree = new ANNkd_tree()\n");
         system->kdTree = new ANNkd_tree(system->kdTree_pts, nPts, system->dimension);
         system->kdTree_initialized = true;
     }

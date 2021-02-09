@@ -75,6 +75,7 @@ namespace Spatialpy{
     	// double c = x[2] - neighbor.x[2];
     	// double r2 =  ( a*a + b*b + c*c);
     	// Make sure the distance was actually set by the annkFRSearch
+        double r2_old = r2;
         if(r2 == ANN_DIST_INF) {
             r2 = particle_dist_sqrd(neighbor) ;
         }
@@ -99,6 +100,8 @@ namespace Spatialpy{
 
     	if(isnan(D_i_j)){
     	    printf("Got NaN calculating D_i_j for me=%i, neighbor=%i\n",id, neighbor->id);
+    	    printf("r2=%e ",r2);
+    	    printf("r2_old=%e ",r2);
     	    printf("r=%e ",r);
     	    printf("h=%e ",h);
     	    printf("alpha=%e ",alpha);
@@ -107,6 +110,8 @@ namespace Spatialpy{
     	    printf("rho=%e ",rho);
     	    printf("n->mass=%e ", neighbor->mass);
     	    printf("n->rho=%e ", neighbor->rho);
+            printf("x=[%e,%e,%e] ",this->x[0],this->x[1],this->x[2]);
+            printf("n->x=[%e,%e,%e] ",neighbor->x[0],neighbor->x[1],neighbor->x[2]);
 
     	    exit(1);
     	}

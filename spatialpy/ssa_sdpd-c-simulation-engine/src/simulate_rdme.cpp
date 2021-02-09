@@ -38,6 +38,7 @@ namespace Spatialpy{
     // This function get called by the main simulation loop.  It advances the
     // state the of RDME system by dt
     void simulate_rdme(ParticleSystem*system,unsigned int step){
+        return;
         // rdme_t*rdme = system->rdme;
         // if(rdme == NULL){
         //     return;
