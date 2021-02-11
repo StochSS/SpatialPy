@@ -4,15 +4,31 @@ import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 
 
 from spatialpy.Model import *
 from spatialpy.Result import *
 
+def read_from_stdout(stdout):
+    ''' Used with subprocess.Popen and threading to capture all output and print
+        to the screen notebook without waiting or storing the output ina buffer.'''
+    try:
+        while True:
+            time.sleep(0.01)
+            line = stdout.readline()
+            if line != b'':
+                print(line.decode(),end='')
+            else:
+                print("got empty line, ending")
+                return
+    except Exception as e:
+        print("read_from_stdout(): {0}".format(e))
+
 
 class Solver:
-    """ spatialpy solvers. """
+    """ SpatialPu solver object.  Take a  """
 
     def __init__(self, model, debug_level=0):
         """ Constructor. """
@@ -154,19 +170,24 @@ class Solver:
                 try:
                     print("cmd = {0}".format(solver_cmd))
                     print("got here1-")
-                    process = subprocess.Popen(solver_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,  shell=True, start_new_session=True)
-                    for line in process.stdout:
-                        sys.stdout.write(line)
-                    print("got here2")
-                    return_code = process.wait()
-                    print("got here3")
+                    with subprocess.Popen(solver_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,  shell=True, start_new_session=True) as process:
+                        #for line in process.stdout:
+                        #    sys.stdout.write(line)
+                        t = threading.Thread(target=read_from_stdout, args=(process.stdout,))
+                        t.start()
+                        print("got here2")
+                        return_code = process.wait()
+                        #t.terminate() # stop reader thread
+                        print("got here3")
+                        t.join()
+                        print("got here4")
                 except OSError as e:
                     print("Error, execution of solver raised an exception: {0}".format(e))
             else:
                 try:
                     start = time.monotonic()
                     return_code = None
-                    with subprocess.Popen(solver_cmd, shell=True, stdout=subprocess.PIPE, start_new_session=True) as process:
+                    with subprocess.Popen(solver_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True) as process:
                         try:
                             if timeout is not None:
                                 stdout, stderr = process.communicate(

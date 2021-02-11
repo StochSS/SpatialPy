@@ -29,15 +29,14 @@ namespace Spatialpy{
     pthread_barrier_t end_sort_barrier;
     pthread_barrier_t begin_output_barrier;
     pthread_barrier_t end_output_barrier;
-    unsigned int current_step;
 
     void* output_system_thread(void* targ){
         ParticleSystem* system = (ParticleSystem*) targ;
         while(1){
             pthread_barrier_wait(&begin_output_barrier);
-            //output_csv(system, current_step);
+            //output_csv(system, system->current_step);
             if(debug_flag) printf("[OUT] start output_vtk__sync_step()\n");
-            output_vtk__sync_step(system, current_step);
+            output_vtk__sync_step(system, system->current_step);
             if(debug_flag) printf("[OUT] done output_vtk__sync_step()\n");
             pthread_barrier_wait(&end_output_barrier);
             if(debug_flag) printf("[OUT] start output_vtk__async_step()\n");
@@ -201,13 +200,13 @@ namespace Spatialpy{
         // Start simulation, coordinate simulation
         unsigned int step,next_output_step = 0;
         for(step=0; step < system->nt; step++){
+            system->current_step = step;
             // Release the Sort Index threads
             if(debug_flag) printf("[%i] Starting the Sort Index threads\n",step);
             pthread_barrier_wait(&begin_sort_barrier);
             // Output state
             if(step >= next_output_step){
                 // Release output thread
-                current_step = step;
                 if(debug_flag) printf("[%i] Starting the Output threads\n",step);
                 pthread_barrier_wait(&begin_output_barrier);
                 next_output_step += system->output_freq;
@@ -247,7 +246,6 @@ namespace Spatialpy{
             if(debug_flag) printf("[%i] Finish RDME simulation\n",step);
         }
         // Record final timepoint
-        current_step = step;
         if(debug_flag) printf("[%i] Starting the Output threads\n",step);
         pthread_barrier_wait(&begin_output_barrier);
         pthread_barrier_wait(&end_output_barrier);
