@@ -11,17 +11,17 @@ import time
 from spatialpy.Model import *
 from spatialpy.Result import *
 
-def read_from_stdout(stdout):
+def read_from_stdout(stdout,verbose=True):
     ''' Used with subprocess.Popen and threading to capture all output and print
         to the screen notebook without waiting or storing the output ina buffer.'''
     try:
         while True:
-            time.sleep(0.01)
             line = stdout.readline()
             if line != b'':
-                print(line.decode(),end='')
+                if verbose:
+                    print(line.decode(),end='')
             else:
-                print("got empty line, ending")
+                #got empty line, ending
                 return
     except Exception as e:
         print("read_from_stdout(): {0}".format(e))
@@ -93,7 +93,10 @@ class Solver:
 
         # Build the solver
         makefile = self.SpatialPy_ROOTDIR+'/build/Makefile'
-        cmd_list = ['cd', self.build_dir, '&&', 'make', '-f', makefile, 'ROOT="' + self.SpatialPy_ROOTPARAM+'"', 'ROOTINC="' + self.SpatialPy_ROOTINC+'"','MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir]
+        cmd_list = ['cd', self.build_dir, '&&', 'make', '-f', makefile,
+            'ROOT="' + self.SpatialPy_ROOTPARAM+'"',
+            'ROOTINC="' + self.SpatialPy_ROOTINC+'"',
+            'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir]
         if profile:
           cmd_list.append('GPROFFLAG=-pg')
         if profile or debug:
@@ -102,40 +105,41 @@ class Solver:
         if self.debug_level > 1:
             print("cmd: {0}\n".format(cmd))
         try:
-            handle = subprocess.Popen(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            handle = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT, shell=True)
+            stdout, _ = handle.communicate()
             return_code = handle.wait()
+            if return_code != 0:
+                try:
+                    print(stdout.decode("utf-8"))
+                except Exception as e:
+                    pass
+                raise SimulationError(
+                    "Compilation of solver failed, return_code={0}".format(
+                        return_code))
+
+            if self.debug_level > 1:
+                print(stdout.decode("utf-8"))
+
         except OSError as e:
-            print(
-                "Error, execution of compilation raised an exception: {0}".format(e))
+            print("Error, execution of compilation raised an exception: {0}".format(
+                e))
             print("cmd = {0}".format(cmd))
             raise SimulationError("Compilation of solver failed")
-
-        if return_code != 0:
-            try:
-                print("Reading stdout/stderr from process:")
-                print(handle.stdout.read().decode("utf-8"))
-                print(handle.stderr.read().decode("utf-8"))
-            except Exception as e:
-                pass
-            raise SimulationError(
-                "Compilation of solver failed, return_code={0}".format(return_code))
-
-        if self.debug_level > 1:
-            print(handle.stdout.read().decode("utf-8"))
-            print(handle.stderr.read().decode("utf-8"))
 
         self.is_compiled = True
 
 
-    def run(self, number_of_trajectories=1, seed=None, timeout=None, number_of_threads=None, debug=False, profile=False):
+    def run(self, number_of_trajectories=1, seed=None, timeout=None,
+                number_of_threads=None, debug=False, profile=False, verbose=True):
         """ Run one simulation of the model.
         Args:
             number_of_trajectories: (int) How many trajectories should be simulated.
             seed: (int) the random number seed (incremented by one for multiple runs).
             timeout: (int) maximum number of seconds the solver can run.
             number_of_threads: (int) the number threads the solver will use.
-            debug: (bool) start a gdbgui debugger (also compiles with debug symbols if compilation hasn't happened)
+            debug: (bool) start a gdbgui debugger (also compiles with debug symbols
+                if compilation hasn't happened)
             profile: (bool) output gprof profiling data if available
         Returns:
             Result object.
@@ -164,90 +168,50 @@ class Solver:
 
             if self.debug_level > 1:
                 print('cmd: {0}\n'.format(solver_cmd))
-            stdout = None
-            stderr = None
-            if True: 
-                try:
-                    print("cmd = {0}".format(solver_cmd))
-                    print("got here1-")
-                    with subprocess.Popen(solver_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,  shell=True, start_new_session=True) as process:
-                        #for line in process.stdout:
-                        #    sys.stdout.write(line)
-                        t = threading.Thread(target=read_from_stdout, args=(process.stdout,))
-                        t.start()
-                        print("got here2")
-                        return_code = process.wait()
-                        #t.terminate() # stop reader thread
-                        print("got here3")
-                        t.join()
-                        print("got here4")
-                except OSError as e:
-                    print("Error, execution of solver raised an exception: {0}".format(e))
-            else:
-                try:
-                    start = time.monotonic()
-                    return_code = None
-                    with subprocess.Popen(solver_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True) as process:
-                        try:
-                            if timeout is not None:
-                                stdout, stderr = process.communicate(
-                                    timeout=timeout)
-                            else:
-                                stdout, stderr = process.communicate()
-                            return_code = process.wait()
-                            if self.debug_level >= 1:  # stderr & stdout to the terminal
-                                print('Elapsed seconds: {:.2f}'.format(
-                                    time.monotonic() - start))
-                                if stdout is not None:
-                                    print(stdout.decode('utf-8'))
-                                if stderr is not None:
-                                    print(stderr.decode('utf-8'))
-                        except KeyboardInterrupt:
-                            print('Terminated by user after seconds: {:.2f}'.format(
-                                time.monotonic() - start))
-                            os.killpg(process.pid, signal.SIGINT)
-                            #return_code = process.wait()
-                            stdout, stderr = process.communicate()
-                            if self.debug_level >= 1:  # stderr & stdout to the terminal
-                                print('Elapsed seconds: {:.2f}'.format(
-                                    time.monotonic() - start))
-                                if stdout is not None:
-                                    print(stdout.decode('utf-8'))
-                                if stderr is not None:
-                                    print(stderr.decode('utf-8'))
-                        except subprocess.TimeoutExpired:
-                            # send signal to the process group
-                            os.killpg(process.pid, signal.SIGINT)
-                            stdout, stderr = process.communicate()
-                            message = "SpatialPy solver timeout exceded. "
-                            if stdout is not None:
-                                message += stdout.decode('utf-8')
-                            if stderr is not None:
-                                message += stderr.decode('utf-8')
-                            #raise SimulationTimeout(message)
-                except OSError as e:
-                    print(
-                        "Error, execution of solver raised an exception: {0}".format(e))
-                    print("cmd = {0}".format(solver_cmd))
 
-                if return_code is not None and return_code != 0:
-                    if self.debug_level >= 1:
-                        try:
-                            print(stderr)
-                            print(stdout)
-                        except Exception as e:
-                            pass
-                    print("solver_cmd = {0}".format(solver_cmd))
-                    raise SimulationError(
-                        "Solver execution failed, return code = {0}".format(return_code))
+            start = time.monotonic()
+            return_code = None
+            try:
+                with subprocess.Popen(solver_cmd, shell=True,
+                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                        start_new_session=True) as process:
+                    try:
+                        # start thread to read process stdout to stdout
+                        t = threading.Thread(target=read_from_stdout,
+                            args=(process.stdout,verbose,))
+                        t.start()
+                        if timeout is not None:
+                            return_code = process.wait(timeout=timeout)
+                        else:
+                            return_code = process.wait()
+                        t.join()
+                    except KeyboardInterrupt:
+                        # send signal to the process group
+                        os.killpg(process.pid, signal.SIGINT)
+                        raise SimulationError(
+                            'Terminated by user after seconds: {:.2f}'.format(
+                            time.monotonic() - start))
+                    except subprocess.TimeoutExpired:
+                        # send signal to the process group
+                        os.killpg(process.pid, signal.SIGINT)
+                        raise SimulationTimeout("SpatialPy solver timeout exceded.")
+            except OSError as e:
+                print("Error, execution of solver raised an exception: {0}".format(
+                    e))
+                print("cmd = {0}".format(solver_cmd))
+
+            if self.debug_level >= 1:  # output time
+                print('Elapsed seconds: {:.2f}'.format(
+                    time.monotonic() - start))
+
+            if return_code is not None and return_code != 0:
+                print("solver_cmd = {0}".format(solver_cmd))
+                raise SimulationError(
+                    "Solver execution failed, return code = {0}".format(return_code))
 
             result["Status"] = "Success"
             if profile:
                 self.read_profile_info(result)
-            if stdout is not None:
-                result.stdout = stdout.decode('utf-8')
-            if stderr is not None:
-                result.stderr = stderr.decode('utf-8')
             if number_of_trajectories > 1:
                 result_list.append(result)
             else:

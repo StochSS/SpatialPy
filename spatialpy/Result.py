@@ -72,8 +72,6 @@ class Result(dict):
         self.U = None
         self.tspan = None
         self.data_is_loaded = False
-        self.stdout = None
-        self.stderr = None
         self.result_dir = result_dir
 
 
