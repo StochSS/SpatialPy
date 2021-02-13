@@ -100,7 +100,7 @@ namespace Spatialpy{
         unsigned int i;
         int count = 0;
         // each thread will take a step with each of it's particles
-        for(step=0; step < system->nt; step++){
+        for(step=0; step <= system->nt; step++){
             // block on the begin barrier
             if(debug_flag) printf("[WORKER %i] waiting to begin step %i\n",targ->thread_id,step);
             pthread_barrier_wait(&begin_step_barrier);
@@ -198,27 +198,27 @@ namespace Spatialpy{
         if(debug_flag) printf("Creating thread to create output files\n");
 
         // Start simulation, coordinate simulation
-        unsigned int step,next_output_step = 0;
-        for(step=0; step < system->nt; step++){
-            system->current_step = step;
+        unsigned int next_output_step = 0;
+        for(system->current_step=0; system->current_step <= system->nt; system->current_step++){
+
             // Release the Sort Index threads
-            if(debug_flag) printf("[%i] Starting the Sort Index threads\n",step);
+            if(debug_flag) printf("[%i] Starting the Sort Index threads\n",system->current_step);
             pthread_barrier_wait(&begin_sort_barrier);
             // Output state
-            if(step >= next_output_step){
+            if(system->current_step >= next_output_step){
                 // Release output thread
-                if(debug_flag) printf("[%i] Starting the Output threads\n",step);
+                if(debug_flag) printf("[%i] Starting the Output threads\n",system->current_step);
                 pthread_barrier_wait(&begin_output_barrier);
                 next_output_step += system->output_freq;
                 // Wait until output threads are done
                 pthread_barrier_wait(&end_output_barrier);
-                if(debug_flag) printf("[%i] Output threads finished\n",step);
+                if(debug_flag) printf("[%i] Output threads finished\n",system->current_step);
 
             }
             // Wait until Sort Index threads are done
             pthread_barrier_wait(&end_sort_barrier);
-            if(debug_flag) printf("[%i] Sort Index threads finished\n",step);
-            if(debug_flag>2 && step==0){
+            if(debug_flag) printf("[%i] Sort Index threads finished\n",system->current_step);
+            if(debug_flag>2 && system->current_step==0){
                 printf("x_index = [");
                 for(auto n = system->particles.begin(); n!=system->particles.end(); ++n){
                     printf("%e ",n->x[0]);
@@ -232,27 +232,27 @@ namespace Spatialpy{
             }
 
             // Release the worker threads to take step
-            if(debug_flag) printf("[%i] Starting the Worker threads\n",step);
+            if(debug_flag) printf("[%i] Starting the Worker threads\n",system->current_step);
             pthread_barrier_wait(&begin_step_barrier);
             unsigned int nsubsteps = get_number_of_substeps();
             for(unsigned int substep=0;substep < nsubsteps; substep++){
                 // Wait until worker threads are done
                 pthread_barrier_wait(&end_step_barrier);
-                if(debug_flag) printf("[%i] Worker threads finished substep %i/%i\n",step,substep,nsubsteps);
+                if(debug_flag) printf("[%i] Worker threads finished substep %i/%i\n",system->current_step,substep,nsubsteps);
             }
             // Solve RDME 
-            if(debug_flag) printf("[%i] starting RDME simulation\n",step);
-            simulate_rdme(system, step);
-            if(debug_flag) printf("[%i] Finish RDME simulation\n",step);
+            if(debug_flag) printf("[%i] starting RDME simulation\n",system->current_step);
+            simulate_rdme(system, system->current_step);
+            if(debug_flag) printf("[%i] Finish RDME simulation\n",system->current_step);
         }
         // Record final timepoint
-        if(debug_flag) printf("[%i] Starting the Output threads\n",step);
+        if(debug_flag) printf("[%i] Starting the Output threads\n",system->current_step);
         pthread_barrier_wait(&begin_output_barrier);
         pthread_barrier_wait(&end_output_barrier);
-        if(debug_flag) printf("[%i] Output threads finished\n",step);
-        if(debug_flag) printf("[%i] Waiting for Async Output threads\n",step);
+        if(debug_flag) printf("[%i] Output threads finished\n",system->current_step);
+        if(debug_flag) printf("[%i] Waiting for Async Output threads\n",system->current_step);
         pthread_barrier_wait(&begin_output_barrier); // wait for the async 
-        if(debug_flag) printf("[%i] Async Output threads finished\n",step);
+        if(debug_flag) printf("[%i] Async Output threads finished\n",system->current_step);
 
         //clean up
         if(debug_flag) printf("Cleaning up RDME\n");

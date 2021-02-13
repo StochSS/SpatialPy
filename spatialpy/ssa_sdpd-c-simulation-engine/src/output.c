@@ -57,7 +57,7 @@ namespace Spatialpy{
             }
         }
         output_buffer_current_num_particles = ncnt;
-        if(system->initialized){
+        if(system->num_stoch_species > 0){
             // make a copy of the RDME state vector xx
             if(output_buffer_xx_size==0){
                 output_buffer_xx_size = output_buffer_current_num_particles*system->num_stoch_species;
@@ -66,25 +66,6 @@ namespace Spatialpy{
                 output_buffer_xx_size = output_buffer_current_num_particles*system->num_stoch_species;
                 output_buffer_xx = new unsigned int[output_buffer_xx_size] ;
             }
-            /*
-            printf("system->num_stoch_species*output_buffer_current_num_particles = %i\n",system->num_stoch_species*output_buffer_current_num_particles);
-            printf("output_buffer_current_num_particles = %i\n",output_buffer_current_num_particles);
-            printf("system->num_stoch_species = %i\n",system->num_stoch_species);
-            int i;
-            printf("xx = [ ");
-            for(i=0;i<system->num_stoch_species*output_buffer_current_num_particles;i++){
-                printf("%i ",system->rdme->xx[i]);
-            }
-            printf("]\n");
-            printf("output_buffer_xx = [ ");
-            for(i=0;i<system->num_stoch_species*output_buffer_current_num_particles;i++){
-                printf("%i ",output_buffer_xx[i]);
-            }
-            printf("]\n");
-            */
-            //memcpy( (void*) &output_buffer_xx, (void*) system->rdme->xx, 
-            //    sizeof(unsigned int)*system->num_stoch_species*output_buffer_current_num_particles);
-            //for(int i=0;i<system->num_stoch_species*output_buffer_current_num_particles;i++){
             ncnt=0;
             for(long unsigned int i = 0; i < system->particles.size(); i++){
                 p = &system->particles[i] ;
@@ -203,7 +184,7 @@ namespace Spatialpy{
             }
         }
         // d - discrete
-        if(system->initialized){
+        if(system->num_stoch_species > 0){
             long unsigned int s;
             for(s=0;s<system->num_stoch_species;s++){
                 fprintf(fp,"D[%s] 1 %i int\n", system->species_names[s], np);

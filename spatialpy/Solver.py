@@ -188,8 +188,7 @@ class Solver:
                     except KeyboardInterrupt:
                         # send signal to the process group
                         os.killpg(process.pid, signal.SIGINT)
-                        raise SimulationError(
-                            'Terminated by user after seconds: {:.2f}'.format(
+                        print('Terminated by user after seconds: {:.2f}'.format(
                             time.monotonic() - start))
                     except subprocess.TimeoutExpired:
                         # send signal to the process group
