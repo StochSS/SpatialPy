@@ -55,27 +55,27 @@ namespace Spatialpy{
         if(debug_flag) printf("\tstarting buildKDTree()\n");
         
         if(system->kdTree_initialized) {
-            if(debug_flag) printf("\tsystem->kdTree_initialized=True\n");
+            if(debug_flag){ printf("\tsystem->kdTree_initialized=True\n");}
             if(system->static_domain) {
                 return;} // do not rebuild tree for static domains
-            if(debug_flag) printf("\tannDeallocPts()\n");
+            if(debug_flag){ printf("\tannDeallocPts()\n");}
             annDeallocPts(system->kdTree_pts);
-            if(debug_flag) printf("\tdeleting system->kdTree (no close)\n"); fflush(stdout);
+            if(debug_flag){ printf("\tdeleting system->kdTree (no close)\n"); fflush(stdout);}
             delete system->kdTree; // NO [] on your delete!!!!
-            if(debug_flag) printf("\tdone deleting system->kdTree (no close)\n"); fflush(stdout);
+            if(debug_flag){ printf("\tdone deleting system->kdTree (no close)\n"); fflush(stdout);}
             //if(debug_flag) printf("\tannClose()\n");
             //annClose();
         }
-        if(debug_flag) printf("\tsystem->particles.size()\n");fflush(stdout);
+        if(debug_flag){ printf("\tsystem->particles.size()\n");fflush(stdout);}
         int nPts = system->particles.size();
-        if(debug_flag) printf("\tannAllocPts()\n");fflush(stdout);
+        if(debug_flag){ printf("\tannAllocPts()\n");fflush(stdout);}
         system->kdTree_pts = annAllocPts(nPts, system->dimension);
         for(int i = 0; i < nPts; i++) {
             for(int j = 0; j < system->dimension; j++) {
                 system->kdTree_pts[i][j] = system->particles[i].x[j];
             }
         }
-        if(debug_flag) printf("\tsystem->kdTree = new ANNkd_tree()\n");
+        if(debug_flag){ printf("\tsystem->kdTree = new ANNkd_tree()\n");}
         system->kdTree = new ANNkd_tree(system->kdTree_pts, nPts, system->dimension);
         system->kdTree_initialized = true;
     }
@@ -153,6 +153,7 @@ namespace Spatialpy{
         // create all the worker threads
         int num_particles_left = system->particles.size();
         long unsigned int particle_list_ittr = 0;
+        if(debug_flag){ printf("Creating %i simulation threads\n",num_threads);}
         for (i=0; i < num_threads; i++) {
             targs[i].system = system;
             targs[i].num_threads = num_threads;
@@ -175,6 +176,7 @@ namespace Spatialpy{
             pthread_create(&thread_handles[i], NULL, run_simulation_thread, &targs[i]);
         }
         // Create threads to sort indexes
+        if(debug_flag) printf("Creating thread to update sort index\n");
         pthread_t* sort_thread_handles = (pthread_t*) malloc(sizeof(pthread_t)*3);
         pthread_barrier_init(&begin_sort_barrier, NULL, 2);
         pthread_barrier_init(&end_sort_barrier, NULL, 2);
@@ -182,7 +184,6 @@ namespace Spatialpy{
         sort_args[0].system = system ;
         sort_args[0].sort_ndx = 0;
         pthread_create(&sort_thread_handles[0], NULL, sort_index_thread, &sort_args[0]);
-        if(debug_flag) printf("Creating thread to update x-position index\n");
         /*sort_args[1].ll = system->y_index;
         sort_args[1].sort_index = 1;
         pthread_create(&sort_thread_handles[1], NULL, sort_index_thread, &sort_args[1]);

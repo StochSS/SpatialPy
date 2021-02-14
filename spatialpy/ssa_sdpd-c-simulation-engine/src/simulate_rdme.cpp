@@ -19,11 +19,11 @@
 
 /**************************************************************************/
 namespace Spatialpy{
-    //TODO: MOVE RNG INSTANTIATION AND INCLUDE SEED
 
-    void initialize_rdme(ParticleSystem *system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
-                            unsigned int*u0){
-        if(debug_flag){printf("*************** initialize_rdme ******************\n");fflush(stdout);}
+    void initialize_rdme(ParticleSystem *system, size_t *irN, size_t *jcN,int *prN,
+                        size_t *irG,size_t *jcG, unsigned int*u0, std::mt19937 rng){
+
+        if(debug_flag){printf("initialize_rdme()\n");fflush(stdout);}
         //printf("nsm_core__create() BEGIN\n");fflush(stdout);
         nsm_core__create(system,irN,jcN,prN,irG,jcG);
         //printf("nsm_core__create() END\n");fflush(stdout);
@@ -325,11 +325,11 @@ namespace Spatialpy{
             p = &system->particles[i] ;
             //p = e->data;
             
-            long unsigned int srng = rng() ;
-            long unsigned int rng_max = rng.max() ;
-            double tt = -log(1.0-(rng() * 1.0 / rng.max())) / (p->srrate+p->sdrate);
+            //long unsigned int srng = rng() ;
+            //long unsigned int rng_max = rng.max() ;
+            //double tt = -log(1.0-(rng() * 1.0 / rng.max())) / (p->srrate+p->sdrate);
 
-            system->event_v.emplace_back(p, tt) ;
+            //system->event_v.emplace_back(p, tt) ;
         }
         //initialize_heap(rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
         // ordered_list_sort(system->heap);
@@ -369,7 +369,7 @@ namespace Spatialpy{
 
 
     /**************************************************************************/
-    void nsm_core__build_diffusion_matrix(ParticleSystem*system){
+    /**void nsm_core__build_diffusion_matrix(ParticleSystem*system){
         printf("*************** build_diffusion_matrix ***************\n");fflush(stdout);
         double off_diag_sum,diff_const,dist2;
         //NeighborNode *n2;
@@ -496,7 +496,7 @@ namespace Spatialpy{
         fprintf(fp, "D = scipy.sparse.csc_matrix(prD,irD,jcD)\n");
         fclose(fp);
 
-    }
+    }**/
 
     /**************************************************************************/
     /**
