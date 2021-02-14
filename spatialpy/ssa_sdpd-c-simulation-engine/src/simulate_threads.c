@@ -100,7 +100,7 @@ namespace Spatialpy{
         unsigned int i;
         int count = 0;
         // each thread will take a step with each of it's particles
-        for(step=0; step <= system->nt; step++){
+        for(step=0; step < system->nt; step++){
             // block on the begin barrier
             if(debug_flag) printf("[WORKER %i] waiting to begin step %i\n",targ->thread_id,step);
             pthread_barrier_wait(&begin_step_barrier);
@@ -199,7 +199,7 @@ namespace Spatialpy{
 
         // Start simulation, coordinate simulation
         unsigned int next_output_step = 0;
-        for(system->current_step=0; system->current_step <= system->nt; system->current_step++){
+        for(system->current_step=0; system->current_step < system->nt; system->current_step++){
 
             // Release the Sort Index threads
             if(debug_flag) printf("[%i] Starting the Sort Index threads\n",system->current_step);

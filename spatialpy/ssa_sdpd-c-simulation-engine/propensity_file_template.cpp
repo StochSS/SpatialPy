@@ -161,7 +161,7 @@ namespace Spatialpy{
             if(num_threads>8){ num_threads=8; }
         }
 
-        run_simulation(1, system);
+        run_simulation(num_threads, system);
         exit(0);
 
 }
