@@ -14,7 +14,7 @@ See the file LICENSE.txt for details.
 namespace Spatialpy{
 
 void initialize_rdme(ParticleSystem *system, size_t *irN, size_t *jcN,int *prN,
-                     size_t *irG,size_t *jcG, unsigned int*u0, std::mt19937_64 rng);
+                     size_t *irG,size_t *jcG, unsigned int*u0);
 void simulate_rdme(ParticleSystem*system, unsigned int step);
 void destroy_rdme(ParticleSystem*system);
 

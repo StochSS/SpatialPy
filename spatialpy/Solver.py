@@ -542,7 +542,7 @@ class Solver:
         if(self.model.enable_rdme and len(self.model.listOfSpecies) > 0):
             init_rdme = '''
             initialize_rdme(system, input_irN, input_jcN, input_prN, input_irG,
-                            input_jcG, input_u0, rng );'''
+                            input_jcG, input_u0 );'''
         propfilestr = propfilestr.replace("__INIT_RDME__", init_rdme)
 
 

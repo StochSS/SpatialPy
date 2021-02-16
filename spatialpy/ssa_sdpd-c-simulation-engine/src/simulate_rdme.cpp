@@ -21,7 +21,7 @@
 namespace Spatialpy{
 
     void initialize_rdme(ParticleSystem *system, size_t *irN, size_t *jcN,int *prN,
-                        size_t *irG,size_t *jcG, unsigned int*u0, std::mt19937 rng){
+                        size_t *irG,size_t *jcG, unsigned int*u0){
 
         if(debug_flag){printf("initialize_rdme()\n");fflush(stdout);}
         //printf("nsm_core__create() BEGIN\n");fflush(stdout);
@@ -325,8 +325,8 @@ namespace Spatialpy{
             p = &system->particles[i] ;
             //p = e->data;
             
-            //long unsigned int srng = rng() ;
-            //long unsigned int rng_max = rng.max() ;
+            long unsigned int srng = rng() ;
+            long unsigned int rng_max = rng.max() ;
             //double tt = -log(1.0-(rng() * 1.0 / rng.max())) / (p->srrate+p->sdrate);
 
             //system->event_v.emplace_back(p, tt) ;
