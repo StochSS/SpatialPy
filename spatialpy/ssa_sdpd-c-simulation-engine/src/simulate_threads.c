@@ -257,7 +257,7 @@ namespace Spatialpy{
 
         //clean up
         if(debug_flag) printf("Cleaning up RDME\n");
-        //destroy_rdme(system);
+        destroy_rdme(system);
 
         // Kill threads and wait for them to finish
         /*
