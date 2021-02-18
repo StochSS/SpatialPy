@@ -56,12 +56,12 @@ class Model():
 
 
     def __str__(self):
-        divider = "\n{"*"*10}\n"
+        divider = f"\n{'*'*10}\n"
 
         def decorate(header):
             return f"\n{divider}{header}{divider}"
         
-        print_string = f"{self.name}\n\n"
+        print_string = f"{self.name}"
         if len(self.listOfSpecies):
             print_string += decorate("Species")
             for _, species in self.listOfSpecies.items():
@@ -73,7 +73,7 @@ class Model():
         if len(self.listOfDiffusionRestrictions):
             print_string += decorate("Diffusion Restrictions")
             for species, types in self.listOfDiffusionRestrictions.items():
-                print_string += f"\n{species.name}: {str(types)}"
+                print_string += f"\n{species.name} is restricted to: {str(types)}"
         if len(self.listOfParameters):
             print_string += decorate("Parameters")
             for _, parameter in self.listOfParameters.items():
@@ -102,7 +102,7 @@ class Model():
 
         sol = Solver(self, debug_level=debug_level)
 
-        return sol.run(number_of_trajectories=number_of_trajectories, seed=seed, , timeout=timeout,
+        return sol.run(number_of_trajectories=number_of_trajectories, seed=seed, timeout=timeout,
                        number_of_threads=number_of_threads, debug=debug, profile=profile)
 
 
@@ -644,11 +644,11 @@ class Reaction():
                 name = species if isinstance(species, str) else species.name
                 print_string += f"\n\t\t{name}: {stoichiometry}"
         if len(self.products):
-            print_string += f"{pad}Products\n"
+            print_string += f"\n\tProducts"
             for species, stoichiometry in self.products.items():
                 name = species if isinstance(species, str) else species.name
-                print_string += f"\n\t\t{name}: {stoichiometry}\n"
-        print_string += f"{pad}Propensity Function: {self.propensity_function}"
+                print_string += f"\n\t\t{name}: {stoichiometry}"
+        print_string += f"\n\tPropensity Function: {self.propensity_function}"
         return print_string
 
 

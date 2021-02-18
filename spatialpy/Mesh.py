@@ -29,24 +29,23 @@ class Mesh():
         self.ylim = ylim
         self.zlim = zlim
 
-    def __str__(str):
-        divider = "*"*10
+    def __str__(self):
         pad = "    "
-        domain_strs = [divider, "Domain Attributes", divider, f"{pad}On Boundary: {self.on_boundary}",
+        domain_strs = ["Domain Attributes", "", f"{pad}On Boundary: {self.on_boundary}",
                      f"{pad}Mesh Size: {self.mesh_size}", f"{pad}RHO_0: {self.rho0}", f"{pad}C_0: {self.c0}",
                      f"{pad}P_0: {self.P0}", f"{pad}Gravity: {self.gravity}", f"{pad}X Limit: {self.xlim}",
                      f"{pad}Y Limit: {self.ylim}", f"{pad}Z Limit: {self.zlim}"]
-        domain_strs.extend(["", divider, "Paritcles", divider])
+        domain_strs.extend(["", "Paritcles", ""])
         for i, vertex in enumerate(self.vertices):
             v_str = f"{pad}{i+1}: {vertex}\n{pad}   Volume:{self.vol[i]}, Mass: {self.mass[i]}, "
             v_str += f"Type: {self.type[i]}, nu: {self.nu[i]}, Fixed: {self.fixed[i]}"
             domain_strs.append(v_str)
         if self.triangles is not None:
-            domain_strs.extend(["", divider, "Triangles", divider])
+            domain_strs.extend(["", "Triangles", ""])
             for i, triangle in enumerate(self.triangles):
                 domain_strs.append(f"{pad}{i+1}: {triangle}")
         if self.tetrahedrons is not None:
-            domain_strs.extend(["", divider, "Triangles", divider])
+            domain_strs.extend(["", "Tetrahedrons", ""])
             for i, tetrahedron in enumerate(self.tetrahedrons):
                 domain_strs.append(f"{pad}{i+1}: {tetrahedron}, Volume: {self.tetrahedron_vol[i]}")
 
