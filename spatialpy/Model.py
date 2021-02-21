@@ -55,7 +55,41 @@ class Model():
         self.output_freq = None
 
 
-    def run(self, number_of_trajectories=1, seed=None, number_of_threads=None, debug_level=0, debug=False, profile=False):
+    def __str__(self):
+        divider = f"\n{'*'*10}\n"
+
+        def decorate(header):
+            return f"\n{divider}{header}{divider}"
+        
+        print_string = f"{self.name}"
+        if len(self.listOfSpecies):
+            print_string += decorate("Species")
+            for _, species in self.listOfSpecies.items():
+                print_string += f"\n{str(species)}"
+        if len(self.listOfInitialConditions):
+            print_string += decorate("Initial Conditions")
+            for _, initial_condition in self.listOfInitialConditions.items():
+                print_string += f"\n{str(initial_condition)}"
+        if len(self.listOfDiffusionRestrictions):
+            print_string += decorate("Diffusion Restrictions")
+            for species, types in self.listOfDiffusionRestrictions.items():
+                print_string += f"\n{species.name} is restricted to: {str(types)}"
+        if len(self.listOfParameters):
+            print_string += decorate("Parameters")
+            for _, parameter in self.listOfParameters.items():
+                print_string += f"\n{str(parameter)}"
+        if len(self.listOfReactions):
+            print_string += decorate("Reactions")
+            for _, reaction in self.listOfReactions.items():
+                print_string += f"\n{str(reaction)}"
+        if self.mesh is not None:
+            print_string += decorate("Domain")
+            print_string += f"\n{str(self.mesh)}"
+
+        return print_string
+
+
+    def run(self, number_of_trajectories=1, seed=None, timeout=None, number_of_threads=None, debug_level=0, debug=False, profile=False):
         """ Simulate the model.
         Args:
             number_of_trajectories: How many trajectories should be run.
@@ -68,7 +102,8 @@ class Model():
 
         sol = Solver(self, debug_level=debug_level)
 
-        return sol.run(number_of_trajectories=number_of_trajectories, seed=seed, number_of_threads=number_of_threads, debug=debug, profile=profile)
+        return sol.run(number_of_trajectories=number_of_trajectories, seed=seed, timeout=timeout,
+                       number_of_threads=number_of_threads, debug=debug, profile=profile)
 
 
     def set_timesteps(self, step_size, num_steps):
@@ -460,7 +495,8 @@ class Species():
 
 
     def __str__(self):
-        return self.name
+        print_string = f"{self.name}: {str(self.diffusion_constant)}"
+        return print_string
 
 class Parameter():
     """
@@ -513,7 +549,8 @@ class Parameter():
         self.evaluate()
 
     def __str__(self):
-        return str(self.value)
+        print_string = f"{self.name}: {str(self.expression)}"
+        return print_string
 
 
 class Reaction():
@@ -599,6 +636,22 @@ class Reaction():
 
         self.restrict_to = restrict_to
 
+    def __str__(self):
+        print_string = f"{self.name}, Active in: {str(self.restrict_to)}"
+        if len(self.reactants):
+            print_string += f"\n\tReactants"
+            for species, stoichiometry in self.reactants.items():
+                name = species if isinstance(species, str) else species.name
+                print_string += f"\n\t\t{name}: {stoichiometry}"
+        if len(self.products):
+            print_string += f"\n\tProducts"
+            for species, stoichiometry in self.products.items():
+                name = species if isinstance(species, str) else species.name
+                print_string += f"\n\t\t{name}: {stoichiometry}"
+        print_string += f"\n\tPropensity Function: {self.propensity_function}"
+        return print_string
+
+
     def create_mass_action(self):
         """ Create a mass action propensity function given self.reactants and a single parameter value.
         """
@@ -622,11 +675,11 @@ class Reaction():
             # Case 1: 2X -> Y
             if self.reactants[r] == 2:
                 propensity_function = ("0.5*" + propensity_function +
-                                       "*" + str(r) + "*(" + str(r) + "-1)/vol")
+                                       "*" + r.name + "*(" + r.name + "-1)/vol")
             else:
                 # Case 3: X1, X2 -> Y;
-                propensity_function += "*" + str(r)
-            self.ode_propensity_function += "*" + str(r)
+                propensity_function += "*" + r.name
+            self.ode_propensity_function += "*" + r.name
 
         # Set the volume dependency based on order.
         order = len(self.reactants)
