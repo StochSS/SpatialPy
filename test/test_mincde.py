@@ -26,7 +26,7 @@ class MeshSize(pyurdme.URDMEDataFunction):
         pyurdme.URDMEDataFunction.__init__(self, name="MeshSize")
         self.mesh = mesh
         self.h = mesh.get_mesh_size()
-    
+
     def map(self, x):
         ret = self.h[self.mesh.closest_vertex(x)]
         return ret
@@ -50,7 +50,7 @@ class TestMinCDE(unittest.TestCase):
         mindpsd = numpy.abs(mindfft[:numpy.floor((N-1)/2)])
         mindfreq = numpy.arange(len(mindpsd), dtype=float)/T
         mind_max_period = 1/mindfreq[1+numpy.argmax(mindpsd[1:])]
-        print mind_max_period
+        print(mind_max_period)
         self.assertTrue(mind_max_period > 50)
         self.assertTrue(mind_max_period < 70)
 
@@ -69,7 +69,7 @@ class TestMinCDE(unittest.TestCase):
         mindpsd = numpy.abs(mindfft[:numpy.floor((N-1)/2)])
         mindfreq = numpy.arange(len(mindpsd), dtype=float)/T
         mind_max_period = 1/mindfreq[1+numpy.argmax(mindpsd[1:])]
-        print mind_max_period
+        print(mind_max_period)
         self.assertTrue(mind_max_period > 26)
         self.assertTrue(mind_max_period < 30)
 
@@ -77,5 +77,3 @@ class TestMinCDE(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-
