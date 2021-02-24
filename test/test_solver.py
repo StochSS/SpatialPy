@@ -2,7 +2,6 @@
 
 # import pickle
 import unittest
-import numpy
 import spatialpy
 
 

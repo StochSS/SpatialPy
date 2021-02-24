@@ -12,12 +12,10 @@ if __name__ == '__main__':
         sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
     import test_solver
-    #import test_threads
     #import test_mincde
 
     modules = [
         test_solver,
-        #test_threads,
         #test_mincde,
     ]
 

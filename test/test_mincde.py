@@ -1,26 +1,18 @@
 #!/usr/bin/env python
-import pyurdme
-from examples.mincde.mincde import mincde
+
+from models.mincde import mincde
 from models.mincde_5r import MinCDE5R
 import scipy.fftpack
-
 import numpy
-import pickle
 import unittest
-
-import dolfin
-import os
+import spatialpy
 
 class Membrane(dolfin.SubDomain):
     def inside(self,x,on_boundary):
         return on_boundary
-
-
 class Cytosol(dolfin.SubDomain):
     def inside(self,x,on_boundary):
         return not on_boundary
-
-
 class MeshSize(pyurdme.URDMEDataFunction):
     def __init__(self,mesh):
         pyurdme.URDMEDataFunction.__init__(self, name="MeshSize")
@@ -31,10 +23,7 @@ class MeshSize(pyurdme.URDMEDataFunction):
         ret = self.h[self.mesh.closest_vertex(x)]
         return ret
 
-
 class TestMinCDE(unittest.TestCase):
-
-
 
     def test_mincde_oscillation_period(self):
         """ Check that the MinCDE model is producing oscillation of the right period. """
@@ -72,7 +61,6 @@ class TestMinCDE(unittest.TestCase):
         print(mind_max_period)
         self.assertTrue(mind_max_period > 26)
         self.assertTrue(mind_max_period < 30)
-
 
 
 if __name__ == '__main__':
