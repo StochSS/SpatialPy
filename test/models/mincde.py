@@ -1,16 +1,19 @@
 #!/usr/bin/env python
-""" spatialpy model file for the MinCDE example. """
 
+from spatialpy.Model import SpeciesError
+import numpy
 import os.path
-from spatialpy.InitialCondition import InitialCondition, ScatterInitialCondition
 import spatialpy
 
 class Membrane(spatialpy.Geometry):
     def inside(self,x,on_boundary):
         return on_boundary
+
+
 class Cytosol(spatialpy.Geometry):
     def inside(self,x,on_boundary):
         return not on_boundary
+
 
 class MeshSize(spatialpy.DataFunction):
     def __init__(self,mesh):
@@ -22,16 +25,16 @@ class MeshSize(spatialpy.DataFunction):
         ret = self.h[self.mesh.closest_vertex(x)]
         return ret
 
-class MinCDE5R(spatialpy.Model):
-    """ Model of MinCDE oscillations in E. Coli based on the model by Fange and Elf. """
+class mincde(spatialpy.Model):
+    """ Model of MinD oscillations in E. Coli, based on the model by Huang. et. al. in """
 
     def __init__(self, model_name="mincde"):
-        spatialpy.URDMEModel.__init__(self,model_name)
+        spatialpy.Model.__init__(self,model_name)
 
         # Species
         MinD_m     = spatialpy.Species(name="MinD_m", diffusion_constant=1e-14, D=2)
-        MinD_c_adp = spatialpy.Species(name="MinD_c_adp", diffusion_constant=2.5e-12, D=3)
         MinD_c_atp = spatialpy.Species(name="MinD_c_atp", diffusion_constant=2.5e-12, D=3)
+        MinD_c_adp = spatialpy.Species(name="MinD_c_adp", diffusion_constant=2.5e-12, D=3)
         MinD_e     = spatialpy.Species(name="MinD_e", diffusion_constant=2.5e-12, D=3)
         MinDE      = spatialpy.Species(name="MinDE", diffusion_constant=1e-14, D=2)
 
@@ -59,11 +62,11 @@ class MinCDE5R(spatialpy.Model):
 
         # Parameters
         NA = spatialpy.Parameter(name="NA", expression=6.022e23)
-        sigma_d  = spatialpy.Parameter(name="sigma_d", expression=1.25e-8)
-        sigma_dD = spatialpy.Parameter(name="sigma_dD", expression="9.0e6/(1000.0*NA)")
-        sigma_e  = spatialpy.Parameter(name="sigma_e", expression="5.58e7/(1000.0*NA)")
+        sigma_d  = spatialpy.Parameter(name="sigma_d", expression=2.5e-8)
+        sigma_dD = spatialpy.Parameter(name="sigma_dD", expression=0.0016e-18)
+        sigma_e  = spatialpy.Parameter(name="sigma_e", expression=0.093e-18)
         sigma_de = spatialpy.Parameter(name="sigma_de", expression=0.7)
-        sigma_dt = spatialpy.Parameter(name="sigma_dt", expression=0.5)
+        sigma_dt = spatialpy.Parameter(name="sigma_dt", expression=1.0)
 
         self.add_parameter([NA,sigma_d,sigma_dD,sigma_e,sigma_de,sigma_dt])
 
@@ -77,15 +80,32 @@ class MinCDE5R(spatialpy.Model):
         R3 = spatialpy.Reaction(name="R3", reactants={MinD_m:1,MinD_e:1}, products={MinDE:1}, massaction=True, rate=sigma_e)
         R4 = spatialpy.Reaction(name="R4", reactants={MinDE:1}, products={MinD_c_adp:1,MinD_e:1}, massaction=True, rate=sigma_de)
         R5 = spatialpy.Reaction(name="R5", reactants={MinD_c_adp:1}, products={MinD_c_atp:1}, massaction=True, rate=sigma_dt)
+        R6 = spatialpy.Reaction(name="R6", reactants={MinDE:1,MinD_c_atp:1}, products={MinD_m:1,MinDE:1}, massaction=True, rate=sigma_dD)
 
-        self.add_reaction([R1,R2,R3,R4,R5])
+        self.add_reaction([R1,R2,R3,R4,R5,R6])
 
         # Restrict to boundary
         self.restrict(MinD_m,boundary)
         self.restrict(MinDE,boundary)
 
         # Distribute molecules over the mesh according to their initial values
-        self.add_initial_condition(spatialpy.ScatterInitialCondition(MinD_c_adp, 4000))
-        self.add_initial_condition(spatialpy.ScatterInitialCondition(MinD_e, 1000))
 
-        self.timespan(range(900))
+        self.add_initial_condition(spatialpy.ScatterInitialCondition(MinD_c_adp, 4500))
+        self.add_initial_condition(spatialpy.ScatterInitialCondition(MinD_e, 1575))
+
+        self.timespan(range(500))
+
+
+if __name__=="__main__":
+    """ Dump model to a file. """
+
+    model = mincde(model_name="mincde")
+    result = model.run(report_level=1)
+
+    try:
+        mindm = result.get_species("MinD_m")
+        y_vals = model.mesh.coordinates()[:, 1]
+        idx = (y_vals < 1e-6)
+        mindmsum = numpy.sum(mindm[:,idx],axis=1)
+    except:
+        pass

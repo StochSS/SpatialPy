@@ -33,7 +33,9 @@ class cylinderDemo3D(spatialpy.Model):
         self.add_species([A, B])
 
         # Define Geometry
-        self.mesh = spatialpy.Mesh.read_xml_mesh('cylinder.xml')
+        # Make sure that we have the correct path to the mesh file even if we are not executing from the basedir.
+        basedir = os.path.dirname(os.path.abspath(__file__))
+        self.mesh = spatialpy.Mesh.read_xml_mesh(basedir+'cylinder.xml')
 
         # Define Types
         self.set_type(Middle(), 1)
@@ -70,11 +72,3 @@ class cylinderDemo3D(spatialpy.Model):
         # Define simulation timespan
         #self.set_timesteps(1, 200)
         self.timespan(range(500))
-
-if __name__=="__main__":
-    model = cylinderDemo3D()
-    result = model.run()
-    A_sum = numpy.sum(result.get_species("A"), axis=1)
-    B_sum = numpy.sum(result.get_species("B"), axis=1)
-    print(A_sum[-1])
-    print(B_sum[-1])
