@@ -3,12 +3,17 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Vim
+
+*.swp
+*.swo
+
 # C extensions
 *.so
 
 # Distribution / packaging
 .Python
-build/
+/build/
 develop-eggs/
 dist/
 downloads/

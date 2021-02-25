@@ -1,0 +1,4 @@
+pygmsh>=5.0.2
+meshio>=2.3.10
+scipy>=1.4.1
+plotly>=4.1.0
