@@ -7,15 +7,15 @@ import numpy
 import unittest
 import spatialpy
 
-class Membrane(dolfin.SubDomain):
+class Membrane(spatialpy.Geometry):
     def inside(self,x,on_boundary):
         return on_boundary
-class Cytosol(dolfin.SubDomain):
+class Cytosol(spatialpy.Geometry):
     def inside(self,x,on_boundary):
         return not on_boundary
-class MeshSize(pyurdme.URDMEDataFunction):
+class MeshSize(spatialpy.DataFunction):
     def __init__(self,mesh):
-        pyurdme.URDMEDataFunction.__init__(self, name="MeshSize")
+        spatialpy.DataFunction.__init__(self, name="MeshSize")
         self.mesh = mesh
         self.h = mesh.get_mesh_size()
 
