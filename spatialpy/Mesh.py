@@ -1,3 +1,4 @@
+import json
 import numpy
 from scipy.spatial import KDTree
 
@@ -276,6 +277,30 @@ class Mesh():
 
         return cls.import_meshio_object(meshio.msh_io.read(filename))
 
+
+
+    @classmethod
+    def read_stochss_domain(cls, filename):
+        """
+        Read a StochSS Domain (.domn) file or
+        pull a StochSS Domain from a StochSS Spatial Model (.smdl) file
+        """
+        try:
+            with open(filename, "r") as domain_file:
+                domain = json.load(domain_file)
+                if "domain" in domain.keys():
+                    domain = domain['domain']
+
+            mesh = Mesh(0, tuple(domain['x_lim']), tuple(domain['y_lim']), tuple(domain['z_lim']),
+                        rho0=domain['rho_0'], c0=domain['c_0'], P0=domain['p_0'], gravity=domain['gravity'])
+
+            for particle in domain['particles']:
+                mesh.add_point(particle['point'], particle['volume'], particle['mass'],
+                               particle['type'], particle['nu'], particle['fixed'])
+
+            return mesh
+        except KeyError as e:
+            raise MeshError("The file is not a StochSS Domain (.smdl) or a StochSS Spatial Model (.smdl).")
 
 
     @classmethod
