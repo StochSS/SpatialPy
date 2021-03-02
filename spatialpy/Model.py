@@ -123,7 +123,7 @@ class Model():
         self.num_timesteps = math.ceil(num_steps *  steps_per_output)
         self.output_freq = steps_per_output
 
-    def timespan(self, time_span):
+    def timespan(self, time_span, timestep_size=None):
         """
         Set the time span of simulation. The SSA-SDPD engine does not support
         non-uniform timespans.
@@ -134,6 +134,8 @@ class Model():
         """
 
         self.tspan = time_span
+        if timestep_size is not None:
+            self.timestep_size = timestep_size
 
         items_diff = numpy.diff(time_span)
         items = map(lambda x: round(x, 10), items_diff)
