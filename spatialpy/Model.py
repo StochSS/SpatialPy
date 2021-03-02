@@ -200,6 +200,19 @@ class Model():
         else:
             self.listOfDiffusionRestrictions[species] = listOfTypes
 
+    def add_mesh(self, mesh):
+        '''
+        Add a mesh to the model
+
+        mesh : Mesh
+            The Mesh to be added to the model
+        '''
+        if type(mesh).__name__ != 'Mesh':
+            raise ModelError("Unexpected parameter for add_mesh. Parameter must be a Mesh.")
+
+        self.mesh = mesh
+        self.listOfTypeIDs = list(set(mesh.type))
+
     def add_data_function(self, data_function):
         """ Add a scalar spatial function to the simulation. This is useful if you have a
             spatially varying in put to your model. Argument is a instances of subclass of the
