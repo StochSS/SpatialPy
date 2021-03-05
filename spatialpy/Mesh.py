@@ -300,7 +300,7 @@ class Mesh():
 
             return mesh
         except KeyError as e:
-            raise MeshError("The file is not a StochSS Domain (.smdl) or a StochSS Spatial Model (.smdl).")
+            raise MeshError("The file is not a StochSS Domain (.domn) or a StochSS Spatial Model (.smdl).")
 
 
     @classmethod
