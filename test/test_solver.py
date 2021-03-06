@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-# import pickle
+import pickle
 import unittest
+
 import spatialpy
 
 
@@ -18,11 +19,12 @@ class diffusion_debug(spatialpy.Model):
             mass=1.0, nu=1.0, fixed=True,  rho0=1.0, c0=1.0, P0=1.0
         )
 
-        self.add_initial_condition(spatialpy.PlaceInitialCondition(A, 1000, [0,0,0]))
+        self.add_initial_condition(
+            spatialpy.PlaceInitialCondition(A, 1000, [0, 0, 0]))
 
-        self.timestep_size=0.1
-        self.num_timesteps=10
-        self.output_freq=1
+        self.timestep_size = 0.1
+        self.num_timesteps = 10
+        self.output_freq = 1
 
 # class testPeriodicDiffusion(spatialpy.Model):
 #     def __init__(self, model_name="test1D"):
@@ -81,35 +83,35 @@ class TestSolverFunctionality(unittest.TestCase):
         result2 = solver.run()
         self.assertFalse(result1 == result2)
 
-    # def test_mesh_pickle(self):
-    #     meshstr = pickle.dumps(self.model.mesh)
-    #     mesh = pickle.loads(meshstr)
+    def test_mesh_pickle(self):
+        meshstr = pickle.dumps(self.model.mesh)
+        mesh = pickle.loads(meshstr)
 
-    # def test_model_pickle(self):
-    #     """ Test that the model is picklable. We do not compare models directly, but rather the results after simulation. """
-    #     model = self.model
-    #     model_str = pickle.dumps(model)
-    #     model2 = pickle.loads(model_str)
-    #     result1 = model.run(seed=1)
-    #     result2 = model2.run(seed=1)
-    #     self.assertEqual(result1,result2)
+    def test_model_pickle(self):
+        """ Test that the model is picklable. We do not compare models directly, but rather the results after simulation. """
+        model = self.model
+        model_str = pickle.dumps(model)
+        model2 = pickle.loads(model_str)
+        result1 = model.run(seed=1)
+        result2 = model2.run(seed=1)
+        self.assertTrue(result1 == result2)
 
-    # def test_solver_pickle(self):
-    #     """ Test that the model, solver and result objects are pickleable. """
-    #     sol = pyurdme.nsmsolver.NSMSolver(self.model)
-    #     sol_str = pickle.dumps(sol)
-    #     sol2 = pickle.loads(sol_str)
-    #     result1 = sol.run(seed=1)
-    #     result2 = sol2.run(seed=1)
-    #     self.assertEqual(result1,result2)
+    def test_solver_pickle(self):
+        """ Test that the model, solver and result objects are pickleable. """
+        sol = spatialpy.Solver(self.model)
+        sol_str = pickle.dumps(sol)
+        sol2 = pickle.loads(sol_str)
+        result1 = sol.run(seed=1)
+        result2 = sol2.run(seed=1)
+        self.assertTrue(result1 == result2)
 
-    # def test_result_pickle(self):
-    #     """ Test that the result object is picklable. """
-    #     sol = pyurdme.nsmsolver.NSMSolver(self.model)
-    #     result = sol.run(seed=1)
-    #     result_str = pickle.dumps(result)
-    #     result2 = pickle.loads(result_str)
-    #     self.assertEqual(result,result2)
+    def test_result_pickle(self):
+        """ Test that the result object is picklable. """
+        sol = spatialpy.Solver(self.model)
+        result = sol.run(seed=1)
+        result_str = pickle.dumps(result)
+        result2 = pickle.loads(result_str)
+        self.assertTrue(result == result2)
 
     def test_run_ensemble(self):
         """ Test the running of ensembles of runs """

@@ -112,17 +112,6 @@ class Result(dict):
 
         return not self.__eq__(other)
 
-    def __getstate__(self):
-        """ Used by pickle to get state when pickling. We need to read the contents of the
-        output file since we can't pickle file objects. """
-        #TODO
-        raise Exception('TODO: spatialpy.Result.__getstate__()');
-
-    def __setstate__(self, state):
-        """ Used by pickle to set state when unpickling. """
-        #TODO
-        raise Exception('TODO: spatialpy.Result.__setstate__()');
-
 
     def read_step(self, step_num, debug=False):
         """ Read the data for simulation step 'step_num'. """
