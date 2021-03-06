@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from spatialpy.Model import SpeciesError
 import numpy
