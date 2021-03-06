@@ -65,6 +65,7 @@ namespace Spatialpy{
             isnan(v[2]) || !isfinite(v[2]) ||
             isnan(rho)  || !isfinite(rho) ){
             printf("ERROR: nan/inf detected!!!\n");
+            printf("number of neighbors: %li\n", neighbors.size()) ;
             printf("id=%i\n",id);
             printf("x[0]=%e\n",x[0]);
             printf("x[1]=%e\n",x[1]);
@@ -87,6 +88,7 @@ namespace Spatialpy{
             printf("old_v[0]=%e\n",old_v[0]);
             printf("old_v[1]=%e\n",old_v[1]);
             printf("old_v[2]=%e\n",old_v[2]);
+            printf("sys->dimension: %i\n", sys->dimension) ;
             printf("sys->current_step=%i\n",sys->current_step);
             printf("sys->dt=%e\n",sys->dt);
             exit(1);
@@ -228,6 +230,7 @@ namespace Spatialpy{
         printf("Neighbor search complete!\n") ;
         */
         system->kdTree->annkFRSearch(queryPt, dist, k, nn_idx, dists);
+        neighbors.clear() ;
         for(int i = 0; i < k && nn_idx[i] != ANN_NULL_IDX; i++) {
             //printf("Adding neighbor %i to list.  Index of neighbor: %i with dist: %f\n", i, nn_idx[i], dists[i]) ;
             Particle *neighbor = &system->particles[nn_idx[i]];
