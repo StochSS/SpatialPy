@@ -19,6 +19,10 @@ class PlaceInitialCondition(InitialCondition):
         self.count = count
         self.location = location
 
+    def __str__(self):
+        print_string = f"{self.species.name}: {str(self.count)}, at: {str(self.location)}"
+        return print_string
+
     def apply(self, model):
         spec_name = self.species.name
         for spec_ndx, spec_name in enumerate(model.listOfSpecies.keys()):
@@ -31,6 +35,10 @@ class UniformInitialCondition(InitialCondition):
         self.species = species
         self.count = count
         self.types = types
+
+    def __str__(self):
+        print_string = f"{self.species.name}: {str(self.count)}, Uniformly distrbuted in: {str(self.types)}"
+        return print_string
 
     def apply(self, model):
         spec_name = self.species.name
@@ -55,6 +63,10 @@ class ScatterInitialCondition(InitialCondition):
         self.species = species
         self.count = count
         self.types = types
+
+    def __str__(self):
+        print_string = f"{self.species.name}: {str(self.count)}, Scatter over: {str(self.types)}"
+        return print_string
 
     def apply(self, model):
         spec_name = self.species.name

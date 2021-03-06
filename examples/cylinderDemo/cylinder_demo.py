@@ -18,7 +18,7 @@ class Edge2(spatialpy.Geometry):
 class Middle(spatialpy.Geometry):
     def inside(self, x, on_boundary):
         return abs(x[0] - MIN_X_DIM) >= 0.05
-class cylinderDemo3D(spatialpy.Geometry):
+class cylinderDemo3D(spatialpy.Model):
     def __init__(self, model_name="cylinder_demo3d"):
         spatialpy.Model.__init__(self, model_name)
 
