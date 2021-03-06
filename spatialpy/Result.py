@@ -1,28 +1,14 @@
+import filecmp
+import math
 import os
-import re
+import pickle
 import shutil
 import subprocess
-import sys
-import tempfile
-import types
-import warnings
-import uuid
-
 
 import numpy
-import scipy.io
-import scipy.sparse
 
-from spatialpy.VTKReader import VTKReader
 from spatialpy.Model import *
-
-import inspect
-
-import pickle
-import json
-import math
-
-
+from spatialpy.VTKReader import VTKReader
 
 common_rgb_values=['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f',
                    '#bcbd22','#17becf','#ff0000','#00ff00','#0000ff','#ffff00','#00ffff','#ff00ff',
@@ -94,16 +80,37 @@ class Result(dict):
 #        return model2
 
 
-    def __getstate__(self):
-        """ Used by pickle to get state when pickling. We need to read the contents of the
-        output file since we can't pickle file objects. """
-        #TODO
-        raise Exception('TODO: spatialpy.Result.__getstate__()');
+    def __eq__(self, other):
+        """ Compare Result object's output for equality. This does _NOT_ compare objects themselves
 
-    def __setstate__(self, state):
-        """ Used by pickle to set state when unpickling. """
-        #TODO
-        raise Exception('TODO: spatialpy.Result.__setstate__()');
+        Params:
+            self: Results object
+            other: Results object to compare against
+        Return:
+            bool """
+
+        if isinstance(other, Result) and self.result_dir != None and other.result_dir != None:
+                # Compare contents, not shallow compare
+                filecmp.cmpfiles.__defaults__ = (False,)
+                dircmp = filecmp.dircmp(self.result_dir, other.result_dir)
+                # Raise exception if funny_files
+                assert not dircmp.funny_files
+                if not (dircmp.left_only or dircmp.right_only or dircmp.funny_files or dircmp.diff_files):
+                    return True
+                return False
+        return NotImplemented
+
+    def __ne__(self, other):
+        """ Compare Result object's output for inequality. This does _NOT_ compare objects themselves.
+            This inverts the logic in __eq__().
+
+        Params:
+            self: Results object
+            other: Results object to compare against
+        Return:
+            bool """
+
+        return not self.__eq__(other)
 
 
     def read_step(self, step_num, debug=False):
@@ -155,7 +162,7 @@ class Result(dict):
 
         #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
         #                    num=self.model.num_timesteps+1, dtype=int)
-        t_index_arr = self.get_timespan();
+        t_index_arr = self.get_timespan()
 
         if timepoints is not None:
             if isinstance(timepoints,float):
@@ -257,7 +264,7 @@ class Result(dict):
 
         if use_matplotlib:
             import matplotlib.pyplot as plt
-            
+
             if (deterministic or not concentration):
                 d = data[spec_name]
             else:
@@ -497,7 +504,7 @@ class Result(dict):
 
         if use_matplotlib:
             import matplotlib.pyplot as plt
-            
+
             if (property_name == 'v'):
                 d = data[property_name]
                 d = [d[i][p_ndx] for i in range(0,len(d))]

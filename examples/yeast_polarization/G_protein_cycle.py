@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """ pyURDME model file for the polarization 1D example. """
 
 import os

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """ pyURDME model file for the model found in Lawson et al. PloS Comp Bio (2013). """
 
 import os

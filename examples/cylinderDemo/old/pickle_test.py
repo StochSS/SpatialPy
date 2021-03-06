@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from cylinder_demo3D import cylinderDemo3D
 from pyurdme.nsmsolver import NSMSolver
 import matplotlib.pyplot as plt

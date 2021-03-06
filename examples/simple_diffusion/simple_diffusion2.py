@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """ PyURDME model with one species diffusing in the unit circle and one
     species diffusing on the boundary of the circle. Subdomains are 
     here handled by Dolfin's native subdomain model. """
