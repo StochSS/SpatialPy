@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import re
 
 
 from spatialpy.Model import *
@@ -69,7 +70,8 @@ class Solver:
             print("Compiling Solver.  Build dir: {0}".format(self.build_dir))
 
         # Write the propensity file
-        self.propfilename = self.model_name + '_generated_model'
+        self.propfilename = re.sub('[^\w\_]', '', self.model_name) # Match except word characters \w = ([a-zA-Z0-9_]) and \_ = _ replace with ''
+        self.propfilename = self.propfilename + '_generated_model'
         self.prop_file_name = self.build_dir + '/' + self.propfilename + '.c'
         if self.debug_level > 1:
             print("Creating propensity file {0}".format(self.prop_file_name))
