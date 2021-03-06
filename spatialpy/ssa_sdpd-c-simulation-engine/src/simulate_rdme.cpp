@@ -19,11 +19,11 @@
 
 /**************************************************************************/
 namespace Spatialpy{
-    //TODO: MOVE RNG INSTANTIATION AND INCLUDE SEED
 
-    void initialize_rdme(ParticleSystem *system, size_t *irN, size_t *jcN,int *prN,size_t *irG,size_t *jcG,
-                            unsigned int*u0){
-        if(debug_flag){printf("*************** initialize_rdme ******************\n");fflush(stdout);}
+    void initialize_rdme(ParticleSystem *system, size_t *irN, size_t *jcN,int *prN,
+                        size_t *irG,size_t *jcG, unsigned int*u0){
+
+        if(debug_flag){printf("initialize_rdme()\n");fflush(stdout);}
         //printf("nsm_core__create() BEGIN\n");fflush(stdout);
         nsm_core__create(system,irN,jcN,prN,irG,jcG);
         //printf("nsm_core__create() END\n");fflush(stdout);
@@ -38,7 +38,6 @@ namespace Spatialpy{
     // This function get called by the main simulation loop.  It advances the
     // state the of RDME system by dt
     void simulate_rdme(ParticleSystem*system,unsigned int step){
-        return;
         // rdme_t*rdme = system->rdme;
         // if(rdme == NULL){
         //     return;
@@ -70,16 +69,10 @@ namespace Spatialpy{
         nsm_core__take_step(system, system->dt*step, system->dt);
     }
     /**************************************************************************/
-    /**
     void destroy_rdme(ParticleSystem*system){
-        if(system->rdme == NULL){
-            return;
-        }
         if(debug_flag) printf("NSM: total # reacton events %lu\n",system->rdme->total_reactions);
         if(debug_flag) printf("NSM: total # diffusion events %lu\n",system->rdme->total_diffusion);
-        nsm_core__destroy(system->rdme);
     }
-    **/
 
 
 
@@ -317,6 +310,13 @@ namespace Spatialpy{
         // rdme_t* rdme = system->rdme;
         /* Calculate times to next event (reaction or diffusion)
          in each subvolume and initialize heap. */
+
+        std::vector<double> propensities(system->particles.size());
+        double propensitySum=0.0;
+        std::size_t activeChannels=0; // initial number of nonzero propensities (typically improves initial performance)
+
+
+
         for(long unsigned int i=0; i<system->particles.size(); i++){
         //for (i = 0; i < rdme->Ncells; i++) {
             //rdme->rtimes[i] = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/(rdme->srrate[i]+rdme->sdrate[i]);
@@ -325,14 +325,32 @@ namespace Spatialpy{
             p = &system->particles[i] ;
             //p = e->data;
             
-            long unsigned int srng = rng() ;
-            long unsigned int rng_max = rng.max() ;
-            double tt = -log(1.0-(rng() * 1.0 / rng.max())) / (p->srrate+p->sdrate);
+            //long unsigned int srng = rng() ;
+            //long unsigned int rng_max = rng.max() ;
+            //double tt = -log(1.0-(rng() * 1.0 / rng.max())) / (p->srrate+p->sdrate);
+            propensities[i] = p->srrate + p->sdrate;
+            propensitySum += propensities[i];
+            if(propensities[i] > 0){
+                activeChannels++
+            }
+            if(p.particle_index != i){
+                // particles can move around in the sys->particles vector,
+                // this ensures that we know where in the vector each particle is
+                p.particle_index = i;
+            }
 
-            system->event_v.emplace_back(p, tt) ;
+            //system->event_v.emplace_back(p, tt) ;
         }
         //initialize_heap(rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
         // ordered_list_sort(system->heap);
+
+        double timeOffset = system->current_step * system->dt;
+        
+        // TODO: does this deallocate memory on the 2nd call?  No
+        // TODO: make a deallocation function
+        system->rdme_event_q.build(propensities, rng, propensitySum, activeChannels,
+                                   timeOffset );
+
     }
 
     /**************************************************************************/
@@ -369,7 +387,7 @@ namespace Spatialpy{
 
 
     /**************************************************************************/
-    void nsm_core__build_diffusion_matrix(ParticleSystem*system){
+    /**void nsm_core__build_diffusion_matrix(ParticleSystem*system){
         printf("*************** build_diffusion_matrix ***************\n");fflush(stdout);
         double off_diag_sum,diff_const,dist2;
         //NeighborNode *n2;
@@ -496,7 +514,7 @@ namespace Spatialpy{
         fprintf(fp, "D = scipy.sparse.csc_matrix(prD,irD,jcD)\n");
         fclose(fp);
 
-    }
+    }**/
 
     /**************************************************************************/
     /**
@@ -545,6 +563,8 @@ namespace Spatialpy{
     //    printf("========================================================\n");
 
 
+        std::pair<double,int> timeRxnPair;
+        int reactionIndex;
         /* Main loop. */
         while(tt <= end_time){
 
@@ -553,8 +573,13 @@ namespace Spatialpy{
             //told = tt;
             //tt   = rdme->rtimes[0];
             //subvol = rdme->node[0];
-            subvol = system->event_v.front().data;
-            tt = system->event_v.front().tt;
+            //subvol = system->event_v.front().data;
+            //tt = system->event_v.front().tt;
+
+            timeRxnPair = system->rdme_event_q.selectReaction();
+            tt = timeRxnPair.first;
+            subvol_index = timeRxnPair.second;
+            subvol = system->particles[subvol_index];
             vol = (subvol->mass / subvol->rho);
 
             if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}
@@ -795,43 +820,43 @@ namespace Spatialpy{
 
             /* Compute time to new event for this subvolume. */
             totrate = subvol->srrate+subvol->sdrate;
-            if(totrate > 0.0){
-                system->event_v.front().tt = -log(1.0-(rng() * 1.0 / rng.max()))/totrate+tt;
-            }else{
-                system->event_v.front().tt = INFINITY;
-            }
+            //if(totrate > 0.0){
+            //    system->event_v.front().tt = -log(1.0-(rng() * 1.0 / rng.max()))/totrate+tt;
+            //}else{
+            //    system->event_v.front().tt = INFINITY;
+            //}
+
             /* Update the heap. */
             //update(0,rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
-
-
-            // TODO: REPLACE BUBBLE_UP_DOWN
             //ordered_list_bubble_up_down(system->event_v, subvol->heap_index);
+
+            system->rdme_event_q.update(subvol_index, totrate, tt, rng);
+
+
 
             /* If it was a diffusion event, also update the other affected
              node. */
             if(event) {
 
                 totrate = dest_subvol->srrate+dest_subvol->sdrate;
-/*
-                if(totrate > 0.0) {
-                    printf("dest_subvol->heap_index->tt: %f\n", dest_subvol->heap_index->tt) ;
-                    if(!isinf(dest_subvol->heap_index->tt)){
-                        dest_subvol->heap_index->tt =
-                        (old_rrate+old_drate)/totrate*(dest_subvol->heap_index->tt - tt)+tt;
-                    }else{
-                        // generate a new waiting time
-                        dest_subvol->heap_index->tt = -log(1.0-(rng() * 1.0 / rng.max()))/totrate+tt;
-                    }
-*/
-                }
-           /*
-            else{
-                    dest_subvol->heap_index->tt = INFINITY;
-                }
-                //TODO: REPLACE BUBBLE_UP_DOWN
+//
+//                if(totrate > 0.0) {
+//                    printf("dest_subvol->heap_index->tt: %f\n", dest_subvol->heap_index->tt) ;
+//                    if(!isinf(dest_subvol->heap_index->tt)){
+//                        dest_subvol->heap_index->tt =
+//                        (old_rrate+old_drate)/totrate*(dest_subvol->heap_index->tt - tt)+tt;
+//                    }else{
+//                        // generate a new waiting time
+//                        dest_subvol->heap_index->tt = -log(1.0-(rng() * 1.0 / rng.max()))/totrate+tt;
+//                    }
+//
+//                }else{
+//                    dest_subvol->heap_index->tt = INFINITY;
+//                }
                 //ordered_list_bubble_up_down(system->heap, dest_subvol->heap_index);
+
+                system->rdme_event_q.update(dest_subvol.particle_index, totrate, tt, rng);
             }
-            */
 
             // re-sort the heap
             //ordered_list_sort(system->rdme->heap);  // this resorts the whole list

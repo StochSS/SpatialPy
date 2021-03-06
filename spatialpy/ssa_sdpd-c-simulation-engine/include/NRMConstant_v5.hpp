@@ -70,7 +70,11 @@ class NRMConstant_v5 {
 	
     // activeChannels is count of nonzero propensities
     template <typename generatorType>
-    void build(std::vector<double>& propensities, generatorType& generator, double propensitySum, std::size_t activeChannels, double timeOffset=0.0, double simulationEndTime=std::numeric_limits<double>::max()) {
+
+    void build(std::vector<double>& propensities, generatorType& generator,
+               double propensitySum, std::size_t activeChannels,
+               double timeOffset=0.0, 
+               double simulationEndTime=std::numeric_limits<double>::max()) {
 //        std::cout << "in build..." << std::endl;
 
         activeChannelCounter=activeChannels;
