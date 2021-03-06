@@ -15,6 +15,7 @@ See the file LICENSE.txt for details.
 #include "propensities.hpp"
 // Include ANN KD Tree
 #include <ANN/ANN.h>
+#include "NRMConstant_v5.hpp"
 
 extern int debug_flag ;
 
@@ -62,7 +63,8 @@ namespace Spatialpy{
         double* rrate;
         double sdrate;
         double* Ddiag;
-        EventNode*heap_index;
+        //EventNode*heap_index;
+        std::size_t particle_index;
 
         void check_particle_nan();
 
@@ -77,19 +79,19 @@ namespace Spatialpy{
         int get_k__exact(ANNpoint queryPt, ANNdist dist, ANNkd_tree *tree) ;
         void find_neighbors(ParticleSystem *system, bool use_exact_k=true) ;
 
-            bool operator<(const Particle& p2){ 
-                return x[0] > p2.x[0] ; 
-            } 
-    };
-
-    struct EventNode{
-        Particle* data ;
-        double tt ;
-        EventNode(Particle *data, double tt) ;
-        bool operator< (const EventNode& e2){ 
-            return tt > e2.tt ; 
+        bool operator<(const Particle& p2){ 
+            return x[0] > p2.x[0] ; 
         } 
     };
+
+//    struct EventNode{
+//        Particle* data ;
+//        double tt ;
+//        EventNode(Particle *data, double tt) ;
+//        bool operator< (const EventNode& e2){ 
+//            return tt > e2.tt ; 
+//        } 
+//    };
 
     struct NeighborNode{
         Particle *data ;
@@ -147,11 +149,12 @@ namespace Spatialpy{
         double rho0;
         double P0;
         std::vector<Particle> particles;
-        std::vector<EventNode> event_v;
+        //std::vector<EventNode> event_v;
         // std::priority_queue<Particle> x_index;
         //std::priority_queue<EventNode> event_q;
 
-        // Moved from rdme_t
+        // Moved from rdme_ta
+        NRMConstant_v5 rdme_event_q;
         const size_t *irN;
         const size_t *jcN;
         const int *prN;

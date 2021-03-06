@@ -102,34 +102,6 @@ namespace Spatialpy{
 
     int main(int argc, char**argv){
         using namespace Spatialpy ;
-        //debug_flag = 1;
-        //ParticleSystem* system = create_system();
-        // Fix particles in space
-        //system->static_domain = 1;
-        //CONFIG =
-        //system->dt = 1;
-        //system->nt = 101;
-        //system->output_freq = 1;
-        //system->h = 0.5;
-        //system->rho0 = 1.0;
-        //system->c0 = 10;
-        //system->P0 = 10;
-        // bounding box
-        //system->xlo = -5.1;
-        //system->xhi = 5.1;
-        //system->ylo = -1.1;
-        //system->yhi = 1.1;
-        //system->zlo = -1.1;
-        //system->zhi = 1.1;
-        __SYSTEM_CONFIG__
-        // create all particles in system
-        init_all_particles(system);
-        // Setup chemical reaction system
-        //initialize_rdme(system, NUM_VOXELS, NUM_SPECIES, NUM_REACTIONS, input_vol, input_sd,
-        //                input_data, input_dsize, input_irN, input_jcN, input_prN, input_irG,
-        //                input_jcG, input_species_names, input_u0, input_num_subdomain,
-        //                input_subdomain_diffusion_matrix);
-        __INIT_RDME__
 
         int num_threads = 1, sflag = 0, tflag = 0, opt;
         long seed;
@@ -160,10 +132,15 @@ namespace Spatialpy{
             num_threads = get_num_processors();
             if(num_threads>8){ num_threads=8; }
         }
+        // Python generated code goes here
+        __SYSTEM_CONFIG__
+        // create all particles in system
+        init_all_particles(system);
+        // Setup chemical reaction system
+        __INIT_RDME__
 
         run_simulation(num_threads, system);
         exit(0);
-
 }
 
 
