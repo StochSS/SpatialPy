@@ -354,10 +354,10 @@ class Result(dict):
             for i in range(1, len(t_ndx_list), speed):
                 _, _data = self.read_step(t_ndx_list[i])
                 _data = _data[spec_name] if deterministic or not concentration else _data[spec_name] / (_data['mass'] / _data['rho'])
-                if min(_data) < cmin:
-                    cmin = min(_data)
-                if max(_data) > cmax:
-                    cmax = max(_data)
+                if min(_data) - 0.1 < cmin:
+                    cmin = min(_data) - 0.1
+                if max(_data) + 0.1 > cmax:
+                    cmax = max(_data) + 0.1
 
             frames = []
             for index in range(0, len(t_ndx_list), speed):
@@ -366,7 +366,7 @@ class Result(dict):
                 # map data to types
                 types = {}
                 for i, val in enumerate(data['type']):
-                    name = "sub {}".format(val)
+                    name = species
                     if deterministic or not concentration:
                         spec_data = data[spec_name][i]
                     else:
@@ -399,6 +399,7 @@ class Result(dict):
         if return_plotly_figure:
             return fig
         else:
+            init_notebook_mode(connected=True)
             iplot(fig)
 
     def get_property(self, property_name, timepoints=None):
@@ -603,11 +604,11 @@ class Result(dict):
             for i in range(1, len(t_ndx_list), speed):
                 _, _data = self.read_step(t_ndx_list[i])
                 _cmin = min(_data[property_name]) if property_name != "v" else min(_data[property_name], key=lambda val: val[p_ndx])[p_ndx]
-                if _cmin < cmin:
-                    cmin = _cmin
+                if _cmin - 0.1 < cmin:
+                    cmin = _cmin - 0.1
                 _cmax = max(_data[property_name]) if property_name != "v" else max(_data[property_name], key=lambda val: val[p_ndx])[p_ndx]
-                if _cmax > cmax:
-                    cmax = _cmax
+                if _cmax + 0.1 > cmax:
+                    cmax = _cmax + 0.1
 
             frames = []
             for index in range(0, len(t_ndx_list), speed):
@@ -657,6 +658,7 @@ class Result(dict):
         if return_plotly_figure:
             return fig
         else:
+            init_notebook_mode(connected=True)
             iplot(fig)
 
 #    def __setattr__(self, k, v):
