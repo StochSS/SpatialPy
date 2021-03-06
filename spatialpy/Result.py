@@ -7,7 +7,7 @@ import tempfile
 import types
 import warnings
 import uuid
-
+import filecmp
 
 import numpy
 import scipy.io
@@ -93,6 +93,38 @@ class Result(dict):
 #            model2.u0[s,:] = self.get_species(sname, timepoints=-1)
 #        return model2
 
+
+    def __eq__(self, other):
+        """ Compare Result object's output for equality. This does _NOT_ compare objects themselves
+
+        Params:
+            self: Results object
+            other: Results object to compare against
+        Return:
+            bool """
+
+        if isinstance(other, Result) and self.result_dir != None and other.result_dir != None:
+                # Compare contents, not shallow compare
+                filecmp.cmpfiles.__defaults__ = (False,)
+                dircmp = filecmp.dircmp(self.result_dir, other.result_dir)
+                # Raise exception if funny_files
+                assert not dircmp.funny_files
+                if not (dircmp.left_only or dircmp.right_only or dircmp.funny_files or dircmp.diff_files):
+                    return True
+                return False
+        return NotImplemented
+
+    def __ne__(self, other):
+        """ Compare Result object's output for inequality. This does _NOT_ compare objects themselves.
+            This inverts the logic in __eq__().
+
+        Params:
+            self: Results object
+            other: Results object to compare against
+        Return:
+            bool """
+
+        return not self.__eq__(other)
 
     def __getstate__(self):
         """ Used by pickle to get state when pickling. We need to read the contents of the
