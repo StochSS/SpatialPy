@@ -162,8 +162,7 @@ class Result(dict):
 
         #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
         #                    num=self.model.num_timesteps+1, dtype=int)
-        t_index_arr = self.get_timespan();
-                # Should this ; be here? ^
+        t_index_arr = self.get_timespan()
 
         if timepoints is not None:
             if isinstance(timepoints,float):
