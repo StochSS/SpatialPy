@@ -12,6 +12,5 @@ __url__          = 'https://spatialpy.github.io/SpatialPy/'
 __download_url__ = 'https://github.com/SpatialPy/SpatialPy/tarball/master/'
 __author__       = 'See AUTHORS'
 __email__        = 'bdrawert@unca.edu'
-__license__      = 'GPL'
+__license__      = 'GPL-3.0-only'
 __copyright__    = 'Copyright (C) 2017-2020'
-
