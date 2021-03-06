@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # import pickle
 from spatialpy.Model import ModelError
@@ -97,32 +97,32 @@ class TestSolverFunctionality(unittest.TestCase):
     #     A = result.get_species("A", -1)
     #     self.assertFalse((A - model.u0).any())
 
-    # def test_same_seed(self):
-    #     """ Test that the output is the same if the same seed is used, edxplicit solver creation  """
-    #     solver = spatialpy.Solver(self.model)
-    #     result1 = solver.run(seed=1)
-    #     result2 = solver.run(seed=1)
-    #     self.assertEqual(result1, result2)
+    def test_same_seed(self):
+        """ Test that the output is the same if the same seed is used, edxplicit solver creation  """
+        solver = spatialpy.Solver(self.model)
+        result1 = solver.run(seed=1)
+        result2 = solver.run(seed=1)
+        self.assertTrue(result1 == result2)
 
-    # def test_same_seed2(self):
-    #     """ Test that the output is the same if the same seed is used, use model.run()  """
-    #     result1 = self.model.run(seed=1)
-    #     result2 = self.model.run(seed=1)
-    #     self.assertEqual(result1, result2)
+    def test_same_seed2(self):
+        """ Test that the output is the same if the same seed is used, use model.run()  """
+        result1 = self.model.run(seed=1)
+        result2 = self.model.run(seed=1)
+        self.assertTrue(result1 == result2)
 
-    # def test_different_seeds(self):
-    #     """ Test that the output is different if different seeds are used. """
-    #     solver = spatialpy.Solver(self.model)
-    #     result1 = solver.run(seed=1)
-    #     result2 = solver.run(seed=100)
-    #     self.assertNotEqual(result1, result2)
+    def test_different_seeds(self):
+        """ Test that the output is different if different seeds are used. """
+        solver = spatialpy.Solver(self.model)
+        result1 = solver.run(seed=1)
+        result2 = solver.run(seed=100)
+        self.assertFalse(result1 == result2)
 
-    # def test_default_seed(self):
-    #     """ Test that the output is different if no seed is given (default set on C level). """
-    #     solver = spatialpy.Solver(self.model)
-    #     result1 = solver.run()
-    #     result2 = solver.run()
-    #     self.assertNotEqual(result1, result2)
+    def test_default_seed(self):
+        """ Test that the output is different if no seed is given (default set on C level). """
+        solver = spatialpy.Solver(self.model)
+        result1 = solver.run()
+        result2 = solver.run()
+        self.assertFalse(result1 == result2)
 
     # def test_mesh_pickle(self):
     #     meshstr = pickle.dumps(self.model.mesh)
