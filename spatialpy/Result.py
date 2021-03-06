@@ -1,28 +1,14 @@
+import filecmp
+import math
 import os
-import re
+import pickle
 import shutil
 import subprocess
-import sys
-import tempfile
-import types
-import warnings
-import uuid
-import filecmp
 
 import numpy
-import scipy.io
-import scipy.sparse
 
-from spatialpy.VTKReader import VTKReader
 from spatialpy.Model import *
-
-import inspect
-
-import pickle
-import json
-import math
-
-
+from spatialpy.VTKReader import VTKReader
 
 common_rgb_values=['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f',
                    '#bcbd22','#17becf','#ff0000','#00ff00','#0000ff','#ffff00','#00ffff','#ff00ff',
@@ -188,6 +174,7 @@ class Result(dict):
         #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
         #                    num=self.model.num_timesteps+1, dtype=int)
         t_index_arr = self.get_timespan();
+                # Should this ; be here? ^
 
         if timepoints is not None:
             if isinstance(timepoints,float):
@@ -289,7 +276,7 @@ class Result(dict):
 
         if use_matplotlib:
             import matplotlib.pyplot as plt
-            
+
             if (deterministic or not concentration):
                 d = data[spec_name]
             else:
@@ -528,7 +515,7 @@ class Result(dict):
 
         if use_matplotlib:
             import matplotlib.pyplot as plt
-            
+
             if (property_name == 'v'):
                 d = data[property_name]
                 d = [d[i][p_ndx] for i in range(0,len(d))]
