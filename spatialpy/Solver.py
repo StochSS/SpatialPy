@@ -220,7 +220,7 @@ class Solver:
                 raise SimulationError(
                     "Solver execution failed, return code = {0}".format(return_code))
 
-            result["Status"] = "Success"
+            result.success = True
             if profile:
                 self.read_profile_info(result)
             if stdout is not None:
