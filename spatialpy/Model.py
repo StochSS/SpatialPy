@@ -68,7 +68,7 @@ class Model():
                 print_string += f"\n{str(species)}"
         if len(self.listOfInitialConditions):
             print_string += decorate("Initial Conditions")
-            for _, initial_condition in self.listOfInitialConditions:
+            for initial_condition in self.listOfInitialConditions:
                 print_string += f"\n{str(initial_condition)}"
         if len(self.listOfDiffusionRestrictions):
             print_string += decorate("Diffusion Restrictions")
