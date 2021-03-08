@@ -61,6 +61,7 @@ class Result():
         self.success = False
         self.stdout = None
         self.stderr = None
+        self.timeout = False
         self.result_dir = result_dir
 
 

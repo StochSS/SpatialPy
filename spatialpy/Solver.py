@@ -195,6 +195,7 @@ class Solver:
                             if stderr is not None:
                                 print(stderr.decode('utf-8'))
                     except subprocess.TimeoutExpired:
+                        result.timeout = True
                         # send signal to the process group
                         os.killpg(process.pid, signal.SIGINT)
                         stdout, stderr = process.communicate()
