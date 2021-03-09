@@ -5,7 +5,7 @@
 # @website https://github.com/StochSS/SpatialPy
 # =============================================================================
 
-__version__      = '0.5.0'
+__version__      = '0.5.1'
 __title__        = 'SpatialPy'
 __description__  = 'Python Interface for Spatial Stochastic Biochemical Simulations'
 __url__          = 'https://spatialpy.github.io/SpatialPy/'
