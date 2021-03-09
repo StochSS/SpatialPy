@@ -68,7 +68,7 @@ class Model():
                 print_string += f"\n{str(species)}"
         if len(self.listOfInitialConditions):
             print_string += decorate("Initial Conditions")
-            for _, initial_condition in self.listOfInitialConditions.items():
+            for initial_condition in self.listOfInitialConditions:
                 print_string += f"\n{str(initial_condition)}"
         if len(self.listOfDiffusionRestrictions):
             print_string += decorate("Diffusion Restrictions")
@@ -123,7 +123,7 @@ class Model():
         self.num_timesteps = math.ceil(num_steps *  steps_per_output)
         self.output_freq = steps_per_output
 
-    def timespan(self, time_span):
+    def timespan(self, time_span, timestep_size=None):
         """
         Set the time span of simulation. The SSA-SDPD engine does not support
         non-uniform timespans.
@@ -134,6 +134,8 @@ class Model():
         """
 
         self.tspan = time_span
+        if timestep_size is not None:
+            self.timestep_size = timestep_size
 
         items_diff = numpy.diff(time_span)
         items = map(lambda x: round(x, 10), items_diff)
@@ -197,6 +199,19 @@ class Model():
             self.listOfDiffusionRestrictions[species] = [listOfTypes]
         else:
             self.listOfDiffusionRestrictions[species] = listOfTypes
+
+    def add_mesh(self, mesh):
+        '''
+        Add a mesh to the model
+
+        mesh : Mesh
+            The Mesh to be added to the model
+        '''
+        if type(mesh).__name__ != 'Mesh':
+            raise ModelError("Unexpected parameter for add_mesh. Parameter must be a Mesh.")
+
+        self.mesh = mesh
+        self.listOfTypeIDs = list(set(mesh.type))
 
     def add_data_function(self, data_function):
         """ Add a scalar spatial function to the simulation. This is useful if you have a

@@ -1,28 +1,14 @@
+import filecmp
+import math
 import os
-import re
+import pickle
 import shutil
 import subprocess
-import sys
-import tempfile
-import types
-import warnings
-import uuid
-
 
 import numpy
-import scipy.io
-import scipy.sparse
 
-from spatialpy.VTKReader import VTKReader
 from spatialpy.Model import *
-
-import inspect
-
-import pickle
-import json
-import math
-
-
+from spatialpy.VTKReader import VTKReader
 
 common_rgb_values=['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f',
                    '#bcbd22','#17becf','#ff0000','#00ff00','#0000ff','#ffff00','#00ffff','#ff00ff',
@@ -64,16 +50,18 @@ def _plotly_iterate(types, size=5, property_name=None, cmin=None, cmax=None, col
         trace_list.append(trace)
     return trace_list
 
-class Result(dict):
-    """ Result object for a URDME simulation, extends the dict object. """
+class Result():
+    """ Result object for a URDME simulation. """
 
     def __init__(self, model=None, result_dir=None, loaddata=False):
         self.model = model
         self.U = None
         self.tspan = None
         self.data_is_loaded = False
+        self.success = False
         self.stdout = None
         self.stderr = None
+        self.timeout = False
         self.result_dir = result_dir
 
 
@@ -94,17 +82,80 @@ class Result(dict):
 #        return model2
 
 
+    def __eq__(self, other):
+        """ Compare Result object's output for equality. This does _NOT_ compare objects themselves
+
+        Params:
+            self: Results object
+            other: Results object to compare against
+        Return:
+            bool """
+
+        if isinstance(other, Result) and self.result_dir != None and other.result_dir != None:
+                # Compare contents, not shallow compare
+                filecmp.cmpfiles.__defaults__ = (False,)
+                dircmp = filecmp.dircmp(self.result_dir, other.result_dir)
+                # Raise exception if funny_files
+                assert not dircmp.funny_files
+                if not (dircmp.left_only or dircmp.right_only or dircmp.funny_files or dircmp.diff_files):
+                    return True
+                return False
+        return NotImplemented
+
+    def __ne__(self, other):
+        """ Compare Result object's output for inequality. This does _NOT_ compare objects themselves.
+            This inverts the logic in __eq__().
+
+        Params:
+            self: Results object
+            other: Results object to compare against
+        Return:
+            bool """
+
+        return not self.__eq__(other)
+
     def __getstate__(self):
-        """ Used by pickle to get state when pickling. We need to read the contents of the
-        output file since we can't pickle file objects. """
-        #TODO
-        raise Exception('TODO: spatialpy.Result.__getstate__()');
+            """ Used by pickle to get state when pickling. """
+
+            state = {}
+            for key, item in self.__dict__.items():
+                resultdict = OrderedDict()
+                # Pickle all Result output files
+                # This does not perserve file metadata like permissions.
+                # In the future we should probably at least perserve permissions.
+                try:
+                    for root, _, file in os.walk(self.result_dir):
+                        for filename in file:
+                            fd = open(os.path.join(root, filename), 'rb')
+                            fd.seek(0)
+                            resultdict[filename] = fd.read()
+                            fd.close()
+                    state['results_output'] = resultdict
+                except Exception as e:
+                    raise Exception("Error pickling model, could not pickle the Result output files: "+str(e))
+                state[key] = item
+
+            return state
 
     def __setstate__(self, state):
         """ Used by pickle to set state when unpickling. """
-        #TODO
-        raise Exception('TODO: spatialpy.Result.__setstate__()');
 
+        self.__dict__ = state
+
+        # Recreate the Result output files
+        # This does not restore file metadata like permissions.
+        # In the future we should probably at least restore permissions.
+        try:
+            results_output = state['results_output']
+            if not os.path.exists(state['result_dir']):
+                os.mkdir(state['result_dir'])
+                for filename, contents in results_output.items():
+                    fd = open(os.path.join(state['result_dir'], filename), 'wb')
+                    fd.seek(0)
+                    fd.write(contents)
+                    fd.close()
+        except Exception as e:
+            raise Exception("Error unpickling model, could not recreate the Result output files: "+str(e))
 
     def read_step(self, step_num, debug=False):
         """ Read the data for simulation step 'step_num'. """
@@ -155,7 +206,7 @@ class Result(dict):
 
         #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
         #                    num=self.model.num_timesteps+1, dtype=int)
-        t_index_arr = self.get_timespan();
+        t_index_arr = self.get_timespan()
 
         if timepoints is not None:
             if isinstance(timepoints,float):
@@ -257,7 +308,7 @@ class Result(dict):
 
         if use_matplotlib:
             import matplotlib.pyplot as plt
-            
+
             if (deterministic or not concentration):
                 d = data[spec_name]
             else:
@@ -354,10 +405,10 @@ class Result(dict):
             for i in range(1, len(t_ndx_list), speed):
                 _, _data = self.read_step(t_ndx_list[i])
                 _data = _data[spec_name] if deterministic or not concentration else _data[spec_name] / (_data['mass'] / _data['rho'])
-                if min(_data) < cmin:
-                    cmin = min(_data)
-                if max(_data) > cmax:
-                    cmax = max(_data)
+                if min(_data) - 0.1 < cmin:
+                    cmin = min(_data) - 0.1
+                if max(_data) + 0.1 > cmax:
+                    cmax = max(_data) + 0.1
 
             frames = []
             for index in range(0, len(t_ndx_list), speed):
@@ -366,7 +417,7 @@ class Result(dict):
                 # map data to types
                 types = {}
                 for i, val in enumerate(data['type']):
-                    name = "sub {}".format(val)
+                    name = species
                     if deterministic or not concentration:
                         spec_data = data[spec_name][i]
                     else:
@@ -399,6 +450,7 @@ class Result(dict):
         if return_plotly_figure:
             return fig
         else:
+            init_notebook_mode(connected=True)
             iplot(fig)
 
     def get_property(self, property_name, timepoints=None):
@@ -496,7 +548,7 @@ class Result(dict):
 
         if use_matplotlib:
             import matplotlib.pyplot as plt
-            
+
             if (property_name == 'v'):
                 d = data[property_name]
                 d = [d[i][p_ndx] for i in range(0,len(d))]
@@ -603,11 +655,11 @@ class Result(dict):
             for i in range(1, len(t_ndx_list), speed):
                 _, _data = self.read_step(t_ndx_list[i])
                 _cmin = min(_data[property_name]) if property_name != "v" else min(_data[property_name], key=lambda val: val[p_ndx])[p_ndx]
-                if _cmin < cmin:
-                    cmin = _cmin
+                if _cmin - 0.1 < cmin:
+                    cmin = _cmin - 0.1
                 _cmax = max(_data[property_name]) if property_name != "v" else max(_data[property_name], key=lambda val: val[p_ndx])[p_ndx]
-                if _cmax > cmax:
-                    cmax = _cmax
+                if _cmax + 0.1 > cmax:
+                    cmax = _cmax + 0.1
 
             frames = []
             for index in range(0, len(t_ndx_list), speed):
@@ -657,6 +709,7 @@ class Result(dict):
         if return_plotly_figure:
             return fig
         else:
+            init_notebook_mode(connected=True)
             iplot(fig)
 
 #    def __setattr__(self, k, v):

@@ -1,10 +1,10 @@
-/* *****************************************************************************
+/* *****************************************************************************************
 SSA-SDPD simulation engine
 Copyright 2018 Brian Drawert (UNCA)
 
-This program is distributed under the terms of the GNU General Public License.
+This program is distributed under the terms of the GNU GENERAL PUBLIC LICENSE Version 3.
 See the file LICENSE.txt for details.
-***************************************************************************** */
+***************************************************************************************** */
 #include "read_lammps_input_file.h"
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """ spatialpy model file for the MinCDE example. """
 
 import os.path
