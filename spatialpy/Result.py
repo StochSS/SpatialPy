@@ -50,16 +50,18 @@ def _plotly_iterate(types, size=5, property_name=None, cmin=None, cmax=None, col
         trace_list.append(trace)
     return trace_list
 
-class Result(dict):
-    """ Result object for a URDME simulation, extends the dict object. """
+class Result():
+    """ Result object for a URDME simulation. """
 
     def __init__(self, model=None, result_dir=None, loaddata=False):
         self.model = model
         self.U = None
         self.tspan = None
         self.data_is_loaded = False
+        self.success = False
         self.stdout = None
         self.stderr = None
+        self.timeout = False
         self.result_dir = result_dir
 
 

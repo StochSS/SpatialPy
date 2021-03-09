@@ -195,6 +195,7 @@ class Solver:
                             if stderr is not None:
                                 print(stderr.decode('utf-8'))
                     except subprocess.TimeoutExpired:
+                        result.timeout = True
                         # send signal to the process group
                         os.killpg(process.pid, signal.SIGINT)
                         stdout, stderr = process.communicate()
@@ -220,7 +221,7 @@ class Solver:
                 raise SimulationError(
                     "Solver execution failed, return code = {0}".format(return_code))
 
-            result["Status"] = "Success"
+            result.success = True
             if profile:
                 self.read_profile_info(result)
             if stdout is not None:
