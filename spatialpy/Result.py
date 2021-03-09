@@ -114,6 +114,48 @@ class Result():
 
         return not self.__eq__(other)
 
+    def __getstate__(self):
+            """ Used by pickle to get state when pickling. """
+
+            state = {}
+            for key, item in self.__dict__.items():
+                resultdict = OrderedDict()
+                # Pickle all Result output files
+                # This does not perserve file metadata like permissions.
+                # In the future we should probably at least perserve permissions.
+                try:
+                    for root, _, file in os.walk(self.result_dir):
+                        for filename in file:
+                            fd = open(os.path.join(root, filename), 'rb')
+                            fd.seek(0)
+                            resultdict[filename] = fd.read()
+                            fd.close()
+                    state['results_output'] = resultdict
+                except Exception as e:
+                    raise Exception("Error pickling model, could not pickle the Result output files: "+str(e))
+                state[key] = item
+
+            return state
+
+    def __setstate__(self, state):
+        """ Used by pickle to set state when unpickling. """
+
+        self.__dict__ = state
+
+        # Recreate the Result output files
+        # This does not restore file metadata like permissions.
+        # In the future we should probably at least restore permissions.
+        try:
+            results_output = state['results_output']
+            if not os.path.exists(state['result_dir']):
+                os.mkdir(state['result_dir'])
+                for filename, contents in results_output.items():
+                    fd = open(os.path.join(state['result_dir'], filename), 'wb')
+                    fd.seek(0)
+                    fd.write(contents)
+                    fd.close()
+        except Exception as e:
+            raise Exception("Error unpickling model, could not recreate the Result output files: "+str(e))
 
     def read_step(self, step_num, debug=False):
         """ Read the data for simulation step 'step_num'. """
