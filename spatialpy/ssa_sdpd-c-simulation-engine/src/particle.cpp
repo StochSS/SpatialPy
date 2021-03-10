@@ -53,7 +53,7 @@ namespace Spatialpy{
     }
 
     NeighborNode::NeighborNode(Particle *data, double dist, double dWdr, double D_i_j):data(data), dist(dist), dWdr(dWdr), D_i_j(D_i_j){}
-    EventNode::EventNode(Particle *data, double tt):data(data), tt(tt){}
+    //EventNode::EventNode(Particle *data, double tt):data(data), tt(tt){}
 
     void Particle::check_particle_nan(){
         if(
