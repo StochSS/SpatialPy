@@ -92,14 +92,14 @@ class Result():
             bool """
 
         if isinstance(other, Result) and self.result_dir != None and other.result_dir != None:
-                # Compare contents, not shallow compare
-                filecmp.cmpfiles.__defaults__ = (False,)
-                dircmp = filecmp.dircmp(self.result_dir, other.result_dir)
-                # Raise exception if funny_files
-                assert not dircmp.funny_files
-                if not (dircmp.left_only or dircmp.right_only or dircmp.funny_files or dircmp.diff_files):
-                    return True
-                return False
+            # Compare contents, not shallow compare
+            filecmp.cmpfiles.__defaults__ = (False,)
+            dircmp = filecmp.dircmp(self.result_dir, other.result_dir)
+            # Raise exception if funny_files
+            assert not dircmp.funny_files
+            if not (dircmp.left_only or dircmp.right_only or dircmp.funny_files or dircmp.diff_files):
+                return True
+            return False
         return NotImplemented
 
     def __ne__(self, other):
@@ -294,7 +294,7 @@ class Result():
         """
         from plotly.offline import init_notebook_mode, iplot
 
-        if(t_ndx < 0):
+        if t_ndx < 0:
             t_ndx = len(self.get_timespan()) + t_ndx
 
         if animated and t_ndx_list is None:
