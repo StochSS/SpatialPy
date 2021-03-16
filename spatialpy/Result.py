@@ -1,9 +1,9 @@
+import csv
 import filecmp
 import math
 import os
 import pickle
 import shutil
-import subprocess
 
 import numpy
 
@@ -750,36 +750,42 @@ class Result():
         except Exception as e:
             pass
 
-    def export_to_csv(self, folder_name):
-        """ Dump trajectory to a set CSV files, the first specifies the mesh (mesh.csv) and the rest specify trajectory data for each species (species_S.csv for species named 'S').
-            The columns of mesh.csv are: 'Voxel ID', 'X', 'Y', 'Z', 'Volume', 'Type'.
-            The columns of species_S.csv are: 'Time', 'Voxel 0', Voxel 1', ... 'Voxel N'.
-        """
-        #TODO: Check if this still works
-        import csv
-        subprocess.call(["mkdir", "-p", folder_name])
-        #['Voxel ID', 'X', 'Y', 'Z', 'Volume', 'Type']
-        with open(os.path.join(folder_name,'mesh.csv'), 'w+') as csvfile:
-            writer = csv.writer(csvfile, delimiter=',')
-            writer.writerow(['Voxel ID', 'X', 'Y', 'Z', 'Volume', 'Type'])
-            vol = self.model.get_solver_datastructure()['vol']
-            for ndx in range(self.model.mesh.get_num_voxels()):
-                row = [ndx]+self.model.mesh.coordinates()[ndx,:].tolist()+[vol[ndx]]+[self.model.mesh.type[ndx]]
-                writer.writerow(row)
+    def export_to_csv(self, folder_name='./'):
+        """ Write the trajectory to a set CSV files. The first, modelname_mesh.csv, specifies the mesh.
+            The other files, modelname_species_S.csv, for species named S, specify trajectory data for each species.
+            The columns of modelname_mesh.csv are: 'Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity'
+            The columns of modelname_species_S.csv: 'Time', 'Voxel 0', Voxel 1', ... 'Voxel N'.
 
-        for spec in self.model.listOfSpecies:
+        Attributes
+        ----------
+        folder_name: str (default ./)
+            A path where the csv files will be written
+        """
+        if not os.path.exists(folder_name):
+                os.mkdir(folder_name)
+
+        #['Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity']
+        with open(os.path.join(folder_name, self.model.name + '_mesh.csv'), 'w+') as csvfile:
+            mesh = self.model.mesh
+            writer = csv.writer(csvfile, delimiter=',')
+            writer.writerow(['Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity'])
+            for ndx in range(len(mesh.vertices)):
+                writer.writerow([ndx] + mesh.coordinates()[ndx,:].tolist() + [mesh.type[ndx]] \
+                    + [mesh.vol[ndx]] + [mesh.mass[ndx]] + [mesh.nu[ndx]])
+
+        for species in self.model.listOfSpecies:
             #['Time', 'Voxel 0', Voxel 1', ... 'Voxel N']
-            with open(os.path.join(folder_name,'species_{0}.csv'.format(spec)), 'w+') as csvfile:
-                data = self.get_species(spec)
-                (num_t,num_vox) = data.shape
+            with open(os.path.join(folder_name, self.model.name + '_species_{0}.csv'.format(species)), 'w+') as csvfile:
+                data = self.get_species(species)
+                (num_time,num_vox) = data.shape
                 writer = csv.writer(csvfile, delimiter=',')
                 row = ['Time']
-                for v in range(num_vox):
-                    row.append('Voxel {0}'.format(v))
+                for voxel in range(num_vox):
+                    row.append('Voxel {0}'.format(voxel))
                 writer.writerow(row)
                 timespan = self.get_timespan()
-                for t in range(num_t):
-                    writer.writerow([timespan[t].tolist()] + data[t,:].tolist())
+                for time in range(num_time):
+                    writer.writerow([timespan[time].tolist()] + data[time,:].tolist())
 
     def export_to_vtk(self, species, folder_name):
         """ Dump the trajectory to a collection of vtk files in the folder folder_name (created if non-existant).
