@@ -751,7 +751,7 @@ class Result():
             pass
 
     def export_to_csv(self, folder_name='./'):
-        """ Write the trajectory to a set CSV files. The first, modelname_mesh.csv, specifies the mesh.
+        """ Write the trajectory to a set of CSV files. The first, modelname_mesh.csv, specifies the mesh.
             The other files, modelname_species_S.csv, for species named S, specify trajectory data for each species.
             The columns of modelname_mesh.csv are: 'Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity'
             The columns of modelname_species_S.csv: 'Time', 'Voxel 0', Voxel 1', ... 'Voxel N'.
@@ -792,14 +792,6 @@ class Result():
             The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension. """
         #TODO
         raise Exception("todo")
-
-
-
-
-    def display(self, species, time_index, opacity=1.0, wireframe=True, width=500, camera=[0,0,1]):
-        """ Plot the trajectory as a PDE style plot. """
-        raise Exception("Deprecated")
-
 
 class ResultError(Exception):
     pass
