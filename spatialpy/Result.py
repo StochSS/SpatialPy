@@ -91,7 +91,7 @@ class Result():
         Return:
             bool """
 
-        if isinstance(other, Result) and self.result_dir != None and other.result_dir != None:
+        if isinstance(other, Result) and self.result_dir and other.result_dir:
             # Compare contents, not shallow compare
             filecmp.cmpfiles.__defaults__ = (False,)
             dircmp = filecmp.dircmp(self.result_dir, other.result_dir)
@@ -115,27 +115,27 @@ class Result():
         return not self.__eq__(other)
 
     def __getstate__(self):
-            """ Used by pickle to get state when pickling. """
+        """ Used by pickle to get state when pickling. """
 
-            state = {}
-            for key, item in self.__dict__.items():
-                resultdict = OrderedDict()
-                # Pickle all Result output files
-                # This does not perserve file metadata like permissions.
-                # In the future we should probably at least perserve permissions.
-                try:
-                    for root, _, file in os.walk(self.result_dir):
-                        for filename in file:
-                            fd = open(os.path.join(root, filename), 'rb')
-                            fd.seek(0)
-                            resultdict[filename] = fd.read()
-                            fd.close()
-                    state['results_output'] = resultdict
-                except Exception as e:
-                    raise Exception("Error pickling model, could not pickle the Result output files: "+str(e))
-                state[key] = item
+        state = {}
+        for key, item in self.__dict__.items():
+            resultdict = OrderedDict()
+            # Pickle all Result output files
+            # This does not perserve file metadata like permissions.
+            # In the future we should probably at least perserve permissions.
+            try:
+                for root, _, file in os.walk(self.result_dir):
+                    for filename in file:
+                        fd = open(os.path.join(root, filename), 'rb')
+                        fd.seek(0)
+                        resultdict[filename] = fd.read()
+                        fd.close()
+                state['results_output'] = resultdict
+            except Exception as e:
+                raise Exception("Error pickling model, could not pickle the Result output files: "+str(e))
+            state[key] = item
 
-            return state
+        return state
 
     def __setstate__(self, state):
         """ Used by pickle to set state when unpickling. """
@@ -536,7 +536,7 @@ class Result():
         mpl_height: int (default 4.8)
             Height in inches of output plot box
         """
-        if(t_ndx < 0):
+        if t_ndx < 0:
             t_ndx = len(self.get_timespan()) + t_ndx
 
         if animated and t_ndx_list is None:
@@ -549,7 +549,7 @@ class Result():
         if use_matplotlib:
             import matplotlib.pyplot as plt
 
-            if (property_name == 'v'):
+            if property_name == 'v':
                 d = data[property_name]
                 d = [d[i][p_ndx] for i in range(0,len(d))]
             else:
@@ -762,7 +762,7 @@ class Result():
             A path where the csv files will be written
         """
         if not os.path.exists(folder_name):
-                os.mkdir(folder_name)
+            os.mkdir(folder_name)
 
         #['Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity']
         with open(os.path.join(folder_name, self.model.name + '_mesh.csv'), 'w+') as csvfile:
