@@ -774,18 +774,17 @@ class Result():
                     + [mesh.vol[ndx]] + [mesh.mass[ndx]] + [mesh.nu[ndx]])
 
         for species in self.model.listOfSpecies:
-            #['Time', 'Voxel 0', Voxel 1', ... 'Voxel N']
+            #['Voxel', 'Time 0', Time 1', ... 'Time N']
             with open(os.path.join(folder_name, self.model.name + '_species_{0}.csv'.format(species)), 'w+') as csvfile:
                 data = self.get_species(species)
-                (num_time,num_vox) = data.shape
+                (num_time, num_vox) = data.shape
                 writer = csv.writer(csvfile, delimiter=',')
-                row = ['Time']
-                for voxel in range(num_vox):
-                    row.append('Voxel {0}'.format(voxel))
-                writer.writerow(row)
-                timespan = self.get_timespan()
+                header_row = ['Voxel']
                 for time in range(num_time):
-                    writer.writerow([timespan[time].tolist()] + data[time,:].tolist())
+                    header_row.append('Time {0}'.format(time))
+                writer.writerow(header_row)
+                for voxel in range(num_vox):
+                    writer.writerow([(str(voxel))] + data[:,voxel].tolist())
 
     def export_to_vtk(self, species, folder_name):
         """ Dump the trajectory to a collection of vtk files in the folder folder_name (created if non-existant).
