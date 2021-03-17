@@ -759,7 +759,7 @@ class Result():
         Attributes
         ----------
         folder_name: str (default ./)
-            A path where the csv files will be written
+            A path where the csv files will be written (created if non-existant)
         """
         if not os.path.exists(folder_name):
             os.mkdir(folder_name)
@@ -784,13 +784,24 @@ class Result():
                     header_row.append('Time {0}'.format(time))
                 writer.writerow(header_row)
                 for voxel in range(num_vox):
-                    writer.writerow([(str(voxel))] + data[:,voxel].tolist())
+                    writer.writerow([voxel] + data[:,voxel].tolist())
 
-    def export_to_vtk(self, species, folder_name):
-        """ Dump the trajectory to a collection of vtk files in the folder folder_name (created if non-existant).
-            The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension. """
-        #TODO
-        raise Exception("todo")
+    def export_to_vtk(self, species=None, folder_name='./'):
+        """ Write the trajectory to a collection of vtk files.
+            The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension.
+
+        Attributes
+        ----------
+        species: list (default None)
+            A list of species to export data from. If none are provided all species will exported
+        folder_name: str (default ./)
+            A path where the vtk files will be written (created if non-existant)
+        """
+        if not os.path.exists(folder_name):
+            os.mkdir(folder_name)
+
+        if not species:
+            species = list(self.model.get_all_species())
 
 class ResultError(Exception):
     pass
