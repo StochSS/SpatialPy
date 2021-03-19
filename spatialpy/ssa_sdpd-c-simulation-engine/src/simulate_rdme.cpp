@@ -70,8 +70,8 @@ namespace Spatialpy{
     }
     /**************************************************************************/
     void destroy_rdme(ParticleSystem*system){
-        if(debug_flag) printf("NSM: total # reacton events %lu\n",system->rdme->total_reactions);
-        if(debug_flag) printf("NSM: total # diffusion events %lu\n",system->rdme->total_diffusion);
+        if(debug_flag) printf("NSM: total # reacton events %lu\n",system->total_reactions);
+        if(debug_flag) printf("NSM: total # diffusion events %lu\n",system->total_diffusion);
     }
 
 
@@ -92,7 +92,7 @@ namespace Spatialpy{
             p2 = nn.data;
             printf("%i: nn->D_i_j=%e \n",p2->id,nn.D_i_j);
         }
-        
+
     }
 
     /*void nsm_core(const size_t *irD,const size_t *jcD,const double *prD,
@@ -324,7 +324,7 @@ namespace Spatialpy{
             Particle *p ;
             p = &system->particles[i] ;
             //p = e->data;
-            
+
             //long unsigned int srng = rng() ;
             //long unsigned int rng_max = rng.max() ;
             //double tt = -log(1.0-(rng() * 1.0 / rng.max())) / (p->srrate+p->sdrate);
@@ -333,10 +333,10 @@ namespace Spatialpy{
             if(propensities[i] > 0){
                 activeChannels++
             }
-            if(p.particle_index != i){
+            if(p->particle_index != i){
                 // particles can move around in the sys->particles vector,
                 // this ensures that we know where in the vector each particle is
-                p.particle_index = i;
+                p->particle_index = i;
             }
 
             //system->event_v.emplace_back(p, tt) ;
@@ -345,7 +345,7 @@ namespace Spatialpy{
         // ordered_list_sort(system->heap);
 
         double timeOffset = system->current_step * system->dt;
-        
+
         // TODO: does this deallocate memory on the 2nd call?  No
         // TODO: make a deallocation function
         system->rdme_event_q.build(propensities, rng, propensitySum, activeChannels,
@@ -533,7 +533,8 @@ namespace Spatialpy{
         double totrate,cum,rdelta,rrdelta;
         int event,errcode = 0;
         long unsigned int re, spec = 0 ;
-        Particle*subvol;
+        Particle *subvol;
+        int subvol_index;
         size_t i,j = 0;
         //double old_rrate = 0.0,old_drate = 0.0;
         double rand1,rand2,cum2,old;
@@ -579,7 +580,7 @@ namespace Spatialpy{
             timeRxnPair = system->rdme_event_q.selectReaction();
             tt = timeRxnPair.first;
             subvol_index = timeRxnPair.second;
-            subvol = system->particles[subvol_index];
+            subvol = &system->particles[subvol_index];
             vol = (subvol->mass / subvol->rho);
 
             if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}
@@ -855,7 +856,7 @@ namespace Spatialpy{
 //                }
                 //ordered_list_bubble_up_down(system->heap, dest_subvol->heap_index);
 
-                system->rdme_event_q.update(dest_subvol.particle_index, totrate, tt, rng);
+                system->rdme_event_q.update(dest_subvol->particle_index, totrate, tt, rng);
             }
 
             // re-sort the heap

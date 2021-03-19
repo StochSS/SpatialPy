@@ -53,7 +53,7 @@ namespace Spatialpy{
     }
 
     NeighborNode::NeighborNode(Particle *data, double dist, double dWdr, double D_i_j):data(data), dist(dist), dWdr(dWdr), D_i_j(D_i_j){}
-    EventNode::EventNode(Particle *data, double tt):data(data), tt(tt){}
+    // EventNode::EventNode(Particle *data, double tt):data(data), tt(tt){}
 
     void Particle::check_particle_nan(){
         if(
@@ -123,7 +123,7 @@ namespace Spatialpy{
     	// double c = x[2] - neighbor.x[2];
     	// double r2 =  ( a*a + b*b + c*c);
     	// Make sure the distance was actually set by the annkFRSearch
-        double r2_old = r2;
+        //double r2_old = r2;
         if(r2 == ANN_DIST_INF) {
             r2 = particle_dist_sqrd(neighbor) ;
         }
