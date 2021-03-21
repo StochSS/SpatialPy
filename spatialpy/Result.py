@@ -750,7 +750,7 @@ class Result():
         except Exception as e:
             pass
 
-    def export_to_csv(self, folder_name='./'):
+    def export_to_csv(self, folder_name=None):
         """ Write the trajectory to a set of CSV files. The first, modelname_mesh.csv, specifies the mesh.
             The other files, modelname_species_S.csv, for species named S, specify trajectory data for each species.
             The columns of modelname_mesh.csv are: 'Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity'
@@ -758,10 +758,14 @@ class Result():
 
         Attributes
         ----------
-        folder_name: str (default ./)
-            A path where the csv files will be written (created if non-existant)
+        folder_name: str (default current working directory)
+            A path where the vtk files will be written, created if non-existant.
+            If no path is provided current working directory is used.
         """
-        if not os.path.exists(folder_name):
+
+        if not folder_name:
+            folder_name = os.path.abspath(os.getcwd())
+        elif not os.path.exists(folder_name):
             os.mkdir(folder_name)
 
         #['Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity']
@@ -786,7 +790,7 @@ class Result():
                 for voxel in range(num_vox):
                     writer.writerow([voxel] + data[:,voxel].tolist())
 
-    def export_to_vtk(self, species=None, folder_name='./'):
+    def export_to_vtk(self, species=None, folder_name=None):
         """ Write the trajectory to a collection of vtk files.
             The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension.
 
@@ -794,10 +798,14 @@ class Result():
         ----------
         species: list (default None)
             A list of species to export data from. If none are provided all species will exported
-        folder_name: str (default ./)
-            A path where the vtk files will be written (created if non-existant)
+        folder_name: str (default current working directory)
+            A path where the vtk files will be written, created if non-existant.
+            If no path is provided current working directory is used.
         """
-        if not os.path.exists(folder_name):
+
+        if not folder_name:
+            folder_name = os.path.abspath(os.getcwd())
+        elif not os.path.exists(folder_name):
             os.mkdir(folder_name)
 
         if not species:
