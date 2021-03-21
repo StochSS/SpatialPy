@@ -126,10 +126,9 @@ class Result():
             try:
                 for root, _, file in os.walk(self.result_dir):
                     for filename in file:
-                        fd = open(os.path.join(root, filename), 'rb')
-                        fd.seek(0)
-                        resultdict[filename] = fd.read()
-                        fd.close()
+                        with open(os.path.join(root, filename), 'rb') as fd:
+                            fd.seek(0)
+                            resultdict[filename] = fd.read()
                 state['results_output'] = resultdict
             except Exception as e:
                 raise Exception("Error pickling model, could not pickle the Result output files: "+str(e))
@@ -150,10 +149,9 @@ class Result():
             if not os.path.exists(state['result_dir']):
                 os.mkdir(state['result_dir'])
                 for filename, contents in results_output.items():
-                    fd = open(os.path.join(state['result_dir'], filename), 'wb')
-                    fd.seek(0)
-                    fd.write(contents)
-                    fd.close()
+                    with open(os.path.join(state['result_dir'], filename), 'wb') as fd:
+                        fd.seek(0)
+                        fd.write(contents)
         except Exception as e:
             raise Exception("Error unpickling model, could not recreate the Result output files: "+str(e))
 
