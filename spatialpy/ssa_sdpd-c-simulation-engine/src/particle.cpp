@@ -6,7 +6,6 @@ This program is distributed under the terms of the GNU General Public License.
 See the file LICENSE.txt for details.
 ***************************************************************************** */
 #include "particle.hpp"
-#include "NRMConstant_v5.hpp"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>

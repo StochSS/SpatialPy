@@ -15,7 +15,6 @@ See the file LICENSE.txt for details.
 #include "propensities.hpp"
 #include <ANN/ANN.h> // ANN KD Tree
 
-class NRMConstant_v5 ;
 #include "NRMConstant_v5.hpp"
 
 extern int debug_flag ;
