@@ -533,7 +533,7 @@ namespace Spatialpy{
         double totrate,cum,rdelta,rrdelta;
         int event,errcode = 0;
         long unsigned int re, spec = 0 ;
-        Particle *subvol;
+        Particle& subvol;
         int subvol_index;
         size_t i,j = 0;
         //double old_rrate = 0.0,old_drate = 0.0;
@@ -580,7 +580,7 @@ namespace Spatialpy{
             timeRxnPair = system->rdme_event_q.selectReaction();
             tt = timeRxnPair.first;
             subvol_index = timeRxnPair.second;
-            subvol = &system->particles[subvol_index];
+            subvol = system->particles[subvol_index];
             vol = (subvol->mass / subvol->rho);
 
             if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}
