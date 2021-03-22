@@ -2,6 +2,7 @@
 #include "output.h"
 #include "particle.hpp"
 #include "simulate_rdme.hpp"
+#include "NRMConstant_v5.hpp"
 //#include "dSFMT/dSFMT.h"
 #include <random>
 #include <errno.h>
@@ -362,7 +363,7 @@ namespace Spatialpy{
         
         // TODO: does this deallocate memory on the 2nd call?  No
         // TODO: make a deallocation function
-        system->rdme_event_q.build(propensities, rng, propensitySum, activeChannels,
+        system->rdme_event_q.build(system->particles, rng, propensitySum, activeChannels,
                                    timeOffset );
 
     }

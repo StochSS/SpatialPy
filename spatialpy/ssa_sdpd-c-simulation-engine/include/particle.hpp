@@ -13,8 +13,9 @@ See the file LICENSE.txt for details.
 #include <queue>
 #include <memory>
 #include "propensities.hpp"
-// Include ANN KD Tree
-#include <ANN/ANN.h>
+#include <ANN/ANN.h> // ANN KD Tree
+
+class NRMConstant_v5 ;
 #include "NRMConstant_v5.hpp"
 
 extern int debug_flag ;

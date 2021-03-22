@@ -9,6 +9,7 @@ See the file LICENSE.txt for details.
 #define simulate_rdme_h
 #include "particle.hpp"
 #include "propensities.hpp"
+#include "NRMConstant_v5.hpp"
 #include <random>
 
 namespace Spatialpy{
