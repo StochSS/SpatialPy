@@ -4,6 +4,7 @@ import math
 import os
 import pickle
 import shutil
+import tempfile
 
 import numpy
 
@@ -146,12 +147,12 @@ class Result():
         # In the future we should probably at least restore permissions.
         try:
             results_output = state['results_output']
-            if not os.path.exists(state['result_dir']):
-                os.mkdir(state['result_dir'])
-                for filename, contents in results_output.items():
-                    with open(os.path.join(state['result_dir'], filename), 'wb') as fd:
-                        fd.seek(0)
-                        fd.write(contents)
+            state['result_dir'] = tempfile.mkdtemp(
+                prefix='spatialpy_result_', dir=os.environ.get('SPATIALPY_TMPDIR'))
+            for filename, contents in results_output.items():
+                with open(os.path.join(state['result_dir'], filename), 'wb') as fd:
+                    fd.seek(0)
+                    fd.write(contents)
         except Exception as e:
             raise Exception("Error unpickling model, could not recreate the Result output files: "+str(e))
 
