@@ -148,7 +148,7 @@ namespace Spatialpy{
     void NRMConstant_v5::update(std::size_t reactionIndex, double newPropensity, double currentTime, std::mt19937_64& rng) {
 
         double firingTime;
-        if (newPropensity==0) {
+        if (newPropensity <= 0.0) {
             firingTime=std::numeric_limits<double>::infinity();
             if (nextFiringTime.at(reactionIndex)!=std::numeric_limits<double>::infinity()) {
                 activeChannelCounter--;
@@ -229,9 +229,14 @@ namespace Spatialpy{
             if (theHashTable[minBin][i].first<theHashTable[minBin][minTimeRxnIndex].first) {
                 minTimeRxnIndex=i;
             }
+            /*if (theHashTable[minBin][i].first < 0.0) {
+                printf("Index: %i tt: %f\n",theHashTable[minBin][i].second, theHashTable[minBin][i].first);
+            }*/
         }
-
-        
+        /*if (theHashTable[minBin][minTimeRxnIndex].first < 0.0) {
+            printf("First: %f\n", theHashTable[minBin][minTimeRxnIndex].first);
+            printf("Selecting: %i\n", theHashTable[minBin][minTimeRxnIndex].second);
+        }*/
         previousFiringTime=theHashTable[minBin][minTimeRxnIndex].first;
         ++rxnCountThisBuildOrRebuild;
     //    std::cout << "returning time=" <<theHashTable[minBin][minTimeRxnIndex].first<<", reaction index=" << theHashTable[minBin][minTimeRxnIndex].second << " in selectReaction\n";

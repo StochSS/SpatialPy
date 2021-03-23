@@ -595,7 +595,6 @@ namespace Spatialpy{
             subvol_index = timeRxnPair.second;
             subvol = &system->particles[subvol_index];
             vol = (subvol->mass / subvol->rho);
-
             if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}
             /* First check if it is a reaction or a diffusion event. */
             totrate = subvol->srrate + subvol->sdrate;
@@ -689,7 +688,7 @@ namespace Spatialpy{
                 if(spec >= system->num_stoch_species){
                     //printf("Diffusion species overflow\n");
                     // try again, 'cum' is a better estimate of the propensity sum
-                    if(cum != subvol->srrate){
+                    if(cum != subvol->sdrate){
                         printf("Diffusion propensity mismatch in voxel %i. spec=%li, sdrate[subvol]=%e cum=%e diff_rand=%e\n",subvol->id,spec,subvol->sdrate,cum,diff_rand);
                         rdelta = 0.0;
                         for(j = 0; j < system->num_stoch_species; j++){
