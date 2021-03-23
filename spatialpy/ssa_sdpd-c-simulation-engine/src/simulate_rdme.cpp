@@ -547,7 +547,7 @@ namespace Spatialpy{
         double totrate,cum,rdelta,rrdelta;
         int event,errcode = 0;
         long unsigned int re, spec = 0 ;
-        Particle *subvol;
+        Particle* subvol;
         size_t i,j = 0;
         //double old_rrate = 0.0,old_drate = 0.0;
         double rand1,rand2,cum2,old;
