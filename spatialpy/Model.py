@@ -36,7 +36,7 @@ class Model():
         self.species_map = {}
 
         ######################
-        self.mesh = None
+        self.domain = None
         self.listOfTypeIDs = [1] # starts with type '1'
         self.listOfDiffusionRestrictions = {}
         self.listOfDataFunctions = []
@@ -60,7 +60,7 @@ class Model():
 
         def decorate(header):
             return f"\n{divider}{header}{divider}"
-        
+
         print_string = f"{self.name}"
         if len(self.listOfSpecies):
             print_string += decorate("Species")
@@ -82,9 +82,9 @@ class Model():
             print_string += decorate("Reactions")
             for _, reaction in self.listOfReactions.items():
                 print_string += f"\n{str(reaction)}"
-        if self.mesh is not None:
+        if self.domain is not None:
             print_string += decorate("Domain")
-            print_string += f"\n{str(self.mesh)}"
+            print_string += f"\n{str(self.domain)}"
 
         return print_string
 
@@ -159,25 +159,25 @@ class Model():
             nu: (float) the viscosity of each particle in the type
             fixed: (bool) are the particles in this type immobile
         Return values:
-            Number of mesh points that were tagged with this type_id
+            Number of domain points that were tagged with this type_id
         """
 
-        if self.mesh is None:
-            raise Exception("SpatialPy models must have a mesh before types can be attached");
+        if self.domain is None:
+            raise Exception("SpatialPy models must have a domain before types can be attached");
         if type_id not in self.listOfTypeIDs:
             # index is the "particle type", value is the "type ID"
             self.listOfTypeIDs.append(type_id)
         # apply the type to all points, set type for any points that match
         count = 0
-        on_boundary = self.mesh.find_boundary_points()
-        for v_ndx in range(self.mesh.get_num_voxels()):
-            if geometry_ivar.inside( self.mesh.coordinates()[v_ndx,:], on_boundary[v_ndx]):
-                self.mesh.type[v_ndx] = type_id
+        on_boundary = self.domain.find_boundary_points()
+        for v_ndx in range(self.domain.get_num_voxels()):
+            if geometry_ivar.inside( self.domain.coordinates()[v_ndx,:], on_boundary[v_ndx]):
+                self.domain.type[v_ndx] = type_id
                 if (mass is not None):
-                    self.mesh.mass[v_ndx] = mass
+                    self.domain.mass[v_ndx] = mass
                 if (nu is not None):
-                    self.mesh.nu[v_ndx] = nu
-                self.mesh.fixed[v_ndx] = fixed
+                    self.domain.nu[v_ndx] = nu
+                self.domain.fixed[v_ndx] = fixed
                 count +=1
         if count == 0:
             warnings.warn("Type with type_id={0} has zero particles in it".format(type_id))
@@ -200,18 +200,18 @@ class Model():
         else:
             self.listOfDiffusionRestrictions[species] = listOfTypes
 
-    def add_mesh(self, mesh):
+    def add_domain(self, domain):
         '''
-        Add a mesh to the model
+        Add a domain to the model
 
-        mesh : Mesh
-            The Mesh to be added to the model
+        domani : Domain
+            The Domain object to be added to the model
         '''
-        if type(mesh).__name__ != 'Mesh':
-            raise ModelError("Unexpected parameter for add_mesh. Parameter must be a Mesh.")
+        if type(domain).__name__ != 'Domain':
+            raise ModelError("Unexpected parameter for add_domain. Parameter must be a Domain.")
 
-        self.mesh = mesh
-        self.listOfTypeIDs = list(set(mesh.type))
+        self.domain = domain
+        self.listOfTypeIDs = list(set(domain.type))
 
     def add_data_function(self, data_function):
         """ Add a scalar spatial function to the simulation. This is useful if you have a
@@ -480,7 +480,7 @@ class Model():
         """ Initalize the u0 matrix (zeros) and then apply each initial condition"""
         # initalize
         ns = self.get_num_species()
-        nv = self.mesh.get_num_voxels()
+        nv = self.domain.get_num_voxels()
         self.u0 = numpy.zeros((ns, nv))
         # apply initial condition functions
         for ic in self.listOfInitialConditions:

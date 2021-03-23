@@ -194,7 +194,7 @@ class Result():
 
         species_map = self.model.species_map
         num_species = self.model.get_num_species()
-        num_voxel = self.model.mesh.get_num_voxels()
+        num_voxel = self.model.domain.get_num_voxels()
 
         if isinstance(species,str):
             spec_name = species
@@ -341,7 +341,7 @@ class Result():
             else:
                 types[name] = {"points":[points[i]], "data":[spec_data]}
 
-        is_2d = self.model.mesh.zlim[0] == self.model.mesh.zlim[1]
+        is_2d = self.model.domain.zlim[0] == self.model.domain.zlim[1]
 
         trace_list = _plotly_iterate(types, size=size, colormap=colormap, is_2d=is_2d)
 
@@ -349,7 +349,7 @@ class Result():
             "aspectmode": 'data',
         }
         layout = {"width": width, "height": width, "scene":scene,
-                  "xaxis":{"range":self.model.mesh.xlim}, "yaxis":{"range":self.model.mesh.ylim}
+                  "xaxis":{"range":self.model.domain.xlim}, "yaxis":{"range":self.model.domain.ylim}
                  }
         if title is not None:
             layout["title"] = title
@@ -465,7 +465,7 @@ class Result():
 
         t_index_arr = numpy.linspace(0,self.model.num_timesteps,
                             num=self.model.num_timesteps+1, dtype=int)
-        num_voxel = self.model.mesh.get_num_voxels()
+        num_voxel = self.model.domain.get_num_voxels()
 
         if timepoints is not None:
             if isinstance(timepoints,float):
@@ -590,7 +590,7 @@ class Result():
                 "data" : data[property_name]
             }
 
-        is_2d = self.model.mesh.zlim[0] == self.model.mesh.zlim[1]
+        is_2d = self.model.domain.zlim[0] == self.model.domain.zlim[1]
 
         trace_list = _plotly_iterate(types, size=size, property_name=property_name,
                                      colormap=colormap, is_2d=is_2d)
@@ -599,7 +599,7 @@ class Result():
             "aspectmode": 'data',
         }
         layout = {"width": width, "height": width, "scene":scene,
-                  "xaxis":{"range":self.model.mesh.xlim}, "yaxis":{"range":self.model.mesh.ylim}
+                  "xaxis":{"range":self.model.domain.xlim}, "yaxis":{"range":self.model.domain.ylim}
                  }
 
         if title is not None:
@@ -763,8 +763,8 @@ class Result():
             writer = csv.writer(csvfile, delimiter=',')
             writer.writerow(['Voxel ID', 'X', 'Y', 'Z', 'Volume', 'Type'])
             vol = self.model.get_solver_datastructure()['vol']
-            for ndx in range(self.model.mesh.get_num_voxels()):
-                row = [ndx]+self.model.mesh.coordinates()[ndx,:].tolist()+[vol[ndx]]+[self.model.mesh.type[ndx]]
+            for ndx in range(self.model.domain.get_num_voxels()):
+                row = [ndx]+self.model.domain.coordinates()[ndx,:].tolist()+[vol[ndx]]+[self.model.domain.type[ndx]]
                 writer.writerow(row)
 
         for spec in self.model.listOfSpecies:
