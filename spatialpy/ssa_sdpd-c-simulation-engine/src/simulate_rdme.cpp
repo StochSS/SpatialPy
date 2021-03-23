@@ -315,8 +315,21 @@ namespace Spatialpy{
         double propensitySum=0.0;
         std::size_t activeChannels=0; // initial number of nonzero propensities (typically improves initial performance)
 
-
-
+        long unsigned int p_i = 0 ;
+        for(auto p = system->particles.begin(); p!=system->particles.end(); p++){
+            propensities[p_i] = p->srrate + p->sdrate;
+            propensitySum += propensities[p_i];
+            if(propensities[p_i] > 0){
+                activeChannels++ ;
+            }
+            if(p->particle_index != p_i){
+                // particles can move around in the sys->particles vector,
+                // this ensures that we know where in the vector each particle is
+                p->particle_index = p_i;
+            }
+            p_i++ ;
+        }
+        /**
         for(long unsigned int i=0; i<system->particles.size(); i++){
         //for (i = 0; i < rdme->Ncells; i++) {
             //rdme->rtimes[i] = -log(1.0-dsfmt_genrand_close_open(&dsfmt))/(rdme->srrate[i]+rdme->sdrate[i]);
@@ -341,6 +354,7 @@ namespace Spatialpy{
 
             //system->event_v.emplace_back(p, tt) ;
         }
+    **/
         //initialize_heap(rdme->rtimes,rdme->node,rdme->heap,rdme->Ncells);
         // ordered_list_sort(system->heap);
 
@@ -533,8 +547,7 @@ namespace Spatialpy{
         double totrate,cum,rdelta,rrdelta;
         int event,errcode = 0;
         long unsigned int re, spec = 0 ;
-        Particle& subvol;
-        int subvol_index;
+        Particle* subvol;
         size_t i,j = 0;
         //double old_rrate = 0.0,old_drate = 0.0;
         double rand1,rand2,cum2,old;
@@ -565,7 +578,7 @@ namespace Spatialpy{
 
 
         std::pair<double,int> timeRxnPair;
-        int reactionIndex;
+        int reactionIndex, subvol_index;
         /* Main loop. */
         while(tt <= end_time){
 
@@ -580,7 +593,7 @@ namespace Spatialpy{
             timeRxnPair = system->rdme_event_q.selectReaction();
             tt = timeRxnPair.first;
             subvol_index = timeRxnPair.second;
-            subvol = system->particles[subvol_index];
+            subvol = &system->particles[subvol_index];
             vol = (subvol->mass / subvol->rho);
 
             if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}

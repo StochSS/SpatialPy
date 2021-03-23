@@ -18,8 +18,6 @@
 // removes vectors and replace with hashmap (unordered_map) to allow adding or removing "channels"
 // removed PROFILE code (look at old version for old profiling data)
 
-#include "particle.hpp"
-
 #include <iostream>
 #include <vector>
 #include <random>
@@ -142,7 +140,6 @@ class NRMConstant_v5 {
     template <typename generatorType>
     void build(std::vector<Spatialpy::Particle> particles, generatorType& generator, double propensitySum, std::size_t activeChannels, double timeOffset=0.0, double simulationEndTime=std::numeric_limits<double>::max()) {
         //        std::cout << "in build..." << std::endl;
-        
         activeChannelCounter=activeChannels;
         endTime=simulationEndTime;
         previousFiringTime=timeOffset;//initialize (could set to nan or something instead)
@@ -165,10 +162,11 @@ class NRMConstant_v5 {
         std::size_t active_channel_count=0; // for verifying build input
         
         std::cout << "?? is index into particles vector a valid unique id?\n";
-        for (std::size_t i=0; i!=particles.size(); ++i) {
+        
+        for(auto p = particles.begin(); p!=particles.end(); p++){
             double firingTime;
-            double this_propensity = particles[i].srrate+particles[i].sdrate;
-            unsigned this_id = particles[i].id;
+            double this_propensity = p->srrate+p->sdrate;
+            unsigned this_id = p->id;
             if (this_propensity==0.0) {
                 firingTime=std::numeric_limits<double>::infinity();
             }
@@ -188,6 +186,31 @@ class NRMConstant_v5 {
                 binIndexAndPositionInBin[this_id]=std::make_pair<int,int>(-1,-1);// bin (and index within bin) is -1 if not in the hash table
             }
         }
+        /**
+        for (std::size_t i=0; i!=particles.size(); ++i) {
+            double firingTime;
+            double this_propensity = particles[i]->srrate+particles[i]->sdrate;
+            unsigned this_id = particles[i]->id;
+            if (this_propensity==0.0) {
+                firingTime=std::numeric_limits<double>::infinity();
+            }
+            else {
+                firingTime=exponential(generator)/this_propensity+timeOffset;
+                ++active_channel_count;
+            }
+            
+            nextFiringTime[this_id]=firingTime;//.insert(std::make_pair<reactionIndexT,firingTimeT>(i,firingTime));
+            //            std::cout << "nextFiringTime["<<i<<"]="<<nextFiringTime[i]<<"\n";
+            //insert into hashTable
+            int bin=computeBinIndex(firingTime);
+            if (bin>=0) {
+                theHashTable[bin].push_back(std::make_pair(firingTime,this_id));//place this rxn at back of bin
+                binIndexAndPositionInBin[this_id]=std::make_pair(bin,theHashTable[bin].size()-1);
+            } else {
+                binIndexAndPositionInBin[this_id]=std::make_pair<int,int>(-1,-1);// bin (and index within bin) is -1 if not in the hash table
+            }
+        }
+        **/
         
         //set rxn counter to 0
         rxnCountThisBuildOrRebuild=0;
