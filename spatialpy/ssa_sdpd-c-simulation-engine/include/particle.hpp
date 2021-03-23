@@ -13,6 +13,7 @@ See the file LICENSE.txt for details.
 #include <queue>
 #include <memory>
 #include "propensities.hpp"
+#include "part.hpp"
 #include <ANN/ANN.h> // ANN KD Tree
 
 #include "NRMConstant_v5.hpp"
@@ -26,73 +27,6 @@ namespace Spatialpy{
     struct NeighborNode ;
     struct EventNode ;
 
-    struct Particle{
-        Particle(ParticleSystem *sys, unsigned int id=0) ;
-        ParticleSystem *sys ;
-        unsigned int id;
-        int type;
-        double old_x[3];
-        double old_v[3];
-        double old_rho;
-        double x[3];
-        double v[3];
-        double vt[3];
-        double mass;
-        double rho;
-        double nu;
-        int solidTag;
-        double bvf_phi;
-        double normal[3];
-        double F[3];
-        double Frho;
-        double Fbp[3];
-        // Data Function
-        double * data_fn ;
-        //std::shared_ptr<double[]> data_fn;
-        // chem_rxn_system
-        unsigned int*xx; // populaion of discrete/stochastic species
-        double *C ;
-        double *Q ;
-        //std::shared_ptr<double[]> C;  // concentration of chem species
-        //std::shared_ptr<double[]> Q;  // flux of chem species
-        // below here for simulation
-        std::vector<NeighborNode> neighbors ;
-
-        // Moved from rdme_voxel_t
-        double srrate;
-        double* rrate;
-        double sdrate;
-        double* Ddiag;
-        //EventNode*heap_index;
-        std::size_t particle_index;
-
-        void check_particle_nan();
-
-        double particle_dist(Particle *p2);
-        double particle_dist_sqrd(Particle *p2);
-        int add_to_neighbor_list(Particle *neighbor, ParticleSystem *system, double r2) ;
-
-        // KD TREE FUNCTIONS
-        void get_k_cleanup(ANNidxArray nn_idx, ANNdistArray dists) ;
-        void search_cleanup(ANNpoint queryPt, ANNidxArray nn_idx, ANNdistArray dists) ;
-        int get_k__approx(ParticleSystem *system) ;
-        int get_k__exact(ANNpoint queryPt, ANNdist dist, ANNkd_tree *tree) ;
-        void find_neighbors(ParticleSystem *system, bool use_exact_k=true) ;
-
-        bool operator<(const Particle& p2){ 
-            return x[0] > p2.x[0] ; 
-        } 
-    };
-
-//    struct EventNode{
-//        Particle* data ;
-//        double tt ;
-//        EventNode(Particle *data, double tt) ;
-//        bool operator< (const EventNode& e2){ 
-//            return tt > e2.tt ; 
-//        } 
-//    };
-
     struct NeighborNode{
         Particle *data ;
         double dist ;
@@ -105,35 +39,6 @@ namespace Spatialpy{
         } 
     };
 
-/**
-    struct CompareTT { 
-        bool operator()(EventNode const& e1, EventNode const& e2) 
-        { 
-            // return "false" if "e1" is ordered  
-            // before "e2", for example: 
-            return e1.tt > e2.tt ; 
-        } 
-    };
- 
-    struct CompareDist { 
-        bool operator()(NeighborNode const& n1, NeighborNode const& n2) 
-        { 
-            // return "false" if "n1" is ordered  
-            // before "n2", for example: 
-            return n1.dist > n2.dist ; 
-        } 
-    };
- 
-    struct CompareX { 
-        bool operator()(Particle const& p1, Particle const& p2) 
-        { 
-            // return "false" if "p1" is ordered  
-            // before "p2", for example: 
-            return p1.x[0] > p2.x[0] ; 
-        } 
-    };
-**/
- 
     struct ParticleSystem{
         ParticleSystem(size_t num_types, size_t num_chem_species, size_t num_chem_rxns, 
                          size_t num_stoch_species, size_t num_stoch_rxns,size_t num_data_fn) ;
@@ -149,9 +54,6 @@ namespace Spatialpy{
         double rho0;
         double P0;
         std::vector<Particle> particles;
-        //std::vector<EventNode> event_v;
-        // std::priority_queue<Particle> x_index;
-        //std::priority_queue<EventNode> event_q;
 
         // Moved from rdme_ta
         NRMConstant_v5 rdme_event_q;

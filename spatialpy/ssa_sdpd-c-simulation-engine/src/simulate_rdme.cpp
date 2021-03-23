@@ -362,8 +362,8 @@ namespace Spatialpy{
 
         // TODO: does this deallocate memory on the 2nd call?  No
         // TODO: make a deallocation function
-        system->rdme_event_q.build(propensities, rng, propensitySum, activeChannels,
-                                   timeOffset );
+        system->rdme_event_q.build(propensities, propensitySum, activeChannels,
+                                   rng, timeOffset );
 
     }
 
@@ -547,8 +547,7 @@ namespace Spatialpy{
         double totrate,cum,rdelta,rrdelta;
         int event,errcode = 0;
         long unsigned int re, spec = 0 ;
-        Particle& subvol;
-        int subvol_index;
+        Particle *subvol;
         size_t i,j = 0;
         //double old_rrate = 0.0,old_drate = 0.0;
         double rand1,rand2,cum2,old;

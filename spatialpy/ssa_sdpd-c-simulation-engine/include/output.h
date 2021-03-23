@@ -8,6 +8,7 @@ See the file LICENSE.txt for details.
 #ifndef output_h
 #define output_h
 #include "particle.hpp"
+#include "part.hpp"
 
 namespace Spatialpy{
     void output_csv(ParticleSystem*system, int current_step);

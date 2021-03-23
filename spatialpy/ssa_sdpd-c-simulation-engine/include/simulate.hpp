@@ -8,6 +8,7 @@ See the file LICENSE.txt for details.
 #ifndef simulate_hpp
 #define simulate_hpp
 #include "particle.hpp"
+#include "part.hpp"
 
 namespace Spatialpy{
     void run_simulation(int num_threads, ParticleSystem *system);

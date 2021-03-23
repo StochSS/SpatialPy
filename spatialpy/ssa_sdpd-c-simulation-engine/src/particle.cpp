@@ -5,6 +5,7 @@ Copyright 2018 Brian Drawert (UNCA)
 This program is distributed under the terms of the GNU General Public License.
 See the file LICENSE.txt for details.
 ***************************************************************************** */
+#include "part.hpp" 
 #include "particle.hpp"
 #include <stdlib.h>
 #include <stdio.h>
