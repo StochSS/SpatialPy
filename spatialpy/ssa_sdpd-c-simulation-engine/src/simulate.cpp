@@ -1,14 +1,15 @@
-#include "simulate.hpp"
-#include "output.h"
-#include "particle.hpp"
-#include "simulate_rdme.hpp"
-#include "model.h"
 #include <errno.h>
-#include "pthread_barrier.h"
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+#include "model.h"
+#include "output.h"
+#include "particle_system.hpp"
+#include "pthread_barrier.h"
+#include "simulate.hpp"
+#include "simulate_rdme.hpp"
 
 namespace Spatialpy{
     void take_step(Particle* me, ParticleSystem* system, unsigned int step, unsigned int substep){
@@ -38,13 +39,13 @@ namespace Spatialpy{
         int i;
         //printf("particle id=%i Q[0]=%e\n",me.id,me.Q[0]);
 
-        // Step 1.1: 
+        // Step 1.1:
         if(step==0 || system->static_domain == 0){
             me->find_neighbors(system);
         }
 
         // Step 1.2: Predictor step
-        
+
         // Update half-state
         if (me->solidTag == 0 && system->static_domain == 0) {
            for (i = 0; i < 3; i++) {
@@ -55,7 +56,7 @@ namespace Spatialpy{
                 // Update position using previous velocity
                 me->x[i] = me->x[i] + system->dt * me->vt[i];
             }
-            // Update density using continuity equation 
+            // Update density using continuity equation
             me->rho = me->rho + 0.5 * system->dt * me->Frho;
         }
         // update half-state of chem rxn
@@ -118,7 +119,7 @@ namespace Spatialpy{
                 me->v[i] = me->v[i] + 0.5 * system->dt * me->F[i];
             }
 
-            // Update density using continuity equation and Shepard filter 
+            // Update density using continuity equation and Shepard filter
             //if (step % 20 == 0) {
             //    filterDensity(me, system);
             //}
@@ -134,7 +135,7 @@ namespace Spatialpy{
 
 
         // Step 3.2: Compute boundary volume fractions (bvf)
-        // Step 3.3: Apply BVF 
+        // Step 3.3: Apply BVF
         if (me->solidTag == 0 && system->static_domain == 0) {
             computeBoundaryVolumeFraction(me,system);
             applyBoundaryVolumeFraction(me, system);
@@ -150,4 +151,3 @@ namespace Spatialpy{
 
     }
 }
-

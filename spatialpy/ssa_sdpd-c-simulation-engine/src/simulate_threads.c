@@ -1,16 +1,17 @@
-#include "model.h"
-#include "output.h"
-#include "particle.hpp"
-#include "simulate.hpp"
-#include "simulate_rdme.hpp"
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
 // Include ANN KD Tree
-#include <ANN/ANN.h>
+#include "ANN/ANN.h"
+#include "model.h"
+#include "output.h"
+#include "particle_system.hpp"
+#include "simulate.hpp"
+#include "simulate_rdme.hpp"
 
 namespace Spatialpy{
     struct arg {
@@ -53,7 +54,7 @@ namespace Spatialpy{
     void buildKDTree(ParticleSystem *system) {
         // cleanup KD Tree
         if(debug_flag) printf("\tstarting buildKDTree()\n");
-        
+
         if(system->kdTree_initialized) {
             if(debug_flag){ printf("\tsystem->kdTree_initialized=True\n");}
             if(system->static_domain) {
@@ -241,7 +242,7 @@ namespace Spatialpy{
                 pthread_barrier_wait(&end_step_barrier);
                 if(debug_flag) printf("[%i] Worker threads finished substep %i/%i\n",system->current_step,substep,nsubsteps);
             }
-            // Solve RDME 
+            // Solve RDME
             if(debug_flag) printf("[%i] starting RDME simulation\n",system->current_step);
             simulate_rdme(system, system->current_step);
             if(debug_flag) printf("[%i] Finish RDME simulation\n",system->current_step);
@@ -252,7 +253,7 @@ namespace Spatialpy{
         pthread_barrier_wait(&end_output_barrier);
         if(debug_flag) printf("[%i] Output threads finished\n",system->current_step);
         if(debug_flag) printf("[%i] Waiting for Async Output threads\n",system->current_step);
-        pthread_barrier_wait(&begin_output_barrier); // wait for the async 
+        pthread_barrier_wait(&begin_output_barrier); // wait for the async
         if(debug_flag) printf("[%i] Async Output threads finished\n",system->current_step);
 
         //clean up
@@ -278,5 +279,3 @@ namespace Spatialpy{
         return;
     }
 }
-
-

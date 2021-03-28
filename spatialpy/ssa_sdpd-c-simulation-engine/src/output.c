@@ -1,8 +1,9 @@
-#include "output.h"
-#include "particle.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "output.h"
+#include "particle_system.hpp"
 
 namespace Spatialpy{
     void output_csv(ParticleSystem*system, int current_step){
@@ -82,7 +83,7 @@ namespace Spatialpy{
         if(output_buffer_current_step == 0){
             sprintf(filename, "output0_boundingBox.vtk");
             if(debug_flag){printf("Writing file '%s'\n", filename);}
-            if((fp = fopen(filename,"w+"))==NULL){ 
+            if((fp = fopen(filename,"w+"))==NULL){
                 perror("Can't write 'output0_boundingBox.vtk'");exit(1);
             }
             fprintf(fp, "# vtk DataFile Version 4.1\n");
@@ -100,7 +101,7 @@ namespace Spatialpy{
         }
         sprintf(filename,"output%u.vtk",output_buffer_current_step);
         if(debug_flag){printf("Writing file '%s'\n", filename);}
-        if((fp = fopen(filename,"w+"))==NULL){ 
+        if((fp = fopen(filename,"w+"))==NULL){
             perror("Can't write output vtk file");exit(1);
         }
         fprintf(fp, "# vtk DataFile Version 4.1\n");
@@ -162,13 +163,13 @@ namespace Spatialpy{
         for(i=0;i<np;i++){
             fprintf(fp, "%lf ",output_buffer[i].bvf_phi);
             if((i+1)%9==0){ fprintf(fp,"\n"); }
-        } 
+        }
         fprintf(fp,"\n");
         fprintf(fp,"nu 1 %i double\n", np);
         for(i=0;i<np;i++){
             fprintf(fp, "%lf ",output_buffer[i].nu);
             if((i+1)%9==0){ fprintf(fp,"\n"); }
-        } 
+        }
         fprintf(fp,"\n");
         // loop here to check for continous species
         // c - concentration or continous? clarify at meeting

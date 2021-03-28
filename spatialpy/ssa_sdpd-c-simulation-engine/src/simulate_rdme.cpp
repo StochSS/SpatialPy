@@ -1,8 +1,4 @@
 #include <time.h>
-#include "output.h"
-#include "particle.hpp"
-#include "simulate_rdme.hpp"
-//#include "dSFMT/dSFMT.h"
 #include <random>
 #include <errno.h>
 #include <pthread.h>
@@ -13,8 +9,11 @@
 #include <math.h>
 #include <string.h>
 
-#include "propensities.hpp"
 //#include "binheap.h"
+#include "output.h"
+#include "particle_system.hpp"
+#include "propensities.hpp"
+#include "simulate_rdme.hpp"
 
 
 /**************************************************************************/

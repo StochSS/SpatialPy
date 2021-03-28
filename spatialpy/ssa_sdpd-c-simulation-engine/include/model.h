@@ -7,8 +7,9 @@ See the file LICENSE.txt for details.
 ***************************************************************************** */
 #ifndef model_h
 #define model_h
+
 #include "particle.hpp"
-#include "part.hpp"
+#include "particle_system.hpp"
 
 namespace Spatialpy{
     void filterDensity(Particle* me, ParticleSystem* system);

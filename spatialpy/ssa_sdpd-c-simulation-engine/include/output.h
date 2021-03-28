@@ -7,8 +7,9 @@ See the file LICENSE.txt for details.
 ***************************************************************************** */
 #ifndef output_h
 #define output_h
+
 #include "particle.hpp"
-#include "part.hpp"
+#include "particle_system.hpp"
 
 namespace Spatialpy{
     void output_csv(ParticleSystem*system, int current_step);
@@ -16,4 +17,3 @@ namespace Spatialpy{
     void output_vtk__async_step(ParticleSystem *system);
 }
 #endif // output_h
-

@@ -5,8 +5,7 @@ Copyright 2018 Brian Drawert (UNCA)
 This program is distributed under the terms of the GNU General Public License.
 See the file LICENSE.txt for details.
 ***************************************************************************** */
-#include "part.hpp" 
-#include "particle.hpp"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -14,8 +13,11 @@ See the file LICENSE.txt for details.
 #include <vector>
 #include <queue>
 #include <memory>
+
 // Include ANN KD Tree
-#include <ANN/ANN.h>
+#include "ANN/ANN.h"
+#include "particle.hpp"
+#include "particle_system.hpp"
 
 namespace Spatialpy{
     ParticleSystem::ParticleSystem(size_t num_types, size_t num_chem_species, size_t num_chem_rxns,
