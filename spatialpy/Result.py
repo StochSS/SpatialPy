@@ -24,6 +24,7 @@ common_color_scales = ["Plotly3","Jet","Blues","YlOrRd","PuRd","BuGn","YlOrBr","
 
 
 def _plotly_iterate(types, size=5, property_name=None, cmin=None, cmax=None, colormap=None, is_2d=False):
+    """ Helper method used by plotly display methods. """
     import plotly.graph_objs as go
 
     trace_list = []
@@ -54,17 +55,14 @@ def _plotly_iterate(types, size=5, property_name=None, cmin=None, cmax=None, col
 class Result():
     """ Result object for a URDME simulation. """
 
-    def __init__(self, model=None, result_dir=None, loaddata=False):
+    def __init__(self, model=None, result_dir=None):
         self.model = model
-        self.U = None
         self.tspan = None
-        self.data_is_loaded = False
         self.success = False
         self.stdout = None
         self.stderr = None
         self.timeout = False
         self.result_dir = result_dir
-
 
 
 #    def get_endtime_model(self):
@@ -82,15 +80,45 @@ class Result():
 #            model2.u0[s,:] = self.get_species(sname, timepoints=-1)
 #        return model2
 
+#    def __setattr__(self, k, v):
+#        if k in self.keys():
+#            self[k] = v
+#        elif not hasattr(self, k):
+#            self[k] = v
+#        else:
+#            raise AttributeError("Cannot set '%s', cls attribute already exists" % ( k, ))
+#
+#    def __setupitems__(self, k):
+#        if (k == 'U' or k == 'tspan') and not self.data_is_loaded:
+#            if self.result_dir is None:
+#                raise AttributeError("This result object has no data file.")
+#            self.read_solution()
+#
+#    def __getitem__(self, k):
+#        self.__setupitems__(k)
+#        if k in self.keys():
+#            return self.get(k)
+#        raise KeyError("Object has no attribute {0}".format(k))
+#
+#    def __getattr__(self, k):
+#        self.__setupitems__(k)
+#        if k in self.keys():
+#            return self.get(k)
+#        raise AttributeError("Object has no attribute {0}".format(k))
 
     def __eq__(self, other):
-        """ Compare Result object's output for equality. This does _NOT_ compare objects themselves
+        """ Compare Result object's simulation data for equality. This does _NOT_ compare objects themselves.
 
-        Params:
-            self: Results object
-            other: Results object to compare against
-        Return:
-            bool """
+        Attributes
+        ----------
+            other: Result
+                Results object to compare against
+
+        Return
+        ----------
+            bool:
+                Whether or not the Results object's simulation data is equal
+        """
 
         if isinstance(other, Result) and self.result_dir and other.result_dir:
             # Compare contents, not shallow compare
@@ -104,14 +132,18 @@ class Result():
         return NotImplemented
 
     def __ne__(self, other):
-        """ Compare Result object's output for inequality. This does _NOT_ compare objects themselves.
-            This inverts the logic in __eq__().
+        """ Compare Result object's simulation data for inequality. This does _NOT_ compare objects themselves.
 
-        Params:
-            self: Results object
-            other: Results object to compare against
-        Return:
-            bool """
+        Attributes
+        ----------
+            other: Result
+                Results object to compare against
+
+        Return
+        ----------
+            bool:
+                Whether or not the Results object's simulation data is unequal
+        """
 
         return not self.__eq__(other)
 
@@ -156,8 +188,34 @@ class Result():
         except Exception as e:
             raise Exception("Error unpickling model, could not recreate the Result output files: "+str(e))
 
+    def __del__(self):
+        """ Deconstructor. """
+        try:
+            if self.result_dir is not None:
+                try:
+                    shutil.rmtree(self.result_dir)
+                except OSError as e:
+                    print("Could not delete '{0}'".format(self.result_dir))
+        except Exception as e:
+            pass
+
     def read_step(self, step_num, debug=False):
-        """ Read the data for simulation step 'step_num'. """
+        """ Read the data for simulation step 'step_num'.
+
+        Attributes
+        ----------
+        step_num: Usually an int
+            The step number to read simulation data from
+        debug: bool (default False)
+            Whether or not debug information should be printed
+
+        Return
+        ----------
+            tuple:
+                A tuple containing a numpy.ndarray of point coordinates [0]
+                along with a dictionary of property and species data [1]
+        """
+
         reader = VTKReader(debug=debug)
         num = int(step_num * self.model.output_freq)
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(num))
@@ -170,8 +228,15 @@ class Result():
         vtk_data = reader.getarrays()
         return (points, vtk_data)
 
-
     def get_timespan(self):
+        """  Get the model time span.
+
+        Return
+        ----------
+            numpy.ndarray:
+                A numpy array containing the time span of the model
+        """
+
         self.tspan = numpy.linspace(0,self.model.num_timesteps,
                 num=math.ceil(self.model.num_timesteps/self.model.output_freq)+1) * self.model.timestep_size
         return self.tspan
@@ -180,15 +245,29 @@ class Result():
         """ Get the populations/concentration values for a given species in the model for
             one or all timepoints.
 
+        Attributes
+        ----------
+        species: str/dict
+            A species in string or dictionary form to retreive information about
+        timepoints: int (default None)
+            A time point where the information should be retreived from.
             If 'timepoints' is None (default), a matrix of dimension:
-            (number of timepoints) x (number of voxels) is returned.  If an integer value is
-            given, that value is used to index into the timespan, and that time point is returned
+            (number of timepoints) x (number of voxels) is returned.
+            If an integer value is given, that value is used to index into the timespan, and that time point is returned
             as a 1D array with size (number of voxel).
+        concentration: bool (default False)
+            Whether or not the species is a concentration (True) or population (False)
+            If concentration is False (default), the integer, raw, trajectory data is returned.
+            If set to True, the concentration (=copy_number/volume) is returned.
+        deterministic: bool (default False)
+            Whether or not the species is deterministic (True) or stochastic (False)
+        debug: bool (default False)
+            Whether or not debug information should be printed
 
-            If concentration is False (default), the integer, raw, trajectory data is returned,
-            if set to True, the concentration (=copy_number/volume) is returned.
-
-            If deterministic is True, show results for determinstic (instead of stochastic) values
+        Return
+        ----------
+            numpy.ndarray:
+                A numpy array containing the species population/concentration values
         """
 
         species_map = self.model.species_map
@@ -291,6 +370,7 @@ class Result():
         debug: bool
             output debugging info
         """
+
         from plotly.offline import init_notebook_mode, iplot
 
         if t_ndx < 0:
@@ -308,7 +388,7 @@ class Result():
         if use_matplotlib:
             import matplotlib.pyplot as plt
 
-            if (deterministic or not concentration):
+            if deterministic or not concentration:
                 d = data[spec_name]
             else:
                 d = data[spec_name] / (data['mass'] / data['rho'])
@@ -535,6 +615,7 @@ class Result():
         mpl_height: int (default 4.8)
             Height in inches of output plot box
         """
+
         if t_ndx < 0:
             t_ndx = len(self.get_timespan()) + t_ndx
 
@@ -710,44 +791,6 @@ class Result():
         else:
             init_notebook_mode(connected=True)
             iplot(fig)
-
-#    def __setattr__(self, k, v):
-#        if k in self.keys():
-#            self[k] = v
-#        elif not hasattr(self, k):
-#            self[k] = v
-#        else:
-#            raise AttributeError("Cannot set '%s', cls attribute already exists" % ( k, ))
-#
-#    def __setupitems__(self, k):
-#        if (k == 'U' or k == 'tspan') and not self.data_is_loaded:
-#            if self.result_dir is None:
-#                raise AttributeError("This result object has no data file.")
-#            self.read_solution()
-#
-#    def __getitem__(self, k):
-#        self.__setupitems__(k)
-#        if k in self.keys():
-#            return self.get(k)
-#        raise KeyError("Object has no attribute {0}".format(k))
-#
-#    def __getattr__(self, k):
-#        self.__setupitems__(k)
-#        if k in self.keys():
-#            return self.get(k)
-#        raise AttributeError("Object has no attribute {0}".format(k))
-
-    def __del__(self):
-        """ Deconstructor. """
-        #   if not self.data_is_loaded:
-        try:
-            if self.result_dir is not None:
-                try:
-                    shutil.rmtree(self.result_dir)
-                except OSError as e:
-                    print("Could not delete '{0}'".format(self.result_dir))
-        except Exception as e:
-            pass
 
     def export_to_csv(self, folder_name=None):
         """ Write the trajectory to a set of CSV files. The first, modelname_mesh.csv, specifies the mesh.
