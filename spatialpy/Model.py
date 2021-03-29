@@ -204,7 +204,7 @@ class Model():
         '''
         Add a domain to the model
 
-        domani : Domain
+        domain : Domain
             The Domain object to be added to the model
         '''
         if type(domain).__name__ != 'Domain':
