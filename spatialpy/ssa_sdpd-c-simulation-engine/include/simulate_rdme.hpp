@@ -7,9 +7,11 @@ See the file LICENSE.txt for details.
 ***************************************************************************** */
 #ifndef simulate_rdme_h
 #define simulate_rdme_h
-#include "particle.hpp"
-#include "propensities.hpp"
+
 #include <random>
+
+#include "particle_system.hpp"
+#include "propensities.hpp"
 
 namespace Spatialpy{
 
@@ -39,6 +41,4 @@ void nsm_core__take_step(ParticleSystem*system, double current_time,
                          double step_size);
 }
 
-
 #endif /* simulate_rdme_h */
-

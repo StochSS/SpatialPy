@@ -2,8 +2,8 @@
 
 /* B. Drawert   2019-06-04 */
 /* J. Cullhed   2008-06-18. */
-/* A. Hellander 2010-01-10. */  
-/* A. Hellander 2012-06-05 (rev). */  
+/* A. Hellander 2010-01-10. */
+/* A. Hellander 2012-06-05 (rev). */
 /* B. Drawert   2012-09-08 */
 
 #ifndef PROPENSITIES__H
@@ -16,7 +16,7 @@ extern std::mt19937_64 rng;
 namespace Spatialpy{
 
     /* Global variable that can be used to pass parameters to the propensity functions. */
-    extern double *parameters; 
+    extern double *parameters;
 
     /* Definition of the propensity function. */
     // double rfun(const int *x, double t, const double vol, const double *data, int sd, int voxel, int *xx, const size_t *irK, const size_t *jcK, const double *prK)
@@ -34,6 +34,5 @@ namespace Spatialpy{
     void applyBoundaryConditions(Particle* me, ParticleSystem* system);
 }
 
-
-#endif 
+#endif
 /* PROPENSITIES__H */

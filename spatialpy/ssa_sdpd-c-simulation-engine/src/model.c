@@ -7,10 +7,12 @@ Based on a Matlab program by Bruno Jacob (UCSB)
 This program is distributed under the terms of the GNU General Public License.
 See the file LICENSE.txt for details.
 ***************************************************************************** */
-#include "particle.hpp"
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "particle_system.hpp"
 
 namespace Spatialpy{
 
@@ -20,7 +22,7 @@ namespace Spatialpy{
         std::vector<NeighborNode> neighbors = me->neighbors;
         //printf("pairwiseForce(id=%i)\n",me->id);
         //fflush(stdout);
-        
+
         double R, Pj, dv[3], dx[3], r, dWdr, dv_dx, fp, fv, fbp,
             transportTensor[3][3], ft[3], pressure_gradient;
         dx[0] = 0.0;
@@ -46,7 +48,7 @@ namespace Spatialpy{
         //    printf("Error, only 3D or 2D domains are supported\n");
         //    exit(1);
         //}
-       
+
         // Zero tensors
         for (i = 0; i < 3; i++) {
             for (j = 0; j < 3; j++) {
@@ -105,7 +107,7 @@ namespace Spatialpy{
                 }
             }
             for (i = 0; i < 3; i++) {
-                ft[i] = (1.0 / me->mass) * (pow(me->mass / me->rho, 2) + pow(pt_j->mass / pt_j->rho, 2)) * 
+                ft[i] = (1.0 / me->mass) * (pow(me->mass / me->rho, 2) + pow(pt_j->mass / pt_j->rho, 2)) *
                                            (transportTensor[i][0] * dx[0] + transportTensor[i][1] * dx[1] + transportTensor[i][2] * dx[2]) * dWdr / (r + 0.001 * h);
             }
 
@@ -118,9 +120,9 @@ namespace Spatialpy{
             //fflush(stdout);
 
             // Compute density variation
-            me->Frho = me->Frho + me->rho * (pt_j->mass / pt_j->rho) * dv_dx * (1 / (r + 0.001 * h)) * dWdr 
-                          - 0.0 * h * me->rho * c0 * pt_j->mass * 2.0 * (pt_j->rho / me->rho - 1.0) * (r * r / (r * r + 0.01 * h * h)) * (1.0 / (r + 0.001 * h)) * dWdr / pt_j->rho 
-                          - (pt_j->mass / pt_j->rho) * (me->rho * ((me->v[0] - me->vt[0]) * dx[0] + (me->v[1] - me->vt[1]) * dx[1] + (me->v[2] - me->vt[2]) * dx[2]) 
+            me->Frho = me->Frho + me->rho * (pt_j->mass / pt_j->rho) * dv_dx * (1 / (r + 0.001 * h)) * dWdr
+                          - 0.0 * h * me->rho * c0 * pt_j->mass * 2.0 * (pt_j->rho / me->rho - 1.0) * (r * r / (r * r + 0.01 * h * h)) * (1.0 / (r + 0.001 * h)) * dWdr / pt_j->rho
+                          - (pt_j->mass / pt_j->rho) * (me->rho * ((me->v[0] - me->vt[0]) * dx[0] + (me->v[1] - me->vt[1]) * dx[1] + (me->v[2] - me->vt[2]) * dx[2])
                           + pt_j->rho * ((pt_j->v[0] - pt_j->vt[0]) * dx[0] + (pt_j->v[1] - pt_j->vt[1]) * dx[1] + (pt_j->v[2] - pt_j->vt[2]) * dx[2])) * (1.0 / (r + 0.001 * h)) * dWdr;
 
             //printf("pairwiseForce(id=%i) me->Frho = [%e]\n",me->id,me->Frho);
@@ -308,4 +310,3 @@ namespace Spatialpy{
     }
 
 }
-

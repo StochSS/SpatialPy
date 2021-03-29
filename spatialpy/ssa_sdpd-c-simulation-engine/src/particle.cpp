@@ -5,7 +5,7 @@ Copyright 2018 Brian Drawert (UNCA)
 This program is distributed under the terms of the GNU General Public License.
 See the file LICENSE.txt for details.
 ***************************************************************************** */
-#include "particle.hpp"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -13,14 +13,17 @@ See the file LICENSE.txt for details.
 #include <vector>
 #include <queue>
 #include <memory>
+
 // Include ANN KD Tree
-#include <ANN/ANN.h>
+#include "ANN/ANN.h"
+#include "particle.hpp"
+#include "particle_system.hpp"
 
 namespace Spatialpy{
-    ParticleSystem::ParticleSystem(size_t num_types, size_t num_chem_species, size_t num_chem_rxns, 
-                         size_t num_stoch_species, size_t num_stoch_rxns,size_t num_data_fn): 
-                            num_types(num_types), num_chem_species(num_chem_species), 
-                            num_chem_rxns(num_chem_rxns), num_stoch_species(num_stoch_species), 
+    ParticleSystem::ParticleSystem(size_t num_types, size_t num_chem_species, size_t num_chem_rxns,
+                         size_t num_stoch_species, size_t num_stoch_rxns,size_t num_data_fn):
+                            num_types(num_types), num_chem_species(num_chem_species),
+                            num_chem_rxns(num_chem_rxns), num_stoch_species(num_stoch_species),
                             num_stoch_rxns(num_stoch_rxns), num_data_fn(num_data_fn){
         dimension = 3;
         boundary_conditions[0] = 'n';
@@ -38,7 +41,7 @@ namespace Spatialpy{
     ParticleSystem::~ParticleSystem(){}
 
     Particle::Particle(ParticleSystem *sys, unsigned int id):sys(sys), id(id){
-    	nu = 0.01; 
+    	nu = 0.01;
     	mass = 1;
     	rho = 1;
     	solidTag = 0;
@@ -53,11 +56,11 @@ namespace Spatialpy{
     }
 
     NeighborNode::NeighborNode(Particle *data, double dist, double dWdr, double D_i_j):data(data), dist(dist), dWdr(dWdr), D_i_j(D_i_j){}
-    EventNode::EventNode(Particle *data, double tt):data(data), tt(tt){}
+    //EventNode::EventNode(Particle *data, double tt):data(data), tt(tt){}
 
     void Particle::check_particle_nan(){
         if(
-            isnan(x[0]) || !isfinite(x[0]) || 
+            isnan(x[0]) || !isfinite(x[0]) ||
             isnan(x[1]) || !isfinite(x[1]) ||
             isnan(x[2]) || !isfinite(x[2]) ||
             isnan(v[0]) || !isfinite(v[0]) ||
@@ -123,7 +126,7 @@ namespace Spatialpy{
     	// double c = x[2] - neighbor.x[2];
     	// double r2 =  ( a*a + b*b + c*c);
     	// Make sure the distance was actually set by the annkFRSearch
-        double r2_old = r2;
+        //double r2_old = r2;
         if(r2 == ANN_DIST_INF) {
             r2 = particle_dist_sqrd(neighbor) ;
         }
@@ -200,7 +203,7 @@ namespace Spatialpy{
     	//TODO: empty_neighbor_list(neighbors);
     	// search for points forward: (assumes the list is sorted ascending)
     	//printf("find_neighbors.search forward\n");
-    	
+
         // ANN KD Tree k fixed radius nearest neighbor search
         ANNpoint queryPt = annAllocPt(system->dimension);
         for(int i = 0; i < system->dimension; i++) {
@@ -211,7 +214,7 @@ namespace Spatialpy{
         // Number of neighbors to search for
         int k;
         if(use_exact_k) {
-            k = get_k__exact(queryPt, dist, system->kdTree);    
+            k = get_k__exact(queryPt, dist, system->kdTree);
         }else{
             k = get_k__approx(system);
         }
@@ -255,7 +258,7 @@ namespace Spatialpy{
     	// 	//TODO: Should these be breaks instead of continue?
     	//     if( (n.data.x[2] > (x[2] + system.h)) || (n.data.x[2] < (x[2] - system.h) ) ) continue;
     	//     add_to_neighbor_list(n, system);
-    	//     if(debug_flag>2){ 
+    	//     if(debug_flag>2){
     	// 	printf("find_neighbors(%i) forward found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
     	// 	    id,n.data.id, particle_dist(n.data),
     	// 	    x[0] - n.data.x[0],
@@ -272,11 +275,11 @@ namespace Spatialpy{
     	//     if( (n->data.x[1] > (x[1] + system.h)) || (n->data.x[1] < (x[1] - system.h) ) ){
     	// 	continue;
     	//     }
-    	//     if( (n->data.x[2] > (x[2] + system.h)) || (n->data.x[2] < (x[2] - system.h) ) ){ 
+    	//     if( (n->data.x[2] > (x[2] + system.h)) || (n->data.x[2] < (x[2] - system.h) ) ){
     	// 	continue;
     	//     }
     	//     add_to_neighbor_list(n->data, system);
-    	//     if(debug_flag>2){ 
+    	//     if(debug_flag>2){
     	// 	printf("find_neighbors(%i) backwards found %i dist: %e    dx: %e   dy: %e   dz: %e\n",
     	// 	    id,n->data.id, particle_dist(n->data),
     	// 	    x[0] - n->data.x[0],
@@ -286,4 +289,3 @@ namespace Spatialpy{
     	// }
 
 }
-

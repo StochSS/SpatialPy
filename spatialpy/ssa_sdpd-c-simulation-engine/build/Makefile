@@ -4,7 +4,7 @@ SIMFLAGS = -l. -std=c++14 -Wall -O3
 LFLAGS = -pthread -lm
 INCDIR = $(ROOTINC)/include/ $(ROOTINC)/external/ $(ROOTINC)/external/ANN/include/
 INCDIRPARAMS = $(INCDIR:%=-I%)
-OBJ = particle.o simulate.o count_cores.o output.o simulate_rdme.o simulate_threads.o model.o pthread_barrier.o
+OBJ = NRMConstant_v5.o particle.o simulate.o count_cores.o output.o simulate_rdme.o simulate_threads.o model.o pthread_barrier.o
 ANNOBJECTS = ANN.o brute.o kd_tree.o kd_util.o kd_split.o \
 	kd_dump.o kd_search.o kd_pr_search.o kd_fix_rad_search.o \
 	bd_tree.o bd_search.o bd_pr_search.o bd_fix_rad_search.o \
