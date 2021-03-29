@@ -2,7 +2,6 @@ import csv
 import filecmp
 import math
 import os
-import pickle
 import shutil
 import tempfile
 
@@ -65,47 +64,6 @@ class Result():
         self.result_dir = result_dir
 
 
-#    def get_endtime_model(self):
-#        """ Return a URDME model object with the initial conditions set to the final time point of the
-#            result object.
-#        """
-#        if self.model is None:
-#            raise Exception("can not continue a result with no model")
-#        # create a soft copy
-#        model_str = pickle.dumps(self.model)
-#        model2 = pickle.loads(model_str)
-#        # set the initial conditions
-#        model2.u0 = numpy.zeros(self.model.u0.shape)
-#        for s, sname in enumerate(self.model.listOfSpecies):
-#            model2.u0[s,:] = self.get_species(sname, timepoints=-1)
-#        return model2
-
-#    def __setattr__(self, k, v):
-#        if k in self.keys():
-#            self[k] = v
-#        elif not hasattr(self, k):
-#            self[k] = v
-#        else:
-#            raise AttributeError("Cannot set '%s', cls attribute already exists" % ( k, ))
-#
-#    def __setupitems__(self, k):
-#        if (k == 'U' or k == 'tspan') and not self.data_is_loaded:
-#            if self.result_dir is None:
-#                raise AttributeError("This result object has no data file.")
-#            self.read_solution()
-#
-#    def __getitem__(self, k):
-#        self.__setupitems__(k)
-#        if k in self.keys():
-#            return self.get(k)
-#        raise KeyError("Object has no attribute {0}".format(k))
-#
-#    def __getattr__(self, k):
-#        self.__setupitems__(k)
-#        if k in self.keys():
-#            return self.get(k)
-#        raise AttributeError("Object has no attribute {0}".format(k))
-
     def __eq__(self, other):
         """ Compare Result object's simulation data for equality. This does _NOT_ compare objects themselves.
 
@@ -153,9 +111,7 @@ class Result():
         state = {}
         for key, item in self.__dict__.items():
             resultdict = OrderedDict()
-            # Pickle all Result output files
-            # This does not perserve file metadata like permissions.
-            # In the future we should probably at least perserve permissions.
+
             try:
                 for root, _, file in os.walk(self.result_dir):
                     for filename in file:
@@ -174,13 +130,11 @@ class Result():
 
         self.__dict__ = state
 
-        # Recreate the Result output files
-        # This does not restore file metadata like permissions.
-        # In the future we should probably at least restore permissions.
         try:
             results_output = state['results_output']
             state['result_dir'] = tempfile.mkdtemp(
                 prefix='spatialpy_result_', dir=os.environ.get('SPATIALPY_TMPDIR'))
+
             for filename, contents in results_output.items():
                 with open(os.path.join(state['result_dir'], filename), 'wb') as fd:
                     fd.seek(0)
@@ -832,14 +786,12 @@ class Result():
                 for voxel in range(num_vox):
                     writer.writerow([voxel] + data[:,voxel].tolist())
 
-    def export_to_vtk(self, species=None, folder_name=None):
+    def export_to_vtk(self, folder_name=None):
         """ Write the trajectory to a collection of vtk files.
             The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension.
 
         Attributes
         ----------
-        species: list (default None)
-            A list of species to export data from. If none are provided all species will exported
         folder_name: str (default current working directory)
             A path where the vtk files will be written, created if non-existant.
             If no path is provided current working directory is used.
@@ -850,8 +802,6 @@ class Result():
         elif not os.path.exists(folder_name):
             os.mkdir(folder_name)
 
-        if not species:
-            species = list(self.model.get_all_species())
 
 class ResultError(Exception):
     pass
