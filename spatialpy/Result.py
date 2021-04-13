@@ -12,8 +12,9 @@ from spatialpy.Model import *
 
 try:
     import vtk
-except ImportError as e:
-    print('''The Python package 'vtk' is not installed. Using integrated VTK reader. This is significantly slower than the official VTK package.''')
+except:
+    print('''Using fallback VTK reader. This is significantly slower than the official VTK package.
+For best performance please install the VTK Python package: \'python3 -m pip install vtk\'''')
     from spatialpy.VTKReader import VTKReader
 
 common_rgb_values=['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f',
