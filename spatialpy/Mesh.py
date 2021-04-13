@@ -273,7 +273,7 @@ class Mesh():
         try:
             import meshio
         except ImportError as e:
-            raise MeshError("The python package 'meshio' is not istaled.")
+            raise MeshError("The Python package 'meshio' is not installed.")
 
         return cls.import_meshio_object(meshio.msh_io.read(filename))
 
