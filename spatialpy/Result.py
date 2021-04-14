@@ -786,22 +786,5 @@ class Result():
                 for voxel in range(num_vox):
                     writer.writerow([voxel] + data[:,voxel].tolist())
 
-    def export_to_vtk(self, folder_name=None):
-        """ Write the trajectory to a collection of vtk files.
-            The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension.
-
-        Attributes
-        ----------
-        folder_name: str (default current working directory)
-            A path where the vtk files will be written, created if non-existant.
-            If no path is provided current working directory is used.
-        """
-
-        if not folder_name:
-            folder_name = os.path.abspath(os.getcwd())
-        elif not os.path.exists(folder_name):
-            os.mkdir(folder_name)
-
-
 class ResultError(Exception):
     pass
