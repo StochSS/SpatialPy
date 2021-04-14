@@ -4,11 +4,18 @@ import os
 import pickle
 import shutil
 import subprocess
+import sys
 
 import numpy
 
 from spatialpy.Model import *
-from spatialpy.VTKReader import VTKReader
+
+try:
+    import vtk
+except ImportError as e:
+    print('''The Python package 'vtk' is not installed. Using integrated VTK reader. This is significantly 
+slower than the official VTK package.''')
+    from spatialpy.VTKReader import VTKReader
 
 common_rgb_values=['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f',
                    '#bcbd22','#17becf','#ff0000','#00ff00','#0000ff','#ffff00','#00ffff','#ff00ff',
@@ -158,17 +165,52 @@ class Result():
             raise Exception("Error unpickling model, could not recreate the Result output files: "+str(e))
 
     def read_step(self, step_num, debug=False):
-        """ Read the data for simulation step 'step_num'. """
-        reader = VTKReader(debug=debug)
+        """ Read the data for simulation step 'step_num'.
+
+        Attributes
+        ----------
+            step_num: int
+                The step number of the results to read
+            debug: bool
+                Whether or not to display debug information
+        Return
+        ----------
+            tuple:
+                Contains point coordinate data in the first index and type and property data in the second index """
         num = int(step_num * self.model.output_freq)
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(num))
-        #print("read_step({0}) opening '{1}'".format(step_num, filename))
-        reader.setfilename(filename)
-        reader.readfile()
-        if reader.getpoints() is None or reader.getarrays() is None:
+
+        if debug:
+            print("read_step({0}) opening '{1}'".format(step_num, filename))
+
+        if 'vtk' in sys.modules:
+            reader = vtk.vtkGenericDataObjectReader()
+            reader.SetFileName(filename)
+            reader.Update()
+            data = reader.GetOutput()
+
+            if data is not None:
+                points = numpy.array(data.GetPoints().GetData())
+                pd = data.GetPointData()
+                vtk_data = {}
+
+                for i in range(pd.GetNumberOfArrays()):
+                    if pd.GetArrayName(i) is None:
+                        break
+
+                    if debug:
+                        print(i,pd.GetArrayName(i))
+
+                    vtk_data[pd.GetArrayName(i)] = numpy.array(pd.GetArray(i))
+        else:
+            reader = VTKReader(filename=filename, debug=debug)
+            reader.readfile()
+            points = reader.getpoints()
+            vtk_data = reader.getarrays()
+
+        if points is None or vtk_data is None:
             raise ResultError("read_step(step_num={0}): got data = None".format(step_num))
-        points = reader.getpoints()
-        vtk_data = reader.getarrays()
+
         return (points, vtk_data)
 
 
