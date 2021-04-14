@@ -786,5 +786,11 @@ class Result():
                 for voxel in range(num_vox):
                     writer.writerow([voxel] + data[:,voxel].tolist())
 
+    def export_to_vtk(self, timespan, folder_name=None):
+        """ Write the trajectory to a collection of vtk files.
+            The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension."""
+            # TODO
+        raise Exception("Not implemented.")
+
 class ResultError(Exception):
     pass
