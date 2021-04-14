@@ -752,22 +752,20 @@ namespace Spatialpy{
                         break;
                     }
                 }
-                if(nn==NULL){ //Diffusion direction overflow
+                if(dest_subvol==NULL){ //Diffusion direction overflow
                     // try again, 'cum2' is a better estimate of propensity sum
                     rand2 = r2*cum2;
                     cum2 = 0.0;
-                    NeighborNode *n = NULL;
-                    for(auto nn : subvol->neighbors){
-                        p2 = nn.data;
-                        n = &nn ;
+                    for(auto nn=subvol->neighbors.begin(); nn!=subvol->neighbors.end(); ++nn){
+                        p2 = nn->data;
                         diff_const = system->subdomain_diffusion_matrix[spec*system->num_types + (p2->type-1)];
-                        cum2 += nn.D_i_j * diff_const;
+                        cum2 += nn->D_i_j * diff_const;
                         if(cum2 > rand2){
                             dest_subvol = p2;
                             break;
                         }
                     }
-                    if(n==NULL){
+                    if(dest_subvol==NULL){
                         printf("Error: overflow in trying to determine which destination voxel subvol=%i\n",subvol->id);
                         printf("subvol->id=%u ",subvol->id);
                         printf("rand2=%e ",rand2);
