@@ -1,9 +1,11 @@
 import json
+
 import numpy
 from scipy.spatial import KDTree
 
-class Mesh():
-    """ Mesh class for spatial py """
+
+class Domain():
+    """ Domain class for SpatialPy """
 
 
     def __init__(self, numpoints, xlim, ylim, zlim, rho0=1.0, c0=10, P0=10, gravity=None):
@@ -12,7 +14,7 @@ class Mesh():
         self.tetrahedrons = None
 
         self.on_boundary = None
-        self.mesh_size = None
+        self.domain_size = None
         self.tetrahedron_vol = None
 
         self.vol = numpy.zeros((numpoints), dtype=float)
@@ -33,7 +35,7 @@ class Mesh():
     def __str__(self):
         pad = "    "
         domain_strs = ["Domain Attributes", "", f"{pad}On Boundary: {self.on_boundary}",
-                     f"{pad}Mesh Size: {self.mesh_size}", f"{pad}RHO_0: {self.rho0}", f"{pad}C_0: {self.c0}",
+                     f"{pad}Domain Size: {self.domain_size}", f"{pad}RHO_0: {self.rho0}", f"{pad}C_0: {self.c0}",
                      f"{pad}P_0: {self.P0}", f"{pad}Gravity: {self.gravity}", f"{pad}X Limit: {self.xlim}",
                      f"{pad}Y Limit: {self.ylim}", f"{pad}Z Limit: {self.zlim}"]
         domain_strs.extend(["", "Paritcles", ""])
@@ -52,12 +54,12 @@ class Mesh():
 
         return "\n".join(domain_strs)
 
-    def add_point(self, x, vol, mass, type, nu, fixed):	
-        self.vol = numpy.append(self.vol,vol)	
-        self.mass = numpy.append(self.mass,mass)	
-        self.type = numpy.append(self.type,type)	
-        self.nu = numpy.append(self.nu,nu)	
-        self.fixed = numpy.append(self.fixed,fixed)	
+    def add_point(self, x, vol, mass, type, nu, fixed):
+        self.vol = numpy.append(self.vol, vol)
+        self.mass = numpy.append(self.mass, mass)
+        self.type = numpy.append(self.type, type)
+        self.nu = numpy.append(self.nu, nu)
+        self.fixed = numpy.append(self.fixed, fixed)
 
         self.vertices = numpy.append(self.vertices, [x], axis=0)
 
@@ -92,11 +94,11 @@ class Mesh():
         return self.on_boundary
 
 
-    def get_mesh_size(self):
-        """ Estimate of mesh size at each vertex as the average of the
+    def get_domain_size(self):
+        """ Estimate of domain size at each vertex as the average of the
             diameters of the circumradius of the tetrahedrons that vertex
             is a part of."""
-        if self.mesh_size is None:
+        if self.domain_size is None:
             #coordinates = self.coordinates()
             _ = self.get_vol()
 
@@ -115,22 +117,22 @@ class Mesh():
                 cr[i] = R
 
             # Compute the mean for each vertex based on all incident cells
-            self.mesh_size = numpy.zeros((self.vertices.shape[0]),dtype=float)
+            self.domain_size = numpy.zeros((self.vertices.shape[0]),dtype=float)
             count = numpy.zeros((self.vertices.shape[0]),dtype=float)
             for tndx in range(self.tetrahedrons.shape[0]):
                 for vndx in self.tetrahedrons[tndx,:]:
-                    self.mesh_size[vndx] += cr[tndx]
+                    self.domain_size[vndx] += cr[tndx]
                     count[vndx] += 1
-            for vndx in range(len(self.mesh_size)):
-                self.mesh_size[vndx] = self.mesh_size[vndx]/count[vndx]
+            for vndx in range(len(self.domain_size)):
+                self.domain_size[vndx] = self.domain_size[vndx]/count[vndx]
 
-        return self.mesh_size
+        return self.domain_size
 
     def distance_between_2_vertices(self, a, b):
         return numpy.linalg.norm( self.vertices[a,:]-self.vertices[b,:] )
 
     def closest_vertex(self, x):
-        min_dist=None
+        min_dist = None
         min_vtx = None
         for i in range(self.vertices.shape[0]):
             d = numpy.linalg.norm( self.vertices[i,:]-x )
@@ -202,12 +204,12 @@ class Mesh():
         """ Read a FEniCS/dolfin style XML mesh file"""
         import xml.etree.ElementTree as ET
         root = ET.parse(filename).getroot()
-        if not root.tag == 'dolfin': raise MeshError("Not a FEniCS/dolfin xml mesh.")
+        if not root.tag == 'dolfin': raise DomainError("Not a FEniCS/dolfin xml mesh.")
         mesh = root[0]
         if mesh.tag != 'mesh' or \
            mesh.attrib['celltype'] != 'tetrahedron' or \
            mesh.attrib['dim'] != '3':
-            raise MeshError("XML mesh format error")
+            raise DomainError("XML mesh format error")
         #
         vertices = mesh[0]
         cells = mesh[1]
@@ -218,11 +220,11 @@ class Mesh():
             mesh_vertices[ int(v.attrib['index']),1] = float(v.attrib['y'])
             mesh_vertices[ int(v.attrib['index']),2] = float(v.attrib['z'])
 
-        # create mesh object
+        # create domain object
         xlim = ( min(mesh_vertices[:,0]) , max(mesh_vertices[:,0]) )
         ylim = ( min(mesh_vertices[:,1]) , max(mesh_vertices[:,1]) )
         zlim = ( min(mesh_vertices[:,2]) , max(mesh_vertices[:,2]) )
-        obj = Mesh(len(vertices), xlim, ylim, zlim)
+        obj = Domain(len(vertices), xlim, ylim, zlim)
         obj.vertices = mesh_vertices
 
         #tetrahedrons
@@ -243,8 +245,8 @@ class Mesh():
     @classmethod
     def import_meshio_object(cls, mesh_obj):
         """ Import a python meshio mesh object. """
-        # create mesh object
-        obj = Mesh()
+        # create domain object
+        obj = Domain()
         #vertices
         obj.vertices = mesh_obj.points
         # triangles
@@ -264,16 +266,16 @@ class Mesh():
         try:
             import pygmsh
         except ImportError as e:
-            raise MeshError("The python package 'pygmsh' is not installed.")
+            raise DomainError("The python package 'pygmsh' is not installed.")
        # try:
        #     _ = pygmsh.get_gmsh_major_version()
        # except FileNotFoundError as e:
-       #     raise MeshError("The command line program 'gmsh' is not installed or is not found in the current PATH")
+       #     raise DomainError("The command line program 'gmsh' is not installed or is not found in the current PATH")
 
         try:
             import meshio
         except ImportError as e:
-            raise MeshError("The python package 'meshio' is not istaled.")
+            raise DomainError("The python package 'meshio' is not installed.")
 
         return cls.import_meshio_object(meshio.msh_io.read(filename))
 
@@ -291,16 +293,16 @@ class Mesh():
                 if "domain" in domain.keys():
                     domain = domain['domain']
 
-            mesh = Mesh(0, tuple(domain['x_lim']), tuple(domain['y_lim']), tuple(domain['z_lim']),
+            obj = Domain(0, tuple(domain['x_lim']), tuple(domain['y_lim']), tuple(domain['z_lim']),
                         rho0=domain['rho_0'], c0=domain['c_0'], P0=domain['p_0'], gravity=domain['gravity'])
 
             for particle in domain['particles']:
-                mesh.add_point(particle['point'], particle['volume'], particle['mass'],
+                obj.add_point(particle['point'], particle['volume'], particle['mass'],
                                particle['type'], particle['nu'], particle['fixed'])
 
-            return mesh
+            return obj
         except KeyError as e:
-            raise MeshError("The file is not a StochSS Domain (.domn) or a StochSS Spatial Model (.smdl).")
+            raise DomainError("The file is not a StochSS Domain (.domn) or a StochSS Spatial Model (.smdl).")
 
 
     @classmethod
@@ -321,11 +323,11 @@ class Mesh():
             c0: (float, default: 10) speed of sound for the system
             P0: (float, default: 10) background pressure for the system
         Returns:
-            Mesh object
+            Domain object
         """
-        # Create mesh object
+        # Create domain object
         numberparticles = nx*ny*nz
-        obj = Mesh(numberparticles, xlim, ylim, zlim, **kwargs)
+        obj = Domain(numberparticles, xlim, ylim, zlim, **kwargs)
         # Vertices
         obj.vertices = numpy.zeros(( numberparticles, 3), dtype=float)
         x_list = numpy.linspace(xlim[0],xlim[1],nx)
@@ -365,11 +367,11 @@ class Mesh():
             c0: (float, default: 10) speed of sound for the system
             P0: (float, default: 10) background pressure for the system
         Returns:
-            Mesh object
+            Domain object
         """
-        # Create mesh object
+        # Create domain object
         numberparticles = nx*ny
-        obj = Mesh(numberparticles, xlim, ylim, (0,0), **kwargs)
+        obj = Domain(numberparticles, xlim, ylim, (0,0), **kwargs)
         # Vertices
         obj.vertices = numpy.zeros(( int(nx)*int(ny), 3), dtype=float)
         x_list = numpy.linspace(xlim[0],xlim[1],nx)
@@ -394,5 +396,5 @@ class Mesh():
 
 
 
-class MeshError(Exception):
+class DomainError(Exception):
     pass

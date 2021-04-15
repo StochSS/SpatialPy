@@ -4,11 +4,18 @@ import math
 import os
 import shutil
 import tempfile
+import sys
 
 import numpy
 
 from spatialpy.Model import *
-from spatialpy.VTKReader import VTKReader
+
+try:
+    import vtk
+except ImportError as e:
+    print('''The Python package 'vtk' is not installed. Using integrated VTK reader. This is significantly 
+slower than the official VTK package.''')
+    from spatialpy.VTKReader import VTKReader
 
 common_rgb_values=['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f',
                    '#bcbd22','#17becf','#ff0000','#00ff00','#0000ff','#ffff00','#00ffff','#ff00ff',
@@ -170,16 +177,40 @@ class Result():
                 along with a dictionary of property and species data [1]
         """
 
-        reader = VTKReader(debug=debug)
         num = int(step_num * self.model.output_freq)
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(num))
-        #print("read_step({0}) opening '{1}'".format(step_num, filename))
-        reader.setfilename(filename)
-        reader.readfile()
-        if reader.getpoints() is None or reader.getarrays() is None:
+
+        if debug:
+            print("read_step({0}) opening '{1}'".format(step_num, filename))
+
+        if 'vtk' in sys.modules:
+            reader = vtk.vtkGenericDataObjectReader()
+            reader.SetFileName(filename)
+            reader.Update()
+            data = reader.GetOutput()
+
+            if data is not None:
+                points = numpy.array(data.GetPoints().GetData())
+                pd = data.GetPointData()
+                vtk_data = {}
+
+                for i in range(pd.GetNumberOfArrays()):
+                    if pd.GetArrayName(i) is None:
+                        break
+
+                    if debug:
+                        print(i,pd.GetArrayName(i))
+
+                    vtk_data[pd.GetArrayName(i)] = numpy.array(pd.GetArray(i))
+        else:
+            reader = VTKReader(filename=filename, debug=debug)
+            reader.readfile()
+            points = reader.getpoints()
+            vtk_data = reader.getarrays()
+
+        if points is None or vtk_data is None:
             raise ResultError("read_step(step_num={0}): got data = None".format(step_num))
-        points = reader.getpoints()
-        vtk_data = reader.getarrays()
+
         return (points, vtk_data)
 
     def get_timespan(self):
@@ -226,7 +257,7 @@ class Result():
 
         species_map = self.model.species_map
         num_species = self.model.get_num_species()
-        num_voxel = self.model.mesh.get_num_voxels()
+        num_voxel = self.model.domain.get_num_voxels()
 
         if isinstance(species,str):
             spec_name = species
@@ -374,7 +405,7 @@ class Result():
             else:
                 types[name] = {"points":[points[i]], "data":[spec_data]}
 
-        is_2d = self.model.mesh.zlim[0] == self.model.mesh.zlim[1]
+        is_2d = self.model.domain.zlim[0] == self.model.domain.zlim[1]
 
         trace_list = _plotly_iterate(types, size=size, colormap=colormap, is_2d=is_2d)
 
@@ -382,7 +413,7 @@ class Result():
             "aspectmode": 'data',
         }
         layout = {"width": width, "height": width, "scene":scene,
-                  "xaxis":{"range":self.model.mesh.xlim}, "yaxis":{"range":self.model.mesh.ylim}
+                  "xaxis":{"range":self.model.domain.xlim}, "yaxis":{"range":self.model.domain.ylim}
                  }
         if title is not None:
             layout["title"] = title
@@ -498,7 +529,7 @@ class Result():
 
         t_index_arr = numpy.linspace(0,self.model.num_timesteps,
                             num=self.model.num_timesteps+1, dtype=int)
-        num_voxel = self.model.mesh.get_num_voxels()
+        num_voxel = self.model.domain.get_num_voxels()
 
         if timepoints is not None:
             if isinstance(timepoints,float):
@@ -624,7 +655,7 @@ class Result():
                 "data" : data[property_name]
             }
 
-        is_2d = self.model.mesh.zlim[0] == self.model.mesh.zlim[1]
+        is_2d = self.model.domain.zlim[0] == self.model.domain.zlim[1]
 
         trace_list = _plotly_iterate(types, size=size, property_name=property_name,
                                      colormap=colormap, is_2d=is_2d)
@@ -633,7 +664,7 @@ class Result():
             "aspectmode": 'data',
         }
         layout = {"width": width, "height": width, "scene":scene,
-                  "xaxis":{"range":self.model.mesh.xlim}, "yaxis":{"range":self.model.mesh.ylim}
+                  "xaxis":{"range":self.model.domain.xlim}, "yaxis":{"range":self.model.domain.ylim}
                  }
 
         if title is not None:
