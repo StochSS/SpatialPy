@@ -1,9 +1,9 @@
+import csv
 import filecmp
 import math
 import os
-import pickle
 import shutil
-import subprocess
+import tempfile
 import sys
 
 import numpy
@@ -30,6 +30,7 @@ common_color_scales = ["Plotly3","Jet","Blues","YlOrRd","PuRd","BuGn","YlOrBr","
 
 
 def _plotly_iterate(types, size=5, property_name=None, cmin=None, cmax=None, colormap=None, is_2d=False):
+    """ Helper method used by plotly display methods. """
     import plotly.graph_objs as go
 
     trace_list = []
@@ -60,11 +61,9 @@ def _plotly_iterate(types, size=5, property_name=None, cmin=None, cmax=None, col
 class Result():
     """ Result object for a URDME simulation. """
 
-    def __init__(self, model=None, result_dir=None, loaddata=False):
+    def __init__(self, model=None, result_dir=None):
         self.model = model
-        self.U = None
         self.tspan = None
-        self.data_is_loaded = False
         self.success = False
         self.stdout = None
         self.stderr = None
@@ -72,111 +71,112 @@ class Result():
         self.result_dir = result_dir
 
 
-
-#    def get_endtime_model(self):
-#        """ Return a URDME model object with the initial conditions set to the final time point of the
-#            result object.
-#        """
-#        if self.model is None:
-#            raise Exception("can not continue a result with no model")
-#        # create a soft copy
-#        model_str = pickle.dumps(self.model)
-#        model2 = pickle.loads(model_str)
-#        # set the initial conditions
-#        model2.u0 = numpy.zeros(self.model.u0.shape)
-#        for s, sname in enumerate(self.model.listOfSpecies):
-#            model2.u0[s,:] = self.get_species(sname, timepoints=-1)
-#        return model2
-
-
     def __eq__(self, other):
-        """ Compare Result object's output for equality. This does _NOT_ compare objects themselves
+        """ Compare Result object's simulation data for equality. This does _NOT_ compare objects themselves.
 
-        Params:
-            self: Results object
-            other: Results object to compare against
-        Return:
-            bool """
+        Attributes
+        ----------
+            other: Result
+                Results object to compare against
 
-        if isinstance(other, Result) and self.result_dir != None and other.result_dir != None:
-                # Compare contents, not shallow compare
-                filecmp.cmpfiles.__defaults__ = (False,)
-                dircmp = filecmp.dircmp(self.result_dir, other.result_dir)
-                # Raise exception if funny_files
-                assert not dircmp.funny_files
-                if not (dircmp.left_only or dircmp.right_only or dircmp.funny_files or dircmp.diff_files):
-                    return True
-                return False
+        Return
+        ----------
+            bool:
+                Whether or not the Results object's simulation data is equal
+        """
+
+        if isinstance(other, Result) and self.result_dir and other.result_dir:
+            # Compare contents, not shallow compare
+            filecmp.cmpfiles.__defaults__ = (False,)
+            dircmp = filecmp.dircmp(self.result_dir, other.result_dir)
+            # Raise exception if funny_files
+            assert not dircmp.funny_files
+            if not (dircmp.left_only or dircmp.right_only or dircmp.funny_files or dircmp.diff_files):
+                return True
+            return False
         return NotImplemented
 
     def __ne__(self, other):
-        """ Compare Result object's output for inequality. This does _NOT_ compare objects themselves.
-            This inverts the logic in __eq__().
+        """ Compare Result object's simulation data for inequality. This does _NOT_ compare objects themselves.
 
-        Params:
-            self: Results object
-            other: Results object to compare against
-        Return:
-            bool """
+        Attributes
+        ----------
+            other: Result
+                Results object to compare against
+
+        Return
+        ----------
+            bool:
+                Whether or not the Results object's simulation data is unequal
+        """
 
         return not self.__eq__(other)
 
     def __getstate__(self):
-            """ Used by pickle to get state when pickling. """
+        """ Used by pickle to get state when pickling. """
 
-            state = {}
-            for key, item in self.__dict__.items():
-                resultdict = OrderedDict()
-                # Pickle all Result output files
-                # This does not perserve file metadata like permissions.
-                # In the future we should probably at least perserve permissions.
-                try:
-                    for root, _, file in os.walk(self.result_dir):
-                        for filename in file:
-                            fd = open(os.path.join(root, filename), 'rb')
+        state = {}
+        for key, item in self.__dict__.items():
+            resultdict = OrderedDict()
+
+            try:
+                for root, _, file in os.walk(self.result_dir):
+                    for filename in file:
+                        with open(os.path.join(root, filename), 'rb') as fd:
                             fd.seek(0)
                             resultdict[filename] = fd.read()
-                            fd.close()
-                    state['results_output'] = resultdict
-                except Exception as e:
-                    raise Exception("Error pickling model, could not pickle the Result output files: "+str(e))
-                state[key] = item
+                state['results_output'] = resultdict
+            except Exception as e:
+                raise Exception("Error pickling model, could not pickle the Result output files: "+str(e))
+            state[key] = item
 
-            return state
+        return state
 
     def __setstate__(self, state):
         """ Used by pickle to set state when unpickling. """
 
         self.__dict__ = state
 
-        # Recreate the Result output files
-        # This does not restore file metadata like permissions.
-        # In the future we should probably at least restore permissions.
         try:
             results_output = state['results_output']
-            if not os.path.exists(state['result_dir']):
-                os.mkdir(state['result_dir'])
-                for filename, contents in results_output.items():
-                    fd = open(os.path.join(state['result_dir'], filename), 'wb')
+            state['result_dir'] = tempfile.mkdtemp(
+                prefix='spatialpy_result_', dir=os.environ.get('SPATIALPY_TMPDIR'))
+
+            for filename, contents in results_output.items():
+                with open(os.path.join(state['result_dir'], filename), 'wb') as fd:
                     fd.seek(0)
                     fd.write(contents)
-                    fd.close()
         except Exception as e:
             raise Exception("Error unpickling model, could not recreate the Result output files: "+str(e))
+
+    def __del__(self):
+        """ Deconstructor. """
+        try:
+            if self.result_dir is not None:
+                try:
+                    shutil.rmtree(self.result_dir)
+                except OSError as e:
+                    print("Could not delete '{0}'".format(self.result_dir))
+        except Exception as e:
+            pass
 
     def read_step(self, step_num, debug=False):
         """ Read the data for simulation step 'step_num'.
 
         Attributes
         ----------
-            step_num: int
-                The step number of the results to read
-            debug: bool
-                Whether or not to display debug information
+        step_num: Usually an int
+            The step number to read simulation data from
+        debug: bool (default False)
+            Whether or not debug information should be printed
+
         Return
         ----------
             tuple:
-                Contains point coordinate data in the first index and type and property data in the second index """
+                A tuple containing a numpy.ndarray of point coordinates [0]
+                along with a dictionary of property and species data [1]
+        """
+
         num = int(step_num * self.model.output_freq)
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(num))
 
@@ -213,8 +213,15 @@ class Result():
 
         return (points, vtk_data)
 
-
     def get_timespan(self):
+        """  Get the model time span.
+
+        Return
+        ----------
+            numpy.ndarray:
+                A numpy array containing the time span of the model
+        """
+
         self.tspan = numpy.linspace(0,self.model.num_timesteps,
                 num=math.ceil(self.model.num_timesteps/self.model.output_freq)+1) * self.model.timestep_size
         return self.tspan
@@ -223,15 +230,29 @@ class Result():
         """ Get the populations/concentration values for a given species in the model for
             one or all timepoints.
 
+        Attributes
+        ----------
+        species: str/dict
+            A species in string or dictionary form to retreive information about
+        timepoints: int (default None)
+            A time point where the information should be retreived from.
             If 'timepoints' is None (default), a matrix of dimension:
-            (number of timepoints) x (number of voxels) is returned.  If an integer value is
-            given, that value is used to index into the timespan, and that time point is returned
+            (number of timepoints) x (number of voxels) is returned.
+            If an integer value is given, that value is used to index into the timespan, and that time point is returned
             as a 1D array with size (number of voxel).
+        concentration: bool (default False)
+            Whether or not the species is a concentration (True) or population (False)
+            If concentration is False (default), the integer, raw, trajectory data is returned.
+            If set to True, the concentration (=copy_number/volume) is returned.
+        deterministic: bool (default False)
+            Whether or not the species is deterministic (True) or stochastic (False)
+        debug: bool (default False)
+            Whether or not debug information should be printed
 
-            If concentration is False (default), the integer, raw, trajectory data is returned,
-            if set to True, the concentration (=copy_number/volume) is returned.
-
-            If deterministic is True, show results for determinstic (instead of stochastic) values
+        Return
+        ----------
+            numpy.ndarray:
+                A numpy array containing the species population/concentration values
         """
 
         species_map = self.model.species_map
@@ -334,9 +355,10 @@ class Result():
         debug: bool
             output debugging info
         """
+
         from plotly.offline import init_notebook_mode, iplot
 
-        if(t_ndx < 0):
+        if t_ndx < 0:
             t_ndx = len(self.get_timespan()) + t_ndx
 
         if animated and t_ndx_list is None:
@@ -351,7 +373,7 @@ class Result():
         if use_matplotlib:
             import matplotlib.pyplot as plt
 
-            if (deterministic or not concentration):
+            if deterministic or not concentration:
                 d = data[spec_name]
             else:
                 d = data[spec_name] / (data['mass'] / data['rho'])
@@ -578,7 +600,8 @@ class Result():
         mpl_height: int (default 4.8)
             Height in inches of output plot box
         """
-        if(t_ndx < 0):
+
+        if t_ndx < 0:
             t_ndx = len(self.get_timespan()) + t_ndx
 
         if animated and t_ndx_list is None:
@@ -591,7 +614,7 @@ class Result():
         if use_matplotlib:
             import matplotlib.pyplot as plt
 
-            if (property_name == 'v'):
+            if property_name == 'v':
                 d = data[property_name]
                 d = [d[i][p_ndx] for i in range(0,len(d))]
             else:
@@ -754,88 +777,51 @@ class Result():
             init_notebook_mode(connected=True)
             iplot(fig)
 
-#    def __setattr__(self, k, v):
-#        if k in self.keys():
-#            self[k] = v
-#        elif not hasattr(self, k):
-#            self[k] = v
-#        else:
-#            raise AttributeError("Cannot set '%s', cls attribute already exists" % ( k, ))
-#
-#    def __setupitems__(self, k):
-#        if (k == 'U' or k == 'tspan') and not self.data_is_loaded:
-#            if self.result_dir is None:
-#                raise AttributeError("This result object has no data file.")
-#            self.read_solution()
-#
-#    def __getitem__(self, k):
-#        self.__setupitems__(k)
-#        if k in self.keys():
-#            return self.get(k)
-#        raise KeyError("Object has no attribute {0}".format(k))
-#
-#    def __getattr__(self, k):
-#        self.__setupitems__(k)
-#        if k in self.keys():
-#            return self.get(k)
-#        raise AttributeError("Object has no attribute {0}".format(k))
+    def export_to_csv(self, folder_name=None):
+        """ Write the trajectory to a set of CSV files. The first, modelname_mesh.csv, specifies the mesh.
+            The other files, modelname_species_S.csv, for species named S, specify trajectory data for each species.
+            The columns of modelname_mesh.csv are: 'Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity'
+            The columns of modelname_species_S.csv: 'Time', 'Voxel 0', Voxel 1', ... 'Voxel N'.
 
-    def __del__(self):
-        """ Deconstructor. """
-        #   if not self.data_is_loaded:
-        try:
-            if self.result_dir is not None:
-                try:
-                    shutil.rmtree(self.result_dir)
-                except OSError as e:
-                    print("Could not delete '{0}'".format(self.result_dir))
-        except Exception as e:
-            pass
-
-    def export_to_csv(self, folder_name):
-        """ Dump trajectory to a set CSV files, the first specifies the mesh (mesh.csv) and the rest specify trajectory data for each species (species_S.csv for species named 'S').
-            The columns of mesh.csv are: 'Voxel ID', 'X', 'Y', 'Z', 'Volume', 'Type'.
-            The columns of species_S.csv are: 'Time', 'Voxel 0', Voxel 1', ... 'Voxel N'.
+        Attributes
+        ----------
+        folder_name: str (default current working directory)
+            A path where the vtk files will be written, created if non-existant.
+            If no path is provided current working directory is used.
         """
-        #TODO: Check if this still works
-        import csv
-        subprocess.call(["mkdir", "-p", folder_name])
-        #['Voxel ID', 'X', 'Y', 'Z', 'Volume', 'Type']
-        with open(os.path.join(folder_name,'mesh.csv'), 'w+') as csvfile:
+
+        if not folder_name:
+            folder_name = os.path.abspath(os.getcwd())
+        elif not os.path.exists(folder_name):
+            os.mkdir(folder_name)
+
+        #['Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity']
+        with open(os.path.join(folder_name, self.model.name + '_mesh.csv'), 'w+') as csvfile:
+            mesh = self.model.mesh
             writer = csv.writer(csvfile, delimiter=',')
-            writer.writerow(['Voxel ID', 'X', 'Y', 'Z', 'Volume', 'Type'])
-            vol = self.model.get_solver_datastructure()['vol']
-            for ndx in range(self.model.domain.get_num_voxels()):
-                row = [ndx]+self.model.domain.coordinates()[ndx,:].tolist()+[vol[ndx]]+[self.model.domain.type[ndx]]
-                writer.writerow(row)
+            writer.writerow(['Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity'])
+            for ndx in range(len(mesh.vertices)):
+                writer.writerow([ndx] + mesh.coordinates()[ndx,:].tolist() + [mesh.type[ndx]] \
+                    + [mesh.vol[ndx]] + [mesh.mass[ndx]] + [mesh.nu[ndx]])
 
-        for spec in self.model.listOfSpecies:
-            #['Time', 'Voxel 0', Voxel 1', ... 'Voxel N']
-            with open(os.path.join(folder_name,'species_{0}.csv'.format(spec)), 'w+') as csvfile:
-                data = self.get_species(spec)
-                (num_t,num_vox) = data.shape
+        for species in self.model.listOfSpecies:
+            #['Voxel', 'Time 0', Time 1', ... 'Time N']
+            with open(os.path.join(folder_name, self.model.name + '_species_{0}.csv'.format(species)), 'w+') as csvfile:
+                data = self.get_species(species)
+                (num_time, num_vox) = data.shape
                 writer = csv.writer(csvfile, delimiter=',')
-                row = ['Time']
-                for v in range(num_vox):
-                    row.append('Voxel {0}'.format(v))
-                writer.writerow(row)
-                timespan = self.get_timespan()
-                for t in range(num_t):
-                    writer.writerow([timespan[t].tolist()] + data[t,:].tolist())
+                header_row = ['Voxel']
+                for time in range(num_time):
+                    header_row.append('Time {0}'.format(time))
+                writer.writerow(header_row)
+                for voxel in range(num_vox):
+                    writer.writerow([voxel] + data[:,voxel].tolist())
 
-    def export_to_vtk(self, species, folder_name):
-        """ Dump the trajectory to a collection of vtk files in the folder folder_name (created if non-existant).
-            The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension. """
-        #TODO
-        raise Exception("todo")
-
-
-
-
-    def display(self, species, time_index, opacity=1.0, wireframe=True, width=500, camera=[0,0,1]):
-        """ Plot the trajectory as a PDE style plot. """
-        raise Exception("Deprecated")
-
+    def export_to_vtk(self, timespan, folder_name=None):
+        """ Write the trajectory to a collection of vtk files.
+            The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension."""
+            # TODO
+        raise Exception("Not implemented.")
 
 class ResultError(Exception):
     pass
