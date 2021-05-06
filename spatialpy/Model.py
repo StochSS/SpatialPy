@@ -227,6 +227,7 @@ class Model():
 
     def add_boundary_condition(self, bc):
         """ Add an BoundaryCondition object to the model."""
+        bc.model = self
         self.listOfBoundaryConditions.append(bc)
 
     def update_namespace(self):
