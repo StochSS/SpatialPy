@@ -359,10 +359,12 @@ namespace Spatialpy{
 
         double timeOffset = system->current_step * system->dt;
 
-        // TODO: does this deallocate memory on the 2nd call?  No
+        // TODO: does this deallocate memory on the 2nd call?  No -> check with Kevin, this might be ok
         // TODO: make a deallocation function
-        system->rdme_event_q.build(propensities, propensitySum, activeChannels,
+        if(system->num_stoch_rxns > 0){
+            system->rdme_event_q.build(propensities, propensitySum, activeChannels,
                                    rng, timeOffset );
+        }
 
     }
 
@@ -540,6 +542,8 @@ namespace Spatialpy{
     /**************************************************************************/
     // Update to use priority queue
     void nsm_core__take_step(ParticleSystem*system, double current_time, double step_size){
+
+        if( system->num_stoch_rxns == 0 ){ return;}
         // rdme_t*rdme = system->rdme;
         double tt = current_time;
         double end_time = current_time + step_size;
