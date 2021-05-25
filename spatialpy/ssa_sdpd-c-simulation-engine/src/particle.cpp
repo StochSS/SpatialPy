@@ -13,6 +13,8 @@ See the file LICENSE.txt for details.
 #include <vector>
 #include <queue>
 #include <memory>
+#include <thread>
+#include <mutex>
 
 // Include ANN KD Tree
 #include "ANN/ANN.h"
@@ -20,6 +22,9 @@ See the file LICENSE.txt for details.
 #include "particle_system.hpp"
 
 namespace Spatialpy{
+    
+    std::mutex mtx ;
+
     ParticleSystem::ParticleSystem(size_t num_types, size_t num_chem_species, size_t num_chem_rxns,
                          size_t num_stoch_species, size_t num_stoch_rxns,size_t num_data_fn):
                             num_types(num_types), num_chem_species(num_chem_species),
@@ -192,7 +197,9 @@ namespace Spatialpy{
         //printf("USING DIST %f...", dist) ;
         for(int i = 0; i < 3; i++){
         }
+        mtx.lock();
         int k = tree->annkFRSearch(queryPt, dist, 0);
+        mtx.unlock(); 
         //printf("Found %i neighbors!\n", k) ;
         return k;
     }
@@ -232,7 +239,9 @@ namespace Spatialpy{
         printf("SEARCH RETURNED %i\n", system->kdTree->annkFRSearch(queryPt, dist, k, nn_idx, dists));
         printf("Neighbor search complete!\n") ;
         */
+        mtx.lock();
         system->kdTree->annkFRSearch(queryPt, dist, k, nn_idx, dists);
+        mtx.unlock();
         neighbors.clear() ;
         for(int i = 0; i < k && nn_idx[i] != ANN_NULL_IDX; i++) {
             //printf("Adding neighbor %i to list.  Index of neighbor: %i with dist: %f\n", i, nn_idx[i], dists[i]) ;

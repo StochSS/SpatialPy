@@ -142,7 +142,6 @@ namespace Spatialpy{
     void run_simulation(int num_threads, ParticleSystem *system){
         //
         int i,j;
-        num_threads = 1 ;
         int num_particles_per_thread = system->particles.size() / num_threads;
         //int num_bonds_per_thread = system->bond_list->count / num_threads;
         // start worked threads
