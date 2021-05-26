@@ -26,6 +26,6 @@ main.o:
 %.o: $(ROOT)/src/%.c
 	$(CC) -c $(GPROFFLAG) $(GDB_FLAG) -o $@ "$<" $(INCDIRPARAMS) $(CFLAGS)
 
-ssa_sdpd: ANN main.o $(OBJ)
-	$(CC) $(GPROFFLAG) $(GDB_FLAG) -o ssa_sdpd $(OBJ)  main.o $(ANNOBJECTS) $(LFLAGS)
+ssa_sdpd: main.o $(OBJ)
+	$(CC) $(GPROFFLAG) $(GDB_FLAG) -o ssa_sdpd $(OBJ)  main.o $(addprefix $(COREDIR)/,$(ANNOBJECTS)) $(LFLAGS)
 
