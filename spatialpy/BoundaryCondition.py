@@ -14,7 +14,8 @@ class BoundaryCondition():
                  species=None,
                  deterministic=True,
                  property=None,
-                 value=None):
+                 value=None,
+                 model=None):
         """
             Conditions (one or more of the following must be set):
                  xmin, xmax: (float) min or max value in the x dimension
@@ -41,6 +42,7 @@ class BoundaryCondition():
         self.property = property
         self.deterministic = deterministic
         self.value = value
+        self.model = model
 
 
     def expression(self):
