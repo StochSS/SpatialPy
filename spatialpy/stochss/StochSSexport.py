@@ -2,6 +2,16 @@ import ast
 import json
 import copy
 
+def __add_boundary_conditions(model, boundary_conditions):
+    model['boundaryConditions'] = []
+    for boundary_condition in boundary_conditions:
+        s_bound_cond = {"compID":model['defaultID'],
+                        "name": type(boundary_condition).__name__,
+                        "expression": boundary_condition.expression()}
+        model['boundaryConditions'].append(s_bound_cond)
+        model['defaultID'] += 1
+
+
 def __add_domain(model, domain):
     boundary_condition = {"reflext_x":True, "reflect_y":True, "reflect_z":True}
     particles = __get_particles(domain=domain)
@@ -205,6 +215,8 @@ def export(model, path=None, return_stochss_model=False):
     __add_domain(model=s_model, domain=model.domain)
     s_model['domain']['static'] = model.staticDomain
     __add_types(model=s_model, types=model.listOfTypeIDs)
+    if model.listOfBoundaryConditions:
+        __add_boundary_conditions(model=s_model, boundary_conditions=model.listOfBoundaryConditions)
     __add_species(model=s_model, species=model.get_all_species(), types=model.listOfTypeIDs,
                   diffusion_restrictions=model.listOfDiffusionRestrictions)
     __add_initial_conditions(model=s_model, types=model.listOfTypeIDs,
