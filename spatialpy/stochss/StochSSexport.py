@@ -7,7 +7,8 @@ def __add_boundary_conditions(model, boundary_conditions):
     for boundary_condition in boundary_conditions:
         s_bound_cond = {"compID":model['defaultID'],
                         "name": type(boundary_condition).__name__,
-                        "expression": boundary_condition.expression()}
+                        "expression": boundary_condition.expression(),
+                        "annotation":""}
         model['boundaryConditions'].append(s_bound_cond)
         model['defaultID'] += 1
 
