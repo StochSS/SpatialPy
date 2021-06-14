@@ -9,6 +9,25 @@ import warnings
 import math
 
 
+def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
+    """
+    SpatialPy model to StochSS converter
+
+    Args:
+        spatialpy_model : spatialpy.Model
+            SpatialPy model to be converted to StochSS
+        filename : str
+            Path to the exported stochss model
+        return_stochss_model : bool
+            Whether or not to return the model
+    """
+    try:
+        from spatialpy.stochss.StochSSexport import export
+    except ImportError:
+        raise ImportError('StochSS export conversion not imported successfully')
+
+    return export(spatialpy_model, path=filename, return_stochss_model=return_stochss_model)
+
 
 class Model():
     """ Representation of a spatial biochemical model. """
