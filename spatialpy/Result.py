@@ -9,13 +9,12 @@ import sys
 import numpy
 
 from spatialpy.Model import *
+from spatialpy.VTKReader import VTKReader
 
 try:
     import vtk
 except ImportError as e:
-    print('''The Python package 'vtk' is not installed. Using integrated VTK reader. This is significantly 
-slower than the official VTK package.''')
-    from spatialpy.VTKReader import VTKReader
+    pass
 
 common_rgb_values=['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f',
                    '#bcbd22','#17becf','#ff0000','#00ff00','#0000ff','#ffff00','#00ffff','#ff00ff',
@@ -68,6 +67,7 @@ class Result():
         self.stdout = None
         self.stderr = None
         self.timeout = False
+        self.official_vtk = False
         self.result_dir = result_dir
 
 
@@ -183,7 +183,7 @@ class Result():
         if debug:
             print("read_step({0}) opening '{1}'".format(step_num, filename))
 
-        if 'vtk' in sys.modules:
+        if self.official_vtk:
             reader = vtk.vtkGenericDataObjectReader()
             reader.SetFileName(filename)
             reader.Update()
