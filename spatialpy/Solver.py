@@ -8,6 +8,8 @@ import threading
 import time
 import tempfile
 import getpass
+import re
+
 
 from spatialpy.Model import *
 from spatialpy.Result import *
@@ -93,8 +95,9 @@ class Solver:
             print("Compiling Solver.  Build dir: {0}".format(self.build_dir))
 
         # Write the propensity file
-        self.propfilename = self.model_name + '_generated_model'
-        self.prop_file_name = self.build_dir + '/' + self.propfilename + '.cpp'
+        self.propfilename = re.sub('[^\w\_]', '', self.model_name) # Match except word characters \w = ([a-zA-Z0-9_]) and \_ = _ replace with ''
+        self.propfilename = self.propfilename + '_generated_model'
+        self.prop_file_name = self.build_dir + '/' + self.propfilename + '.c'
         if self.debug_level > 1:
             print("Creating propensity file {0}".format(self.prop_file_name))
         self.create_propensity_file(file_name=self.prop_file_name)
@@ -204,6 +207,7 @@ class Solver:
                         print('Terminated by user after seconds: {:.2f}'.format(
                             time.monotonic() - start))
                     except subprocess.TimeoutExpired:
+                        result.timeout = True
                         # send signal to the process group
                         os.killpg(process.pid, signal.SIGINT)
                         raise SimulationTimeout("SpatialPy solver timeout exceded.")
@@ -221,7 +225,7 @@ class Solver:
                 raise SimulationError(
                     "Solver execution failed, return code = {0}".format(return_code))
 
-            result["Status"] = "Success"
+            result.success = True
             if profile:
                 self.read_profile_info(result)
             if number_of_trajectories > 1:
@@ -280,7 +284,7 @@ class Solver:
         propfilestr = propfilestr.replace(
             "__NUMBER_OF_SPECIES__", str(self.model.get_num_species()))
         propfilestr = propfilestr.replace(
-            "__NUMBER_OF_VOXELS__", str(self.model.mesh.get_num_voxels()))
+            "__NUMBER_OF_VOXELS__", str(self.model.domain.get_num_voxels()))
 
         # Make sure all paramters are evaluated to scalars before we write them to the file.
         self.model.resolve_parameters()
@@ -378,16 +382,16 @@ class Solver:
         # End of pyurdme replacements
         # SSA-SDPD values here
         init_particles = ""
-        if self.model.mesh.type is None:
-            self.model.mesh.type = numpy.ones(self.model.mesh.get_num_voxels())
-        for i in range(len(self.model.mesh.type)):
-            if self.model.mesh.type[i] == 0:
+        if self.model.domain.type is None:
+            self.model.domain.type = numpy.ones(self.model.domain.get_num_voxels())
+        for i in range(len(self.model.domain.type)):
+            if self.model.domain.type[i] == 0:
                 raise SimulationError(
                     "Not all particles have been defined in a type. Mass and other properties must be defined")
             init_particles += "init_create_particle(sys,id++,{0},{1},{2},{3},{4},{5},{6},{7},{8});".format(
-                self.model.mesh.coordinates()[i,0],self.model.mesh.coordinates()[i,1],self.model.mesh.coordinates()[i,2],
-                self.model.mesh.type[i],self.model.mesh.nu[i],self.model.mesh.mass[i],
-                (self.model.mesh.mass[i] / self.model.mesh.vol[i]),int(self.model.mesh.fixed[i]),num_chem_species )+"\n"
+                self.model.domain.coordinates()[i,0],self.model.domain.coordinates()[i,1],self.model.domain.coordinates()[i,2],
+                self.model.domain.type[i],self.model.domain.nu[i],self.model.domain.mass[i],
+                (self.model.domain.mass[i] / self.model.domain.vol[i]),int(self.model.domain.fixed[i]),num_chem_species )+"\n"
         propfilestr = propfilestr.replace("__INIT_PARTICLES__", init_particles)
 
         # process initial conditions here
@@ -529,24 +533,24 @@ class Solver:
         system_config += "system->nt = {0};\n".format(self.model.num_timesteps)
         system_config += "system->output_freq = {0};\n".format(self.model.output_freq)
         if self.h is None:
-            self.h = self.model.mesh.find_h()
+            self.h = self.model.domain.find_h()
         if self.h == 0.0:
             raise ModelError('h (basis function width) can not be zero.')
         system_config +="system->h = {0};\n".format(self.h)
-        system_config +="system->rho0 = {0};\n".format(self.model.mesh.rho0)
-        system_config +="system->c0 = {0};\n".format(self.model.mesh.c0)
-        system_config +="system->P0 = {0};\n".format(self.model.mesh.P0)
+        system_config +="system->rho0 = {0};\n".format(self.model.domain.rho0)
+        system_config +="system->c0 = {0};\n".format(self.model.domain.c0)
+        system_config +="system->P0 = {0};\n".format(self.model.domain.P0)
         #// bounding box
-        system_config += "system->xlo = {0};\n".format(self.model.mesh.xlim[0])
-        system_config += "system->xhi = {0};\n".format(self.model.mesh.xlim[1])
-        system_config += "system->ylo = {0};\n".format(self.model.mesh.ylim[0])
-        system_config += "system->yhi = {0};\n".format(self.model.mesh.ylim[1])
-        system_config += "system->zlo = {0};\n".format(self.model.mesh.zlim[0])
-        system_config += "system->zhi = {0};\n".format(self.model.mesh.zlim[1])
+        system_config += "system->xlo = {0};\n".format(self.model.domain.xlim[0])
+        system_config += "system->xhi = {0};\n".format(self.model.domain.xlim[1])
+        system_config += "system->ylo = {0};\n".format(self.model.domain.ylim[0])
+        system_config += "system->yhi = {0};\n".format(self.model.domain.ylim[1])
+        system_config += "system->zlo = {0};\n".format(self.model.domain.zlim[0])
+        system_config += "system->zhi = {0};\n".format(self.model.domain.zlim[1])
         #
-        if self.model.mesh.gravity is not None:
+        if self.model.domain.gravity is not None:
             for i in range(3):
-                system_config += "system->gravity[{0}] = {1};\n".format(i,self.model.mesh.gravity[i])
+                system_config += "system->gravity[{0}] = {1};\n".format(i,self.model.domain.gravity[i])
 
 
         propfilestr = propfilestr.replace("__SYSTEM_CONFIG__", system_config)

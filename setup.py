@@ -3,7 +3,7 @@
 # @file    setup.py
 # @brief   SpatialPy setup file
 # @license Please see the file named LICENSE in the project directory
-# @website https://github.com/SpatialPy/SpatialPy
+# @website https://github.com/StochSS/SpatialPy
 #
 # Note: how to do a PyPI release
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,8 +67,8 @@ setup(name                 = version['__title__'].lower(),
       long_description_content_type = "text/markdown",
       keywords             = "biochemical simulation, Gillespie algorithm, stochastic simulation, biology, spatial simulation, RDME",
       project_urls         = {
-          "Tracker": "https://github.com/SpatialPy/SpatialPy/issues",
-          "Source" : "https://github.com/SpatialPy/SpatialPy",
+          "Tracker": "https://github.com/StochSS/SpatialPy/issues",
+          "Source" : "https://github.com/StochSS/SpatialPy",
       },
       packages             = find_packages('.'),
       include_package_data = True,
