@@ -380,7 +380,7 @@ class Result():
             if colormap is None:
                 colormap = "viridis"
 
-            plt.figure(figsize=(mpl_width,mpl_height))
+            plt.figure(figsize=(width, height))
             plt.scatter(points[:,0],points[:,1],c=d,cmap=colormap)
             plt.axis('scaled')
             plt.colorbar()
