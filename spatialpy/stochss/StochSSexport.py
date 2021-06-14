@@ -192,7 +192,7 @@ def export(model, path=None, return_stochss_model=False):
     """
 
     if path is None:
-        path = f"{model.name}.mdl"
+        path = f"{model.name}.smdl"
 
     s_model = {"is_spatial": True,
                "defaultID": 1,
