@@ -298,10 +298,9 @@ class Result():
             ret = ret.flatten()
         return ret
 
-    def plot_species(self, species, t_ndx=0, concentration=False, deterministic=False, width=500, height=500, colormap=None, size=5, title=None,
+    def plot_species(self, species, t_ndx=0, concentration=False, deterministic=False, width=None, height=None, colormap=None, size=5, title=None,
                      animated=False, t_ndx_list=None, speed=1, f_duration=500, t_duration=300, return_plotly_figure=False,
-                     use_matplotlib=False, mpl_width=6.4, mpl_height=4.8,
-                     debug=False):
+                     use_matplotlib=False, debug=False):
         """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
@@ -348,10 +347,6 @@ class Result():
             which may be edited by the user.
         use_matplotlib : bool
             whether or not to plot the proprties results using matplotlib.
-        mpl_width: int (default 6.4)
-            Width in inches of output plot box
-        mpl_height: int (default 4.8)
-            Height in inches of output plot box
         debug: bool
             output debugging info
         """
@@ -373,6 +368,11 @@ class Result():
         if use_matplotlib:
             import matplotlib.pyplot as plt
 
+            if width is None:
+                width = 6.4
+            if height is None:
+                height = 4.8
+
             if deterministic or not concentration:
                 d = data[spec_name]
             else:
@@ -389,6 +389,11 @@ class Result():
             plt.grid(linestyle='--', linewidth=1)
             plt.plot()
             return
+
+        if width is None:
+            width = 500
+        if height is None:
+            height = 500
 
         # map data to types
         types = {}
@@ -549,15 +554,11 @@ class Result():
             ret = ret.flatten()
         return ret
 
-    def plot_property(self, property_name, t_ndx=0, p_ndx=0, width=500, height=500, colormap=None, size=5, title=None,
-                      animated=False, t_ndx_list=None, speed=1, f_duration=500, t_duration=300, return_plotly_figure=False,
-                      use_matplotlib=False, mpl_width=6.4, mpl_height=4.8):
-        """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
-
-            If concentration is False (default), the integer, raw, trajectory data is returned,
-            if set to True, the concentration (=copy_number/volume) is returned.
-
-            If deterministic is True, show results for determinstic (instead of stochastic) values
+    def plot_property(self, property_name, t_ndx=0, p_ndx=0, width=None, height=None, colormap=None, size=5, title=None,
+                      animated=False, t_ndx_list=None, speed=1, f_duration=500, t_duration=300,
+                      return_plotly_figure=False, use_matplotlib=False):
+        """
+        Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
         Attributes
         ----------
@@ -568,9 +569,9 @@ class Result():
         p_ndx : int
             The property index of the results to be plotted
         width: int (default 500)
-            Width in pixels of output plot box
+            Width in pixels of output plot box or for matplotlib inches of output plot box
         height: int (default 500)
-            Height in pixels of output plot box
+            Height in pixels of output plot box or for matplotlib inches of output plot box
         colormap : str
             colormap to use.  Plotly specification, valid values: "Plotly3","Jet","Blues","YlOrRd",
                 "PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu", "PuBu","GnBu","YlGn","Greens","Reds",
@@ -595,10 +596,6 @@ class Result():
             which may be edited by the user.
         use_matplotlib : bool
             whether or not to plot the proprties results using matplotlib.
-        mpl_width: int (default 6.4)
-            Width in inches of output plot box
-        mpl_height: int (default 4.8)
-            Height in inches of output plot box
         """
 
         if t_ndx < 0:
@@ -614,6 +611,11 @@ class Result():
         if use_matplotlib:
             import matplotlib.pyplot as plt
 
+            if width is None:
+                width = 6.4
+            if height is None:
+                height = 4.8
+            
             if property_name == 'v':
                 d = data[property_name]
                 d = [d[i][p_ndx] for i in range(0,len(d))]
@@ -622,7 +624,7 @@ class Result():
             if colormap is None:
                 colormap = "viridis"
 
-            plt.figure(figsize=(mpl_width,mpl_height))
+            plt.figure(figsize=(width, height))
             plt.scatter(points[:,0],points[:,1],c=d,cmap=colormap)
             plt.axis('scaled')
             plt.colorbar()
@@ -631,6 +633,11 @@ class Result():
             plt.grid(linestyle='--', linewidth=1)
             plt.plot()
             return
+
+        if width is None:
+            width = 500
+        if height is None:
+            height = 500
 
         from plotly.offline import init_notebook_mode, iplot
 
