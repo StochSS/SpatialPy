@@ -52,7 +52,7 @@ namespace Spatialpy{
                 output_buffer_chem = (double*) malloc(sizeof(double)*output_buffer_chem_size);
             }else if(output_buffer_chem_size < system->particles.size() * system->num_chem_species){
                 output_buffer_chem_size = system->particles.size() * system->num_chem_species;
-                output_buffer_chem = new double[output_buffer_chem_size] ;
+                output_buffer_chem = (double*) realloc(output_buffer_chem, sizeof(double)*output_buffer_chem_size) ;
             }
         }
         int ncnt=0;
@@ -61,7 +61,7 @@ namespace Spatialpy{
             p = &system->particles[i] ;
             memcpy( (void *) &output_buffer[ncnt++], (void *) p, sizeof(Particle) );
             if(system->num_chem_species > 0){
-                memcpy( (void *) &output_buffer_chem[p->id*system->num_chem_species], reinterpret_cast<void*>(&p->C), sizeof(double)*system->num_chem_species );
+                memcpy( (void *) &output_buffer_chem[p->id*system->num_chem_species], (void*) (&p->C), sizeof(double)*system->num_chem_species );
             }
         }
         output_buffer_current_num_particles = ncnt;

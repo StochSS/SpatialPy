@@ -110,7 +110,7 @@ namespace Spatialpy{
     // Step 3/3: Compute the final state
     void take_step2(Particle* me, ParticleSystem* system, unsigned int step)
     {
-        int i;
+        size_t i;
 
         // Step 3.1: Corrector step
         if (me->solidTag == 0 && system->static_domain == 0) {
@@ -143,8 +143,16 @@ namespace Spatialpy{
 
         //  Solve deterministic/stochastic reaction-diffusion system
         // update half-state of chem rxn
-        for(i=0; i < int(system->num_chem_species); i++){
+        printf("Step %i Particle %i\n", step, me->id) ;
+        for(i=0; i < system->num_chem_species; i++){
+            double temp_c = me->C[i] ;
+            if(me->Q[i] != 0.0){
             me->C[i] += me->Q[i] * system->dt * 0.5;
+            printf("C before:  %f, C After: %f, Species %i\n", temp_c, me->C[i], i) ;
+            }
+            if(me->id == 100){
+                printf("Particle 100 at address %li\n", &me) ;
+            }
         }
         // Apply boundary conditions
         applyBoundaryConditions(me, system);

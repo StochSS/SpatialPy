@@ -10,12 +10,13 @@ import numpy
 
 from spatialpy.Model import *
 
-try:
-    import vtk
-except ImportError as e:
-    print('''The Python package 'vtk' is not installed. Using integrated VTK reader. This is significantly 
-slower than the official VTK package.''')
-    from spatialpy.VTKReader import VTKReader
+#try:
+#    import vtk
+#except ImportError as e:
+#    print('''The Python package 'vtk' is not installed. Using integrated VTK reader. This is significantly 
+#slower than the official VTK package.''')
+
+from spatialpy.VTKReader import VTKReader
 
 common_rgb_values=['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f',
                    '#bcbd22','#17becf','#ff0000','#00ff00','#0000ff','#ffff00','#00ffff','#ff00ff',
@@ -286,7 +287,6 @@ class Result():
         ret = numpy.zeros( (num_timepoints, num_voxel))
         for ndx, t_ndx in enumerate(t_index_arr):
             (_, step) = self.read_step(t_ndx, debug=debug)
-            print(step)
             if deterministic:
                 ret[ndx,:] = step['C['+spec_name+']']
             elif concentration:
