@@ -120,9 +120,6 @@ namespace Spatialpy{
                 for(i=0; i<targ->num_my_particles; i++){
                     p = &system->particles[i+targ->my_first_particle] ;
                     take_step(p,system,step,substep);
-                    if(p->C[step] != 0.0){
-                        printf("From simulate_thread: Particle %i, C: %f\n", p->id, p->C[step]) ; fflush(stdout) ;
-                    }
                     count++;
                 }
                 // block on the end barrier

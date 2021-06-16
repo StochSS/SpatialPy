@@ -61,13 +61,7 @@ namespace Spatialpy{
             p = &system->particles[i] ;
             memcpy( (void *) &output_buffer[ncnt++], (void *) p, sizeof(Particle) );
             if(system->num_chem_species > 0){
-                //memcpy( (void *) &output_buffer_chem[p->id*system->num_chem_species], (void*) (&p->C), sizeof(double)*system->num_chem_species );
-                for(int s = 0 s < system->num_chem_species; s++){
-                    output_buffer_chem[p->id*system->num_chem_species + s] = p->C[s]
-                }
-            }
-            if(p->id == 100){
-                printf("p->C == output_buffer_chem: %i\n", p->C[0] == output_buffer_chem[p->id*system->num_chem_species]) ;
+                memcpy( (void *) &output_buffer_chem[p->id*system->num_chem_species], (void*) (p->C), sizeof(double)*system->num_chem_species );
             }
         }
         output_buffer_current_num_particles = ncnt;
@@ -78,7 +72,7 @@ namespace Spatialpy{
                 output_buffer_xx = (unsigned int*) malloc(sizeof(unsigned int)*output_buffer_xx_size);
             }else if(output_buffer_xx_size < output_buffer_current_num_particles*system->num_stoch_species){
                 output_buffer_xx_size = output_buffer_current_num_particles*system->num_stoch_species;
-                output_buffer_xx = (unsigned int*) realloc(output_buffer_xx_size, sizeof(unsigned int)*output_buffer_xx_size);
+                output_buffer_xx = (unsigned int*) realloc(output_buffer_xx, sizeof(unsigned int)*output_buffer_xx_size);
 
             }
             ncnt=0;
