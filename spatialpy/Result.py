@@ -399,7 +399,7 @@ class Result():
         types = {}
         for i, val in enumerate(data['type']):
             name = species
-            if deterministic or not concentration:
+            if (deterministic or not concentration):
                 spec_data = data[spec_name][i]
             else:
                 spec_data = data[spec_name][i] / (data['mass'][i] / data['rho'][i])
@@ -468,12 +468,12 @@ class Result():
                 "y": 0,
                 "steps": []}
 
-            _data = data[spec_name] if deterministic or not concentration else data[spec_name] / (data['mass'] / data['rho'])
+            _data = data[spec_name] if (deterministic or not concentration) else data[spec_name] / (data['mass'] / data['rho'])
             cmin = min(_data)
             cmax = max(_data)
             for i in range(1, len(t_ndx_list), speed):
                 _, _data = self.read_step(t_ndx_list[i])
-                _data = _data[spec_name] if deterministic or not concentration else _data[spec_name] / (_data['mass'] / _data['rho'])
+                _data = _data[spec_name] if (deterministic or not concentration) else _data[spec_name] / (_data['mass'] / _data['rho'])
                 if min(_data) - 0.1 < cmin:
                     cmin = min(_data) - 0.1
                 if max(_data) + 0.1 > cmax:
@@ -487,7 +487,7 @@ class Result():
                 types = {}
                 for i, val in enumerate(data['type']):
                     name = species
-                    if deterministic or not concentration:
+                    if (deterministic or not concentration):
                         spec_data = data[spec_name][i]
                     else:
                         spec_data = data[spec_name][i] / (data['mass'][i] / data['rho'][i])
