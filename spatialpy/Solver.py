@@ -29,7 +29,7 @@ def read_from_stdout(stdout,verbose=True):
 
 
 class Solver:
-    """ SpatialPu solver object.  Take a  """
+    """ SpatialPy solver object."""
 
     def __init__(self, model, debug_level=0):
         """ Constructor. """
