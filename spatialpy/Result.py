@@ -368,16 +368,12 @@ class Result():
         if use_matplotlib:
             import matplotlib.pyplot as plt
 
-<<<<<<< HEAD
-            if (deterministic or not concentration):
-=======
             if width is None:
                 width = 6.4
             if height is None:
                 height = 4.8
 
             if deterministic or not concentration:
->>>>>>> 6b452fb4694654e5a2e208dd30081c08ce9af1a4
                 d = data[spec_name]
             else:
                 d = data[spec_name] / (data['mass'] / data['rho'])
