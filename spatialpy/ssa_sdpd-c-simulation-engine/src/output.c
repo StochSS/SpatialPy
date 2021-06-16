@@ -18,12 +18,12 @@ namespace Spatialpy{
         Particle* p;
         sprintf(filename,"output_%u.csv",current_step);
         FILE*fp = fopen(filename,"w+");
-        fprintf(fp, "id, x, y, z, vx, vy, vz, type, mass, rho, bvf_phi\n");
+        fprintf(fp, "id, x, y, z, vx, vy, vz, type, mass, rho, bvf_phi, C\n");
         for(long unsigned int i = 0; i < system->particles.size(); i++){
             p = &system->particles[i];
-            fprintf(fp,"%u, %lf, %lf, %lf, %lf, %lf, %lf, %i, %lf, %lf, %lf\n",
+            fprintf(fp,"%u, %lf, %lf, %lf, %lf, %lf, %lf, %i, %lf, %lf, %lf, %f\n",
                 p->id, p->x[0], p->x[1], p->x[2], p->v[0], p->v[1], p->v[2],
-                p->type, p->mass, p->rho, p->bvf_phi);
+                p->type, p->mass, p->rho, p->bvf_phi, p->C[current_step]);
         }
         fclose(fp);
     }
@@ -62,6 +62,9 @@ namespace Spatialpy{
             memcpy( (void *) &output_buffer[ncnt++], (void *) p, sizeof(Particle) );
             if(system->num_chem_species > 0){
                 memcpy( (void *) &output_buffer_chem[p->id*system->num_chem_species], (void*) (&p->C), sizeof(double)*system->num_chem_species );
+            }
+            if(p->id == 100){
+                printf("p->C == output_buffer_chem: %i\n", p->C[0] == output_buffer_chem[p->id*system->num_chem_species]) ;
             }
         }
         output_buffer_current_num_particles = ncnt;
