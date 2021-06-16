@@ -150,9 +150,9 @@ namespace Spatialpy{
             me->C[i] += me->Q[i] * system->dt * 0.5;
             printf("C before:  %f, C After: %f, Species %i\n", temp_c, me->C[i], i) ;
             }
-            if(me->id == 100){
-                printf("Particle 100 at address %li\n", &me) ;
-            }
+        }
+        if(me->id == 100){
+            printf("Particle 100 at address %li\n", &me) ;
         }
         // Apply boundary conditions
         applyBoundaryConditions(me, system);
