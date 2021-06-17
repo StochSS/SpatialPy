@@ -1,3 +1,10 @@
+/* *****************************************************************************************
+SSA-SDPD simulation engine
+Copyright 2018 Brian Drawert (UNCA)
+
+This program is distributed under the terms of the GNU GENERAL PUBLIC LICENSE Version 3.
+See the file LICENSE.txt for details.
+***************************************************************************************** */
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
@@ -35,7 +42,7 @@ namespace Spatialpy{
         ParticleSystem* system = (ParticleSystem*) targ;
         while(1){
             pthread_barrier_wait(&begin_output_barrier);
-            //output_csv(system, system->current_step);
+            output_csv(system, system->current_step);
             if(debug_flag) printf("[OUT] start output_vtk__sync_step()\n");
             output_vtk__sync_step(system, system->current_step);
             if(debug_flag) printf("[OUT] done output_vtk__sync_step()\n");

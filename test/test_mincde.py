@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from models.mincde import mincde
 from models.mincde_5r import MinCDE5R

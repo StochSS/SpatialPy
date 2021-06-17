@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """ pyURDME model file for the annihilation cylinder 3D example. """
 
 import os
