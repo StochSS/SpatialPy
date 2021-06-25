@@ -104,7 +104,7 @@ class Solver:
 
         # Build the solver
         makefile = self.SpatialPy_ROOTDIR+'/build/Makefile'
-        cmd_list = ['cd', self.core_dir, '&&', 'make', 'ANN', '-f',  makefile,
+        cmd_list = ['cd', self.core_dir, '&&', 'make', 'CORE', '-f',  makefile,
             'ROOT="' + self.SpatialPy_ROOTPARAM+'"',
             'ROOTINC="' + self.SpatialPy_ROOTINC+'"',
             'BUILD='+self.core_dir, '&&'
