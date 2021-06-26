@@ -25,4 +25,4 @@ jobs:
         python3 -m pip install coverage
         
     - name: Run tests
-      run: coverage run spatialpy/test/run_tests.py
+      run: coverage run test/run_tests.py
