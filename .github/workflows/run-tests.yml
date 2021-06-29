@@ -1,4 +1,4 @@
-name: Run GillesPy2 Tests
+name: Run SpatialPy Tests
 
 on: [push]
 
