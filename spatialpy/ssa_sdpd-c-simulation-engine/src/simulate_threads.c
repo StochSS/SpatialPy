@@ -19,6 +19,7 @@ See the file LICENSE.txt for details.
 #include "particle_system.hpp"
 #include "simulate.hpp"
 #include "simulate_rdme.hpp"
+#include "pthread_barrier.h"
 
 namespace Spatialpy{
     struct arg {
