@@ -77,7 +77,7 @@ class TestSolverFunctionality(unittest.TestCase):
     #     self.assertFalse((A - model.u0).any())
 
     def test_same_seed(self):
-        """ Test that the output is the same if the same seed is used, edxplicit solver creation  """
+        """ Test that the output is the same if the same seed is used, explicit solver creation  """
         solver = spatialpy.Solver(self.model)
         result1 = solver.run(seed=1)
         result2 = solver.run(seed=1)
