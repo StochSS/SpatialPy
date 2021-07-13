@@ -1,3 +1,21 @@
+'''
+SpatialPy is a Python 3 package for simulation of
+spatial deterministic/stochastic reaction-diffusion-advection problems
+Copyright (C) 2021 SpatialPy developers.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import ast
 import json
 import copy
@@ -194,14 +212,18 @@ def export(model, path=None, return_stochss_model=False):
     if path is None:
         path = f"{model.name}.smdl"
 
+    end_sim = model.num_timesteps * model.timestep_size
+    time_step = model.output_freq * model.timestep_size
+
     s_model = {"is_spatial": True,
                "defaultID": 1,
                "defaultMode": "",
                "annotation": "",
                "volume": 1,
                "modelSettings": {
-                    "endSim": model.tspan[-1],
-                    "timeStep": model.timestep_size
+                    "endSim": end_sim,
+                    "timeStep": time_step,
+                    "timestepSize": model.timestep_size
                 },
                 "species": [],
                 "initialConditions": [],
