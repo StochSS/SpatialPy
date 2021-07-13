@@ -19,8 +19,7 @@ class diffusion_debug(spatialpy.Model):
             mass=1.0, nu=1.0, fixed=True,  rho0=1.0, c0=1.0, P0=1.0
         )
 
-        self.add_initial_condition(
-            spatialpy.PlaceInitialCondition(A, 1000, [0, 0, 0]))
+        self.add_initial_condition(spatialpy.PlaceInitialCondition(A, 100000, [0,0,0]))
 
         self.timestep_size = 0.1
         self.num_timesteps = 10

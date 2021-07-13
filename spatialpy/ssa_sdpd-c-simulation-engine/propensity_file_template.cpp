@@ -126,7 +126,7 @@ namespace Spatialpy{
             }
         }
 
-        rng = sflag ? std::mt19937_64(seed) : std::mt19937_64((int)time(NULL)+(int)(1e9*clock()+(int)getpid()));
+        rng = sflag ? std::mt19937_64(seed) : std::mt19937_64(std::random_device{}());
 
         if(!tflag){
             num_threads = get_num_processors();
