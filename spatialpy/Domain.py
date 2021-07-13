@@ -1,7 +1,27 @@
+'''
+SpatialPy is a Python 3 package for simulation of
+spatial deterministic/stochastic reaction-diffusion-advection problems
+Copyright (C) 2021 SpatialPy developers.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import json
 
 import numpy
 from scipy.spatial import KDTree
+
+from spatialpy.Result import _plotly_iterate
 
 
 class Domain():
@@ -197,6 +217,85 @@ class Domain():
             self.vol[v3] += t_vol/4
             self.vol[v4] += t_vol/4
 
+
+    def plot_types(self, width=None, height=None, colormap=None, size=5, title=None,
+                                            use_matplotlib=False, return_plotly_figure=False):
+        '''
+        Plots the domain using plotly. Can only be viewed in a Jupyter Notebook.
+
+        Attributes
+        ----------
+        width: int (default 500)
+            Width in pixels of output plot box or for matplotlib inches of output plot box
+        height: int (default 500)
+            Height in pixels of output plot box or for matplotlib inches of output plot box
+        colormap : str
+            colormap to use.  Plotly specification, valid values: "Plotly3","Jet","Blues","YlOrRd",
+                "PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu", "PuBu","GnBu","YlGn","Greens","Reds",
+                "Greys","RdPu","OrRd","Purples","Oranges".
+        size : int
+            Size in pixels of the particle
+        title : str
+            The title of the graph
+        return_plotly_figure : bool
+            whether or not to return a figure dictionary of data(graph object traces) and layout options
+            which may be edited by the user.
+        use_matplotlib : bool
+            whether or not to plot the proprties results using matplotlib.
+        '''
+
+        if width is None:
+            width = 6.4 if use_matplotlib else 500
+        if height is None:
+            height = 4.8 if use_matplotlib else 500
+
+        if use_matplotlib:
+            import matplotlib.pyplot as plt
+
+            plt.figure(figsize=(width, height))
+            plt.scatter(self.vertices[:,0], self.vertices[:,1], c=self.type, cmap=colormap)
+            plt.axis('scaled')
+            plt.colorbar()
+            if title is not None:
+                plt.title(title)
+            plt.grid(linestyle='--', linewidth=1)
+            plt.plot()
+            return
+
+        from plotly.offline import init_notebook_mode, iplot
+
+        types = {}
+        for i, val in enumerate(self.type):
+            name = "type {}".format(val)
+
+            if name in types.keys():
+                types[name]['points'].append(self.vertices[i])
+                types[name]['data'].append(self.type[i])
+            else:
+                types[name] = {"points":[self.vertices[i]], "data":[self.type[i]]}
+
+        is_2d = self.zlim[0] == self.zlim[1]
+
+        trace_list = _plotly_iterate(types, size=size, property_name="type",
+                                     colormap=colormap, is_2d=is_2d)
+
+        scene = {
+            "aspectmode": 'data',
+        }
+        layout = {"width": width, "height": width, "scene":scene,
+                  "xaxis":{"range":self.xlim}, "yaxis":{"range":self.ylim}
+                 }
+
+        if title is not None:
+            layout["title"] = title
+
+        fig = {"data":trace_list, "layout":layout}
+
+        if return_plotly_figure:
+            return fig
+        else:
+            init_notebook_mode(connected=True)
+            iplot(fig)
 
 
     @classmethod

@@ -1,9 +1,28 @@
+'''
+SpatialPy is a Python 3 package for simulation of
+spatial deterministic/stochastic reaction-diffusion-advection problems
+Copyright (C) 2021 SpatialPy developers.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import os
 import shutil
 import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import re
 
@@ -11,9 +30,24 @@ import re
 from spatialpy.Model import *
 from spatialpy.Result import *
 
+def read_from_stdout(stdout,verbose=True):
+    ''' Used with subprocess.Popen and threading to capture all output and print
+        to the screen notebook without waiting or storing the output ina buffer.'''
+    try:
+        while True:
+            line = stdout.readline()
+            if line != b'':
+                if verbose:
+                    print(line.decode(),end='')
+            else:
+                #got empty line, ending
+                return
+    except Exception as e:
+        print("read_from_stdout(): {0}".format(e))
+
 
 class Solver:
-    """ spatialpy solvers. """
+    """ SpatialPy solver object."""
 
     def __init__(self, model, debug_level=0):
         """ Constructor. """
@@ -79,7 +113,10 @@ class Solver:
 
         # Build the solver
         makefile = self.SpatialPy_ROOTDIR+'/build/Makefile'
-        cmd_list = ['cd', self.build_dir, '&&', 'make', '-f', makefile, 'ROOT="' + self.SpatialPy_ROOTPARAM+'"', 'ROOTINC="' + self.SpatialPy_ROOTINC+'"','MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir]
+        cmd_list = ['cd', self.build_dir, '&&', 'make', '-f', makefile,
+            'ROOT="' + self.SpatialPy_ROOTPARAM+'"',
+            'ROOTINC="' + self.SpatialPy_ROOTINC+'"',
+            'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir]
         if profile:
           cmd_list.append('GPROFFLAG=-pg')
         if profile or debug:
@@ -88,40 +125,41 @@ class Solver:
         if self.debug_level > 1:
             print("cmd: {0}\n".format(cmd))
         try:
-            handle = subprocess.Popen(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            handle = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT, shell=True)
+            stdout, _ = handle.communicate()
             return_code = handle.wait()
+            if return_code != 0:
+                try:
+                    print(stdout.decode("utf-8"))
+                except Exception as e:
+                    pass
+                raise SimulationError(
+                    "Compilation of solver failed, return_code={0}".format(
+                        return_code))
+
+            if self.debug_level > 1:
+                print(stdout.decode("utf-8"))
+
         except OSError as e:
-            print(
-                "Error, execution of compilation raised an exception: {0}".format(e))
+            print("Error, execution of compilation raised an exception: {0}".format(
+                e))
             print("cmd = {0}".format(cmd))
             raise SimulationError("Compilation of solver failed")
-
-        if return_code != 0:
-            try:
-                print("Reading stdout/stderr from process:")
-                print(handle.stdout.read().decode("utf-8"))
-                print(handle.stderr.read().decode("utf-8"))
-            except Exception as e:
-                pass
-            raise SimulationError(
-                "Compilation of solver failed, return_code={0}".format(return_code))
-
-        if self.debug_level > 1:
-            print(handle.stdout.read().decode("utf-8"))
-            print(handle.stderr.read().decode("utf-8"))
 
         self.is_compiled = True
 
 
-    def run(self, number_of_trajectories=1, seed=None, timeout=None, number_of_threads=None, debug=False, profile=False):
+    def run(self, number_of_trajectories=1, seed=None, timeout=None,
+                number_of_threads=None, debug=False, profile=False, verbose=True):
         """ Run one simulation of the model.
         Args:
             number_of_trajectories: (int) How many trajectories should be simulated.
             seed: (int) the random number seed (incremented by one for multiple runs).
             timeout: (int) maximum number of seconds the solver can run.
             number_of_threads: (int) the number threads the solver will use.
-            debug: (bool) start a gdbgui debugger (also compiles with debug symbols if compilation hasn't happened)
+            debug: (bool) start a gdbgui debugger (also compiles with debug symbols
+                if compilation hasn't happened)
             profile: (bool) output gprof profiling data if available
         Returns:
             Result object.
@@ -150,73 +188,43 @@ class Solver:
 
             if self.debug_level > 1:
                 print('cmd: {0}\n'.format(solver_cmd))
-            stdout = ''
-            stderr = ''
-#            try:
-#                if self.debug_level >= 1:  #stderr & stdout to the terminal
-#                    handle = subprocess.Popen(solver_cmd, shell=True)
-#                else:
-#                    handle = subprocess.Popen(solver_cmd, stderr=subprocess.PIPE,
-#                                              stdout=subprocess.PIPE, shell=True)
-#                    stdout, stderr = handle.communicate()
-#                return_code = handle.wait()
-#            except OSError as e:
-#                print("Error, execution of solver raised an exception: {0}".format(e))
-#                print("cmd = {0}".format(solver_cmd))
+
+            start = time.monotonic()
+            return_code = None
             try:
-                start = time.monotonic()
-                return_code = None
-                with subprocess.Popen(solver_cmd, shell=True, stdout=subprocess.PIPE, start_new_session=True) as process:
+                with subprocess.Popen(solver_cmd, shell=True,
+                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                        start_new_session=True) as process:
                     try:
+                        # start thread to read process stdout to stdout
+                        t = threading.Thread(target=read_from_stdout,
+                            args=(process.stdout,verbose,))
+                        t.start()
                         if timeout is not None:
-                            stdout, stderr = process.communicate(
-                                timeout=timeout)
+                            return_code = process.wait(timeout=timeout)
                         else:
-                            stdout, stderr = process.communicate()
-                        return_code = process.wait()
-                        if self.debug_level >= 1:  # stderr & stdout to the terminal
-                            print('Elapsed seconds: {:.2f}'.format(
-                                time.monotonic() - start))
-                            if stdout is not None:
-                                print(stdout.decode('utf-8'))
-                            if stderr is not None:
-                                print(stderr.decode('utf-8'))
+                            return_code = process.wait()
+                        t.join()
                     except KeyboardInterrupt:
+                        # send signal to the process group
+                        os.killpg(process.pid, signal.SIGINT)
                         print('Terminated by user after seconds: {:.2f}'.format(
                             time.monotonic() - start))
-                        os.killpg(process.pid, signal.SIGINT)
-                        #return_code = process.wait()
-                        stdout, stderr = process.communicate()
-                        if self.debug_level >= 1:  # stderr & stdout to the terminal
-                            print('Elapsed seconds: {:.2f}'.format(
-                                time.monotonic() - start))
-                            if stdout is not None:
-                                print(stdout.decode('utf-8'))
-                            if stderr is not None:
-                                print(stderr.decode('utf-8'))
                     except subprocess.TimeoutExpired:
                         result.timeout = True
                         # send signal to the process group
                         os.killpg(process.pid, signal.SIGINT)
-                        stdout, stderr = process.communicate()
-                        message = "SpatialPy solver timeout exceded. "
-                        if stdout is not None:
-                            message += stdout.decode('utf-8')
-                        if stderr is not None:
-                            message += stderr.decode('utf-8')
-                        #raise SimulationTimeout(message)
+                        raise SimulationTimeout("SpatialPy solver timeout exceded.")
             except OSError as e:
-                print(
-                    "Error, execution of solver raised an exception: {0}".format(e))
+                print("Error, execution of solver raised an exception: {0}".format(
+                    e))
                 print("cmd = {0}".format(solver_cmd))
 
+            if self.debug_level >= 1:  # output time
+                print('Elapsed seconds: {:.2f}'.format(
+                    time.monotonic() - start))
+
             if return_code is not None and return_code != 0:
-                if self.debug_level >= 1:
-                    try:
-                        print(stderr)
-                        print(stdout)
-                    except Exception as e:
-                        pass
                 print("solver_cmd = {0}".format(solver_cmd))
                 raise SimulationError(
                     "Solver execution failed, return code = {0}".format(return_code))
@@ -224,10 +232,6 @@ class Solver:
             result.success = True
             if profile:
                 self.read_profile_info(result)
-            if stdout is not None:
-                result.stdout = stdout.decode('utf-8')
-            if stderr is not None:
-                result.stderr = stderr.decode('utf-8')
             if number_of_trajectories > 1:
                 result_list.append(result)
             else:
@@ -267,7 +271,7 @@ class Solver:
 
 
         template = open(os.path.abspath(os.path.dirname(
-            __file__)) + '/ssa_sdpd-c-simulation-engine/propensity_file_template.c', 'r')
+            __file__)) + '/ssa_sdpd-c-simulation-engine/propensity_file_template.cpp', 'r')
         propfile = open(file_name, "w")
         propfilestr = template.read()
 
@@ -431,7 +435,7 @@ class Solver:
                     for j in range(Nd.shape[1]):
                         if j+i > 0:
                             outstr += ','
-                        outstr += "{0}".format(Nd[i, j])
+                        outstr += "{0}".format(int(Nd[i, j]))
                 outstr += "};\n"
                 outstr += "static size_t input_irN[{0}] = ".format(len(N.indices))
                 outstr += "{"
@@ -454,7 +458,7 @@ class Solver:
                 for i in range(len((N.data))):
                     if i > 0:
                         outstr += ','
-                    outstr += str(N.data[i])
+                    outstr += str(int(N.data[i]))
                 outstr += "};"
                 input_constants += outstr + "\n"
             else:
@@ -517,7 +521,7 @@ class Solver:
             "__INPUT_CONSTANTS__", input_constants)
 
         system_config = "debug_flag = {0};\n".format(self.debug_level)
-        system_config += "system_t* system = create_system({0},{1},{2},{3},{4},{5});\n".format(
+        system_config += "ParticleSystem *system = new ParticleSystem({0},{1},{2},{3},{4},{5});\n".format(
             num_types, num_chem_species, num_chem_rxns, 
             num_stoch_species, num_stoch_rxns, num_data_fn
             )
