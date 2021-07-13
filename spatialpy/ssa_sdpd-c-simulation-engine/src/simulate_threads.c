@@ -1,3 +1,21 @@
+/**
+SpatialPy is a Python 3 package for simulation of
+spatial deterministic/stochastic reaction-diffusion-advection problems
+Copyright (C) 2021 SpatialPy developers.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
+
 /* *****************************************************************************************
 SSA-SDPD simulation engine
 Copyright 2018 Brian Drawert (UNCA)
@@ -43,7 +61,7 @@ namespace Spatialpy{
         ParticleSystem* system = (ParticleSystem*) targ;
         while(1){
             pthread_barrier_wait(&begin_output_barrier);
-            output_csv(system, system->current_step);
+            //output_csv(system, system->current_step);
             if(debug_flag) printf("[OUT] start output_vtk__sync_step()\n");
             output_vtk__sync_step(system, system->current_step);
             if(debug_flag) printf("[OUT] done output_vtk__sync_step()\n");
