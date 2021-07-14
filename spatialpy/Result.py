@@ -381,8 +381,8 @@ class Result():
 
         time_index_list = self.get_timespan()
 
-        if animated and t_ndx_list is not None:
-            time_index_list = t_ndx_list 
+        if animated and t_ndx_list is None:
+            t_ndx_list = time_index_list 
 
         spec_name = "C[{0}]".format(species) if deterministic else "D[{0}]".format(species)
 
