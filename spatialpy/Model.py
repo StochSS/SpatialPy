@@ -155,10 +155,12 @@ class Model():
         if self.timestep_size is None:
             raise ModelError("timestep_size is not set")
 
-        steps_per_output = math.ceil(step_size/self.timestep_size)
+        self.output_freq = math.ceil(step_size/self.timestep_size)
 
-        self.num_timesteps = math.ceil(num_steps *  steps_per_output)
-        self.output_freq = steps_per_output
+        self.num_timesteps = math.ceil(num_steps * self.output_freq)
+        # array of step numbers corresponding to the simulation times in the timespan
+        self.timespan_steps = numpy.linspace(0,self.num_timesteps,
+                        num=math.ceil(self.num_timesteps/self.output_freq)+1, dtype=int)
 
     def timespan(self, time_span, timestep_size=None):
         """
