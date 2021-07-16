@@ -195,13 +195,15 @@ class Result():
                 along with a dictionary of property and species data [1]
         """
 
+        if debug:
+            print("read_step({0}) ".format(step_num), end='')
         #num = int(step_num * self.model.output_freq)
         #num = int(step_num / self.model.timestep_size)
         num = self.model.timespan_steps[step_num]
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(num))
 
         if debug:
-            print("read_step({0}) opening '{1}'".format(step_num, filename))
+            print("opening '{0}'".format(filename))
 
         if self.official_vtk:
             reader = vtk.vtkGenericDataObjectReader()
@@ -291,7 +293,7 @@ class Result():
         #                    num=self.model.num_timesteps+1, dtype=int)
         #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
         #        num=math.ceil(self.model.num_timesteps/self.model.output_freq)+1) 
-        lt=len(self.get_timespan())
+        lt=len(self.get_timespan())-1
         t_index_arr = numpy.linspace(0,lt,num=lt+1,dtype=int)
 
         if timepoints is not None:
@@ -381,8 +383,6 @@ class Result():
 
         from plotly.offline import init_notebook_mode, iplot
 
-        if t_ndx < 0:
-            t_ndx = len(self.get_timespan()) + t_ndx
 
         time_index_list = self.get_timespan()
 
@@ -393,7 +393,7 @@ class Result():
 
         # read data at time point
         if animated:
-            t_ndx = time_index_list[0]
+            t_ndx = 0
         elif t_val is None and t_ndx is None:
             t_ndx = 0 # default value
         elif t_val is not None and t_ndx is not None:
@@ -409,6 +409,8 @@ class Result():
         else:
             if t_ndx != int(t_ndx):
                 raise ResultError("t_ndx must be an integer")
+            if t_ndx < 0:
+                t_ndx = len(self.get_timespan()) + t_ndx
         points, data = self.read_step(t_ndx, debug=debug)
 
         if use_matplotlib:
@@ -656,7 +658,7 @@ class Result():
 
         # read data at time point
         if animated:
-            t_ndx = time_index_list[0]
+            t_ndx = 0
         elif t_val is None and t_ndx is None:
             t_ndx = 0 # default value
         elif t_val is not None and t_ndx is not None:
