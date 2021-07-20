@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pickle
 import unittest
-
+import numpy
 import spatialpy
 
 
@@ -41,9 +41,7 @@ class diffusion_debug(spatialpy.Model):
 
         self.add_initial_condition(spatialpy.PlaceInitialCondition(A, 100000, [0,0,0]))
 
-        self.timestep_size=.1
-        self.num_timesteps=10
-        self.output_freq=1
+        self.timespan(numpy.linspace(0,10,11),timestep_size=0.1)
 
 
 # class testPeriodicDiffusion(spatialpy.Model):
