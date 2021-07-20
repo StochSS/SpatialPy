@@ -145,7 +145,7 @@ class Result():
                             resultdict[filename] = fd.read()
                 state['results_output'] = resultdict
             except Exception as e:
-                raise Exception("Error pickling model, could not pickle the Result output files: "+str(e))
+                raise ResultError("Error pickling model, could not pickle the Result output files: "+str(e))
             state[key] = item
 
         return state
@@ -165,7 +165,7 @@ class Result():
                     fd.seek(0)
                     fd.write(contents)
         except Exception as e:
-            raise Exception("Error unpickling model, could not recreate the Result output files: "+str(e))
+            raise ResultError("Error unpickling model, could not recreate the Result output files: "+str(e))
 
     def __del__(self):
         """ Deconstructor. """
@@ -195,7 +195,8 @@ class Result():
                 along with a dictionary of property and species data [1]
         """
 
-        num = int(step_num * self.model.output_freq)
+        #num = int(step_num * self.model.output_freq)
+        num = int(step_num / self.model.timestep_size)
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(num))
 
         if debug:
@@ -316,10 +317,12 @@ class Result():
             ret = ret.flatten()
         return ret
 
-    def plot_species(self, species, t_ndx=0, concentration=False, deterministic=False, width=None, height=None, colormap=None, size=5, title=None,
-                     animated=False, t_ndx_list=None, speed=1, f_duration=500, t_duration=300, return_plotly_figure=False,
+    def plot_species(self, species, t_ndx=0, t_val=None, concentration=False, 
+                     deterministic=False, width=None, height=None, colormap=None,
+                     size=5, title=None, animated=False, t_ndx_list=None, speed=1,
+                     f_duration=500, t_duration=300, return_plotly_figure=False,
                      use_matplotlib=False, debug=False):
-        """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
+        """ Plots the Results using plotly or matplotlib. Can be viewed in a Jupyter Notebook.
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
             if set to True, the concentration (=copy_number/volume) is returned.
@@ -332,6 +335,8 @@ class Result():
             A string describing the species to be plotted.
         t_ndx : int
             The time index of the results to be plotted, ignored if animated is set to True
+        t_val : float
+            The time value of the results to be plotted, ignored if animated is set to True
         concentration : bool
             Whether or not to plot the data as stochastic concentration, ignored if deterministic is
             set to True
@@ -374,14 +379,25 @@ class Result():
         if t_ndx < 0:
             t_ndx = len(self.get_timespan()) + t_ndx
 
+        time_index_list = self.get_timespan()
+
         if animated and t_ndx_list is None:
-            t_ndx_list = list(range(int(self.model.num_timesteps/self.model.output_freq)+1))
+            t_ndx_list = time_index_list 
 
         spec_name = "C[{0}]".format(species) if deterministic else "D[{0}]".format(species)
 
         # read data at time point
-        time_index = t_ndx_list[0] if animated else t_ndx
-        points, data = self.read_step(time_index, debug=debug)
+        if animated:
+            time_value = time_index_list[0]
+        elif t_val is not None:
+            if t_val in time_index_list:
+                time_value = t_val
+            else:
+                raise ResultError("time value (t_val) value given is not a valid result timepoint") 
+        else:
+            time_value = time_index_list[t_ndx]
+
+        points, data = self.read_step(time_value, debug=debug)
 
         if use_matplotlib:
             import matplotlib.pyplot as plt
