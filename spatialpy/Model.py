@@ -647,6 +647,7 @@ class Reaction():
         self.massaction = massaction
         self.rate = rate
         self.annotation = annotation
+        self.restrict_to = restrict_to
 
     def initialize(self, model):
         """ Defered object initialization, called by model.add_reaction(). """
