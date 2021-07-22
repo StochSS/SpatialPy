@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 '''
 SpatialPy is a Python 3 package for simulation of
 spatial deterministic/stochastic reaction-diffusion-advection problems
@@ -30,10 +31,12 @@ if __name__ == '__main__':
         sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
     import test_solver
+    import test_model
     #import test_mincde
 
     modules = [
         test_solver,
+        test_model
         #test_mincde,
     ]
 

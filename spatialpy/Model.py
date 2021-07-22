@@ -392,10 +392,12 @@ class Model():
             or a dict with name, instance pairs. """
         if isinstance(reacs, list):
             for r in reacs:
+                r.initialize(self)
                 if r.name is None or r.name == "":
                     r.name = 'rxn' + str(uuid.uuid4()).replace('-', '_')
                 self.listOfReactions[r.name] = r
         elif type(reacs).__name__ == "Reaction":
+                reacs.initialize(self)
                 if reacs.name is None or reacs.name == "":
                     reacs.name = 'rxn' + str(uuid.uuid4()).replace('-', '_')
                 self.listOfReactions[reacs.name] = reacs
@@ -641,54 +643,70 @@ class Reaction():
 
         # Metadata
         self.name = name
-        self.annotation = ""
+        self.reactants = reactants
+        self.products = products
+        self.propensity_function = propensity_function
+        self.massaction = massaction
+        self.rate = rate
+        self.annotation = annotation
+        self.restrict_to = restrict_to
 
-        if propensity_function is None:
-            if rate is None:
+    def initialize(self, model):
+        """ Defered object initialization, called by model.add_reaction(). """
+
+        self.ode_propensity_function = self.propensity_function
+
+        if self.propensity_function is None:
+            if self.rate is None:
                 errmsg = f"Reaction {name}: You must either set the reaction to be mass-action or specifiy a propensity function."
                 raise ReactionError(errmsg)
             self.massaction = True
         else:
-            if rate is not None:
+            if self.rate is not None:
                 errmsg = f"Reaction {name}: You cannot set the propensity type to mass-action and simultaneously set a propensity function."
                 raise ReactionError(errmsg)
             # If they don't give us a propensity function and do give a rate, assume mass-action.
             self.massaction = False
             self.marate = None
 
-        self.propensity_function = propensity_function
-        self.ode_propensity_function = propensity_function
 
+        reactants = self.reactants
         self.reactants = {}
         if reactants is not None:
             for r in reactants:
                 rtype = type(r).__name__
-                if rtype=='instance':
-                    self.reactants[r.name] = reactants[r]
-                else:
+                if rtype=='Species':
                     self.reactants[r]=reactants[r]
+                elif rtype=='str':
+                    if r not in model.listOfSpecies:
+                        raise ReactionError(f"Could not find species '{r}' in model.")
+                    self.reactants[model.listOfSpecies[r]] = reactants[r]
 
+        products = self.products
         self.products = {}
         if products is not None:
             for p in products:
                 rtype = type(p).__name__
-                if rtype=='instance':
-                    self.products[p.name] = products[p]
-                else:
+                if rtype=='Species':
                     self.products[p]=products[p]
+                else:
+                    if p not in model.listOfSpecies:
+                        raise ReactionError(f"Could not find species '{p}' in model.")
+                    self.products[model.listOfSpecies[p]] = products[p]
 
         if self.massaction:
             self.type = "mass-action"
-            rtype = type(rate).__name__
-            if rtype == 'instance':
-                self.marate = rate.name
+            rtype = type(self.rate).__name__
+            if rtype == 'Parameter':
+                self.marate = self.rate.name
+            elif rtype == 'int' or rtype == 'float':
+                self.marate = str(self.rate)
             else:
-                self.marate = rate
+                self.marate = self.rate
             self.create_mass_action()
         else:
             self.type = "customized"
 
-        self.restrict_to = restrict_to
 
     def __str__(self):
         print_string = f"{self.name}, Active in: {str(self.restrict_to)}"
@@ -708,11 +726,12 @@ class Reaction():
 
     def create_mass_action(self):
         """ Create a mass action propensity function given self.reactants and a single parameter value.
+
+         We support zeroth, first and second order propensities only.
+         There is no theoretical justification for higher order propensities.
+         Users can still create such propensities if they really want to,
+         but should then use a custom propensity.
         """
-        # We support zeroth, first and second order propensities only.
-        # There is no theoretical justification for higher order propensities.
-        # Users can still create such propensities if they really want to,
-        # but should then use a custom propensity.
         total_stoch = 0
         for r in self.reactants:
             total_stoch += self.reactants[r]
