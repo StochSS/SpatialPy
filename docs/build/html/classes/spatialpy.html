@@ -214,45 +214,92 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">spatialpy.Domain.</span></span><span class="sig-name descname"><span class="pre">Domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numpoints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zlim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Domain class for SpatialPy</p>
+<p>Domain class for SpatialPy.  A domain defines points and attributes of a regional space for simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>numpoints</strong> (<em>int</em>) – Total number of spatial domain points</p></li>
+<li><p><strong>xlim</strong> – Range of domain along x-axis</p></li>
+<li><p><strong>ylim</strong> – Range of domain along y-axis</p></li>
+<li><p><strong>zlim</strong> – Range of domain along z-axis</p></li>
+<li><p><strong>rho</strong> – Background density for the system</p></li>
+<li><p><strong>c0</strong> – Speed of sound for the system</p></li>
+<li><p><strong>P0</strong> – Background pressure for the system</p></li>
+<li><p><strong>gravity</strong> – Acceleration of gravity for the system.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.add_point">
 <span class="sig-name descname"><span class="pre">add_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.add_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.add_point" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Add a single point particle to the domain space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>) or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – Spatial coordinate vertices of point to be added</p></li>
+<li><p><strong>vol</strong> (<em>float</em>) – Default volume of particle to be added</p></li>
+<li><p><strong>mass</strong> (<em>float</em>) – Default mass of particle to be added</p></li>
+<li><p><strong>type</strong> (<em>int</em>) – Particle typeid of particle to be created</p></li>
+<li><p><strong>nu</strong> (<em>float</em>) – Default viscosity of particle to be created</p></li>
+<li><p><strong>fixed</strong> (<em>bool</em>) – True if particle is spatially fixed, else False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.calculate_vol">
 <span class="sig-name descname"><span class="pre">calculate_vol</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.calculate_vol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.calculate_vol" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Calculate the total volume of the domain.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.closest_vertex">
 <span class="sig-name descname"><span class="pre">closest_vertex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.closest_vertex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.closest_vertex" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Find the nearest vertex of a given point in the domain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>) or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – Target source point</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>tuple(float, float, float) or tuple(float, float)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.coordinates">
 <span class="sig-name descname"><span class="pre">coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.coordinates" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get coordinates within domain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.create_2D_domain">
 <em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">create_2D_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xlim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.create_2D_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.create_2D_domain" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a filled 2D domain
-:param xlim: (tuple) highest and lowest coordinate in the x dimension
-:param ylim: (tuple) highest and lowest coordinate in the y dimension
-:param nx: (int) number of particle spacing in the x dimension
-:param ny: (int) number of particle spacing in the y dimension
-:param type_id: (int, default: 1) default type ID of particles created to be created
-:param mass: (float, default: 1.0) default mass of particles created to be created
-:param nu: (float, default: 1.0) default viscosity of particles created to be created
-:param fixed: (bool, default: false) spatially fixed flag of particles created to be created
-:param rho0: (float, default: 1.0) background density for the system
-:param c0: (float, default: 10) speed of sound for the system
-:param P0: (float, default: 10) background pressure for the system</p>
+<dd><p>Create a filled 2D domain</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Domain object</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xlim</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – highest and lowest coordinate in the x dimension</p></li>
+<li><p><strong>ylim</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – highest and lowest coordinate in the y dimension</p></li>
+<li><p><strong>nx</strong> (<em>int</em>) – number of particle spacing in the x dimension</p></li>
+<li><p><strong>ny</strong> (<em>int</em>) – number of particle spacing in the y dimension</p></li>
+<li><p><strong>type_id</strong> (<em>int</em>) – default type ID of particles created to be created. Defaults to 1</p></li>
+<li><p><strong>mass</strong> (<em>float</em>) – default mass of particles created to be created. Defaults to 1.0</p></li>
+<li><p><strong>nu</strong> (<em>float</em>) – default viscosity of particles created to be created. Defaults to 1.0</p></li>
+<li><p><strong>fixed</strong> (<em>bool</em>) – spatially fixed flag of particles created to be created. Defaults to false.</p></li>
+<li><p><strong>rho0</strong> (<em>float</em>) – background density for the system. Defaults to 1.0</p></li>
+<li><p><strong>c0</strong> (<em>float</em>) – speed of sound for the system. Defaults to 10</p></li>
+<li><p><strong>P0</strong> – background pressure for the system. Defaults to 10</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.Domain.Domain" title="spatialpy.Domain.Domain">spatialpy.Domain.Domain</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -260,23 +307,27 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.create_3D_domain">
 <em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">create_3D_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xlim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zlim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.create_3D_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.create_3D_domain" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a filled 3D domain
-:param xlim: (tuple) highest and lowest coordinate in the x dimension
-:param ylim: (tuple) highest and lowest coordinate in the y dimension
-:param zlim: (tuple) highest and lowest coordinate in the z dimension
-:param nx: (int) number of particle spacing in the x dimension
-:param ny: (int) number of particle spacing in the y dimension
-:param nz: (int) number of particle spacing in the z dimension
-:param type_id: (int, default: 1) default type ID of particles created to be created
-:param mass: (float, default: 1.0) default mass of particles created to be created
-:param nu: (float, default: 1.0) default viscosity of particles created to be created
-:param fixed: (bool, default: false) spatially fixed flag of particles created to be created
-:param rho0: (float, default: 1.0) background density for the system
-:param c0: (float, default: 10) speed of sound for the system
-:param P0: (float, default: 10) background pressure for the system</p>
+<dd><p>Create a filled 3D domain</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Domain object</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xlim</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – highest and lowest coordinate in the x dimension</p></li>
+<li><p><strong>ylim</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – highest and lowest coordinate in the y dimension</p></li>
+<li><p><strong>zlim</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – highest and lowest coordinate in the z dimension</p></li>
+<li><p><strong>nx</strong> (<em>int</em>) – number of particle spacing in the x dimension</p></li>
+<li><p><strong>ny</strong> (<em>int</em>) – number of particle spacing in the y dimension</p></li>
+<li><p><strong>nz</strong> (<em>int</em>) – number of particle spacing in the z dimension</p></li>
+<li><p><strong>type_id</strong> (<em>int</em>) – default type ID of particles created to be created. Defaults to 1</p></li>
+<li><p><strong>mass</strong> (<em>float</em>) – default mass of particles created to be created. Defaults to 1.0</p></li>
+<li><p><strong>nu</strong> (<em>float</em>) – default viscosity of particles created to be created. Defaults to 1.0</p></li>
+<li><p><strong>fixed</strong> (<em>bool</em>) – spatially fixed flag of particles created to be created. Defaults to false.</p></li>
+<li><p><strong>rho0</strong> (<em>float</em>) – background density for the system. Defaults to 1.0</p></li>
+<li><p><strong>c0</strong> (<em>float</em>) – speed of sound for the system. Defaults to 10</p></li>
+<li><p><strong>P0</strong> – background pressure for the system. Defaults to 10</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.Domain.Domain" title="spatialpy.Domain.Domain">spatialpy.Domain.Domain</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -284,7 +335,19 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.distance_between_2_vertices">
 <span class="sig-name descname"><span class="pre">distance_between_2_vertices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.distance_between_2_vertices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.distance_between_2_vertices" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get distance between 2 domain vertices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>) or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – Starting point</p></li>
+<li><p><strong>b</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>) or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – Ending point</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.find_boundary_points">
@@ -294,12 +357,24 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.find_h">
 <span class="sig-name descname"><span class="pre">find_h</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.find_h"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.find_h" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Find h value of system.  This value value is based off of             the particle which has the greatest distance to             its nearest neighbor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.get_bounding_box">
 <span class="sig-name descname"><span class="pre">get_bounding_box</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.get_bounding_box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.get_bounding_box" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get the bounding box of the entire domain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float | float | float | float | float | float</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.get_domain_size">
@@ -307,129 +382,105 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dd><p>Estimate of domain size at each vertex as the average of the
 diameters of the circumradius of the tetrahedrons that vertex
 is a part of.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.get_num_voxels">
 <span class="sig-name descname"><span class="pre">get_num_voxels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.get_num_voxels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.get_num_voxels" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get number of voxels in domain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.get_vol">
 <span class="sig-name descname"><span class="pre">get_vol</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.get_vol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.get_vol" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get the total volume of the domain.</p>
+<p>rtype: float</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.import_meshio_object">
 <em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">import_meshio_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh_obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.import_meshio_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.import_meshio_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Import a python meshio mesh object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mesh_obj</strong> (<em>meshio.Mesh</em>) – MeshIO object to import</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.Domain.Domain" title="spatialpy.Domain.Domain">spatialpy.Domain.Domain</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.plot_types">
 <span class="sig-name descname"><span class="pre">plot_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_matplotlib</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_plotly_figure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.plot_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.plot_types" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the domain using plotly. Can only be viewed in a Jupyter Notebook.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="spatialpy.Domain.Domain.width">
-<span class="sig-name descname"><span class="pre">width</span></span><a class="headerlink" href="#spatialpy.Domain.Domain.width" title="Permalink to this definition">¶</a></dt>
-<dd><p>Width in pixels of output plot box or for matplotlib inches of output plot box</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int (default 500)</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>width</strong> (<em>int</em>) – Width in pixels of output plot box or for matplotlib inches of output plot box.         Default=500</p></li>
+<li><p><strong>height</strong> (<em>int</em>) – Height in pixels of output plot box or for matplotlib inches of output plot box.         Default=500</p></li>
+<li><p><strong>colormap</strong> (<em>str</em>) – colormap to use.  Plotly specification. <strong>valid values:</strong>         “Plotly3”,”Jet”,”Blues”,”YlOrRd”, “PuRd”,”BuGn”,”YlOrBr”,”PuBuGn”,”BuPu”,        “YlGnBu”, “PuBu”,”GnBu”,”YlGn”,”Greens”,”Reds”, “Greys”,”RdPu”,”OrRd”,”Purples”,”Oranges”.</p></li>
+<li><p><strong>size</strong> (<em>int</em>) – Size in pixels of the particle</p></li>
+<li><p><strong>title</strong> (<em>str</em>) – The title of the graph</p></li>
+<li><p><strong>return_plotly_figure</strong> (<em>bool</em>) – Whether or not to return a figure dictionary of data(graph object traces) and layout options
+which may be edited by the user.</p></li>
+<li><p><strong>use_matplotlib</strong> (<em>bool</em>) – Whether or not to plot the proprties results using matplotlib.</p></li>
+</ul>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="spatialpy.Domain.Domain.height">
-<span class="sig-name descname"><span class="pre">height</span></span><a class="headerlink" href="#spatialpy.Domain.Domain.height" title="Permalink to this definition">¶</a></dt>
-<dd><p>Height in pixels of output plot box or for matplotlib inches of output plot box</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int (default 500)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="spatialpy.Domain.Domain.colormap">
-<span class="sig-name descname"><span class="pre">colormap</span></span><a class="headerlink" href="#spatialpy.Domain.Domain.colormap" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>colormap to use.  Plotly specification, valid values: “Plotly3”,”Jet”,”Blues”,”YlOrRd”,</dt><dd><p>“PuRd”,”BuGn”,”YlOrBr”,”PuBuGn”,”BuPu”,”YlGnBu”, “PuBu”,”GnBu”,”YlGn”,”Greens”,”Reds”,
-“Greys”,”RdPu”,”OrRd”,”Purples”,”Oranges”.</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="spatialpy.Domain.Domain.size">
-<span class="sig-name descname"><span class="pre">size</span></span><a class="headerlink" href="#spatialpy.Domain.Domain.size" title="Permalink to this definition">¶</a></dt>
-<dd><p>Size in pixels of the particle</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="spatialpy.Domain.Domain.title">
-<span class="sig-name descname"><span class="pre">title</span></span><a class="headerlink" href="#spatialpy.Domain.Domain.title" title="Permalink to this definition">¶</a></dt>
-<dd><p>The title of the graph</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="spatialpy.Domain.Domain.return_plotly_figure">
-<span class="sig-name descname"><span class="pre">return_plotly_figure</span></span><a class="headerlink" href="#spatialpy.Domain.Domain.return_plotly_figure" title="Permalink to this definition">¶</a></dt>
-<dd><p>whether or not to return a figure dictionary of data(graph object traces) and layout options
-which may be edited by the user.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="spatialpy.Domain.Domain.use_matplotlib">
-<span class="sig-name descname"><span class="pre">use_matplotlib</span></span><a class="headerlink" href="#spatialpy.Domain.Domain.use_matplotlib" title="Permalink to this definition">¶</a></dt>
-<dd><p>whether or not to plot the proprties results using matplotlib.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.read_msh_file">
 <em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">read_msh_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.read_msh_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.read_msh_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a Gmsh style .msh file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – Filename of gmsh file</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.Domain.Domain" title="spatialpy.Domain.Domain">spatialpy.Domain.Domain</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.read_stochss_domain">
 <em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">read_stochss_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.read_stochss_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.read_stochss_domain" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read a StochSS Domain (.domn) file or
-pull a StochSS Domain from a StochSS Spatial Model (.smdl) file</p>
+<dd><p>Read a StochSS Domain (.domn) file or pull a StochSS Domain from a StochSS Spatial Model (.smdl) file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – name of file to read.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.Domain.Domain" title="spatialpy.Domain.Domain">spatialpy.Domain.Domain</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Domain.Domain.read_xml_mesh">
 <em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">read_xml_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Domain.html#Domain.read_xml_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Domain.Domain.read_xml_mesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a FEniCS/dolfin style XML mesh file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – name of file to read</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.Domain.Domain" title="spatialpy.Domain.Domain">spatialpy.Domain.Domain</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
