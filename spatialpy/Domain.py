@@ -286,7 +286,7 @@ class Domain():
     def get_vol(self):
         """ Get the total volume of the domain.
 
-            rtype: float
+            :rtype: float
         """
 
         if self.vol is None:
