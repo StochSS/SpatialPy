@@ -112,6 +112,53 @@
 <div class="viewcode-block" id="BoundaryCondition"><a class="viewcode-back" href="../../classes/spatialpy.html#spatialpy.BoundaryCondition.BoundaryCondition">[docs]</a><span class="k">class</span> <span class="nc">BoundaryCondition</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; Set spatial regions of the domain where a property of</span>
 <span class="sd">        particles are held constant (updated each simulation step)</span>
+
+<span class="sd">        Conditions (one or more of the following must be set):</span>
+<span class="sd">             - xmin, xmax: (float) min or max value in the x dimension</span>
+<span class="sd">             - ymin, ymax: (float) min or max value in the y dimension</span>
+<span class="sd">             - zmin, zmax: (float) min or max value in the z dimension</span>
+<span class="sd">             - type_id: type (subdomain) of the partciles</span>
+<span class="sd">        Targets (one of the following must be set):</span>
+<span class="sd">            property: (str), &#39;nu&#39;, &#39;rho&#39;,&#39;v&#39;</span>
+<span class="sd">            species: (str) name of a chemical species.</span>
+<span class="sd">                       Must also set deterministic=True/False flag.</span>
+
+<span class="sd">        :param xmin: x-axis coordinate lower bound of **condition**</span>
+<span class="sd">        :type xmin: float</span>
+<span class="sd">        </span>
+<span class="sd">        :param xmax: x-axis coordinate upper bound of **condition**</span>
+<span class="sd">        :type xmax: float</span>
+
+<span class="sd">        :param ymin: y-axis coordinate lower bound of **condition**</span>
+<span class="sd">        :type ymin: float</span>
+<span class="sd">        </span>
+<span class="sd">        :param ymax: y-axis coordinate upper bound of **condition**</span>
+<span class="sd">        :type ymax: float</span>
+
+<span class="sd">        :param zmin: z-axis coordinate lower bound of **condition**</span>
+<span class="sd">        :type zmin: float</span>
+<span class="sd">        </span>
+<span class="sd">        :param zmax: z-axis coordinate upper bound of **condition**</span>
+<span class="sd">        :type zmax: float</span>
+
+<span class="sd">        :param typeid: Set **condition** to particle type id</span>
+<span class="sd">        :type typeid: int</span>
+
+<span class="sd">        :param species: Set **target** of boundary condition to target Species.  If set, determinstic must also be set to True/False.</span>
+<span class="sd">        :type species: str</span>
+
+<span class="sd">        :param deterministic: **Must be set if target is Species.** Set True if boundary condition target is species \</span>
+<span class="sd">        and applies to deterministic simulation. **BoundaryCondition not yet implemeneted for Stochastic Species**.</span>
+<span class="sd">        :type deterministic: bool</span>
+
+<span class="sd">        :param property: Set **target** to properties, can be &#39;nu&#39; &#39;rho&#39; or &#39;v&#39;</span>
+<span class="sd">        :type property: str</span>
+
+<span class="sd">        :param value: Value property will take in region defined by the conditions</span>
+<span class="sd">        :type value: float or float[3]</span>
+
+<span class="sd">        :param model: Target model of boundary condition</span>
+<span class="sd">        :type model: spatialpy.Model.Model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">xmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -123,21 +170,7 @@
                  <span class="nb">property</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Conditions (one or more of the following must be set):</span>
-<span class="sd">                 xmin, xmax: (float) min or max value in the x dimension</span>
-<span class="sd">                 ymin, ymax: (float) min or max value in the y dimension</span>
-<span class="sd">                 zmin, zmax: (float) min or max value in the z dimension</span>
-<span class="sd">                 type_id: type (subdomain) of the partciles</span>
-<span class="sd">            Targets (one of the following must be set):</span>
-<span class="sd">                property: (str), &#39;nu&#39;, &#39;rho&#39;,&#39;v&#39;</span>
-<span class="sd">                spesicies: (str) name of a chemical species.</span>
-<span class="sd">                           Must also set deterministic=True/False flag.</span>
-<span class="sd">            Assignment:</span>
-<span class="sd">                value: (float or float[3]), value property will take in region</span>
-<span class="sd">                       defined by the conditions</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xmin</span> <span class="o">=</span> <span class="n">xmin</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xmax</span> <span class="o">=</span> <span class="n">xmax</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ymin</span> <span class="o">=</span> <span class="n">ymin</span>
@@ -153,6 +186,10 @@
 
 
 <div class="viewcode-block" id="BoundaryCondition.expression"><a class="viewcode-back" href="../../classes/spatialpy.html#spatialpy.BoundaryCondition.BoundaryCondition.expression">[docs]</a>    <span class="k">def</span> <span class="nf">expression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Creates evaluable string expression of boundary condition.</span>
+
+<span class="sd">            :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
         <span class="k">if</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">property</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ModelError</span><span class="p">(</span><span class="s2">&quot;Can not set both species and property&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
