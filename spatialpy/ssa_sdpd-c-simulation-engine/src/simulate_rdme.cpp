@@ -179,14 +179,15 @@ namespace Spatialpy{
         }
 
         double timeOffset = system->current_step * system->dt;
-
-        // TODO: does this deallocate memory on the 2nd call?  No -> check with Kevin, this might be ok
-        // TODO: make a deallocation function
+        double endTime  = timeOffset + system->dt;
+        if(system->static_domain){
+            endTime  = system->nt*system->dt;
+        }
         if(system->num_stoch_species > 0){
             if( propensitySum > 0.0 ){
-                system->rdme_event_q.build(propensities, propensitySum, activeChannels,
-                                   rng, timeOffset );
-                return true;
+                return system->rdme_event_q.build(propensities, propensitySum,
+                                    activeChannels, rng, timeOffset,
+                                    endTime );
             }
         }
         return false;
