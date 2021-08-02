@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -c -std=c++14 -Wall -O3 -g
+CFLAGS = -c -std=c++14 -Wall -O3
 SIMFLAGS = -l. -std=c++14 -Wall -O3
 LFLAGS = -pthread -lm
 INCDIR = $(ROOTINC)/include/ $(ROOTINC)/external/ $(ROOTINC)/external/ANN/include/
