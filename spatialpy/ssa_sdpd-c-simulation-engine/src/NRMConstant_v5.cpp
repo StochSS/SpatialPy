@@ -24,22 +24,27 @@ namespace Spatialpy{
 
     NRMConstant_v5::NRMConstant_v5() : previousFiringTime(0.0), exponential(1) {}
 
-    void NRMConstant_v5::build(std::vector<double>& propensities,
+    bool NRMConstant_v5::build(std::vector<double>& propensities,
                double propensitySum, std::size_t activeChannels,
                std::mt19937_64& rng, double timeOffset,
                double simulationEndTime) {
-            //  std::cout << "in build..." << std::endl;
+        //std::cout<<"build(propensitySum="<<propensitySum<<", activeChannels="<<activeChannels<<", timeOffset="<<timeOffset<<"simulationEndTime="<<simulationEndTime<<")" << std::endl;
 
         activeChannelCounter=activeChannels;
         endTime=simulationEndTime;
         previousFiringTime=timeOffset; //initialize (could set to nan or something instead)
 
+        // clear out maps - reset all data
+        nextFiringTime.clear();
+        binIndexAndPositionInBin.clear();
+
         // nextFiringTime.resize(propensities.size());
         // binIndexAndPositionInBin.resize(propensities.size());
 
         if (propensitySum==0.0) {
-            std::cerr << "ERROR: propensity sum is zero on initial build. Terminating." << std::endl;
-            exit(1);
+            //std::cerr << "ERROR: propensity sum is zero on initial build. Terminating." << std::endl;
+            //exit(1);
+            return false;
         }
 
         setBinNumberAndBounds(timeOffset,propensitySum,activeChannels); //choose lowerBound, upperBound, and numberOfBins
@@ -89,78 +94,79 @@ namespace Spatialpy{
         }
 
     //  std::cout << "exiting build...\n";
+        return true;
     }
 
-    void NRMConstant_v5::build(std::vector<Spatialpy::Particle>& particles,
-           double propensitySum, std::size_t activeChannels,
-           std::mt19937_64& rng, double timeOffset,
-           double simulationEndTime) {
-    //  std::cout << "in build..." << std::endl;
-        activeChannelCounter=activeChannels;
-        endTime=simulationEndTime;
-        previousFiringTime=timeOffset; //initialize (could set to nan or something instead)
-
-        // nextFiringTime.resize(propensities.size());
-        // binIndexAndPositionInBin.resize(propensities.size());
-
-        if (propensitySum==0.0) {
-            std::cerr << "ERROR: propensity sum is zero on initial build. Terminating." << std::endl;
-            exit(1);
-        }
-
-        setBinNumberAndBounds(timeOffset,propensitySum,activeChannels); //choose lowerBound, upperBound, and numberOfBins
-        minBin=0;
-
-        std::vector<std::pair<double, std::size_t> > emptyVector;
-
-        theHashTable.resize(numberOfBins,emptyVector);
-
-        std::size_t active_channel_count=0; //for verifying build input
-
-        std::cout << "?? is index into particles vector a valid unique id?\n";
-
-        for(auto p = particles.begin(); p!=particles.end(); p++){
-            double firingTime;
-            double this_propensity = p->srrate+p->sdrate;
-            unsigned this_id = p->id;
-            if (this_propensity==0.0) {
-                firingTime=std::numeric_limits<double>::infinity();
-            }
-            else {
-                firingTime=exponential(rng)/this_propensity+timeOffset;
-                ++active_channel_count;
-            }
-
-            nextFiringTime[this_id]=firingTime; //.insert(std::make_pair<reactionIndexT,firingTimeT>(i,firingTime));
-            //  std::cout << "nextFiringTime["<<i<<"]="<<nextFiringTime[i]<<"\n";
-            //insert into hashTable
-            int bin=computeBinIndex(firingTime);
-            if (bin>=0) {
-                theHashTable[bin].push_back(std::make_pair(firingTime,this_id)); //place this rxn at back of bin
-                binIndexAndPositionInBin[this_id]=std::make_pair(bin,theHashTable[bin].size()-1);
-            } else {
-                binIndexAndPositionInBin[this_id]=std::make_pair<int,int>(-1,-1); //bin (and index within bin) is -1 if not in the hash table
-            }
-        }
-
-        //set rxn counter to 0
-        rxnCountThisBuildOrRebuild=0;
-
-        //record info from build
-        rxnsBetweenBuildOrRebuild.push_back(0);
-        lowerBoundsBuildOrRebuild.push_back(currentLowerBound); //keep entry for each build/rebuild; lowerBound.back() corresponds to currentLowerBound
-        upperBoundsBuildOrRebuild.push_back(currentUpperBound);
-
-        // printHashTable();
-
-        if (active_channel_count!=activeChannelCounter) {
-            std::cout << "ERROR: active channel count is inconsistent.\n";
-            exit(1);
-        }
-
-    //  std::cout << "exiting build...\n";
-
-    }
+//    void NRMConstant_v5::build(std::vector<Spatialpy::Particle>& particles,
+//           double propensitySum, std::size_t activeChannels,
+//           std::mt19937_64& rng, double timeOffset,
+//           double simulationEndTime) {
+//    //  std::cout << "in build..." << std::endl;
+//        activeChannelCounter=activeChannels;
+//        endTime=simulationEndTime;
+//        previousFiringTime=timeOffset; //initialize (could set to nan or something instead)
+//
+//        // nextFiringTime.resize(propensities.size());
+//        // binIndexAndPositionInBin.resize(propensities.size());
+//
+//        if (propensitySum==0.0) {
+//            std::cerr << "ERROR: propensity sum is zero on initial build. Terminating." << std::endl;
+//            exit(1);
+//        }
+//
+//        setBinNumberAndBounds(timeOffset,propensitySum,activeChannels); //choose lowerBound, upperBound, and numberOfBins
+//        minBin=0;
+//
+//        std::vector<std::pair<double, std::size_t> > emptyVector;
+//
+//        theHashTable.resize(numberOfBins,emptyVector);
+//
+//        std::size_t active_channel_count=0; //for verifying build input
+//
+//        std::cout << "?? is index into particles vector a valid unique id?\n";
+//
+//        for(auto p = particles.begin(); p!=particles.end(); p++){
+//            double firingTime;
+//            double this_propensity = p->srrate+p->sdrate;
+//            unsigned this_id = p->id;
+//            if (this_propensity==0.0) {
+//                firingTime=std::numeric_limits<double>::infinity();
+//            }
+//            else {
+//                firingTime=exponential(rng)/this_propensity+timeOffset;
+//                ++active_channel_count;
+//            }
+//
+//            nextFiringTime[this_id]=firingTime; //.insert(std::make_pair<reactionIndexT,firingTimeT>(i,firingTime));
+//            //  std::cout << "nextFiringTime["<<i<<"]="<<nextFiringTime[i]<<"\n";
+//            //insert into hashTable
+//            int bin=computeBinIndex(firingTime);
+//            if (bin>=0) {
+//                theHashTable[bin].push_back(std::make_pair(firingTime,this_id)); //place this rxn at back of bin
+//                binIndexAndPositionInBin[this_id]=std::make_pair(bin,theHashTable[bin].size()-1);
+//            } else {
+//                binIndexAndPositionInBin[this_id]=std::make_pair<int,int>(-1,-1); //bin (and index within bin) is -1 if not in the hash table
+//            }
+//        }
+//
+//        //set rxn counter to 0
+//        rxnCountThisBuildOrRebuild=0;
+//
+//        //record info from build
+//        rxnsBetweenBuildOrRebuild.push_back(0);
+//        lowerBoundsBuildOrRebuild.push_back(currentLowerBound); //keep entry for each build/rebuild; lowerBound.back() corresponds to currentLowerBound
+//        upperBoundsBuildOrRebuild.push_back(currentUpperBound);
+//
+//        // printHashTable();
+//
+//        if (active_channel_count!=activeChannelCounter) {
+//            std::cout << "ERROR: active channel count is inconsistent.\n";
+//            exit(1);
+//        }
+//
+//    //  std::cout << "exiting build...\n";
+//
+//    }
 
     // reactionIndex is particle id
     void NRMConstant_v5::update(std::size_t reactionIndex, double newPropensity, double currentTime, std::mt19937_64& rng) {
@@ -273,7 +279,7 @@ namespace Spatialpy{
         int binIndex=(int)((firingTime-currentLowerBound)/(currentUpperBound-currentLowerBound)*numberOfBins);
         int returnVal=std::max(binIndex,(int)minBin);
         //  std::cout << "computeBinIndex("<<firingTime<<") returning binIndex=" << binIndex << std::endl;
-        return returnVal;
+        return std::min<int>(returnVal, numberOfBins-1);
     }
 
     //returns false if all propensities are 0
@@ -351,7 +357,7 @@ namespace Spatialpy{
         //  std::cout << "...in setBinNumberAndBounds...newLowerBound=" << newLowerBound << std::endl;
         currentLowerBound=newLowerBound;
         if (currentLowerBound>endTime) {
-            std::cerr << "ERROR: calling rebuild when simulation end time exceeded. Terminating.\n";
+            std::cerr << "ERROR: calling rebuild when simulation end time exceeded. Terminating. newLowerBound="<<newLowerBound<<", endTime="<<endTime<<"\n";
             exit(1);
         }
 
