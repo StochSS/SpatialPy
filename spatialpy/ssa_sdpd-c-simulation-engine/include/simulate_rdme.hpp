@@ -44,7 +44,7 @@ void nsm_core__initialize_chem_populations(ParticleSystem*system, unsigned int*u
 
 void nsm_core__initialize_rxn_propensities(ParticleSystem*system);
 void nsm_core__initialize_diff_propensities(ParticleSystem*system);
-void nsm_core__initialize_heap(ParticleSystem*system);
+bool nsm_core__initialize_heap(ParticleSystem*system);
 
 
 //void nsm_core__build_diffusion_matrix(ParticleSystem*system);

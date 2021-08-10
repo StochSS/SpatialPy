@@ -69,7 +69,7 @@ namespace Spatialpy{
         double P0;
         std::vector<Particle> particles;
 
-        // Moved from rdme_ta
+        // Moved from rdme_t
         NRMConstant_v5 rdme_event_q;
         const size_t *irN;
         const size_t *jcN;

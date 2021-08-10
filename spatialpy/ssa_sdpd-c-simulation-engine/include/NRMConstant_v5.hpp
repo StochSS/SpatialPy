@@ -88,15 +88,15 @@ namespace Spatialpy{
         NRMConstant_v5();
 
         //activeChannels is count of nonzero propensities
-        void build(std::vector<double>& propensities,
+        bool build(std::vector<double>& propensities,
                    double propensitySum, std::size_t activeChannels,
                    std::mt19937_64& rng, double timeOffset=0.0,
                    double simulationEndTime=std::numeric_limits<double>::max()) ;
 
-        void build(std::vector<Spatialpy::Particle>& particles,
-                   double propensitySum, std::size_t activeChannels,
-                   std::mt19937_64& rng, double timeOffset=0.0,
-                   double simulationEndTime=std::numeric_limits<double>::max()) ;
+//        void build(std::vector<Spatialpy::Particle>& particles,
+//                   double propensitySum, std::size_t activeChannels,
+//                   std::mt19937_64& rng, double timeOffset=0.0,
+//                   double simulationEndTime=std::numeric_limits<double>::max()) ;
 
         void printHashTable(); //for debug/dev
 

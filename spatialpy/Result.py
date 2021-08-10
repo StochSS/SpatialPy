@@ -145,7 +145,7 @@ class Result():
                             resultdict[filename] = fd.read()
                 state['results_output'] = resultdict
             except Exception as e:
-                raise Exception("Error pickling model, could not pickle the Result output files: "+str(e))
+                raise ResultError("Error pickling model, could not pickle the Result output files: "+str(e))
             state[key] = item
 
         return state
@@ -165,7 +165,7 @@ class Result():
                     fd.seek(0)
                     fd.write(contents)
         except Exception as e:
-            raise Exception("Error unpickling model, could not recreate the Result output files: "+str(e))
+            raise ResultError("Error unpickling model, could not recreate the Result output files: "+str(e))
 
     def __del__(self):
         """ Deconstructor. """
@@ -183,8 +183,8 @@ class Result():
 
         Attributes
         ----------
-        step_num: Usually an int
-            The step number to read simulation data from
+        step_num: int
+            The index in the timespan 
         debug: bool (default False)
             Whether or not debug information should be printed
 
@@ -195,11 +195,15 @@ class Result():
                 along with a dictionary of property and species data [1]
         """
 
-        num = int(step_num * self.model.output_freq)
+        if debug:
+            print("read_step({0}) ".format(step_num), end='')
+        #num = int(step_num * self.model.output_freq)
+        #num = int(step_num / self.model.timestep_size)
+        num = self.model.timespan_steps[step_num]
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(num))
 
         if debug:
-            print("read_step({0}) opening '{1}'".format(step_num, filename))
+            print("opening '{0}'".format(filename))
 
         if self.official_vtk:
             reader = vtk.vtkGenericDataObjectReader()
@@ -287,7 +291,10 @@ class Result():
 
         #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
         #                    num=self.model.num_timesteps+1, dtype=int)
-        t_index_arr = self.get_timespan()
+        #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
+        #        num=math.ceil(self.model.num_timesteps/self.model.output_freq)+1) 
+        lt=len(self.get_timespan())-1
+        t_index_arr = numpy.linspace(0,lt,num=lt+1,dtype=int)
 
         if timepoints is not None:
             if isinstance(timepoints,float):
@@ -300,6 +307,7 @@ class Result():
         except Exception as e:
             t_index_arr = [t_index_arr]
             num_timepoints = 1
+
 
         ret = numpy.zeros( (num_timepoints, num_voxel))
         for ndx, t_ndx in enumerate(t_index_arr):
@@ -316,10 +324,12 @@ class Result():
             ret = ret.flatten()
         return ret
 
-    def plot_species(self, species, t_ndx=0, concentration=False, deterministic=False, width=None, height=None, colormap=None, size=5, title=None,
-                     animated=False, t_ndx_list=None, speed=1, f_duration=500, t_duration=300, return_plotly_figure=False,
+    def plot_species(self, species, t_ndx=None, t_val=None, concentration=False, 
+                     deterministic=False, width=None, height=None, colormap=None,
+                     size=5, title=None, animated=False, t_ndx_list=None, speed=1,
+                     f_duration=500, t_duration=300, return_plotly_figure=False,
                      use_matplotlib=False, debug=False):
-        """ Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
+        """ Plots the Results using plotly or matplotlib. Can be viewed in a Jupyter Notebook.
 
             If concentration is False (default), the integer, raw, trajectory data is returned,
             if set to True, the concentration (=copy_number/volume) is returned.
@@ -332,6 +342,8 @@ class Result():
             A string describing the species to be plotted.
         t_ndx : int
             The time index of the results to be plotted, ignored if animated is set to True
+        t_val : float
+            The time value of the results to be plotted, ignored if animated is set to True
         concentration : bool
             Whether or not to plot the data as stochastic concentration, ignored if deterministic is
             set to True
@@ -371,17 +383,35 @@ class Result():
 
         from plotly.offline import init_notebook_mode, iplot
 
-        if t_ndx < 0:
-            t_ndx = len(self.get_timespan()) + t_ndx
+
+        time_index_list = self.get_timespan()
 
         if animated and t_ndx_list is None:
-            t_ndx_list = list(range(int(self.model.num_timesteps/self.model.output_freq)+1))
+            t_ndx_list = time_index_list 
 
         spec_name = "C[{0}]".format(species) if deterministic else "D[{0}]".format(species)
 
         # read data at time point
-        time_index = t_ndx_list[0] if animated else t_ndx
-        points, data = self.read_step(time_index, debug=debug)
+        if animated:
+            t_ndx = 0
+        elif t_val is None and t_ndx is None:
+            t_ndx = 0 # default value
+        elif t_val is not None and t_ndx is not None:
+            raise ResultError("t_ndx and t_val can not both be set.")
+        elif t_val is not None:
+            if t_val in time_index_list:
+                for n,t in enumerate(time_index_list):
+                    if t == t_val:
+                        t_ndx = n
+                        break
+            else:
+                raise ResultError("time value (t_val) value given is not a valid result timepoint") 
+        else:
+            if t_ndx != int(t_ndx):
+                raise ResultError("t_ndx must be an integer")
+            if t_ndx < 0:
+                t_ndx = len(self.get_timespan()) + t_ndx
+        points, data = self.read_step(t_ndx, debug=debug)
 
         if use_matplotlib:
             import matplotlib.pyplot as plt
@@ -490,7 +520,7 @@ class Result():
             cmin = min(_data)
             cmax = max(_data)
             for i in range(1, len(t_ndx_list), speed):
-                _, _data = self.read_step(t_ndx_list[i])
+                _, _data = self.read_step(i)
                 _data = _data[spec_name] if (deterministic or not concentration) else _data[spec_name] / (_data['mass'] / _data['rho'])
                 if min(_data) - 0.1 < cmin:
                     cmin = min(_data) - 0.1
@@ -499,7 +529,7 @@ class Result():
 
             frames = []
             for index in range(0, len(t_ndx_list), speed):
-                points, data = self.read_step(t_ndx_list[index])
+                points, data = self.read_step(index)
 
                 # map data to types
                 types = {}
@@ -566,15 +596,16 @@ class Result():
 
         ret = numpy.zeros( (num_timepoints, num_voxel))
         for ndx, t_ndx in enumerate(t_index_arr):
-            (_, step) = self.read_step(t_ndx)
+            (_, step) = self.read_step(ndx)
             ret[ndx,:] = step[property_name]
         if ret.shape[0] == 1:
             ret = ret.flatten()
         return ret
 
-    def plot_property(self, property_name, t_ndx=0, p_ndx=0, width=None, height=None, colormap=None, size=5, title=None,
-                      animated=False, t_ndx_list=None, speed=1, f_duration=500, t_duration=300,
-                      return_plotly_figure=False, use_matplotlib=False):
+    def plot_property(self, property_name, t_ndx=None, t_val=None, p_ndx=0, width=None, height=None,
+                      colormap=None, size=5, title=None, animated=False, t_ndx_list=None, speed=1,
+                      f_duration=500, t_duration=300, return_plotly_figure=False, use_matplotlib=False,
+                      debug=False):
         """
         Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
@@ -584,6 +615,8 @@ class Result():
             A string describing the property to be plotted.
         t_ndx : int
             The time index of the results to be plotted
+        t_val : float
+            The time value of the results to be plotted, ignored if animated is set to True
         p_ndx : int
             The property index of the results to be plotted
         width: int (default 500)
@@ -614,17 +647,36 @@ class Result():
             which may be edited by the user.
         use_matplotlib : bool
             whether or not to plot the proprties results using matplotlib.
+        debug: bool
+            output debugging info
         """
 
-        if t_ndx < 0:
-            t_ndx = len(self.get_timespan()) + t_ndx
+        time_index_list = self.get_timespan()
 
         if animated and t_ndx_list is None:
-            t_ndx_list = list(range(int(self.model.num_timesteps/self.model.output_freq)+1))
+            t_ndx_list = time_index_list
 
         # read data at time point
-        time_index = t_ndx_list[0] if animated else t_ndx
-        points, data = self.read_step(time_index)
+        if animated:
+            t_ndx = 0
+        elif t_val is None and t_ndx is None:
+            t_ndx = 0 # default value
+        elif t_val is not None and t_ndx is not None:
+            raise ResultError("t_ndx and t_val can not both be set.")
+        elif t_val is not None:
+            if t_val in time_index_list:
+                for n,t in enumerate(time_index_list):
+                    if t == t_val:
+                        t_ndx = n
+                        break
+            else:
+                raise ResultError("time value (t_val) value given is not a valid result timepoint")
+        else:
+            if t_ndx != int(t_ndx):
+                raise ResultError("t_ndx must be an integer")
+            if t_ndx < 0:
+                t_ndx = len(self.get_timespan()) + t_ndx
+        points, data = self.read_step(t_ndx, debug=debug)
 
         if use_matplotlib:
             import matplotlib.pyplot as plt
@@ -743,7 +795,7 @@ class Result():
             cmin = min(data[property_name]) if property_name != "v" else min(data[property_name], key=lambda val: val[p_ndx])[p_ndx]
             cmax = max(data[property_name]) if property_name != "v" else max(data[property_name], key=lambda val: val[p_ndx])[p_ndx]
             for i in range(1, len(t_ndx_list), speed):
-                _, _data = self.read_step(t_ndx_list[i])
+                _, _data = self.read_step(i)
                 _cmin = min(_data[property_name]) if property_name != "v" else min(_data[property_name], key=lambda val: val[p_ndx])[p_ndx]
                 if _cmin - 0.1 < cmin:
                     cmin = _cmin - 0.1
@@ -753,7 +805,7 @@ class Result():
 
             frames = []
             for index in range(0, len(t_ndx_list), speed):
-                points, data = self.read_step(t_ndx_list[index])
+                points, data = self.read_step(index)
 
                 # map data to types
                 types = {}
