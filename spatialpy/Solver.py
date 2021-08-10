@@ -32,7 +32,7 @@ import re
 from spatialpy.Model import *
 from spatialpy.Result import *
 
-def read_from_stdout(stdout,verbose=True):
+def __read_from_stdout(stdout,verbose=True):
     ''' Used with subprocess.Popen and threading to capture all output and print
         to the screen notebook without waiting or storing the output ina buffer.'''
     try:
@@ -45,14 +45,19 @@ def read_from_stdout(stdout,verbose=True):
                 #got empty line, ending
                 return
     except Exception as e:
-        print("read_from_stdout(): {0}".format(e))
+        print("__read_from_stdout(): {0}".format(e))
 
 
 class Solver:
     """ SpatialPy solver object."""
 
     def __init__(self, model, debug_level=0):
-        """ Constructor. """
+        """ Constructor. 
+
+            :param model: Target model of solver simulation
+            :type model: spatialpy.Model.Model
+            :param debug_level: Target level of debugging
+            :type debug_level: int"""
         # TODO: fix class checking
         # if not isinstance(model, Model):
         #    raise SimulationError("Solver constructors must take a Model as an argument.")
@@ -95,7 +100,7 @@ class Solver:
         except Exception as e:
             pass
 
-    def run_debugger(self):
+    def __run_debugger(self):
         """ Start a gdbgui debugger at port 5000. """
         self.debugger_url = 'http://127.0.0.1:5000'
         if not hasattr(self, 'debugger_process'):
@@ -103,7 +108,13 @@ class Solver:
         print(f'Your debugger is running at {self.debugger_url}')
 
     def compile(self, debug=False, profile=False):
-        """ Compile the model."""
+        """ Compile the model.
+
+            :param debug: If True, will print additional build debugging
+            :type debug: bool
+            :param profile: If True, will print additional profiling information
+            :type profile: bool
+        """
 
         # Create a unique directory each time call to compile.
         self.build_dir = tempfile.mkdtemp(
@@ -118,7 +129,7 @@ class Solver:
         self.prop_file_name = self.build_dir + '/' + self.propfilename + '.c'
         if self.debug_level > 1:
             print("Creating propensity file {0}".format(self.prop_file_name))
-        self.create_propensity_file(file_name=self.prop_file_name)
+        self.__create_propensity_file(file_name=self.prop_file_name)
 
         # Build the solver
         makefile = self.SpatialPy_ROOTDIR+'/build/Makefile'
@@ -167,18 +178,23 @@ class Solver:
     def run(self, number_of_trajectories=1, seed=None, timeout=None,
                 number_of_threads=None, debug=False, profile=False, verbose=True):
         """ Run one simulation of the model.
-        Args:
-            number_of_trajectories: (int) How many trajectories should be simulated.
-            seed: (int) the random number seed (incremented by one for multiple runs).
-            timeout: (int) maximum number of seconds the solver can run.
-            number_of_threads: (int) the number threads the solver will use.
-            debug: (bool) start a gdbgui debugger (also compiles with debug symbols
+
+            :param number_of_trajectories: How many trajectories should be simulated.
+            :type number_of_trajectories: int
+            :param seed: the random number seed (incremented by one for multiple runs).
+            :type seed: int
+            :param timeout: maximum number of seconds the solver can run.
+            :type timeout: int
+            :param number_of_threads: the number threads the solver will use.
+            :type number_of_threads: int
+            :param debug: start a gdbgui debugger (also compiles with debug symbols
                 if compilation hasn't happened)
-            profile: (bool) output gprof profiling data if available
-        Returns:
-            Result object.
-                or, if number_of_trajectories > 1
-            a list of Result objects
+            :type debug: bool
+            :param profile: Output gprof profiling data if available
+            :type profile: bool
+
+            :rtype: spatialpy.Result.Result | list(spatialpy.Result.Result)
+
         """
         if number_of_trajectories > 1:
             result_list = []
@@ -211,7 +227,7 @@ class Solver:
                         start_new_session=True) as process:
                     try:
                         # start thread to read process stdout to stdout
-                        t = threading.Thread(target=read_from_stdout,
+                        t = threading.Thread(target=__read_from_stdout,
                             args=(process.stdout,verbose,))
                         t.start()
                         if timeout is not None:
@@ -245,7 +261,7 @@ class Solver:
 
             result.success = True
             if profile:
-                self.read_profile_info(result)
+                self.__read_profile_info(result)
             if number_of_trajectories > 1:
                 result_list.append(result)
             else:
@@ -253,7 +269,7 @@ class Solver:
 
         return result_list
 
-    def read_profile_info(self, result):
+    def __read_profile_info(self, result):
         profile_data_path = os.path.join(result.result_dir, 'gmon.out')
         exe_path = os.path.join(self.build_dir, self.executable_name)
         cmd = f'gprof {exe_path} {profile_data_path}'
@@ -264,7 +280,7 @@ class Solver:
         print(f'Gprof report for {result.result_dir}')
         print(stdout.decode('utf-8'))
 
-    def create_propensity_file(self, file_name=None):
+    def __create_propensity_file(self, file_name=None):
         """ Generate the C propensity file that is used to compile the solvers.
         """
 
