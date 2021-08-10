@@ -47,17 +47,18 @@ def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
 
 
 class Model():
-    """ Representation of a spatial biochemical model. """
+    """ Representation of a spatial biochemical model.
+
+            :param name: Name of the model
+            :type name: str
+
+    """
     reserved_names = ['vol']
     special_characters = ['[', ']', '+', '-', '*', '/', '.', '^']
 
 
     def __init__(self, name=""):
-        """ Create an empty SpatialPy model. 
                 
-                :param name: Name of the model
-                :type name: str
-        """
 
         # The name that the model is referenced by (should be a String)
         self.name = name

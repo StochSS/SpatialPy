@@ -49,15 +49,18 @@ def __read_from_stdout(stdout,verbose=True):
 
 
 class Solver:
-    """ SpatialPy solver object."""
-
-    def __init__(self, model, debug_level=0):
-        """ Constructor. 
+    """ SpatialPy solver object.
 
             :param model: Target model of solver simulation
             :type model: spatialpy.Model.Model
             :param debug_level: Target level of debugging
-            :type debug_level: int"""
+            :type debug_level: int
+    """
+
+    def __init__(self, model, debug_level=0):
+        """ Constructor
+        """
+
         # TODO: fix class checking
         # if not isinstance(model, Model):
         #    raise SimulationError("Solver constructors must take a Model as an argument.")
