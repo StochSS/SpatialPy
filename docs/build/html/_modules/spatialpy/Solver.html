@@ -121,7 +121,7 @@
 <span class="kn">from</span> <span class="nn">spatialpy.Model</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">spatialpy.Result</span> <span class="kn">import</span> <span class="o">*</span>
 
-<div class="viewcode-block" id="read_from_stdout"><a class="viewcode-back" href="../../classes/spatialpy.html#spatialpy.Solver.read_from_stdout">[docs]</a><span class="k">def</span> <span class="nf">read_from_stdout</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">__read_from_stdout</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; Used with subprocess.Popen and threading to capture all output and print</span>
 <span class="sd">        to the screen notebook without waiting or storing the output ina buffer.&#39;&#39;&#39;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -134,14 +134,19 @@
                 <span class="c1">#got empty line, ending</span>
                 <span class="k">return</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;read_from_stdout(): </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;__read_from_stdout(): </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="Solver"><a class="viewcode-back" href="../../classes/spatialpy.html#spatialpy.Solver.Solver">[docs]</a><span class="k">class</span> <span class="nc">Solver</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; SpatialPy solver object.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">debug_level</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Constructor. &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Constructor. </span>
+
+<span class="sd">            :param model: Target model of solver simulation</span>
+<span class="sd">            :type model: spatialpy.Model.Model</span>
+<span class="sd">            :param debug_level: Target level of debugging</span>
+<span class="sd">            :type debug_level: int&quot;&quot;&quot;</span>
         <span class="c1"># TODO: fix class checking</span>
         <span class="c1"># if not isinstance(model, Model):</span>
         <span class="c1">#    raise SimulationError(&quot;Solver constructors must take a Model as an argument.&quot;)</span>
@@ -184,15 +189,21 @@
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">pass</span>
 
-<div class="viewcode-block" id="Solver.run_debugger"><a class="viewcode-back" href="../../classes/spatialpy.html#spatialpy.Solver.Solver.run_debugger">[docs]</a>    <span class="k">def</span> <span class="nf">run_debugger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__run_debugger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Start a gdbgui debugger at port 5000. &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">debugger_url</span> <span class="o">=</span> <span class="s1">&#39;http://127.0.0.1:5000&#39;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;debugger_process&#39;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">debugger_process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="s1">&#39;gdbgui -r&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Your debugger is running at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">debugger_url</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Your debugger is running at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">debugger_url</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Solver.compile"><a class="viewcode-back" href="../../classes/spatialpy.html#spatialpy.Solver.Solver.compile">[docs]</a>    <span class="k">def</span> <span class="nf">compile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">profile</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Compile the model.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Compile the model.</span>
+
+<span class="sd">            :param debug: If True, will print additional build debugging</span>
+<span class="sd">            :type debug: bool</span>
+<span class="sd">            :param profile: If True, will print additional profiling information</span>
+<span class="sd">            :type profile: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Create a unique directory each time call to compile.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">build_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span>
@@ -207,7 +218,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">prop_file_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">propfilename</span> <span class="o">+</span> <span class="s1">&#39;.c&#39;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug_level</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating propensity file </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_file_name</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">create_propensity_file</span><span class="p">(</span><span class="n">file_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_file_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__create_propensity_file</span><span class="p">(</span><span class="n">file_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_file_name</span><span class="p">)</span>
 
         <span class="c1"># Build the solver</span>
         <span class="n">makefile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SpatialPy_ROOTDIR</span><span class="o">+</span><span class="s1">&#39;/build/Makefile&#39;</span>
@@ -256,18 +267,23 @@
 <div class="viewcode-block" id="Solver.run"><a class="viewcode-back" href="../../classes/spatialpy.html#spatialpy.Solver.Solver.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_of_trajectories</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">number_of_threads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">profile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Run one simulation of the model.</span>
-<span class="sd">        Args:</span>
-<span class="sd">            number_of_trajectories: (int) How many trajectories should be simulated.</span>
-<span class="sd">            seed: (int) the random number seed (incremented by one for multiple runs).</span>
-<span class="sd">            timeout: (int) maximum number of seconds the solver can run.</span>
-<span class="sd">            number_of_threads: (int) the number threads the solver will use.</span>
-<span class="sd">            debug: (bool) start a gdbgui debugger (also compiles with debug symbols</span>
+
+<span class="sd">            :param number_of_trajectories: How many trajectories should be simulated.</span>
+<span class="sd">            :type number_of_trajectories: int</span>
+<span class="sd">            :param seed: the random number seed (incremented by one for multiple runs).</span>
+<span class="sd">            :type seed: int</span>
+<span class="sd">            :param timeout: maximum number of seconds the solver can run.</span>
+<span class="sd">            :type timeout: int</span>
+<span class="sd">            :param number_of_threads: the number threads the solver will use.</span>
+<span class="sd">            :type number_of_threads: int</span>
+<span class="sd">            :param debug: start a gdbgui debugger (also compiles with debug symbols</span>
 <span class="sd">                if compilation hasn&#39;t happened)</span>
-<span class="sd">            profile: (bool) output gprof profiling data if available</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            Result object.</span>
-<span class="sd">                or, if number_of_trajectories &gt; 1</span>
-<span class="sd">            a list of Result objects</span>
+<span class="sd">            :type debug: bool</span>
+<span class="sd">            :param profile: Output gprof profiling data if available</span>
+<span class="sd">            :type profile: bool</span>
+
+<span class="sd">            :rtype: spatialpy.Result.Result | list(spatialpy.Result.Result)</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">number_of_trajectories</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">result_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -300,7 +316,7 @@
                         <span class="n">start_new_session</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">process</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="c1"># start thread to read process stdout to stdout</span>
-                        <span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">read_from_stdout</span><span class="p">,</span>
+                        <span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">__read_from_stdout</span><span class="p">,</span>
                             <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span><span class="n">verbose</span><span class="p">,))</span>
                         <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
                         <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -334,7 +350,7 @@
 
             <span class="n">result</span><span class="o">.</span><span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="n">profile</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">read_profile_info</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__read_profile_info</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">number_of_trajectories</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -342,7 +358,7 @@
 
         <span class="k">return</span> <span class="n">result_list</span></div>
 
-<div class="viewcode-block" id="Solver.read_profile_info"><a class="viewcode-back" href="../../classes/spatialpy.html#spatialpy.Solver.Solver.read_profile_info">[docs]</a>    <span class="k">def</span> <span class="nf">read_profile_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__read_profile_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
         <span class="n">profile_data_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">result_dir</span><span class="p">,</span> <span class="s1">&#39;gmon.out&#39;</span><span class="p">)</span>
         <span class="n">exe_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">build_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">executable_name</span><span class="p">)</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;gprof </span><span class="si">{</span><span class="n">exe_path</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">profile_data_path</span><span class="si">}</span><span class="s1">&#39;</span>
@@ -351,9 +367,9 @@
         <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
         <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Gprof report for </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">result_dir</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
 
-<div class="viewcode-block" id="Solver.create_propensity_file"><a class="viewcode-back" href="../../classes/spatialpy.html#spatialpy.Solver.Solver.create_propensity_file">[docs]</a>    <span class="k">def</span> <span class="nf">create_propensity_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__create_propensity_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Generate the C propensity file that is used to compile the solvers.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -679,7 +695,7 @@
 
         <span class="c1">#### Write the data to the file ####</span>
         <span class="n">propfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">propfilestr</span><span class="p">)</span>
-        <span class="n">propfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+        <span class="n">propfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="SimulationError"><a class="viewcode-back" href="../../classes/spatialpy.html#spatialpy.Solver.SimulationError">[docs]</a><span class="k">class</span> <span class="nc">SimulationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
