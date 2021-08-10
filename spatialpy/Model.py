@@ -449,7 +449,7 @@ class Model():
         p.expression = expression
         p.__evaluate()
 
-    def __resolve_parameters(self):
+    def _resolve_parameters(self):
         """ Attempt to resolve all parameter expressions to scalar floating point values.
             Must be called prior to exporting the model.  """
         self.update_namespace()
@@ -536,7 +536,7 @@ class Model():
             self.listOfReactions == other.listOfReactions and \
             self.name == other.name)
 
-    def __create_stoichiometric_matrix(self):
+    def _create_stoichiometric_matrix(self):
         """ Generate a stoichiometric matrix in sparse CSC format. """
 
         if self.get_num_reactions() > 0:
@@ -558,7 +558,7 @@ class Model():
         return N
 
 
-    def __create_dependency_graph(self):
+    def _create_dependency_graph(self):
         """ Construct the sparse dependency graph. """
         # We cannot safely generate a dependency graph (without attempting to analyze the
         # propensity string itself) if the model contains custom propensities.
@@ -626,7 +626,7 @@ class Model():
 
         return G
 
-    def __apply_initial_conditions(self):
+    def _apply_initial_conditions(self):
         """ Initalize the u0 matrix (zeros) and then apply each initial condition"""
         # initalize
         ns = self.get_num_species()

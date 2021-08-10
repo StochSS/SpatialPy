@@ -321,7 +321,7 @@ class Solver:
             "__NUMBER_OF_VOXELS__", str(self.model.domain.get_num_voxels()))
 
         # Make sure all paramters are evaluated to scalars before we write them to the file.
-        self.model.resolve_parameters()
+        self.model._resolve_parameters()
         parameters = ""
         for p in self.model.listOfParameters:
             parameters += "const double " + p + " = " + \
@@ -429,7 +429,7 @@ class Solver:
         propfilestr = propfilestr.replace("__INIT_PARTICLES__", init_particles)
 
         # process initial conditions here
-        self.model.apply_initial_conditions()
+        self.model._apply_initial_conditions()
         nspecies = self.model.u0.shape[0]
         ncells = self.model.u0.shape[1]
 
@@ -455,7 +455,7 @@ class Solver:
             "__DATA_FUNCTION_DEFINITIONS__", data_fn_defs)
 
         if len(self.model.listOfSpecies) > 0:
-            N = self.model.create_stoichiometric_matrix()
+            N = self.model._create_stoichiometric_matrix()
             if(min(N.shape) > 0):
                 Nd = N.todense() # this will not work if Nrxn or Nspecies is zero
                 outstr = "static int input_N_dense[{0}] = ".format(
@@ -497,7 +497,7 @@ class Solver:
                 input_constants += "static size_t input_jcN[0] = {};\n"
                 input_constants += "static int input_prN[0] = {};\n"
 
-            G = self.model.create_dependency_graph()
+            G = self.model._create_dependency_graph()
             outstr = "static size_t input_irG[{0}] = ".format(len(G.indices))
             outstr += "{"
             for i in range(len(G.indices)):
