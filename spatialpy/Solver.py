@@ -32,7 +32,7 @@ import re
 from spatialpy.Model import *
 from spatialpy.Result import *
 
-def __read_from_stdout(stdout,verbose=True):
+def _read_from_stdout(stdout,verbose=True):
     ''' Used with subprocess.Popen and threading to capture all output and print
         to the screen notebook without waiting or storing the output ina buffer.'''
     try:
@@ -45,7 +45,7 @@ def __read_from_stdout(stdout,verbose=True):
                 #got empty line, ending
                 return
     except Exception as e:
-        print("__read_from_stdout(): {0}".format(e))
+        print("_read_from_stdout(): {0}".format(e))
 
 
 class Solver:
@@ -230,7 +230,7 @@ class Solver:
                         start_new_session=True) as process:
                     try:
                         # start thread to read process stdout to stdout
-                        t = threading.Thread(target=__read_from_stdout,
+                        t = threading.Thread(target=_read_from_stdout,
                             args=(process.stdout,verbose,))
                         t.start()
                         if timeout is not None:
