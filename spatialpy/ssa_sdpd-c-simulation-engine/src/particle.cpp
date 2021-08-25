@@ -48,7 +48,6 @@ namespace Spatialpy{
                             num_types(num_types), num_chem_species(num_chem_species),
                             num_chem_rxns(num_chem_rxns), num_stoch_species(num_stoch_species),
                             num_stoch_rxns(num_stoch_rxns), num_data_fn(num_data_fn){
-        dimension = 3;
         boundary_conditions[0] = 'n';
         boundary_conditions[1] = 'n';
         boundary_conditions[2] = 'n';
@@ -160,7 +159,17 @@ namespace Spatialpy{
     	// calculate dWdr
     	double h = system->h;
     	double R = r / h;
-    	double alpha = 105 / (16 * M_PI * h * h * h); // 3D
+        // Alpha varies between 1D, 2D, and 3D Simulations, values from Drawert et. al. Eq 14
+        double alpha ;
+        if (system->dimension == 3){
+            alpha = 105 / (16 * M_PI * h * h * h) ; // 3D
+        }else if (system->dimension == 2){ 
+            alpha = 5 / (M_PI * h * h) ; // 2D
+        }else if (system->dimension == 1){
+            alpha = 5 / 4 * h ; //1D
+        }
+        
+    	//double alpha = 105 / (16 * M_PI * h * h * h); // 3D
     	double dWdr = alpha * (-12 * r / (h * h)) * ((1 - R)* (1 - R));
     	// calculate D_i_j
 
@@ -174,6 +183,7 @@ namespace Spatialpy{
 
     	if(isnan(D_i_j)){
     	    printf("Got NaN calculating D_i_j for me=%i, neighbor=%i\n",id, neighbor->id);
+    	    printf("system->dimension=%i ",system->dimension);
     	    printf("r2=%e ",r2);
     	    printf("r2_old=%e ",r2);
     	    printf("r=%e ",r);
