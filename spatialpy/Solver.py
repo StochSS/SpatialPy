@@ -565,9 +565,9 @@ class Solver:
         system_config += "system->yhi = {0};\n".format(self.model.domain.ylim[1])
         system_config += "system->zlo = {0};\n".format(self.model.domain.zlim[0])
         system_config += "system->zhi = {0};\n".format(self.model.domain.zlim[1])
-        if not sum(self.model.domain.vertices[:,1]):
+        if not numpy.count_nonzero(self.model.domain.vertices[:,1]):
             self.model.dimensions = 1
-        elif not sum(self.model.domain.vertices[:,2]):
+        elif not numpy.count_nonzero(self.model.domain.vertices[:,2]):
             self.model.dimensions = 2
         else:
             self.model.dimensions = 3
