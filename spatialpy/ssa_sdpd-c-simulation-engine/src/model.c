@@ -197,11 +197,13 @@ namespace Spatialpy{
       double r, R, Wij, alpha, num, den;
       double h = system->h;
       if(system->dimension==3){
-          alpha = 105/(16*M_PI*h*h*h);
+          alpha = 105/(16*M_PI*h*h*h); //3D
       }else if(system->dimension==2){
-          alpha = 5/(M_PI*h*h);
+          alpha = 5/(M_PI*h*h); //2D
+      }else if(system->dimension==1){
+          alpha = 5 / 4 * h ; //1D
       }else{
-          printf("Not 1D or 2D\n");exit(1);
+          printf("Not 1D, 2D, or 3D\n");exit(1);
       }
       num = 0.0;
       den = 0.0;
@@ -237,15 +239,14 @@ namespace Spatialpy{
         double r, R, Wij, dWdr, alpha, vos, vtot, nw[3], dx[3], norm_nw;
         int i;
         double h = system->h;
-        if (system->dimension == 3) {
-            alpha = 105 / (16 * M_PI * h * h * h);
-        }
-        else if (system->dimension == 2) {
-            alpha = 5 / (M_PI * h * h);
-        }
-        else {
-            printf("Not 1D or 2D\n");
-            exit(1);
+        if(system->dimension==3){
+            alpha = 105/(16*M_PI*h*h*h); //3D
+        }else if(system->dimension==2){
+            alpha = 5/(M_PI*h*h); //2D
+        }else if(system->dimension==1){
+            alpha = 5 / 4 * h ; //1D
+        }else{
+            printf("Not 1D, 2D, or 3D\n");exit(1);
         }
 
         for (i = 0; i < 3; i++) {

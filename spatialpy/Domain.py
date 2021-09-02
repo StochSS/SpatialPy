@@ -36,6 +36,7 @@ class Domain():
         self.on_boundary = None
         self.domain_size = None
         self.tetrahedron_vol = None
+        self.dimensions = None
 
         self.vol = numpy.zeros((numpoints), dtype=float)
         self.mass = numpy.zeros((numpoints), dtype=float)
@@ -274,7 +275,7 @@ class Domain():
             else:
                 types[name] = {"points":[self.vertices[i]], "data":[self.type[i]]}
 
-        is_2d = self.zlim[0] == self.zlim[1]
+        is_2d = self.dimensions == 2
 
         trace_list = _plotly_iterate(types, size=size, property_name="type",
                                      colormap=colormap, is_2d=is_2d)
