@@ -335,5 +335,6 @@ namespace Spatialpy{
     //  std::cout << "currentLowerBound=" << currentLowerBound << ", currentUpperBound=" << currentUpperBound << std::endl;
     //  std::cout << "binWidth=" << binWidth << std::endl;
     //  std::cout << "numberOfBins=" << numberOfBins << std::endl;
+        return true;
     }
 }
