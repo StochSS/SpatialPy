@@ -1,5 +1,5 @@
 <p align="left">
-<img src="https://raw.githubusercontent.com/spatialpy/SpatialPy/develop/logo/SpatialPy_logo.png">
+<img src="https://raw.githubusercontent.com/StochSS/SpatialPy/main/logo/SpatialPy_logo.png">
 </p>
 
 SpatialPy is a Python 3 package for simulation of spatial deterministic/stochastic reaction-diffusion-advection problems embedded in Lagrangian reference frame particle based fluid dynamics domain
