@@ -48,6 +48,7 @@ namespace Spatialpy{
         }
 
         if(!setBinNumberAndBounds(timeOffset,propensitySum,activeChannels)){ //choose lowerBound, upperBound, and numberOfBins
+            std::cerr << "ERROR: setBinNumberAndBound failed in build()" << std::endl;
             return false;
         }
         minBin=0;
@@ -173,8 +174,9 @@ namespace Spatialpy{
         while (theHashTable[minBin].size()==0) {
             ++minBin;
             if (minBin==theHashTable.size()) {
-            //  std::cout << "rebuilding...\n";
+                //std::cout << "rebuilding...\n";
                 if (!rebuild()) {
+                    //std::cerr << "in selectReaction, rebuild() returned false" << std::endl;
                     return std::make_pair(std::numeric_limits<double>::max(),-1);
                 }
             }
@@ -237,6 +239,8 @@ namespace Spatialpy{
         }
 
         if(!setBinNumberAndBounds(currentUpperBound,propensitySumEstimate,activeChannelCounter)){//
+            //std::cerr << "ERROR: setBinNumberAndBound failed in rebuild()" << std::endl;
+            minBin=0;
             return false;
         }
         minBin=0;
@@ -293,7 +297,7 @@ namespace Spatialpy{
         //  std::cout << "...in setBinNumberAndBounds...newLowerBound=" << newLowerBound << std::endl;
         currentLowerBound=newLowerBound;
         if (currentLowerBound>endTime) {
-            std::cerr << "ERROR: calling rebuild when simulation end time exceeded. Terminating. newLowerBound="<<newLowerBound<<", endTime="<<endTime<<"\n";
+            //std::cerr << "ERROR: calling rebuild when simulation end time exceeded. Terminating. newLowerBound="<<newLowerBound<<", endTime="<<endTime<<"\n";
             //exit(1);
             return false;
         }
