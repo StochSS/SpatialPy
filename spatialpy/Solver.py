@@ -540,7 +540,7 @@ class Solver:
                 try:
                     if s not in self.model.listOfDiffusionRestrictions or \
                        sd_id in self.model.listOfDiffusionRestrictions[s]:
-                        outstr += "{0}".format(s.diffusion_constant)
+                        outstr += "{0}".format(s.diffusion_coefficient)
                     else:
                         outstr += "0.0"
                 except KeyError as e:

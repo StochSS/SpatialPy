@@ -642,36 +642,28 @@ class Model():
 
 
 class Species():
-    """ Model of a biochemical species. Must be assigned either a diffusion_constant, a \
-        diffusion coefficent, or a value D.
+    """ Model of a biochemical species. Must be assigned a diffusion coefficent.
 
             :param name: Name of the Species
             :type name: str
-            :param diffusion_constant: System diffusion constant for Species
-            :type diffusion_constant: float
             :param diffusion_coefficient: non-constant coefficient of diffusion for Species
             :type diffusion_coefficient: float
-            :param D:
-            :type D: """
+            """
 
-    def __init__(self,name=None,diffusion_constant=None,diffusion_coefficient=None,D=None):
+    def __init__(self,name=None, diffusion_coefficient=None):
         # A species has a name (string) and an initial value (positive integer)
         if name is None:
             raise ModelError("Species must have a name")
         else:
             self.name = name
-        if diffusion_constant is not None:
-            self.diffusion_constant=diffusion_constant
-        elif  diffusion_coefficient is not None:
-            self.diffusion_constant=diffusion_coefficient
-        elif D is not None:
-            self.diffusion_constant=D
+        if  diffusion_coefficient is not None:
+            self.diffusion_coefficient=diffusion_coefficient
         else:
-            raise ModelError("Species must have a diffusion_constant")
+            raise ModelError("Species must have a diffusion_coefficient")
 
 
     def __str__(self):
-        print_string = f"{self.name}: {str(self.diffusion_constant)}"
+        print_string = f"{self.name}: {str(self.diffusion_coefficient)}"
         return print_string
 
 class Parameter():

@@ -731,36 +731,28 @@
 
 
 <div class="viewcode-block" id="Species"><a class="viewcode-back" href="../../classes/spatialpy.html#spatialpy.Model.Species">[docs]</a><span class="k">class</span> <span class="nc">Species</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot; Model of a biochemical species. Must be assigned either a diffusion_constant, a \</span>
-<span class="sd">        diffusion coefficent, or a value D.</span>
+    <span class="sd">&quot;&quot;&quot; Model of a biochemical species. Must be assigned a diffusion coefficent.</span>
 
 <span class="sd">            :param name: Name of the Species</span>
 <span class="sd">            :type name: str</span>
-<span class="sd">            :param diffusion_constant: System diffusion constant for Species</span>
-<span class="sd">            :type diffusion_constant: float</span>
 <span class="sd">            :param diffusion_coefficient: non-constant coefficient of diffusion for Species</span>
 <span class="sd">            :type diffusion_coefficient: float</span>
-<span class="sd">            :param D:</span>
-<span class="sd">            :type D: &quot;&quot;&quot;</span>
+<span class="sd">            &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">diffusion_constant</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">diffusion_coefficient</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">D</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">diffusion_coefficient</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># A species has a name (string) and an initial value (positive integer)</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ModelError</span><span class="p">(</span><span class="s2">&quot;Species must have a name&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="k">if</span> <span class="n">diffusion_constant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_constant</span><span class="o">=</span><span class="n">diffusion_constant</span>
-        <span class="k">elif</span>  <span class="n">diffusion_coefficient</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_constant</span><span class="o">=</span><span class="n">diffusion_coefficient</span>
-        <span class="k">elif</span> <span class="n">D</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_constant</span><span class="o">=</span><span class="n">D</span>
+        <span class="k">if</span>  <span class="n">diffusion_coefficient</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_coefficient</span><span class="o">=</span><span class="n">diffusion_coefficient</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ModelError</span><span class="p">(</span><span class="s2">&quot;Species must have a diffusion_constant&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ModelError</span><span class="p">(</span><span class="s2">&quot;Species must have a diffusion_coefficient&quot;</span><span class="p">)</span>
 
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">print_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">diffusion_constant</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">print_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">diffusion_coefficient</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">print_string</span></div>
 
 <div class="viewcode-block" id="Parameter"><a class="viewcode-back" href="../../classes/spatialpy.html#spatialpy.Model.Parameter">[docs]</a><span class="k">class</span> <span class="nc">Parameter</span><span class="p">():</span>
