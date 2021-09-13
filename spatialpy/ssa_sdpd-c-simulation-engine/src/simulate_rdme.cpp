@@ -223,6 +223,11 @@ namespace Spatialpy{
         Particle *dest_subvol = NULL;
         NeighborNode *nn = NULL;
 
+        if(debug_flag>1){
+            printf("take_step() tt=%e end_time=%e\n",tt,end_time);
+            fflush(stdout);
+        }
+
         std::pair<double,int> timeRxnPair;
         int reactionIndex, subvol_index;
         /* Main loop. */
@@ -230,9 +235,23 @@ namespace Spatialpy{
             /* Get the subvolume in which the next event occurred.
              This subvolume is on top of the heap. */
 
+            if(debug_flag>1){
+                printf("selectReaction()\n");
+                fflush(stdout);
+            }
             timeRxnPair = system->rdme_event_q.selectReaction();
             tt = timeRxnPair.first;
             subvol_index = timeRxnPair.second;
+            if(debug_flag>1){
+                printf("selectReaction: subvol_index=%d tt=%e\n",subvol_index,tt);
+                fflush(stdout);
+            }
+            if(subvol_index == -1){ // catch special case of an empty heap
+                //printf("ending take_step, subvol_index=%d tt=%e\n",subvol_index,tt);
+                //fflush(stdout);
+                //debug_flag = 2;
+                return;
+            }
             subvol = &system->particles[subvol_index];
             vol = (subvol->mass / subvol->rho);
             if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}
