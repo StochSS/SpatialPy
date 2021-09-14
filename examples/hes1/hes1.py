@@ -3,77 +3,80 @@ try:
 except:
     pass
 
-import os.path
-import pyurdme
-import dolfin
-import numpy
-import scipy
+import os
+import numpy as np
 
-class Nucleus(dolfin.SubDomain):
-    def inside(self,x,on_boundary):
-        return dolfin.between(x[0]**2+x[1]**2+x[2]**2,(0,3.**2))
+import spatialpy
 
-class hes1(pyurdme.URDMEModel):
-    def __init__(self,model_name="hes1"):
-        pyurdme.URDMEModel.__init__(self, model_name)
+class Nucleus(spatialpy.Geometry):
+    def inside(self, x, on_boundary):
+        return x[0]**2 + x[1]**2 + x[2]**2 <= 3**2
+    
+class Cytoplasm(spatialpy.Geometry):
+    def inside(self, x, on_boundary):
+        return x[0]**2 + x[1]**2 + x[2]**2 > 3**2
+
+class hes1(spatialpy.Model):
+    def __init__(self, model_name="hes1"):
+        spatialpy.Model.__init__(self, model_name)
 
         #Species
-        Pf = pyurdme.Species(name="Pf",diffusion_constant=0.,dimension=3)
-        Po = pyurdme.Species(name="Po",diffusion_constant=0.,dimension=3)
-        mRNA = pyurdme.Species(name="mRNA",diffusion_constant=6.e-1,dimension=3)
-        protein = pyurdme.Species(name="protein",diffusion_constant=6.e-1,dimension=3)
-
-        self.add_species([Pf,Po,mRNA,protein])
-
-        #Mesh
+        Pf = spatialpy.Species(name="Pf", diffusion_constant=0)
+        Po = spatialpy.Species(name="Po", diffusion_constant=0)
+        mRNA = spatialpy.Species(name="mRNA", diffusion_constant=6e-1)
+        protein = spatialpy.Species(name="protein", diffusion_constant=6e-1)
+        self.add_species([Pf, Po, mRNA, protein])
+        
+        #Restrict to promoter_site
+        self.restrict(Pf, 3)
+        self.restrict(Po, 3)
+        
+        #Domain
         basedir = os.path.dirname(os.path.abspath(__file__))
-        self.mesh = pyurdme.URDMEMesh.read_mesh(basedir+"/mesh/cell.msh")
-        #Domains markers
-        nucleus = [2]
-        cytoplasm = [1]
-        promoter_site = [3]
-        #Domains
-        self.add_subdomain(Nucleus(), nucleus[0])
-        self.get_subdomain_vector()
-        self.sd[self.mesh.closest_vertex([0,0,0])] = promoter_site[0]
+        self.domain = spatialpy.Domain.read_msh_file(basedir + "/mesh/cell.msh")
+        
+        #Types
+        self.set_type(Cytoplasm(), 1)
+        self.set_type(Nucleus(), 2)
+        # promoter site
+        self.domain.type[self.domain.closest_vertex([0]*3)] = 3
 
         #Parameters
-        k1 = pyurdme.Parameter(name="k1",expression=1.e9)
-        k2 = pyurdme.Parameter(name="k2",expression=0.1)
-        alpha_m = pyurdme.Parameter(name="alpha_m",expression=3.)
-        alpha_m_gamma = pyurdme.Parameter(name="alpha_m_gamma",expression=3./30.)
-        alpha_p = pyurdme.Parameter(name="alpha_p",expression=1.)
-        mu_m = pyurdme.Parameter(name="mu_m",expression=0.015)
-        mu_p = pyurdme.Parameter(name="mu_p",expression=0.043)
-
-        self.add_parameter([k1,k2,alpha_m,alpha_m_gamma,alpha_p,mu_m,mu_p])
+        k1 = spatialpy.Parameter(name="k1", expression=1e9)
+        k2 = spatialpy.Parameter(name="k2", expression=0.1)
+        alpha_m = spatialpy.Parameter(name="alpha_m", expression=3)
+        alpha_m_gamma = spatialpy.Parameter(name="alpha_m_gamma", expression=0.1)
+        alpha_p = spatialpy.Parameter(name="alpha_p", expression=1)
+        mu_m = spatialpy.Parameter(name="mu_m", expression=0.015)
+        mu_p = spatialpy.Parameter(name="mu_p", expression=0.043)
+        self.add_parameter([k1, k2, alpha_m, alpha_m_gamma, alpha_p, mu_m, mu_p])
 
 
         #Reactions
-        R1 = pyurdme.Reaction(name="R1",reactants={Pf:1,protein:1},products={Po:1},massaction=True,rate=k1, restrict_to=promoter_site)
-        R2 = pyurdme.Reaction(name="R2",reactants={Po:1},products={Pf:1,protein:1},massaction=True,rate=k2, restrict_to=promoter_site)
-        R3 = pyurdme.Reaction(name="R3",reactants={Pf:1},products={Pf:1,mRNA:1},massaction=True,rate=alpha_m, restrict_to=promoter_site)
-        R4 = pyurdme.Reaction(name="R4",reactants={Po:1},products={Po:1,mRNA:1},massaction=True,rate=alpha_m_gamma, restrict_to=promoter_site)
-        R5 = pyurdme.Reaction(name="R5",reactants={mRNA:1},products={mRNA:1,protein:1},massaction=True,rate=alpha_p,restrict_to=cytoplasm)
-        R6 = pyurdme.Reaction(name="R6",reactants={mRNA:1},products={},massaction=True,rate=mu_m)
-        R7 = pyurdme.Reaction(name="R7",reactants={protein:1},products={},massaction=True,rate=mu_p)
+        R1 = spatialpy.Reaction(name="R1", rate=k1, restrict_to=3,
+                                reactants={Pf:1,protein:1}, products={Po:1})
+        R2 = spatialpy.Reaction(name="R2", rate=k2, restrict_to=3,
+                                reactants={Po:1}, products={Pf:1,protein:1})
+        R3 = spatialpy.Reaction(name="R3", rate=alpha_m, restrict_to=3,
+                                reactants={Pf:1}, products={Pf:1,mRNA:1})
+        R4 = spatialpy.Reaction(name="R4", rate=alpha_m_gamma, restrict_to=3,
+                                reactants={Po:1}, products={Po:1,mRNA:1})
+        R5 = spatialpy.Reaction(name="R5", rate=alpha_p, restrict_to=1,
+                                reactants={mRNA:1}, products={mRNA:1,protein:1})
+        R6 = spatialpy.Reaction(name="R6", rate=mu_m, reactants={mRNA:1})
+        R7 = spatialpy.Reaction(name="R7", rate=mu_p, reactants={protein:1})
+        self.add_reaction([R1, R2, R3, R4, R5, R6, R7])
 
-        self.add_reaction([R1,R2,R3,R4,R5,R6,R7])
-
-        #Restrict to promoter_site
-        self.restrict(Po,promoter_site)
-        self.restrict(Pf,promoter_site)
-
-        #Distribute molecules over the mesh
-        self.set_initial_condition_scatter({Pf:1},promoter_site)
-        self.set_initial_condition_scatter({protein:60},cytoplasm)
-        self.set_initial_condition_scatter({mRNA:10},nucleus)
-
+        #Initail Conditions
+        self.add_initial_condition(spatialpy.ScatterInitialCondition(Pf, 1, types=[3]))
+        self.add_initial_condition(spatialpy.ScatterInitialCondition(protein, 60, types=[1]))
+        self.add_initial_condition(spatialpy.ScatterInitialCondition(mRNA, 10, types=[2]))
+        
         self.timespan(range(1200))
 
 if __name__=="__main__":
-    model = hes1(model_name="hes1")
-    result = model.run(debug_level=1)
+    model = hes1()
+    result = model.run()
 
     try:
         protein = result.get_species("protein")
@@ -86,6 +89,3 @@ if __name__=="__main__":
         plt.show()
     except:
         pass
-
-    #print 'Writing species "protein" to folder "proteinOut"'
-    #result.export_to_vtk(species='protein',folder_name='proteinOut')
