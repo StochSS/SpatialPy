@@ -649,7 +649,13 @@ class Reaction():
         self.massaction = massaction
         self.rate = rate
         self.annotation = annotation
-        self.restrict_to = restrict_to
+        if isinstance(restrict_to, int):
+            self.restrict_to = [restrict_to]
+        elif isinstance(restrict_to, list):
+            self.restrict_to = restrict_to
+        else:
+            errmsg = f"Reaction {name}: restrict_to must be an integer or list of integers."
+            raise ReactionError(errmsg)
 
     def initialize(self, model):
         """ Defered object initialization, called by model.add_reaction(). """
