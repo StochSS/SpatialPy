@@ -60,14 +60,19 @@ namespace Spatialpy{
     	// x_index.push(me) ;
     	particles.push_back(*me) ;
     }
-    ParticleSystem::~ParticleSystem(){}
+    ParticleSystem::~ParticleSystem(){
+        particles.clear() ;
+    }
 
-    Particle::Particle(ParticleSystem *sys, unsigned int id):sys(sys), id(id){
-    	nu = 0.01;
-    	mass = 1;
-    	rho = 1;
-    	solidTag = 0;
-    	x[0] = x[1] = x[2] = 0.0;
+    Particle::Particle(ParticleSystem *sys, unsigned int id, 
+                        double xl, double yl, double zl, int type, double nu, 
+                        double mass, double rho, int solidTag) : 
+                        sys(sys), id(id), type(type), 
+                        nu(nu), mass(mass), rho(rho), solidTag(solidTag)
+    {
+    	x[0] = xl ;
+        x[1] = yl ;
+        x[2] = zl ;
     	v[0] = v[1] = v[2] = 0.0;
     	Q = (double*) calloc(sys->num_chem_species, sizeof(double));
     	C = (double*) calloc(sys->num_chem_species, sizeof(double));

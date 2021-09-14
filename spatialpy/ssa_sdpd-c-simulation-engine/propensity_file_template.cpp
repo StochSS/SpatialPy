@@ -83,22 +83,14 @@ namespace Spatialpy{
     //dsfmt_t dsfmt;
 
     void init_create_particle(ParticleSystem *sys, unsigned int id, double x, double y, double z, int type, double nu, double mass, double rho, int solidTag, int num_chem_species){
-        Particle *p  = new Particle(sys, id) ;
-        p->x[0] = x;
-        p->x[1] = y;
-        p->x[2] = z;
-        p->id = id;
-        p->type = type;
-        p->nu = nu;
-        p->mass = mass;
-        p->rho = rho;
-        p->solidTag = solidTag;
+        sys->particles.emplace_back(Particle(sys, id, x, y, z, type, nu, mass, rho,
+            solidTag));
+        Particle *this_particle = &sys->particles.back() ;
         if(num_chem_species > 0){
             for(int i=0;i<num_chem_species;i++){
-                p->C[i] = (double) input_u0[id*num_chem_species+i];
+                this_particle->C[i] = (double) input_u0[id*num_chem_species+i];
             }
         }
-        sys->add_particle(p);
     }
 
 
@@ -107,7 +99,6 @@ namespace Spatialpy{
         __INIT_PARTICLES__
         return id;
     }
-
 
     void applyBoundaryConditions(Particle* me, ParticleSystem* system){
     __BOUNDARY_CONDITIONS__
