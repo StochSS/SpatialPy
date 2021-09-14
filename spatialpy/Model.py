@@ -772,11 +772,6 @@ class Reaction():
         self.propensity_function = propensity_function
         self.ode_propensity_function = ode_propensity_function
 
-    def set_type(self,type):
-        if type not in {'mass-action','customized'}:
-            raise ReactionError("Invalid reaction type.")
-        self.type = type
-
     def add_reactant(self,S,stoichiometry):
         if stoichiometry <= 0:
             raise ReactionError("Reaction "+self.name+"Stoichiometry must be a positive integer.")
