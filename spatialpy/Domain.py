@@ -346,7 +346,10 @@ class Domain():
     def import_meshio_object(cls, mesh_obj):
         """ Import a python meshio mesh object. """
         # create domain object
-        obj = Domain()
+        xlim = ( min(mesh_obj.points[:,0]) , max(mesh_obj.points[:,0]) )
+        ylim = ( min(mesh_obj.points[:,1]) , max(mesh_obj.points[:,1]) )
+        zlim = ( min(mesh_obj.points[:,2]) , max(mesh_obj.points[:,2]) )
+        obj = Domain(len(mesh_obj.points), xlim, ylim, zlim)
         #vertices
         obj.vertices = mesh_obj.points
         # triangles
