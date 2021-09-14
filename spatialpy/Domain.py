@@ -360,6 +360,8 @@ class Domain():
             obj.tetrahedrons = mesh_obj.cells['tetra']
         # volume
         obj.calculate_vol()
+        # set Mass equal to the volume
+        obj.mass = obj.vol
         # return model ref
         return obj
 
