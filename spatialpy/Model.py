@@ -651,7 +651,7 @@ class Reaction():
         self.annotation = annotation
         if isinstance(restrict_to, int):
             self.restrict_to = [restrict_to]
-        elif isinstance(restrict_to, list):
+        elif isinstance(restrict_to, list) or restrict_to is None:
             self.restrict_to = restrict_to
         else:
             errmsg = f"Reaction {name}: restrict_to must be an integer or list of integers."
