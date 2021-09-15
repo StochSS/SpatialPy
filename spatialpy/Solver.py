@@ -584,6 +584,14 @@ class Solver:
         system_config += "system->yhi = {0};\n".format(self.model.domain.ylim[1])
         system_config += "system->zlo = {0};\n".format(self.model.domain.zlim[0])
         system_config += "system->zhi = {0};\n".format(self.model.domain.zlim[1])
+
+        if not numpy.count_nonzero(self.model.domain.vertices[:,1]):
+            self.model.domain.dimensions = 1
+        elif not numpy.count_nonzero(self.model.domain.vertices[:,2]):
+            self.model.domain.dimensions = 2
+        else:
+            self.model.domain.dimensions = 3
+        system_config += "system->dimension = {0};\n".format(self.model.domain.dimensions)
         #
         if self.model.domain.gravity is not None:
             for i in range(3):

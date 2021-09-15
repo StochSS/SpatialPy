@@ -445,7 +445,7 @@ class Result():
             else:
                 types[name] = {"points":[points[i]], "data":[spec_data]}
 
-        is_2d = self.model.domain.zlim[0] == self.model.domain.zlim[1]
+        is_2d = self.model.domain.dimensions == 2
 
         trace_list = _plotly_iterate(types, size=size, colormap=colormap, is_2d=is_2d)
 
@@ -722,7 +722,7 @@ class Result():
                 "data" : data[property_name]
             }
 
-        is_2d = self.model.domain.zlim[0] == self.model.domain.zlim[1]
+        is_2d = self.model.domain.dimensions == 2
 
         trace_list = _plotly_iterate(types, size=size, property_name=property_name,
                                      colormap=colormap, is_2d=is_2d)
