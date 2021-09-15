@@ -50,11 +50,11 @@ class mincde(spatialpy.Model):
         spatialpy.Model.__init__(self,model_name)
 
         # Species
-        MinD_m     = spatialpy.Species(name="MinD_m", diffusion_coefficient=1e-14, D=2)
-        MinD_c_atp = spatialpy.Species(name="MinD_c_atp", diffusion_coefficient=2.5e-12, D=3)
-        MinD_c_adp = spatialpy.Species(name="MinD_c_adp", diffusion_coefficient=2.5e-12, D=3)
-        MinD_e     = spatialpy.Species(name="MinD_e", diffusion_coefficient=2.5e-12, D=3)
-        MinDE      = spatialpy.Species(name="MinDE", diffusion_coefficient=1e-14, D=2)
+        MinD_m     = spatialpy.Species(name="MinD_m", diffusion_coefficient=1e-14, diffusion_coefficient=2)
+        MinD_c_atp = spatialpy.Species(name="MinD_c_atp", diffusion_coefficient=2.5e-12, diffusion_coefficient=3)
+        MinD_c_adp = spatialpy.Species(name="MinD_c_adp", diffusion_coefficient=2.5e-12, diffusion_coefficient=3)
+        MinD_e     = spatialpy.Species(name="MinD_e", diffusion_coefficient=2.5e-12, diffusion_coefficient=3)
+        MinDE      = spatialpy.Species(name="MinDE", diffusion_coefficient=1e-14, diffusion_coefficient=2)
 
         self.add_species([MinD_m,MinD_c_atp,MinD_c_adp,MinD_e,MinDE])
 

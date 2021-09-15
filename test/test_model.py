@@ -64,8 +64,8 @@ class TestModelFunctionality(unittest.TestCase):
     def test_reaction_init(self):
         """ Test that we can instantate a Reaction is all the supported ways. """
         model = spatialpy.Model()
-        s1 = spatialpy.Species('s1', D=0)
-        s2 = spatialpy.Species('s2', D=0)
+        s1 = spatialpy.Species('s1', diffusion_coefficient=0)
+        s2 = spatialpy.Species('s2', diffusion_coefficient=0)
         model.add_species([s1, s2])
         p = spatialpy.Parameter('p',0,1)
         model.add_parameter(p)
