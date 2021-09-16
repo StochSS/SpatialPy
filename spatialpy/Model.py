@@ -826,7 +826,7 @@ class Reaction():
                 self.marate = str(self.rate)
             else:
                 self.marate = self.rate
-            self.create_mass_action()
+            self.__create_mass_action()
         else:
             self.type = "customized"
 
