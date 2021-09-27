@@ -762,8 +762,12 @@ class Reaction():
         for r in self.reactants:
             total_stoch += self.reactants[r]
         if total_stoch > 2:
-            raise ReactionError("Reaction: A mass-action reaction cannot involve more than two of one species or one "
-                                "of two species.")
+            raise ReactionError(
+                      """Reaction: A mass-action reaction cannot involve more than two of one species or one "
+                         of two species (no more than 2 total reactants).
+                         SpatialPy support zeroth, first and second order propensities only.
+                         There is no theoretical justification for higher order propensities.
+                         Users can still create such propensities using a 'custom propensity'.""")
         # Case EmptySet -> Y
 
         if isinstance(self.marate, str):

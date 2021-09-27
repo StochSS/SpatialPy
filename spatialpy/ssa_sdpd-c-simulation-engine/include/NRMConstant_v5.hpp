@@ -93,11 +93,6 @@ namespace Spatialpy{
                    std::mt19937_64& rng, double timeOffset=0.0,
                    double simulationEndTime=std::numeric_limits<double>::max()) ;
 
-//        void build(std::vector<Spatialpy::Particle>& particles,
-//                   double propensitySum, std::size_t activeChannels,
-//                   std::mt19937_64& rng, double timeOffset=0.0,
-//                   double simulationEndTime=std::numeric_limits<double>::max()) ;
-
         void printHashTable(); //for debug/dev
 
         timeIndexPair selectReaction(); //returns pair of firing time, rxn index
@@ -110,7 +105,7 @@ namespace Spatialpy{
         int computeBinIndex(double firingTime);
         //std::size_t insertIntoBin(std::size_t binIndex, double firingTime, std::size_t reactionIndex);
         bool rebuild(); //returns false if all propensities are 0
-        void setBinNumberAndBounds(double newLowerBound, double propensitySum, int activeChannels);
+        bool setBinNumberAndBounds(double newLowerBound, double propensitySum, int activeChannels);
         std::size_t activeChannelCounter;
 
     };

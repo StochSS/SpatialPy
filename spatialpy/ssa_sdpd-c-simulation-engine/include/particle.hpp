@@ -41,7 +41,9 @@ namespace Spatialpy{
     struct EventNode;
 
     struct Particle{
-        Particle(ParticleSystem *sys, unsigned int id=0);
+        Particle(ParticleSystem *sys, unsigned int id=0, double x=0, double y=0, double z=0,
+                    int type=0, double nu=0.01, double mass=1,
+                    double rho=1, int solidTag=0);
         ParticleSystem *sys;
         unsigned int id;
         int type;
