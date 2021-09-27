@@ -53,7 +53,7 @@ class Model():
     special_characters = ['[', ']', '+', '-', '*', '/', '.', '^']
 
 
-    def __init__(self, name=""):
+    def __init__(self, name="spatialpy"):
         """ Create an empty SpatialPy model. """
 
         # The name that the model is referenced by (should be a String)
@@ -136,6 +136,7 @@ class Model():
         Returns:
             A SpatialPy.Result object with the results of the simulation.
         """
+        self.__check_if_complete()
 
         sol = Solver(self, debug_level=debug_level)
 
@@ -143,24 +144,45 @@ class Model():
                        number_of_threads=number_of_threads, debug=debug, profile=profile)
 
 
-    def set_timesteps(self, step_size, num_steps):
+    def __check_if_complete(self):
+        """ Check if the model is complete, otherwise raise an approprate exception.
+        Raises:
+            ModelError
+        """
+        if self.timestep_size is None or self.num_timesteps is None:
+            raise ModelError("The model's timespan is not set.  Use 'timespan()' or 'set_timesteps()'.")
+        if self.domain is None:
+            raise ModelError("The model's domain is not set.  Use 'set_domain()'.")
+            
+    def set_domain(self, domain):
+        """" Set the domain for the model
+        Args:
+            domain: spatialpy.Domain object
+        """
+        self.domain = domain
+
+    def set_timesteps(self, output_interval, num_steps, timestep_size=None):
         """" Set the simlation time span parameters
         Args:
-            step_size: float, size of each timestep in seconds
+            output_interval: float, size of each output timestep in seconds
             num_steps: int, total number of steps to take
 
         Note: the number of output times will be num_steps+1 as the first
               output will be at time zero.
         """
+        if timestep_size is not None:
+            self.timestep_size = timestep_size
         if self.timestep_size is None:
             raise ModelError("timestep_size is not set")
 
-        self.output_freq = math.ceil(step_size/self.timestep_size)
+        self.output_freq = math.ceil(output_interval/self.timestep_size)
 
         self.num_timesteps = math.ceil(num_steps * self.output_freq)
         # array of step numbers corresponding to the simulation times in the timespan
         self.timespan_steps = numpy.linspace(0,self.num_timesteps,
                         num=math.ceil(self.num_timesteps/self.output_freq)+1, dtype=int)
+
+        self.tspan = numpy.linspace(0,self.num_timesteps*self.timestep_size,self.num_timesteps)
 
     def timespan(self, time_span, timestep_size=None):
         """
@@ -534,6 +556,8 @@ class Model():
 
 class Species():
     """ Model of a biochemical species. """
+    reserved_names = ["x", "vol","sd","data_fn","t","debug_flag","Spatialpy"]
+
 
     def __init__(self,name=None,diffusion_constant=None,diffusion_coefficient=None,D=None):
         # A species has a name (string) and an initial value (positive integer)
@@ -549,6 +573,8 @@ class Species():
             self.diffusion_constant=D
         else:
             raise ModelError("Species must have a diffusion_constant")
+        if name in self.reserved_names:
+            raise ModelError("Species can not be named '{0}'".format(name))
 
 
     def __str__(self):

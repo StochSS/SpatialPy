@@ -35,30 +35,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 int debug_flag ;
 
 namespace Spatialpy{
-
     /* Species names */
     __DEFINE_SPECIES__
-
-    /* Number of reactions */
-    #define NR __NUMBER_OF_REACTIONS__  // Depricated, will remove in future version.
-    #define NUM_REACTIONS __NUMBER_OF_REACTIONS__
-    #define NUM_SPECIES __NUMBER_OF_SPECIES__
-    #define NUM_VOXELS __NUMBER_OF_VOXELS__
-
+    /* Data Functions */
     __DATA_FUNCTION_DEFINITIONS__
-
-
     /* Parameter definitions */
     __DEFINE_PARAMETERS__
-
     /* Reaction definitions */
     __DEFINE_REACTIONS__
     /* Deterministic RHS definitions */
     __DEFINE_CHEM_FUNS__
 
+    /* undef Species names (clean namespace, temporary fix) */
+    __UNDEF_SPECIES__
+
     PropensityFun *ALLOC_propensities(void)
     {
-        PropensityFun *ptr = (PropensityFun *)malloc(sizeof(PropensityFun)*NUM_REACTIONS);
+        PropensityFun *ptr = (PropensityFun *)malloc(sizeof(PropensityFun)*__NUMBER_OF_REACTIONS__);
     __DEFINE_PROPFUNS__
         return ptr;
     }
@@ -69,7 +62,7 @@ namespace Spatialpy{
     }
 
     ChemRxnFun* ALLOC_ChemRxnFun(void){
-        ChemRxnFun*ptr = (ChemRxnFun*)malloc(sizeof(ChemRxnFun)*NUM_REACTIONS);
+        ChemRxnFun*ptr = (ChemRxnFun*)malloc(sizeof(ChemRxnFun)*__NUMBER_OF_REACTIONS__);
     __DEFINE_CHEM_FUN_INITS__
         return ptr;
     }
