@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pickle
 import unittest
-
+import string
 import spatialpy
 
 
@@ -60,6 +60,29 @@ class TestModelFunctionality(unittest.TestCase):
 
     def setUp(self):
         pass
+
+    def __helper_single_letter_species_names(self,model,x):
+        try:
+            model.add_species(spatialpy.Species(x,0))
+            print("checking '"+x+"'")
+        except Exception as e:
+            raise e
+
+    def test_single_letter_species_names(self):
+        """ Test that we can have any single letter species name"""
+        model = spatialpy.Model()
+        reserved_names = ["x", "vol","sd","data_fn","t","debug_flag","Spatialpy"]
+        for x in string.ascii_letters:
+            if x in reserved_names:
+                self.assertRaises(spatialpy.ModelError, lambda:self.__helper_single_letter_species_names(model,x) )
+            else:
+                model.add_species(spatialpy.Species(x,0))
+        model.set_timesteps(output_interval=1,num_steps=1,timestep_size=1)
+        model.set_domain(spatialpy.Domain.create_2D_domain([0,1],[0,1],2,2))
+
+        result = model.run(debug_level=0)
+
+
 
     def test_reaction_init(self):
         """ Test that we can instantate a Reaction is all the supported ways. """
