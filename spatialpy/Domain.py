@@ -385,6 +385,18 @@ class Domain():
         return cls.import_meshio_object(meshio.msh_io.read(filename))
 
 
+    def read_stochss_subdomain_file(self, filename):
+        """
+        Read a .txt file that conains the StochSS v1 spatial subdomain descriptions
+        """
+        with open(filename,'r') as fd:
+            for ln,line in enumerate(fd):
+                try:
+                    (ndx,type_id) = line.rstrip().split(',')
+                    self.type[int(ndx)] = int(type_id)
+                except ValueError as e:
+                    raise ModelError(f"Could not read in subdomain file, error on line {ln}: {line}")
+
 
     @classmethod
     def read_stochss_domain(cls, filename):
