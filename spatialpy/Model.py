@@ -847,7 +847,7 @@ class Reaction():
         return print_string
 
 
-    def __create_mass_reaction(self):
+    def __create_mass_action(self):
         """ Create a mass action propensity function given self.reactants and a single parameter value.
 
          We support zeroth, first and second order propensities only.
