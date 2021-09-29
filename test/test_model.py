@@ -77,7 +77,7 @@ class TestModelFunctionality(unittest.TestCase):
                 else:
                     model.add_species(spatialpy.Species(x,0))
         model.set_timesteps(output_interval=1,num_steps=1,timestep_size=1)
-        model.set_domain(spatialpy.Domain.create_2D_domain([0,1],[0,1],2,2))
+        model.add_domain(spatialpy.Domain.create_2D_domain([0,1],[0,1],2,2))
 
         result = model.run(debug_level=0) #this will fail with Exception in the names checking is not correct
 
