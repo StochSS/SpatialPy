@@ -152,15 +152,8 @@ class Model():
         if self.timestep_size is None or self.num_timesteps is None:
             raise ModelError("The model's timespan is not set.  Use 'timespan()' or 'set_timesteps()'.")
         if self.domain is None:
-            raise ModelError("The model's domain is not set.  Use 'set_domain()'.")
+            raise ModelError("The model's domain is not set.  Use 'add_domain()'.")
             
-    def set_domain(self, domain):
-        """" Set the domain for the model
-        Args:
-            domain: spatialpy.Domain object
-        """
-        self.domain = domain
-
     def set_timesteps(self, output_interval, num_steps, timestep_size=None):
         """" Set the simlation time span parameters
         Args:
