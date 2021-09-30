@@ -35,8 +35,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 int debug_flag ;
 
 namespace Spatialpy{
-    /* Data Functions */
-    __DATA_FUNCTION_DEFINITIONS__
     /* Parameter definitions */
     __DEFINE_PARAMETERS__
     /* Reaction definitions */

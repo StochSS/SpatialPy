@@ -429,14 +429,6 @@ class Solver:
         outstr += "};"
         input_constants += outstr + "\n"
 
-        data_fn_defs = ""
-        if len(self.model.listOfSpecies) > 0:
-            for ndf in range(len(self.model.listOfDataFunctions)):
-                data_fn_defs += "#define {0} data_fn[{1}]\n".format(
-                    self.model.listOfDataFunctions[ndf].name, ndf)
-        propfilestr = propfilestr.replace(
-            "__DATA_FUNCTION_DEFINITIONS__", data_fn_defs)
-
         if len(self.model.listOfSpecies) > 0:
             N = self.model.create_stoichiometric_matrix()
             if(min(N.shape) > 0):
