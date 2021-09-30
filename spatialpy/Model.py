@@ -140,6 +140,7 @@ class Model():
             **{name: name for name in math.__dict__.keys()},
             **self.sanitized_species_names(),
             **{name: name for name in self.listOfParameters.keys()},
+            **self.sanitized_data_function_names(),
             **{name: name for name in self.reserved_names}
         }
         self.expr = Expression(namespace=base_namespace, blacklist=["="], sanitize=True)
@@ -314,14 +315,26 @@ class Model():
     def sanitized_species_names(self):
         """
         Generate a dictionary mapping user chosen species names to simplified formats which will be used
-        later on by GillesPySolvers evaluating reaction propensity functions.
+        later on by SpatialPySolvers evaluating reaction propensity functions.
 
-        :returns: the dictionary mapping user species names to their internal GillesPy notation.
+        :returns: the dictionary mapping user species names to their internal SpatialPy notation.
         """
         species_name_mapping = OrderedDict([])
         for i, name in enumerate(self.listOfSpecies.keys()):
             species_name_mapping[name] = 'x[{}]'.format(i)
         return species_name_mapping
+
+    def sanitized_data_function_names(self):
+        """
+        Generate a dictionary mapping user chosen data function names to simplified formats which will be used
+        later on by SpatialPySolvers evaluating reaction propensity functions.
+
+        :returns: the dictionary mapping user data function names to their internal SpatialPy notation.
+        """
+        data_fn_name_mapping = OrderedDict([])
+        for i, data_fn in enumerate(self.listOfDataFunctions):
+            data_fn_name_mapping[data_fn.name] = 'data_fn[{}]'.format(i)
+        return data_fn_name_mapping
 
     def get_species(self, sname):
         return self.listOfSpecies[sname]
