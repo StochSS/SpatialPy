@@ -139,7 +139,7 @@ class Model():
         base_namespace = {
             **{name: name for name in math.__dict__.keys()},
             **self.sanitized_species_names(),
-            **{name: name for name in self.listOfParameters.keys()},
+            **self.sanitized_parameter_names(),
             **self.sanitized_data_function_names(),
             **{name: name for name in self.reserved_names}
         }
@@ -335,6 +335,19 @@ class Model():
         for i, data_fn in enumerate(self.listOfDataFunctions):
             data_fn_name_mapping[data_fn.name] = 'data_fn[{}]'.format(i)
         return data_fn_name_mapping
+
+    def sanitized_parameter_names(self):
+        """
+        Generate a dictionary mapping user chosen parameter names to simplified formats which will be used
+        later on by SpatialPySolvers evaluating reaction propensity functions.
+
+        :returns: the dictionary mapping user parameter names to their internal SpatialPy notation.
+        """
+        parameter_name_mapping = OrderedDict()
+        for i, name in enumerate(self.listOfParameters.keys()):
+            if name not in parameter_name_mapping:
+                parameter_name_mapping[name] = 'P{}'.format(i)
+        return parameter_name_mapping
 
     def get_species(self, sname):
         return self.listOfSpecies[sname]
