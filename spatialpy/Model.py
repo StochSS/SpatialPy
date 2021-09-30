@@ -140,7 +140,7 @@ class Model():
             **{name: name for name in math.__dict__.keys()},
             **self.sanitized_species_names(),
             **{name: name for name in self.listOfParameters.keys()},
-            **{name: name for name in Species.reserved_names}
+            **{name: name for name in self.reserved_names}
         }
         self.expr = Expression(namespace=base_namespace, blacklist=["="], sanitize=True)
 
@@ -580,8 +580,7 @@ class Model():
 
 class Species():
     """ Model of a biochemical species. """
-    reserved_names = ["x", "vol","sd","data_fn","t","debug_flag","Spatialpy"]
-
+    
 
     def __init__(self,name=None,diffusion_constant=None,diffusion_coefficient=None,D=None):
         # A species has a name (string) and an initial value (positive integer)
@@ -597,8 +596,6 @@ class Species():
             self.diffusion_constant=D
         else:
             raise ModelError("Species must have a diffusion_constant")
-        if name in self.reserved_names:
-            raise ModelError("Species can not be named '{0}'".format(name))
 
 
     def __str__(self):
