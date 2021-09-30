@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import uuid
 from collections import OrderedDict
 from spatialpy.Solver import Solver
+from spatialpy.expression import Expression
 import numpy
 import scipy
 import warnings
@@ -91,6 +92,11 @@ class Model():
         self.num_timesteps = None
         self.output_freq = None
 
+        ######################
+        # Expression utility used by the solver
+        # Should be None until the solver is compiled
+        self.expr = None
+
 
     def __str__(self):
         divider = f"\n{'*'*10}\n"
@@ -124,6 +130,19 @@ class Model():
             print_string += f"\n{str(self.domain)}"
 
         return print_string
+
+
+    def get_expression_utility(self):
+        """
+        Create a new expression.
+        """
+        base_namespace = {
+            **{name: name for name in math.__dict__.keys()},
+            **self.sanitized_species_names(),
+            **{name: name for name in self.listOfParameters.keys()},
+            **{name: name for name in Species.reserved_names}
+        }
+        self.expr = Expression(namespace=base_namespace, blacklist=["="], sanitize=True)
 
 
     def run(self, number_of_trajectories=1, seed=None, timeout=None, number_of_threads=None, debug_level=0, debug=False, profile=False):
