@@ -105,6 +105,9 @@ class Solver:
     def compile(self, debug=False, profile=False):
         """ Compile the model."""
 
+        # Create the models expression utility
+        self.model.get_expression_utility()
+
         # Create a unique directory each time call to compile.
         self.build_dir = tempfile.mkdtemp(
             prefix='spatialpy_build_', dir=os.environ.get('SPATIALPY_TMPDIR'))
