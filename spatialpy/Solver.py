@@ -328,12 +328,13 @@ class Solver:
         funcinits = ""
         i = 0
         for R in self.model.listOfReactions:
+            propensity_function = self.model.expr.getexpr_cpp(self.model.listOfReactions[R].propensity_function)
             func = ""
             rname = self.model.listOfReactions[R].name
             func += funheader.replace("__NAME__", rname) + "\n{\n"
             if self.model.listOfReactions[R].restrict_to == None or (isinstance(self.model.listOfReactions[R].restrict_to, list) and len(self.model.listOfReactions[R].restrict_to) == 0):
                 func += "return "
-                func += self.model.listOfReactions[R].propensity_function
+                func += propensity_function
                 func += ";"
             else:
                 func += "if("
@@ -349,7 +350,7 @@ class Solver:
                         "When restricting reaction to types, you must specify either a list or an int")
                 func += "){\n"
                 func += "return "
-                func += self.model.listOfReactions[R].propensity_function
+                func += propensity_function
                 func += ";"
                 func += "\n}else{"
                 func += "\n\treturn 0.0;}"
@@ -370,12 +371,13 @@ class Solver:
         ############################################
         i = 0
         for R in self.model.listOfReactions:
+            ode_propensity_function = self.model.expr.getexpr_cpp(self.model.listOfReactions[R].ode_propensity_function)
             func = ""
             rname = self.model.listOfReactions[R].name
             func += funheader.replace("__NAME__", rname) + "\n{\n"
             if self.model.listOfReactions[R].restrict_to == None or (isinstance(self.model.listOfReactions[R].restrict_to, list) and len(self.model.listOfReactions[R].restrict_to) == 0):
                 func += "return "
-                func += self.model.listOfReactions[R].ode_propensity_function
+                func += ode_propensity_function
                 func += ";"
             else:
                 func += "if("
@@ -391,7 +393,7 @@ class Solver:
                         "When restricting reaction to types, you must specify either a list or an int")
                 func += "){\n"
                 func += "return "
-                func += self.model.listOfReactions[R].ode_propensity_function
+                func += ode_propensity_function
                 func += ";"
                 func += "\n}else{"
                 func += "\n\treturn 0.0;}"
