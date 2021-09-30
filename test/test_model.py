@@ -70,7 +70,7 @@ class TestModelFunctionality(unittest.TestCase):
         model = spatialpy.Model()
         for x in string.ascii_letters:
             with self.subTest(name=x):
-                if x in Model.reserved_names:
+                if x in spatialpy.Model.reserved_names:
                     with self.assertRaises(spatialpy.ModelError):
                         model.add_species(spatialpy.Species(x,0)) 
                 else:
