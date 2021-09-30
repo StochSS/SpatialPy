@@ -303,10 +303,12 @@ class Solver:
 
         # Make sure all paramters are evaluated to scalars before we write them to the file.
         self.model.resolve_parameters()
+        sanitized_parameters = self.model.sanitized_parameter_names()
         parameters = ""
-        for p in self.model.listOfParameters:
+        for pname in self.model.listOfParameters:
+            p = sanitized_parameters[pname]
             parameters += "const double " + p + " = " + \
-                str(self.model.listOfParameters[p].value) + ";\n"
+                str(self.model.listOfParameters[pname].value) + ";\n"
         propfilestr = propfilestr.replace(
             "__DEFINE_PARAMETERS__", str(parameters))
 
