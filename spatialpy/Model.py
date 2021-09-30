@@ -50,7 +50,7 @@ def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
 
 class Model():
     """ Representation of a spatial biochemical model. """
-    reserved_names = ['vol']
+    reserved_names = ['vol', 't']
     special_characters = ['[', ']', '+', '-', '*', '/', '.', '^']
 
 
