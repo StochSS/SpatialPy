@@ -294,17 +294,6 @@ class Solver:
         propfile = open(file_name, "w")
         propfilestr = template.read()
 
-        speciesdef = ""
-        speciesundef = ""
-        i = 0
-        for S in self.model.listOfSpecies:
-            speciesdef += "#define " + S + " " + "x[" + str(i) + "]" + "\n"
-            speciesundef += "#undef " + S + "\n"
-            i += 1
-
-        propfilestr = propfilestr.replace("__DEFINE_SPECIES__", speciesdef)
-        propfilestr = propfilestr.replace("__UNDEF_SPECIES__", speciesundef)
-
         propfilestr = propfilestr.replace(
             "__NUMBER_OF_REACTIONS__", str(self.model.get_num_reactions()))
         propfilestr = propfilestr.replace(

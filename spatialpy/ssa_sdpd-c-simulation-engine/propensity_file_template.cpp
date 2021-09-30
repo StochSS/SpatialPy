@@ -35,8 +35,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 int debug_flag ;
 
 namespace Spatialpy{
-    /* Species names */
-    __DEFINE_SPECIES__
     /* Data Functions */
     __DATA_FUNCTION_DEFINITIONS__
     /* Parameter definitions */
@@ -45,9 +43,6 @@ namespace Spatialpy{
     __DEFINE_REACTIONS__
     /* Deterministic RHS definitions */
     __DEFINE_CHEM_FUNS__
-
-    /* undef Species names (clean namespace, temporary fix) */
-    __UNDEF_SPECIES__
 
     PropensityFun *ALLOC_propensities(void)
     {
