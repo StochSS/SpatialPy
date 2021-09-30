@@ -292,6 +292,18 @@ class Model():
         # Dictionary of expressions that can be evaluated in the scope of this model.
         self.expressions = {}
 
+    def sanitized_species_names(self):
+        """
+        Generate a dictionary mapping user chosen species names to simplified formats which will be used
+        later on by GillesPySolvers evaluating reaction propensity functions.
+
+        :returns: the dictionary mapping user species names to their internal GillesPy notation.
+        """
+        species_name_mapping = OrderedDict([])
+        for i, name in enumerate(self.listOfSpecies.keys()):
+            species_name_mapping[name] = 'x[{}]'.format(i)
+        return species_name_mapping
+
     def get_species(self, sname):
         return self.listOfSpecies[sname]
 
