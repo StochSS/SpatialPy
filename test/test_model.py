@@ -81,6 +81,31 @@ class TestModelFunctionality(unittest.TestCase):
         result = model.run(debug_level=0) #this will fail with Exception in the names checking is not correct
 
 
+    def test_data_function(self):
+        """ Test if the data function is working correctly. """
+        model = spatialpy.Model()
+        for x in spatialpy.Model.reserved_names:
+            with self.subTest(name=x):
+                with self.assertRaises(spatialpy.ModelError):
+                    df = spatialpy.DataFunction(name=x)
+                    model.add_data_function(df)
+        # check if it actually changes at different places in the domain
+        df = spatialpy.DataFunction(name="df")
+        df.map = lambda x: x[0]*10000
+        model.add_data_function(df)
+        model.set_timesteps(output_interval=1,num_steps=1,timestep_size=1)
+        model.add_domain(spatialpy.Domain.create_2D_domain([0,1],[0,1],2,2))
+        model.add_species(spatialpy.Species('A',0))
+        model.add_reaction(spatialpy.Reaction(products={'A':1},propensity_function="df"))
+        df_res = model.run()
+        traj = df_res.get_species('A',-1)
+        self.assertTrue(traj[0] == 0)
+        self.assertTrue(traj[1] == 0)
+        self.assertTrue(traj[2] > 0)
+        self.assertTrue(traj[3] > 0)
+
+
+
 
     def test_reaction_init(self):
         """ Test that we can instantate a Reaction is all the supported ways. """

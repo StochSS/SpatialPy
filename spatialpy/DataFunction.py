@@ -30,9 +30,18 @@ class DataFunction(BoundaryCondition):
         if self.name is None:
             raise Exception("DataFunction must have a 'name'")
 
-    def expression(self):
+    def map(self, x):
         """
+        This method must be overridden by the DataFunction subclass.
+
+        NOTE: The spatial location is evaulated at t=0 and is not 
+              reevaluated as the fluid domain moves over time.
+
+        Args:
+            x: vector of 3 doubles, the x,y,z position
+        Returns:
+            float: value of function at this spatial location.
         """
-        raise Exception("DataFunction.expression() must be implemented.")
+        raise Exception("DataFunction.map() must be implemented.")
 
 

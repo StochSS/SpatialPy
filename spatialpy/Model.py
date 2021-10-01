@@ -287,13 +287,30 @@ class Model():
         self.domain = domain
         self.listOfTypeIDs = list(set(domain.type))
 
-    def add_data_function(self, data_function):
-        """ Add a scalar spatial function to the simulation. This is useful if you have a
-            spatially varying in put to your model. Argument is a instances of subclass of the
-            spatialpy.DataFunction class. It must implement a function 'map(x)' which takes a
-            the spatial positon 'x' as an array, and it returns a float value.
+    def add_data_function(self, obj):
         """
-        self.listOfDataFunctions.append(data_function)
+        Add a scalar spatial function to the simulation. This is useful if you have a
+        spatially varying in put to your model. Argument is a instances of subclass of the
+        spatialpy.DataFunction class. It must implement a function 'map(x)' which takes a
+        the spatial positon 'x' as an array, and it returns a float value.
+
+        Attributes
+        ----------
+        obj : DataFunction, or list of DataFunction
+            The DataFunction or list of DataFunction to be added to the model object.
+        """
+
+        if isinstance(obj, list):
+            for S in obj:
+                self.add_data_function(S)
+        elif type(obj).__name__ == 'DataFunction':
+            problem = self.problem_with_name(obj.name)
+            if problem is not None:
+                raise problem
+            self.listOfDataFunctions.append(obj)
+        else:
+            raise ModelError("Unexpected parameter for add_data_function. Parameter must be DataFunction or list of DataFunction.")
+        return obj
 
     def add_initial_condition(self, ic):
         """ Add an initial condition object to the initialization of the model."""
