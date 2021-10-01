@@ -105,6 +105,9 @@ class Solver:
     def compile(self, debug=False, profile=False):
         """ Compile the model."""
 
+        # Create the models expression utility
+        self.model.get_expression_utility()
+
         # Create a unique directory each time call to compile.
         self.build_dir = tempfile.mkdtemp(
             prefix='spatialpy_build_', dir=os.environ.get('SPATIALPY_TMPDIR'))
@@ -291,17 +294,6 @@ class Solver:
         propfile = open(file_name, "w")
         propfilestr = template.read()
 
-        speciesdef = ""
-        speciesundef = ""
-        i = 0
-        for S in self.model.listOfSpecies:
-            speciesdef += "#define " + S + " " + "x[" + str(i) + "]" + "\n"
-            speciesundef += "#undef " + S + "\n"
-            i += 1
-
-        propfilestr = propfilestr.replace("__DEFINE_SPECIES__", speciesdef)
-        propfilestr = propfilestr.replace("__UNDEF_SPECIES__", speciesundef)
-
         propfilestr = propfilestr.replace(
             "__NUMBER_OF_REACTIONS__", str(self.model.get_num_reactions()))
         propfilestr = propfilestr.replace(
@@ -311,10 +303,12 @@ class Solver:
 
         # Make sure all paramters are evaluated to scalars before we write them to the file.
         self.model.resolve_parameters()
+        sanitized_parameters = self.model.sanitized_parameter_names()
         parameters = ""
-        for p in self.model.listOfParameters:
+        for pname in self.model.listOfParameters:
+            p = sanitized_parameters[pname]
             parameters += "const double " + p + " = " + \
-                str(self.model.listOfParameters[p].value) + ";\n"
+                str(self.model.listOfParameters[pname].value) + ";\n"
         propfilestr = propfilestr.replace(
             "__DEFINE_PARAMETERS__", str(parameters))
 
@@ -325,12 +319,13 @@ class Solver:
         funcinits = ""
         i = 0
         for R in self.model.listOfReactions:
+            propensity_function = self.model.expr.getexpr_cpp(self.model.listOfReactions[R].propensity_function)
             func = ""
             rname = self.model.listOfReactions[R].name
             func += funheader.replace("__NAME__", rname) + "\n{\n"
             if self.model.listOfReactions[R].restrict_to == None or (isinstance(self.model.listOfReactions[R].restrict_to, list) and len(self.model.listOfReactions[R].restrict_to) == 0):
                 func += "return "
-                func += self.model.listOfReactions[R].propensity_function
+                func += propensity_function
                 func += ";"
             else:
                 func += "if("
@@ -346,7 +341,7 @@ class Solver:
                         "When restricting reaction to types, you must specify either a list or an int")
                 func += "){\n"
                 func += "return "
-                func += self.model.listOfReactions[R].propensity_function
+                func += propensity_function
                 func += ";"
                 func += "\n}else{"
                 func += "\n\treturn 0.0;}"
@@ -366,12 +361,13 @@ class Solver:
         ############################################
         i = 0
         for R in self.model.listOfReactions:
+            ode_propensity_function = self.model.expr.getexpr_cpp(self.model.listOfReactions[R].ode_propensity_function)
             func = ""
             rname = self.model.listOfReactions[R].name
             func += funheader.replace("__NAME__", rname) + "\n{\n"
             if self.model.listOfReactions[R].restrict_to == None or (isinstance(self.model.listOfReactions[R].restrict_to, list) and len(self.model.listOfReactions[R].restrict_to) == 0):
                 func += "return "
-                func += self.model.listOfReactions[R].ode_propensity_function
+                func += ode_propensity_function
                 func += ";"
             else:
                 func += "if("
@@ -387,7 +383,7 @@ class Solver:
                         "When restricting reaction to types, you must specify either a list or an int")
                 func += "){\n"
                 func += "return "
-                func += self.model.listOfReactions[R].ode_propensity_function
+                func += ode_propensity_function
                 func += ";"
                 func += "\n}else{"
                 func += "\n\treturn 0.0;}"
@@ -434,21 +430,11 @@ class Solver:
         outstr += "};"
         input_constants += outstr + "\n"
 
-        data_fn_defs = ""
-        data_fn_undefs = ""
         data_fn_assign = ""
         if len(self.model.listOfSpecies) > 0:
             for ndf in range(len(self.model.listOfDataFunctions)):
-                data_fn_defs += "#define {0} data_fn[{1}]\n".format(
-                    self.model.listOfDataFunctions[ndf].name, ndf)
-                data_fn_undefs += "#undef {0}\n".format(
-                    self.model.listOfDataFunctions[ndf].name)
                 data_fn_assign += "this_particle->data_fn[{0}] = input_data_fn[{0}*{1}+id]; ".format(ndf,ncells)
 
-        propfilestr = propfilestr.replace(
-            "__DATA_FUNCTION_DEFINITIONS__", data_fn_defs)
-        propfilestr = propfilestr.replace(
-            "__DATA_FUNCTION_UNDEFINITIONS__", data_fn_undefs)
         propfilestr = propfilestr.replace(
             "__DATA_FUNCTION_ASSIGN__", data_fn_assign)
 
