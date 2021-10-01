@@ -742,8 +742,6 @@ class Species():
             self.diffusion_coefficient=diffusion_coefficient
         else:
             raise ModelError("Species must have a diffusion_coefficient")
-        if name in self.reserved_names:
-            raise ModelError("Species can not be named '{0}'".format(name))
 
 
     def __str__(self):
