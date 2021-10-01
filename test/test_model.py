@@ -68,10 +68,9 @@ class TestModelFunctionality(unittest.TestCase):
         namespace is working correctly.
         """
         model = spatialpy.Model()
-        reserved_names = ["x", "vol","sd","data_fn","t","debug_flag","Spatialpy"]
         for x in string.ascii_letters:
             with self.subTest(name=x):
-                if x in reserved_names:
+                if x in spatialpy.Model.reserved_names:
                     with self.assertRaises(spatialpy.ModelError):
                         model.add_species(spatialpy.Species(x,0)) 
                 else:

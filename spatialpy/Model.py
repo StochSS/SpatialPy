@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import uuid
 from collections import OrderedDict
 from spatialpy.Solver import Solver
+from spatialpy.expression import Expression
 import numpy
 import scipy
 import warnings
@@ -49,7 +50,7 @@ def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
 
 class Model():
     """ Representation of a spatial biochemical model. """
-    reserved_names = ['vol']
+    reserved_names = ['vol', 't']
     special_characters = ['[', ']', '+', '-', '*', '/', '.', '^']
 
 
@@ -91,6 +92,11 @@ class Model():
         self.num_timesteps = None
         self.output_freq = None
 
+        ######################
+        # Expression utility used by the solver
+        # Should be None until the solver is compiled
+        self.expr = None
+
 
     def __str__(self):
         divider = f"\n{'*'*10}\n"
@@ -124,6 +130,20 @@ class Model():
             print_string += f"\n{str(self.domain)}"
 
         return print_string
+
+
+    def get_expression_utility(self):
+        """
+        Create a new expression.
+        """
+        base_namespace = {
+            **{name: name for name in math.__dict__.keys()},
+            **self.sanitized_species_names(),
+            **self.sanitized_parameter_names(),
+            **self.sanitized_data_function_names(),
+            **{name: name for name in self.reserved_names}
+        }
+        self.expr = Expression(namespace=base_namespace, blacklist=["="], sanitize=True)
 
 
     def run(self, number_of_trajectories=1, seed=None, timeout=None, number_of_threads=None, debug_level=0, debug=False, profile=False):
@@ -291,6 +311,43 @@ class Model():
             self.namespace[param]=self.listOfParameters[param].value
         # Dictionary of expressions that can be evaluated in the scope of this model.
         self.expressions = {}
+
+    def sanitized_species_names(self):
+        """
+        Generate a dictionary mapping user chosen species names to simplified formats which will be used
+        later on by SpatialPySolvers evaluating reaction propensity functions.
+
+        :returns: the dictionary mapping user species names to their internal SpatialPy notation.
+        """
+        species_name_mapping = OrderedDict([])
+        for i, name in enumerate(self.listOfSpecies.keys()):
+            species_name_mapping[name] = 'x[{}]'.format(i)
+        return species_name_mapping
+
+    def sanitized_data_function_names(self):
+        """
+        Generate a dictionary mapping user chosen data function names to simplified formats which will be used
+        later on by SpatialPySolvers evaluating reaction propensity functions.
+
+        :returns: the dictionary mapping user data function names to their internal SpatialPy notation.
+        """
+        data_fn_name_mapping = OrderedDict([])
+        for i, data_fn in enumerate(self.listOfDataFunctions):
+            data_fn_name_mapping[data_fn.name] = 'data_fn[{}]'.format(i)
+        return data_fn_name_mapping
+
+    def sanitized_parameter_names(self):
+        """
+        Generate a dictionary mapping user chosen parameter names to simplified formats which will be used
+        later on by SpatialPySolvers evaluating reaction propensity functions.
+
+        :returns: the dictionary mapping user parameter names to their internal SpatialPy notation.
+        """
+        parameter_name_mapping = OrderedDict()
+        for i, name in enumerate(self.listOfParameters.keys()):
+            if name not in parameter_name_mapping:
+                parameter_name_mapping[name] = 'P{}'.format(i)
+        return parameter_name_mapping
 
     def get_species(self, sname):
         return self.listOfSpecies[sname]
@@ -549,8 +606,7 @@ class Model():
 
 class Species():
     """ Model of a biochemical species. """
-    reserved_names = ["x", "vol","sd","data_fn","t","debug_flag","Spatialpy"]
-
+    
 
     def __init__(self,name=None,diffusion_constant=None,diffusion_coefficient=None,D=None):
         # A species has a name (string) and an initial value (positive integer)
@@ -566,8 +622,6 @@ class Species():
             self.diffusion_constant=D
         else:
             raise ModelError("Species must have a diffusion_constant")
-        if name in self.reserved_names:
-            raise ModelError("Species can not be named '{0}'".format(name))
 
 
     def __str__(self):
