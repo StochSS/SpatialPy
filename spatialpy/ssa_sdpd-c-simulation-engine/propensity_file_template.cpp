@@ -48,6 +48,7 @@ namespace Spatialpy{
 
     /* undef Species names (clean namespace, temporary fix) */
     __UNDEF_SPECIES__
+    __DATA_FUNCTION_UNDEFINITIONS__
 
     PropensityFun *ALLOC_propensities(void)
     {
@@ -84,6 +85,7 @@ namespace Spatialpy{
                 this_particle->C[i] = (double) input_u0[id*num_chem_species+i];
             }
         }
+        __DATA_FUNCTION_ASSIGN__
     }
 
 

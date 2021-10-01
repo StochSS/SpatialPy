@@ -360,7 +360,6 @@ class Solver:
         propfilestr = propfilestr.replace("__DEFINE_REACTIONS__", funcs)
         propfilestr = propfilestr.replace("__DEFINE_PROPFUNS__", funcinits)
 
-        # TODO make deterministic chemical reaction functions work
         funheader = "double det__NAME__(const double *x, double t, const double vol, const double *data_fn, int sd)"
         deterministic_chem_rxn_functions = ""
         deterministic_chem_rxn_function_init = ""
@@ -436,12 +435,22 @@ class Solver:
         input_constants += outstr + "\n"
 
         data_fn_defs = ""
+        data_fn_undefs = ""
+        data_fn_assign = ""
         if len(self.model.listOfSpecies) > 0:
             for ndf in range(len(self.model.listOfDataFunctions)):
                 data_fn_defs += "#define {0} data_fn[{1}]\n".format(
                     self.model.listOfDataFunctions[ndf].name, ndf)
+                data_fn_undefs += "#undef {0}\n".format(
+                    self.model.listOfDataFunctions[ndf].name)
+                data_fn_assign += "this_particle->data_fn[{0}] = input_data_fn[{0}*{1}+id]; ".format(ndf,ncells)
+
         propfilestr = propfilestr.replace(
             "__DATA_FUNCTION_DEFINITIONS__", data_fn_defs)
+        propfilestr = propfilestr.replace(
+            "__DATA_FUNCTION_UNDEFINITIONS__", data_fn_undefs)
+        propfilestr = propfilestr.replace(
+            "__DATA_FUNCTION_ASSIGN__", data_fn_assign)
 
         if len(self.model.listOfSpecies) > 0:
             N = self.model.create_stoichiometric_matrix()
@@ -480,11 +489,23 @@ class Solver:
                     outstr += str(int(N.data[i]))
                 outstr += "};"
                 input_constants += outstr + "\n"
+
+                outstr = "static double input_data_fn[{0}] = ".format(len(self.model.listOfDataFunctions)*ncells)
+                outstr += "{"
+                for ndf, df in enumerate(self.model.listOfDataFunctions):
+                    for i in range(ncells):
+                        if i > 0 and ndf==0:
+                            outstr += ','
+                        c = self.model.domain.coordinates()
+                        outstr += str(df.map( [c[i,0],c[i,1],c[i,2]] ))
+                outstr += "};"
+                input_constants += outstr + "\n"
             else:
                 input_constants += "static int input_N_dense[0] = {};\n"
                 input_constants += "static size_t input_irN[0] = {};\n"
                 input_constants += "static size_t input_jcN[0] = {};\n"
                 input_constants += "static int input_prN[0] = {};\n"
+                input_constants += "static double input_data_fn[0] = {};\n"
 
             G = self.model.create_dependency_graph()
             outstr = "static size_t input_irG[{0}] = ".format(len(G.indices))
@@ -597,8 +618,6 @@ class Solver:
         init_bc = ""
         for bc in self.model.listOfBoundaryConditions:
             init_bc += bc.expression()
-        for ndf, df in enumerate(self.model.listOfDataFunctions):
-            init_bc += "me->data_fn[{0}] = {1};\n".format(ndf,df.expression())
         propfilestr = propfilestr.replace("__BOUNDARY_CONDITIONS__", init_bc)
 
         #### Write the data to the file ####
