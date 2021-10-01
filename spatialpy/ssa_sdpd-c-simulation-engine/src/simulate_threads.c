@@ -79,30 +79,30 @@ namespace Spatialpy{
 
     void buildKDTree(ParticleSystem *system) {
         // cleanup KD Tree
-        if(debug_flag) printf("\tstarting buildKDTree()\n");
+        if(debug_flag>1) printf("\tstarting buildKDTree()\n");
 
         if(system->kdTree_initialized) {
-            if(debug_flag){ printf("\tsystem->kdTree_initialized=True\n");}
+            //if(debug_flag>1){ printf("\tsystem->kdTree_initialized=True\n");}
             if(system->static_domain) {
                 return;} // do not rebuild tree for static domains
-            if(debug_flag){ printf("\tannDeallocPts()\n");}
+            //if(debug_flag){ printf("\tannDeallocPts()\n");}
             annDeallocPts(system->kdTree_pts);
-            if(debug_flag){ printf("\tdeleting system->kdTree (no close)\n"); fflush(stdout);}
+            //if(debug_flag){ printf("\tdeleting system->kdTree (no close)\n"); fflush(stdout);}
             delete system->kdTree; // NO [] on your delete!!!!
-            if(debug_flag){ printf("\tdone deleting system->kdTree (no close)\n"); fflush(stdout);}
+            //if(debug_flag){ printf("\tdone deleting system->kdTree (no close)\n"); fflush(stdout);}
             //if(debug_flag) printf("\tannClose()\n");
             //annClose();
         }
-        if(debug_flag){ printf("\tsystem->particles.size()\n");fflush(stdout);}
+        //if(debug_flag){ printf("\tsystem->particles.size()\n");fflush(stdout);}
         int nPts = system->particles.size();
-        if(debug_flag){ printf("\tannAllocPts()\n");fflush(stdout);}
+        //if(debug_flag){ printf("\tannAllocPts()\n");fflush(stdout);}
         system->kdTree_pts = annAllocPts(nPts, system->dimension);
         for(int i = 0; i < nPts; i++) {
             for(int j = 0; j < system->dimension; j++) {
                 system->kdTree_pts[i][j] = system->particles[i].x[j];
             }
         }
-        if(debug_flag){ printf("\tsystem->kdTree = new ANNkd_tree()\n");}
+        //if(debug_flag){ printf("\tsystem->kdTree = new ANNkd_tree()\n");}
         system->kdTree = new ANNkd_tree(system->kdTree_pts, nPts, system->dimension);
         system->kdTree_initialized = true;
     }
@@ -142,7 +142,10 @@ namespace Spatialpy{
                     count++;
                 }
                 // block on the end barrier
-                if(debug_flag)printf("[WORKER %i] completed step %i, substep %i/%i, processed %i particles\n",targ->thread_id,step,substep,nsubsteps,count);
+                if(debug_flag){
+                    printf("[WORKER %i] completed step %i, substep %i/%i, processed %i particles\n",targ->thread_id,step,substep,nsubsteps,count);
+                    fflush(stdout);
+                }
                 pthread_barrier_wait(&end_step_barrier);
             }
             //---------------------------------------
@@ -259,13 +262,17 @@ namespace Spatialpy{
             }
 
             // Release the worker threads to take step
-            if(debug_flag) printf("[%i] Starting the Worker threads\n",system->current_step);
+            if(debug_flag){ printf("[%i] Starting the Worker threads\n",system->current_step);fflush(stdout);}
             pthread_barrier_wait(&begin_step_barrier);
             unsigned int nsubsteps = get_number_of_substeps();
             for(unsigned int substep=0;substep < nsubsteps; substep++){
                 // Wait until worker threads are done
                 pthread_barrier_wait(&end_step_barrier);
-                if(debug_flag) printf("[%i] Worker threads finished substep %i/%i\n",system->current_step,substep,nsubsteps);
+                if(debug_flag){
+                    fflush(stdout);
+                    printf("[%i] Worker threads finished substep %i/%i\n",system->current_step,substep,nsubsteps);
+                    fflush(stdout);
+                }
             }
             // Solve RDME
             if(debug_flag) printf("[%i] starting RDME simulation\n",system->current_step);

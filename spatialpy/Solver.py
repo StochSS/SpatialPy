@@ -130,7 +130,7 @@ class Solver:
         self.propfilename = re.sub('[^\w\_]', '', self.model_name) # Match except word characters \w = ([a-zA-Z0-9_]) and \_ = _ replace with ''
         self.propfilename = self.propfilename + '_generated_model'
         self.prop_file_name = self.build_dir + '/' + self.propfilename + '.c'
-        if self.debug_level > 1:
+        if self.debug_level >= 1:
             print("Creating propensity file {0}".format(self.prop_file_name))
         self.__create_propensity_file(file_name=self.prop_file_name)
 
@@ -210,6 +210,8 @@ class Solver:
             outfile = tempfile.mkdtemp(
                 prefix='spatialpy_result_', dir=os.environ.get('SPATIALPY_TMPDIR'))
             result = Result(self.model, outfile)
+            if self.debug_level >= 1:
+                print("Running simulation. Result dir: {0}".format(outfile))
             solver_cmd = 'cd {0}'.format(
                 outfile) + ";" + os.path.join(self.build_dir, self.executable_name)
 
@@ -219,8 +221,8 @@ class Solver:
             if seed is not None:
                 solver_cmd += " -s "+str(seed+run_ndx)
 
-            if self.debug_level > 1:
-                print('cmd: {0}\n'.format(solver_cmd))
+            if self.debug_level >= 1:
+                print('cmd: {0}'.format(solver_cmd))
 
             start = time.monotonic()
             return_code = None
@@ -309,12 +311,15 @@ class Solver:
         propfilestr = template.read()
 
         speciesdef = ""
+        speciesundef = ""
         i = 0
         for S in self.model.listOfSpecies:
             speciesdef += "#define " + S + " " + "x[" + str(i) + "]" + "\n"
+            speciesundef += "#undef " + S + "\n"
             i += 1
 
         propfilestr = propfilestr.replace("__DEFINE_SPECIES__", speciesdef)
+        propfilestr = propfilestr.replace("__UNDEF_SPECIES__", speciesundef)
 
         propfilestr = propfilestr.replace(
             "__NUMBER_OF_REACTIONS__", str(self.model.get_num_reactions()))
