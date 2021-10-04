@@ -179,20 +179,16 @@ class Result():
             pass
 
     def read_step(self, step_num, debug=False):
-        """ Read the data for simulation step 'step_num'.
+        """ Read the data for simulation step 'step_num'. Returns a tuple containing a numpy.ndarray \
+            of point coordinates [0] along with a dictionary of property and species data [1]
 
-        Attributes
-        ----------
-        step_num: int
-            The index in the timespan 
-        debug: bool (default False)
-            Whether or not debug information should be printed
+        :param step_num: The index in the timespan 
+        :type step_num: int
+        :param debug: Whether or not debug information should be printed
+        :type debug: bool (default False)
 
-        Return
-        ----------
-            tuple:
-                A tuple containing a numpy.ndarray of point coordinates [0]
-                along with a dictionary of property and species data [1]
+        :rtype: tuble
+
         """
 
         if debug:
@@ -236,12 +232,10 @@ class Result():
         return (points, vtk_data)
 
     def get_timespan(self):
-        """  Get the model time span.
+        """  Get the model time span. Returns a numpy array containing the time span of the model
 
-        Return
-        ----------
-            numpy.ndarray:
-                A numpy array containing the time span of the model
+            :rtype: numpy.ndarray:
+
         """
 
         self.tspan = numpy.linspace(0,self.model.num_timesteps,
@@ -250,31 +244,26 @@ class Result():
 
     def get_species(self, species, timepoints=None, concentration=False, deterministic=False, debug=False):
         """ Get the populations/concentration values for a given species in the model for
-            one or all timepoints.
+            one or all timepoints. Returns a numpy array containing the species population/concentration values
 
-        Attributes
-        ----------
-        species: str/dict
-            A species in string or dictionary form to retreive information about
-        timepoints: int (default None)
-            A time point where the information should be retreived from.
-            If 'timepoints' is None (default), a matrix of dimension:
-            (number of timepoints) x (number of voxels) is returned.
-            If an integer value is given, that value is used to index into the timespan, and that time point is returned
-            as a 1D array with size (number of voxel).
-        concentration: bool (default False)
-            Whether or not the species is a concentration (True) or population (False)
-            If concentration is False (default), the integer, raw, trajectory data is returned.
-            If set to True, the concentration (=copy_number/volume) is returned.
-        deterministic: bool (default False)
-            Whether or not the species is deterministic (True) or stochastic (False)
-        debug: bool (default False)
-            Whether or not debug information should be printed
+                :param species: A species in string or dictionary form to retreive information about
+                :type species: str | dict
+                :param timepoints: A time point where the information should be retreived from.
+                    If 'timepoints' is None (default), a matrix of dimension:
+                    (number of timepoints) x (number of voxels) is returned.
+                    If an integer value is given, that value is used to index into the timespan, and that time point is returned
+                    as a 1D array with size (number of voxel).
+                :type timepoints: int (default None)
+                :param concentration: Whether or not the species is a concentration (True) or population (False)
+                    If concentration is False (default), the integer, raw, trajectory data is returned.
+                    If set to True, the concentration (=copy_number/volume) is returned.
+                :type concentration: bool (default False)
+                :param deterministic: Whether or not the species is deterministic (True) or stochastic (False)
+                :type deterministic: bool (default False)
+                :param debug: Whether or not debug information should be printed
+                :type debug: bool (default False)
 
-        Return
-        ----------
-            numpy.ndarray:
-                A numpy array containing the species population/concentration values
+                :rtype: numpy.ndarray
         """
 
         species_map = self.model.species_map
@@ -336,49 +325,47 @@ class Result():
 
             If deterministic is True, show results for determinstic (instead of stochastic) values
 
-        Attributes
-        ----------
-        species : str
-            A string describing the species to be plotted.
-        t_ndx : int
-            The time index of the results to be plotted, ignored if animated is set to True
-        t_val : float
-            The time value of the results to be plotted, ignored if animated is set to True
-        concentration : bool
-            Whether or not to plot the data as stochastic concentration, ignored if deterministic is
+        :param species: A string describing the species to be plotted.
+        :type species: str
+        :param t_ndx: The time index of the results to be plotted, ignored if animated is set to True
+        :type t_ndx: int
+        :param t_val: The time value of the results to be plotted, ignored if animated is set to True
+        :type t_val: float
+        :param concentration: Whether or not to plot the data as stochastic concentration, ignored if deterministic is
             set to True
-        deterministic : bool
-            Whether or not to plot the data as deterministic
-        width: int (default 500)
-            Width in pixels of output plot box
-        height: int (default 500)
-            Height in pixels of output plot box
-        colormap : str
-            colormap to use.  Plotly specification, valid values: "Plotly3","Jet","Blues","YlOrRd",
+        :type concentration: bool
+        :param deterministic: Whether or not to plot the data as deterministic
+        :type deterministic: bool
+        :param width: Width in pixels of output plot box
+        :type width: int (default 500)
+        :param height: Height in pixels of output plot box
+        :type height: int (default 500)
+        :param colormap: colormap to use.  Plotly specification, valid values: "Plotly3","Jet","Blues","YlOrRd",
                 "PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu", "PuBu","GnBu","YlGn","Greens","Reds",
                 "Greys","RdPu","OrRd","Purples","Oranges".
-        size : int
-            Size in pixels of the particle
-        title : str
-            The title of the graph
-        animated : bool
-            Whether or not the plot is a 3D animation, ignored if use_matplotlib True
-        t_ndx_list : list
-            The list of time indeces of the results to be plotted, ignored if animated is
+        :type colormap: str
+        :param size: Size in pixels of the particle
+        :type size: int
+        :param title: The title of the graph
+        :type title: str
+        :param animated: Whether or not the plot is a 3D animation, ignored if use_matplotlib True
+        :type animated: bool
+        :param t_ndx_list: The list of time indeces of the results to be plotted, ignored if animated is
             False (default)
-        speed : int
-            The interval of the time indeces of the results to be plotted (animated plots only)
-        f_duration : int
-            The duration of time that a frame is displayed
-        t_duration : int
-            The duration of time to execute the transition between frames
-        return_plotly_figure : bool
-            whether or not to return a figure dictionary of data(graph object traces) and layout options
+        :type t_ndx_list: list
+        :param speed: The interval of the time indeces of the results to be plotted (animated plots only)
+        :type speed: int
+        :param f_duration: The duration of time that a frame is displayed
+        :type f_duration: int
+        :param t_duration: The duration of time to execute the transition between frames
+        :type t_duration: int
+        :param return_plotly_figure: whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
-        use_matplotlib : bool
-            whether or not to plot the proprties results using matplotlib.
-        debug: bool
-            output debugging info
+        :type return_plotly_figure: bool
+        :param use_matplotlib: whether or not to plot the proprties results using matplotlib.
+        :type use_matplotlib: bool
+        :param debug: output debugging info
+        :type debug: bool
         """
 
         from plotly.offline import init_notebook_mode, iplot
@@ -571,13 +558,18 @@ class Result():
             iplot(fig)
 
     def get_property(self, property_name, timepoints=None):
-        """ Get the property values for a given species in the model for
-            one or all timepoints.
-
-            If 'timepoints' is None (default), a matrix of dimension:
-            (number of timepoints) x (number of voxels) is returned.  If an integer value is
-            given, that value is used to index into the timespan, and that time point is returned
+        """ Get the property values for a given species in the model for \
+            one or all timepoints. If 'timepoints' is None (default), a matrix of dimension: \
+            (number of timepoints) x (number of voxels) is returned.  If an integer value is \
+            given, that value is used to index into the timespan, and that time point is returned \
             as a 1D array with size (number of voxel).
+
+            :param property_name: A string describing the property to be returned.
+            :type property_name: str
+            :param timepoints: timespan index to be returned.  Default is None
+            :type timepoints: int
+
+            :rtype: numpy.ndarray
         """
 
         t_index_arr = numpy.linspace(0,self.model.num_timesteps,
@@ -609,46 +601,44 @@ class Result():
         """
         Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
-        Attributes
-        ----------
-        property_name : str
-            A string describing the property to be plotted.
-        t_ndx : int
-            The time index of the results to be plotted
-        t_val : float
-            The time value of the results to be plotted, ignored if animated is set to True
-        p_ndx : int
-            The property index of the results to be plotted
-        width: int (default 500)
-            Width in pixels of output plot box or for matplotlib inches of output plot box
-        height: int (default 500)
-            Height in pixels of output plot box or for matplotlib inches of output plot box
-        colormap : str
-            colormap to use.  Plotly specification, valid values: "Plotly3","Jet","Blues","YlOrRd",
+        :param property_name: A string describing the property to be plotted.
+        :type property_name: str
+        :param t_ndx: The time index of the results to be plotted
+        :type t_ndx: int
+        :param t_val: The time value of the results to be plotted, ignored if animated is set to True
+        :type t_val: float
+        :param p_ndx: The property index of the results to be plotted
+        :type p_ndx: int
+        :param width: Width in pixels of output plot box or for matplotlib inches of output plot box
+        :type width: int (default 500)
+        :param height: Height in pixels of output plot box or for matplotlib inches of output plot box
+        :type height: int (default 500)
+        :param colormap: colormap to use.  Plotly specification, valid values: "Plotly3","Jet","Blues","YlOrRd",
                 "PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu", "PuBu","GnBu","YlGn","Greens","Reds",
                 "Greys","RdPu","OrRd","Purples","Oranges".
-        size : int
-            Size in pixels of the particle
-        title : str
-            The title of the graph
-        animated : bool
-            Whether or not the plot is a 3D animation, ignored if use_matplotlib True
-        t_ndx_list : list
-            The list of time indeces of the results to be plotted, ignored if animated is
+        :type colormap: str
+        :param size: Size in pixels of the particle
+        :type size: int
+        :param title: The title of the graph
+        :type title: str
+        :param animated: Whether or not the plot is a 3D animation, ignored if use_matplotlib True
+        :type animated: bool
+        :param t_ndx_list: The list of time indeces of the results to be plotted, ignored if animated is
             False (default)
-        speed : int
-            The interval of the time indeces of the results to be plotted (animated plots only)
-        f_duration : int
-            The duration of time that a frame is displayed
-        t_duration : int
-            The duration of time to execute the transition between frames
-        return_plotly_figure : bool
-            whether or not to return a figure dictionary of data(graph object traces) and layout options
+        :type t_ndx_list: list
+        :param speed: The interval of the time indeces of the results to be plotted (animated plots only)
+        :type speed: int
+        :param f_duration: The duration of time that a frame is displayed
+        :type f_duration: int
+        :param t_duration: The duration of time to execute the transition between frames
+        :type t_duration: int
+        :param return_plotly_figure: whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
-        use_matplotlib : bool
-            whether or not to plot the proprties results using matplotlib.
-        debug: bool
-            output debugging info
+        :type return_plotly_figure: bool
+        :param use_matplotlib: whether or not to plot the proprties results using matplotlib.
+        :type use_matplotlib: bool
+        :param debug: output debugging info
+        :type debug: bool
         """
 
         time_index_list = self.get_timespan()
@@ -860,11 +850,9 @@ class Result():
             The columns of modelname_mesh.csv are: 'Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity'
             The columns of modelname_species_S.csv: 'Time', 'Voxel 0', Voxel 1', ... 'Voxel N'.
 
-        Attributes
-        ----------
-        folder_name: str (default current working directory)
-            A path where the vtk files will be written, created if non-existant.
-            If no path is provided current working directory is used.
+            :type folder_name: str (default current working directory)
+            :param folder_name: A path where the vtk files will be written, created if non-existant.
+                If no path is provided current working directory is used.
         """
 
         if not folder_name:
@@ -896,7 +884,8 @@ class Result():
 
     def export_to_vtk(self, timespan, folder_name=None):
         """ Write the trajectory to a collection of vtk files.
-            The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension."""
+            The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension.
+            Not currently implemented."""
             # TODO
         raise Exception("Not implemented.")
 

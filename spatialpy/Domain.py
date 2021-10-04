@@ -25,7 +25,32 @@ from spatialpy.Result import _plotly_iterate
 
 
 class Domain():
-    """ Domain class for SpatialPy """
+    """ Domain class for SpatialPy.  A domain defines points and attributes of a regional space for simulation.
+
+        :param numpoints: Total number of spatial domain points
+        :type numpoints: int
+        
+        :param xlim: Range of domain along x-axis
+        :type xmax: tuple(float)
+
+        :param ylim: Range of domain along y-axis
+        :type ymin: tuple(float)
+        
+        :param zlim: Range of domain along z-axis
+        :type ymax: tuple(float)
+
+        :param rho: Background density for the system
+        :type zmin: float
+        
+        :param c0: Speed of sound for the system
+        :type zmax: float
+
+        :param P0: Background pressure for the system
+        :type typeid: float
+
+        :param gravity: Acceleration of gravity for the system.
+        :type species: float
+    """
 
 
     def __init__(self, numpoints, xlim, ylim, zlim, rho0=1.0, c0=10, P0=10, gravity=None):
@@ -76,6 +101,27 @@ class Domain():
         return "\n".join(domain_strs)
 
     def add_point(self, x, vol, mass, type, nu, fixed):
+        """ Add a single point particle to the domain space.
+
+            :param x: Spatial coordinate vertices of point to be added
+            :type x: tuple(float, float, float) or tuple(float, float)
+
+            :param vol: Default volume of particle to be added
+            :type vol: float
+
+            :param mass: Default mass of particle to be added
+            :type mass: float
+
+            :param type: Particle typeid of particle to be created
+            :type type: int
+
+            :param nu: Default viscosity of particle to be created
+            :type nu: float
+
+            :param fixed: True if particle is spatially fixed, else False
+            :type fixed: bool
+        """
+
         self.vol = numpy.append(self.vol, vol)
         self.mass = numpy.append(self.mass, mass)
         self.type = numpy.append(self.type, type)
@@ -118,7 +164,10 @@ class Domain():
     def get_domain_size(self):
         """ Estimate of domain size at each vertex as the average of the
             diameters of the circumradius of the tetrahedrons that vertex
-            is a part of."""
+            is a part of.
+
+            :rtype: numpy.array
+        """
         if self.domain_size is None:
             #coordinates = self.coordinates()
             _ = self.get_vol()
@@ -150,9 +199,27 @@ class Domain():
         return self.domain_size
 
     def distance_between_2_vertices(self, a, b):
+        """ Get distance between 2 domain vertices.
+            
+            :param a: Starting point
+            :type a: tuple(float, float, float) or tuple(float, float)
+
+            :param b: Ending point
+            :type b: tuple(float, float, float) or tuple(float, float)
+
+            :rtype: float
+        """
         return numpy.linalg.norm( self.vertices[a,:]-self.vertices[b,:] )
 
     def closest_vertex(self, x):
+        """ Find the nearest vertex of a given point in the domain.
+
+            :param x: Target source point
+            :type x: tuple(float, float, float) or tuple(float, float)
+
+            :rtype: tuple(float, float, float) or tuple(float, float)
+        """
+
         min_dist = None
         min_vtx = None
         for i in range(self.vertices.shape[0]):
@@ -163,12 +230,28 @@ class Domain():
         return min_vtx
 
     def coordinates(self):
+        """ Get coordinates within domain.
+
+            :rtype: numpy.array
+        """
         return self.vertices
 
     def get_num_voxels(self):
+        """ Get number of voxels in domain.
+
+            :rtype: int
+        """
+
         return self.vertices.shape[0]
 
     def find_h(self):
+        """ Find h value of system.  This value value is based off of \
+            the particle which has the greatest distance to \
+            its nearest neighbor.
+
+            :rtype: float
+
+        """
         kdtree = KDTree(self.vertices)
         # Detect nearest neighbor distances for all points
         # since each searched point is already included in
@@ -181,6 +264,11 @@ class Domain():
         return h
 
     def get_bounding_box(self):
+        """ Get the bounding box of the entire domain.
+
+            :rtype: float | float | float | float | float | float
+        """
+
         xhi=None
         xlo=None
         yhi=None
@@ -197,11 +285,19 @@ class Domain():
         return xhi,xlo,yhi,ylo,zhi,zlo
 
     def get_vol(self):
+        """ Get the total volume of the domain.
+
+            :rtype: float
+        """
+
         if self.vol is None:
                self.calculate_vol()
         return self.vol
 
     def calculate_vol(self):
+        """ Calculate the total volume of the domain.
+        """
+
         self.vol = numpy.zeros((self.vertices.shape[0]),dtype=float)
         self.tetrahedron_vol = numpy.zeros((self.tetrahedrons.shape[0]),dtype=float)
         for t_ndx in range(self.tetrahedrons.shape[0]):
@@ -224,25 +320,31 @@ class Domain():
         '''
         Plots the domain using plotly. Can only be viewed in a Jupyter Notebook.
 
-        Attributes
-        ----------
-        width: int (default 500)
-            Width in pixels of output plot box or for matplotlib inches of output plot box
-        height: int (default 500)
-            Height in pixels of output plot box or for matplotlib inches of output plot box
-        colormap : str
-            colormap to use.  Plotly specification, valid values: "Plotly3","Jet","Blues","YlOrRd",
-                "PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu", "PuBu","GnBu","YlGn","Greens","Reds",
-                "Greys","RdPu","OrRd","Purples","Oranges".
-        size : int
-            Size in pixels of the particle
-        title : str
-            The title of the graph
-        return_plotly_figure : bool
-            whether or not to return a figure dictionary of data(graph object traces) and layout options
+        :param width: Width in pixels of output plot box or for matplotlib inches of output plot box. \
+        Default=500
+        :type width: int
+
+        :param height: Height in pixels of output plot box or for matplotlib inches of output plot box. \
+        Default=500
+        :type height: int
+
+        :param colormap: colormap to use.  Plotly specification. **valid values:** \
+        "Plotly3","Jet","Blues","YlOrRd", "PuRd","BuGn","YlOrBr","PuBuGn","BuPu",\
+        "YlGnBu", "PuBu","GnBu","YlGn","Greens","Reds", "Greys","RdPu","OrRd","Purples","Oranges".
+        :type colormap: str
+
+        :param size: Size in pixels of the particle
+        :type size: int
+
+        :param title: The title of the graph
+        :type title: str
+
+        :param return_plotly_figure: Whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
-        use_matplotlib : bool
-            whether or not to plot the proprties results using matplotlib.
+        :type return_plotly_figure: bool
+
+        :param use_matplotlib: Whether or not to plot the proprties results using matplotlib.
+        :type use_matplotlib: bool
         '''
 
         if width is None:
@@ -301,7 +403,13 @@ class Domain():
 
     @classmethod
     def read_xml_mesh(cls, filename):
-        """ Read a FEniCS/dolfin style XML mesh file"""
+        """ Read a FEniCS/dolfin style XML mesh file
+
+            :param filename: name of file to read
+            :type filename: str
+
+            :rtype: spatialpy.Domain.Domain
+        """
         import xml.etree.ElementTree as ET
         root = ET.parse(filename).getroot()
         if not root.tag == 'dolfin': raise DomainError("Not a FEniCS/dolfin xml mesh.")
@@ -344,7 +452,13 @@ class Domain():
 
     @classmethod
     def import_meshio_object(cls, mesh_obj):
-        """ Import a python meshio mesh object. """
+        """ Import a python meshio mesh object.
+            
+            :param mesh_obj: MeshIO object to import
+            :type mesh_obj: meshio.Mesh
+
+            :rtype: spatialpy.Domain.Domain
+        """
         # create domain object
         xlim = ( min(mesh_obj.points[:,0]) , max(mesh_obj.points[:,0]) )
         ylim = ( min(mesh_obj.points[:,1]) , max(mesh_obj.points[:,1]) )
@@ -367,7 +481,14 @@ class Domain():
 
     @classmethod
     def read_msh_file(cls, filename):
-        """ Read a Gmsh style .msh file """
+        """ Read a Gmsh style .msh file
+            
+            :param filename: Filename of gmsh file
+            :type filename: str
+
+            :rtype: spatialpy.Domain.Domain
+        """
+
         try:
             import pygmsh
         except ImportError as e:
@@ -400,10 +521,14 @@ class Domain():
 
     @classmethod
     def read_stochss_domain(cls, filename):
+        """ Read a StochSS Domain (.domn) file or pull a StochSS Domain from a StochSS Spatial Model (.smdl) file.
+
+            :param filename: name of file to read.
+            :type filename: str
+
+            :rtype: spatialpy.Domain.Domain
         """
-        Read a StochSS Domain (.domn) file or
-        pull a StochSS Domain from a StochSS Spatial Model (.smdl) file
-        """
+
         try:
             with open(filename, "r") as domain_file:
                 domain = json.load(domain_file)
@@ -425,22 +550,47 @@ class Domain():
     @classmethod
     def create_3D_domain(cls, xlim, ylim, zlim, nx, ny, nz, type_id=1, mass=1.0, nu=1.0, fixed=False, **kwargs):
         """ Create a filled 3D domain
-        Args:
-            xlim: (tuple) highest and lowest coordinate in the x dimension
-            ylim: (tuple) highest and lowest coordinate in the y dimension
-            zlim: (tuple) highest and lowest coordinate in the z dimension
-            nx: (int) number of particle spacing in the x dimension
-            ny: (int) number of particle spacing in the y dimension
-            nz: (int) number of particle spacing in the z dimension
-            type_id: (int, default: 1) default type ID of particles created to be created
-            mass: (float, default: 1.0) default mass of particles created to be created
-            nu: (float, default: 1.0) default viscosity of particles created to be created
-            fixed: (bool, default: false) spatially fixed flag of particles created to be created
-            rho0: (float, default: 1.0) background density for the system
-            c0: (float, default: 10) speed of sound for the system
-            P0: (float, default: 10) background pressure for the system
-        Returns:
-            Domain object
+
+            :param xlim: highest and lowest coordinate in the x dimension
+            :type xlim: tuple(float, float)
+
+            :param ylim: highest and lowest coordinate in the y dimension
+            :type ylim: tuple(float, float)
+
+            :param zlim: highest and lowest coordinate in the z dimension
+            :type zlim: tuple(float, float)
+
+            :param nx: number of particle spacing in the x dimension
+            :type nx: int
+
+            :param ny: number of particle spacing in the y dimension
+            :type ny: int
+
+            :param nz: number of particle spacing in the z dimension
+            :type nz: int
+
+            :param type_id: default type ID of particles created to be created. Defaults to 1
+            :type type_id: int
+
+            :param mass: default mass of particles created to be created. Defaults to 1.0
+            :type mass: float
+
+            :param nu: default viscosity of particles created to be created. Defaults to 1.0
+            :type nu: float
+
+            :param fixed: spatially fixed flag of particles created to be created. Defaults to false.
+            :type fixed: bool
+
+            :param rho0: background density for the system. Defaults to 1.0
+            :type rho0: float
+
+            :param c0: speed of sound for the system. Defaults to 10
+            :type c0: float
+
+            :param P0: background pressure for the system. Defaults to 10
+            :type p0: float
+
+            :rtype: spatialpy.Domain.Domain
         """
         # Create domain object
         numberparticles = nx*ny*nz
@@ -471,20 +621,41 @@ class Domain():
     @classmethod
     def create_2D_domain(cls, xlim, ylim, nx, ny, type_id=1, mass=1.0, nu=1.0, fixed=False, **kwargs):
         """ Create a filled 2D domain
-        Args:
-            xlim: (tuple) highest and lowest coordinate in the x dimension
-            ylim: (tuple) highest and lowest coordinate in the y dimension
-            nx: (int) number of particle spacing in the x dimension
-            ny: (int) number of particle spacing in the y dimension
-            type_id: (int, default: 1) default type ID of particles created to be created
-            mass: (float, default: 1.0) default mass of particles created to be created
-            nu: (float, default: 1.0) default viscosity of particles created to be created
-            fixed: (bool, default: false) spatially fixed flag of particles created to be created
-            rho0: (float, default: 1.0) background density for the system
-            c0: (float, default: 10) speed of sound for the system
-            P0: (float, default: 10) background pressure for the system
-        Returns:
-            Domain object
+
+            :param xlim: highest and lowest coordinate in the x dimension
+            :type xlim: tuple(float, float)
+
+            :param ylim: highest and lowest coordinate in the y dimension
+            :type ylim: tuple(float, float)
+
+            :param nx: number of particle spacing in the x dimension
+            :type nx: int
+
+            :param ny: number of particle spacing in the y dimension
+            :type ny: int
+
+            :param type_id: default type ID of particles created to be created. Defaults to 1
+            :type type_id: int
+
+            :param mass: default mass of particles created to be created. Defaults to 1.0
+            :type mass: float
+
+            :param nu: default viscosity of particles created to be created. Defaults to 1.0
+            :type nu: float
+
+            :param fixed: spatially fixed flag of particles created to be created. Defaults to false.
+            :type fixed: bool
+
+            :param rho0: background density for the system. Defaults to 1.0
+            :type rho0: float
+
+            :param c0: speed of sound for the system. Defaults to 10
+            :type c0: float
+
+            :param P0: background pressure for the system. Defaults to 10
+            :type p0: float
+
+            :rtype: spatialpy.Domain.Domain
         """
         # Create domain object
         numberparticles = nx*ny
