@@ -279,8 +279,8 @@ class Model():
         '''
         Add a domain to the model
 
-        domain : Domain
-            The Domain object to be added to the model
+        Args:
+            domain : The Domain object to be added to the model
         '''
         if type(domain).__name__ != 'Domain':
             raise ModelError("Unexpected parameter for add_domain. Parameter must be a Domain.")

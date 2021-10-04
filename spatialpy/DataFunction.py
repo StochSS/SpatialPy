@@ -16,12 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from spatialpy.BoundaryCondition import BoundaryCondition
 
-
-
-
-class DataFunction(BoundaryCondition):
+class DataFunction():
     """ Abstract class used to constuct the data function. """
 
     def __init__(self, name=None):
