@@ -323,7 +323,7 @@ class Model():
             for S in data_function:
                 self.add_data_function(S)
         elif isinstance(data_function, DataFunction):
-            problem = self.problem_with_name(data_function.name)
+            problem = self.__problem_with_name(data_function.name)
             if problem is not None:
                 raise problem
             self.listOfDataFunctions.append(data_function)
