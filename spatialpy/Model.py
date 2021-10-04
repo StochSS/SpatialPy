@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import uuid
 from collections import OrderedDict
 from spatialpy.Solver import Solver
+from spatialpy.DataFunction import DataFunction
 from spatialpy.expression import Expression
 import numpy
 import scipy
@@ -303,13 +304,13 @@ class Model():
         if isinstance(obj, list):
             for S in obj:
                 self.add_data_function(S)
-        elif type(obj).__name__ == 'DataFunction':
+        elif isinstance(obj, DataFunction):
             problem = self.problem_with_name(obj.name)
             if problem is not None:
                 raise problem
             self.listOfDataFunctions.append(obj)
         else:
-            raise ModelError("Unexpected parameter for add_data_function. Parameter must be DataFunction or list of DataFunction.")
+            raise ModelError("Unexpected parameter for add_data_function. Parameter must be DataFunction or list of DataFunction.{0}".format(type(obj).__name__))
         return obj
 
     def add_initial_condition(self, ic):
