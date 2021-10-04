@@ -319,17 +319,17 @@ class Model():
             :type data_function: spatialpy.DataFunction
         """
 
-        if isinstance(obj, list):
-            for S in obj:
+        if isinstance(data_function, list):
+            for S in data_function:
                 self.add_data_function(S)
-        elif isinstance(obj, DataFunction):
-            problem = self.problem_with_name(obj.name)
+        elif isinstance(data_function, DataFunction):
+            problem = self.problem_with_name(data_function.name)
             if problem is not None:
                 raise problem
-            self.listOfDataFunctions.append(obj)
+            self.listOfDataFunctions.append(data_function)
         else:
-            raise ModelError("Unexpected parameter for add_data_function. Parameter must be DataFunction or list of DataFunction.{0}".format(type(obj).__name__))
-        return obj
+            raise ModelError("Unexpected parameter for add_data_function. Parameter must be DataFunction or list of DataFunctions.")
+        return data_function
 
     def add_initial_condition(self, ic):
         """ Add an initial condition object to the initialization of the model.
