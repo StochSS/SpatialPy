@@ -84,6 +84,14 @@ spatialpy.VTKReader module
    :undoc-members:
    :show-inheritance:
 
+spatialpy.expression module
+---------------------------
+
+.. automodule:: spatialpy.expression
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

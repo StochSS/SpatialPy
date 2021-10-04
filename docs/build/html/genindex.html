@@ -97,12 +97,14 @@
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  
 </div>
 <h2 id="A">A</h2>
@@ -158,13 +160,21 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="classes/spatialpy.html#spatialpy.Domain.Domain.calculate_vol">calculate_vol() (spatialpy.Domain.Domain method)</a>
 </li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.ValidationVisitor.check_blacklist">check_blacklist() (spatialpy.expression.Expression.ValidationVisitor method)</a>
+</li>
       <li><a href="classes/spatialpy.html#spatialpy.Domain.Domain.closest_vertex">closest_vertex() (spatialpy.Domain.Domain method)</a>
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.Solver.Solver.compile">compile() (spatialpy.Solver.Solver method)</a>
 </li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.convert_str">convert_str() (spatialpy.expression.ExpressionConverter class method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="classes/spatialpy.html#spatialpy.Domain.Domain.coordinates">coordinates() (spatialpy.Domain.Domain method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.CppConverter">CppConverter (class in spatialpy.expression)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.CppConverter.CppExpressionTransformer">CppConverter.CppExpressionTransformer (class in spatialpy.expression)</a>
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.Domain.Domain.create_2D_domain">create_2D_domain() (spatialpy.Domain.Domain class method)</a>
 </li>
@@ -210,16 +220,24 @@
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.Result.Result.export_to_csv">export_to_csv() (spatialpy.Result.Result method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="classes/spatialpy.html#spatialpy.Result.Result.export_to_vtk">export_to_vtk() (spatialpy.Result.Result method)</a>
 </li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression">Expression (class in spatialpy.expression)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="classes/spatialpy.html#spatialpy.BoundaryCondition.BoundaryCondition.expression">expression() (spatialpy.BoundaryCondition.BoundaryCondition method)</a>
 
       <ul>
         <li><a href="classes/spatialpy.html#spatialpy.DataFunction.DataFunction.expression">(spatialpy.DataFunction.DataFunction method)</a>
 </li>
       </ul></li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.ValidationVisitor">Expression.ValidationVisitor (class in spatialpy.expression)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter">ExpressionConverter (class in spatialpy.expression)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionResults">ExpressionResults (class in spatialpy.expression)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -250,6 +268,8 @@
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.Domain.Domain.get_domain_size">get_domain_size() (spatialpy.Domain.Domain method)</a>
 </li>
+      <li><a href="classes/spatialpy.html#spatialpy.Model.Model.get_expression_utility">get_expression_utility() (spatialpy.Model.Model method)</a>
+</li>
       <li><a href="classes/spatialpy.html#spatialpy.Model.Model.get_num_reactions">get_num_reactions() (spatialpy.Model.Model method)</a>
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.Model.Model.get_num_species">get_num_species() (spatialpy.Model.Model method)</a>
@@ -258,16 +278,22 @@
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.Model.Model.get_parameter">get_parameter() (spatialpy.Model.Model method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="classes/spatialpy.html#spatialpy.Result.Result.get_property">get_property() (spatialpy.Result.Result method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="classes/spatialpy.html#spatialpy.Model.Model.get_reaction">get_reaction() (spatialpy.Model.Model method)</a>
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.Model.Model.get_species">get_species() (spatialpy.Model.Model method)</a>
 
       <ul>
         <li><a href="classes/spatialpy.html#spatialpy.Result.Result.get_species">(spatialpy.Result.Result method)</a>
+</li>
+      </ul></li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.CppConverter.get_str">get_str() (spatialpy.expression.CppConverter method)</a>
+
+      <ul>
+        <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.get_str">(spatialpy.expression.ExpressionConverter method)</a>
 </li>
       </ul></li>
       <li><a href="classes/spatialpy.html#spatialpy.Result.Result.get_timespan">get_timespan() (spatialpy.Result.Result method)</a>
@@ -277,6 +303,10 @@
       <li><a href="classes/spatialpy.html#spatialpy.VTKReader.VTKReader.getarrayname">getarrayname() (spatialpy.VTKReader.VTKReader method)</a>
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.VTKReader.VTKReader.getarrays">getarrays() (spatialpy.VTKReader.VTKReader method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.getexpr_cpp">getexpr_cpp() (spatialpy.expression.Expression method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.getexpr_python">getexpr_python() (spatialpy.expression.Expression method)</a>
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.VTKReader.VTKReader.getnumpoints">getnumpoints() (spatialpy.VTKReader.VTKReader method)</a>
 </li>
@@ -306,6 +336,8 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.map_operator">map_operator() (spatialpy.expression.Expression class method)</a>
+</li>
       <li><a href="classes/spatialpy.html#spatialpy.Model.Model">Model (class in spatialpy.Model)</a>
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.Model.ModelError">ModelError</a>
@@ -321,6 +353,8 @@
         <li><a href="classes/spatialpy.html#module-spatialpy.DataFunction">spatialpy.DataFunction</a>
 </li>
         <li><a href="classes/spatialpy.html#module-spatialpy.Domain">spatialpy.Domain</a>
+</li>
+        <li><a href="classes/spatialpy.html#module-spatialpy.expression">spatialpy.expression</a>
 </li>
         <li><a href="classes/spatialpy.html#module-spatialpy.Geometry">spatialpy.Geometry</a>
 </li>
@@ -342,6 +376,14 @@
   </ul></td>
 </tr></table>
 
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.operator_map">operator_map (spatialpy.expression.Expression attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -349,10 +391,16 @@
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.Model.ParameterError">ParameterError</a>
 </li>
-      <li><a href="classes/spatialpy.html#spatialpy.InitialCondition.PlaceInitialCondition">PlaceInitialCondition (class in spatialpy.InitialCondition)</a>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.parse_comparison">parse_comparison() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.parse_logical">parse_logical() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.parse_operator">parse_operator() (spatialpy.expression.ExpressionConverter method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes/spatialpy.html#spatialpy.InitialCondition.PlaceInitialCondition">PlaceInitialCondition (class in spatialpy.InitialCondition)</a>
+</li>
       <li><a href="classes/spatialpy.html#spatialpy.Result.Result.plot_property">plot_property() (spatialpy.Result.Result method)</a>
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.Result.Result.plot_species">plot_species() (spatialpy.Result.Result method)</a>
@@ -360,6 +408,8 @@
       <li><a href="classes/spatialpy.html#spatialpy.Domain.Domain.plot_types">plot_types() (spatialpy.Domain.Domain method)</a>
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.VTKReader.VTKReader.populatearrays">populatearrays() (spatialpy.VTKReader.VTKReader method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.PythonConverter">PythonConverter (class in spatialpy.expression)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -390,7 +440,11 @@
       <li><a href="classes/spatialpy.html#spatialpy.VTKReader.VTKReader.readpoints">readpoints() (spatialpy.VTKReader.VTKReader method)</a>
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.Model.Model.reserved_names">reserved_names (spatialpy.Model.Model attribute)</a>
+
+      <ul>
+        <li><a href="classes/spatialpy.html#spatialpy.Model.Species.reserved_names">(spatialpy.Model.Species attribute)</a>
 </li>
+      </ul></li>
       <li><a href="classes/spatialpy.html#spatialpy.Model.Model.restrict">restrict() (spatialpy.Model.Model method)</a>
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.Result.Result">Result (class in spatialpy.Result)</a>
@@ -409,6 +463,12 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes/spatialpy.html#spatialpy.Model.Model.sanitized_data_function_names">sanitized_data_function_names() (spatialpy.Model.Model method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.Model.Model.sanitized_parameter_names">sanitized_parameter_names() (spatialpy.Model.Model method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.Model.Model.sanitized_species_names">sanitized_species_names() (spatialpy.Model.Model method)</a>
+</li>
       <li><a href="classes/spatialpy.html#spatialpy.InitialCondition.ScatterInitialCondition">ScatterInitialCondition (class in spatialpy.InitialCondition)</a>
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.Model.Parameter.set_expression">set_expression() (spatialpy.Model.Parameter method)</a>
@@ -461,6 +521,13 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    spatialpy.expression
+
+      <ul>
+        <li><a href="classes/spatialpy.html#module-spatialpy.expression">module</a>
+</li>
+      </ul></li>
       <li>
     spatialpy.Geometry
 
@@ -549,13 +616,115 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="classes/spatialpy.html#spatialpy.VTKReader.VTKReader">VTKReader (class in spatialpy.VTKReader)</a>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.validate">validate() (spatialpy.expression.Expression method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Add">visit_Add() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.CppConverter.visit_And">visit_And() (spatialpy.expression.CppConverter method)</a>
+
+      <ul>
+        <li><a href="classes/spatialpy.html#spatialpy.expression.PythonConverter.visit_And">(spatialpy.expression.PythonConverter method)</a>
+</li>
+      </ul></li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.ValidationVisitor.visit_Assign">visit_Assign() (spatialpy.expression.Expression.ValidationVisitor method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.CppConverter.CppExpressionTransformer.visit_BinOp">visit_BinOp() (spatialpy.expression.CppConverter.CppExpressionTransformer method)</a>
+
+      <ul>
+        <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.ValidationVisitor.visit_BinOp">(spatialpy.expression.Expression.ValidationVisitor method)</a>
+</li>
+        <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_BinOp">(spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      </ul></li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.ValidationVisitor.visit_BoolOp">visit_BoolOp() (spatialpy.expression.Expression.ValidationVisitor method)</a>
+
+      <ul>
+        <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_BoolOp">(spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      </ul></li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Bytes">visit_Bytes() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.ValidationVisitor.visit_Call">visit_Call() (spatialpy.expression.Expression.ValidationVisitor method)</a>
+
+      <ul>
+        <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Call">(spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      </ul></li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.ValidationVisitor.visit_Compare">visit_Compare() (spatialpy.expression.Expression.ValidationVisitor method)</a>
+
+      <ul>
+        <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Compare">(spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      </ul></li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Constant">visit_Constant() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Div">visit_Div() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Ellipsis">visit_Ellipsis() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Eq">visit_Eq() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Gt">visit_Gt() (spatialpy.expression.ExpressionConverter method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_GtE">visit_GtE() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Lt">visit_Lt() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_LtE">visit_LtE() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Mult">visit_Mult() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.ValidationVisitor.visit_Name">visit_Name() (spatialpy.expression.Expression.ValidationVisitor method)</a>
+
+      <ul>
+        <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Name">(spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      </ul></li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_NameConstant">visit_NameConstant() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_NotEq">visit_NotEq() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Num">visit_Num() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.CppConverter.visit_Or">visit_Or() (spatialpy.expression.CppConverter method)</a>
+
+      <ul>
+        <li><a href="classes/spatialpy.html#spatialpy.expression.PythonConverter.visit_Or">(spatialpy.expression.PythonConverter method)</a>
+</li>
+      </ul></li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Pow">visit_Pow() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Str">visit_Str() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_Sub">visit_Sub() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.ValidationVisitor.visit_UnaryOp">visit_UnaryOp() (spatialpy.expression.Expression.ValidationVisitor method)</a>
+
+      <ul>
+        <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_UnaryOp">(spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      </ul></li>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.ExpressionConverter.visit_USub">visit_USub() (spatialpy.expression.ExpressionConverter method)</a>
+</li>
+      <li><a href="classes/spatialpy.html#spatialpy.VTKReader.VTKReader">VTKReader (class in spatialpy.VTKReader)</a>
+</li>
       <li><a href="classes/spatialpy.html#spatialpy.VTKReader.VTKReaderError">VTKReaderError</a>
 </li>
       <li><a href="classes/spatialpy.html#spatialpy.VTKReader.VTKReaderIOError">VTKReaderIOError</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.with_blacklist">with_blacklist() (spatialpy.expression.Expression method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes/spatialpy.html#spatialpy.expression.Expression.with_namespace">with_namespace() (spatialpy.expression.Expression method)</a>
 </li>
   </ul></td>
 </tr></table>

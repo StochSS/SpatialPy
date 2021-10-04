@@ -120,25 +120,25 @@
 <span class="sd">        :type numpoints: int</span>
 <span class="sd">        </span>
 <span class="sd">        :param xlim: Range of domain along x-axis</span>
-<span class="sd">        :type xmax: tuple(float)</span>
+<span class="sd">        :type xlim: tuple(float)</span>
 
 <span class="sd">        :param ylim: Range of domain along y-axis</span>
-<span class="sd">        :type ymin: tuple(float)</span>
+<span class="sd">        :type ylim: tuple(float)</span>
 <span class="sd">        </span>
 <span class="sd">        :param zlim: Range of domain along z-axis</span>
-<span class="sd">        :type ymax: tuple(float)</span>
+<span class="sd">        :type ylim: tuple(float)</span>
 
 <span class="sd">        :param rho: Background density for the system</span>
-<span class="sd">        :type zmin: float</span>
+<span class="sd">        :type rho: float</span>
 <span class="sd">        </span>
 <span class="sd">        :param c0: Speed of sound for the system</span>
-<span class="sd">        :type zmax: float</span>
+<span class="sd">        :type c0: float</span>
 
 <span class="sd">        :param P0: Background pressure for the system</span>
-<span class="sd">        :type typeid: float</span>
+<span class="sd">        :type P0: float</span>
 
 <span class="sd">        :param gravity: Acceleration of gravity for the system.</span>
-<span class="sd">        :type species: float</span>
+<span class="sd">        :type gravity: float</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 
@@ -150,6 +150,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">on_boundary</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">domain_size</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tetrahedron_vol</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">vol</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numpoints</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numpoints</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -465,7 +466,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">types</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;points&quot;</span><span class="p">:[</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="s2">&quot;data&quot;</span><span class="p">:[</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">[</span><span class="n">i</span><span class="p">]]}</span>
 
-        <span class="n">is_2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">zlim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">is_2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="mi">2</span>
 
         <span class="n">trace_list</span> <span class="o">=</span> <span class="n">_plotly_iterate</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">property_name</span><span class="o">=</span><span class="s2">&quot;type&quot;</span><span class="p">,</span>
                                      <span class="n">colormap</span><span class="o">=</span><span class="n">colormap</span><span class="p">,</span> <span class="n">is_2d</span><span class="o">=</span><span class="n">is_2d</span><span class="p">)</span>

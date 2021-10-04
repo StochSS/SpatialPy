@@ -219,13 +219,13 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>numpoints</strong> (<em>int</em>) – Total number of spatial domain points</p></li>
-<li><p><strong>xlim</strong> – Range of domain along x-axis</p></li>
-<li><p><strong>ylim</strong> – Range of domain along y-axis</p></li>
+<li><p><strong>xlim</strong> (<em>tuple</em><em>(</em><em>float</em><em>)</em>) – Range of domain along x-axis</p></li>
+<li><p><strong>ylim</strong> (<em>tuple</em><em>(</em><em>float</em><em>)</em>) – Range of domain along y-axis</p></li>
 <li><p><strong>zlim</strong> – Range of domain along z-axis</p></li>
-<li><p><strong>rho</strong> – Background density for the system</p></li>
-<li><p><strong>c0</strong> – Speed of sound for the system</p></li>
-<li><p><strong>P0</strong> – Background pressure for the system</p></li>
-<li><p><strong>gravity</strong> – Acceleration of gravity for the system.</p></li>
+<li><p><strong>rho</strong> (<em>float</em>) – Background density for the system</p></li>
+<li><p><strong>c0</strong> (<em>float</em>) – Speed of sound for the system</p></li>
+<li><p><strong>P0</strong> (<em>float</em>) – Background pressure for the system</p></li>
+<li><p><strong>gravity</strong> (<em>float</em>) – Acceleration of gravity for the system.</p></li>
 </ul>
 </dd>
 </dl>
@@ -601,7 +601,7 @@ GNU GENERAL PUBLIC LICENSE Version 3 for more details.</p>
 along with this program.  If not, see &lt;<a class="reference external" href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>&gt;.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="spatialpy.Model.Model">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">spatialpy.Model.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Model.html#Model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Model.Model" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">spatialpy.Model.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spatialpy'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Model.html#Model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Model.Model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Representation of a spatial biochemical model.</p>
 <dl class="field-list simple">
@@ -778,6 +778,12 @@ or a dict with name, instance pairs.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.Model.Model.get_expression_utility">
+<span class="sig-name descname"><span class="pre">get_expression_utility</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Model.html#Model.get_expression_utility"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Model.Model.get_expression_utility" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new expression.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Model.Model.get_num_reactions">
 <span class="sig-name descname"><span class="pre">get_num_reactions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Model.html#Model.get_num_reactions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Model.Model.get_num_reactions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the number of reactions in this model.</p>
@@ -840,7 +846,7 @@ or a dict with name, instance pairs.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="spatialpy.Model.Model.reserved_names">
-<span class="sig-name descname"><span class="pre">reserved_names</span></span><em class="property"> <span class="pre">=</span> <span class="pre">['vol']</span></em><a class="headerlink" href="#spatialpy.Model.Model.reserved_names" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">reserved_names</span></span><em class="property"> <span class="pre">=</span> <span class="pre">['vol',</span> <span class="pre">'t']</span></em><a class="headerlink" href="#spatialpy.Model.Model.reserved_names" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -879,6 +885,42 @@ the types specified in ‘listOfTypes’.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.Model.Model.sanitized_data_function_names">
+<span class="sig-name descname"><span class="pre">sanitized_data_function_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Model.html#Model.sanitized_data_function_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Model.Model.sanitized_data_function_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a dictionary mapping user chosen data function names to simplified formats which will be used
+later on by SpatialPySolvers evaluating reaction propensity functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the dictionary mapping user data function names to their internal SpatialPy notation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.Model.Model.sanitized_parameter_names">
+<span class="sig-name descname"><span class="pre">sanitized_parameter_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Model.html#Model.sanitized_parameter_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Model.Model.sanitized_parameter_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a dictionary mapping user chosen parameter names to simplified formats which will be used
+later on by SpatialPySolvers evaluating reaction propensity functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the dictionary mapping user parameter names to their internal SpatialPy notation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.Model.Model.sanitized_species_names">
+<span class="sig-name descname"><span class="pre">sanitized_species_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Model.html#Model.sanitized_species_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Model.Model.sanitized_species_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a dictionary mapping user chosen species names to simplified formats which will be used
+later on by SpatialPySolvers evaluating reaction propensity functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the dictionary mapping user species names to their internal SpatialPy notation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Model.Model.set_parameter">
 <span class="sig-name descname"><span class="pre">set_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expression</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Model.html#Model.set_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Model.Model.set_parameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the expression of an existing paramter.</p>
@@ -894,19 +936,19 @@ the types specified in ‘listOfTypes’.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.Model.Model.set_timesteps">
-<span class="sig-name descname"><span class="pre">set_timesteps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Model.html#Model.set_timesteps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Model.Model.set_timesteps" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>” Set the simlation time span parameters. Note: the number of output times will be num_steps+1 as the first</dt><dd><p>output will be at time zero.</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>step_size</strong> (<em>float</em>) – Size of each timestep in seconds</p></li>
-<li><p><strong>num_steps</strong> (<em>int</em>) – Total number of steps to take</p></li>
-</ul>
-</dd>
-</dl>
+<span class="sig-name descname"><span class="pre">set_timesteps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_interval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/Model.html#Model.set_timesteps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.Model.Model.set_timesteps" title="Permalink to this definition">¶</a></dt>
+<dd><p>” Set the simlation time span parameters
+:param : param output_interval: size of each output timestep in seconds
+:param : type output_interval:  float
+:param : param num_steps: total number of steps to take. Note: the number of output times will be num_steps+1 as the first</p>
+<blockquote>
+<div><p>output will be at time zero.</p>
+</div></blockquote>
+<p>:param : type num_steps: int
+:param : param step_size: Size of each timestep in seconds
+:param : type step_size: float
+:param : param num_steps: Total number of steps to take
+:param : type num_steps: int</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1167,6 +1209,11 @@ If given a String expression, it should be evaluable in the namespace of a paren
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spatialpy.Model.Species.reserved_names">
+<span class="sig-name descname"><span class="pre">reserved_names</span></span><em class="property"> <span class="pre">=</span> <span class="pre">['x',</span> <span class="pre">'vol',</span> <span class="pre">'sd',</span> <span class="pre">'data_fn',</span> <span class="pre">'t',</span> <span class="pre">'debug_flag',</span> <span class="pre">'Spatialpy']</span></em><a class="headerlink" href="#spatialpy.Model.Species.reserved_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py exception">
@@ -1635,6 +1682,368 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <em class="property"><span class="pre">exception</span> </em><span class="sig-prename descclassname"><span class="pre">spatialpy.VTKReader.</span></span><span class="sig-name descname"><span class="pre">VTKReaderIOError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/VTKReader.html#VTKReaderIOError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.VTKReader.VTKReaderIOError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#spatialpy.VTKReader.VTKReaderError" title="spatialpy.VTKReader.VTKReaderError"><code class="xref py py-class docutils literal notranslate"><span class="pre">spatialpy.VTKReader.VTKReaderError</span></code></a></p>
 <p>Exception raised for I/O errors.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-spatialpy.expression">
+<span id="spatialpy-expression-module"></span><h2>spatialpy.expression module<a class="headerlink" href="#module-spatialpy.expression" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="spatialpy.expression.CppConverter">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">spatialpy.expression.</span></span><span class="sig-name descname"><span class="pre">CppConverter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.AST</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#CppConverter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.CppConverter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#spatialpy.expression.ExpressionConverter" title="spatialpy.expression.ExpressionConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">spatialpy.expression.ExpressionConverter</span></code></a></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="spatialpy.expression.CppConverter.CppExpressionTransformer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">CppExpressionTransformer</span></span><a class="reference internal" href="../_modules/spatialpy/expression.html#CppConverter.CppExpressionTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.CppConverter.CppExpressionTransformer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ast.NodeTransformer</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.CppConverter.CppExpressionTransformer.visit_BinOp">
+<span class="sig-name descname"><span class="pre">visit_BinOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.BinOp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#CppConverter.CppExpressionTransformer.visit_BinOp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.CppConverter.CppExpressionTransformer.visit_BinOp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.CppConverter.get_str">
+<span class="sig-name descname"><span class="pre">get_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/spatialpy/expression.html#CppConverter.get_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.CppConverter.get_str" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.CppConverter.visit_And">
+<span class="sig-name descname"><span class="pre">visit_And</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.And</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#CppConverter.visit_And"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.CppConverter.visit_And" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.CppConverter.visit_Or">
+<span class="sig-name descname"><span class="pre">visit_Or</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Or</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#CppConverter.visit_Or"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.CppConverter.visit_Or" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">spatialpy.expression.</span></span><span class="sig-name descname"><span class="pre">Expression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blacklist</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">ast.operator</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">any</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sanitize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Accepts an expression string to validate and convert.
+Allows for pre-flight syntax and namespace validations,
+as well as converting between Python and C++ expressions.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.ValidationVisitor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">ValidationVisitor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blacklist</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">ast.operator</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sanitize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression.ValidationVisitor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression.ValidationVisitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ast.NodeTransformer</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.ValidationVisitor.check_blacklist">
+<span class="sig-name descname"><span class="pre">check_blacklist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression.ValidationVisitor.check_blacklist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression.ValidationVisitor.check_blacklist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.ValidationVisitor.visit_Assign">
+<span class="sig-name descname"><span class="pre">visit_Assign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Assign</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression.ValidationVisitor.visit_Assign"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression.ValidationVisitor.visit_Assign" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.ValidationVisitor.visit_BinOp">
+<span class="sig-name descname"><span class="pre">visit_BinOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.BinOp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression.ValidationVisitor.visit_BinOp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression.ValidationVisitor.visit_BinOp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.ValidationVisitor.visit_BoolOp">
+<span class="sig-name descname"><span class="pre">visit_BoolOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.BoolOp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression.ValidationVisitor.visit_BoolOp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression.ValidationVisitor.visit_BoolOp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.ValidationVisitor.visit_Call">
+<span class="sig-name descname"><span class="pre">visit_Call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Call</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression.ValidationVisitor.visit_Call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression.ValidationVisitor.visit_Call" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.ValidationVisitor.visit_Compare">
+<span class="sig-name descname"><span class="pre">visit_Compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Compare</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression.ValidationVisitor.visit_Compare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression.ValidationVisitor.visit_Compare" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.ValidationVisitor.visit_Name">
+<span class="sig-name descname"><span class="pre">visit_Name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression.ValidationVisitor.visit_Name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression.ValidationVisitor.visit_Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.ValidationVisitor.visit_UnaryOp">
+<span class="sig-name descname"><span class="pre">visit_UnaryOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.UnaryOp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression.ValidationVisitor.visit_UnaryOp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression.ValidationVisitor.visit_UnaryOp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.getexpr_cpp">
+<span class="sig-name descname"><span class="pre">getexpr_cpp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">statement</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression.getexpr_cpp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression.getexpr_cpp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the expression object into a C++ expression string.
+Raises a SyntaxError if conversion to a C++ string is impossible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p>SyntaxError</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>C++ expression string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.getexpr_python">
+<span class="sig-name descname"><span class="pre">getexpr_python</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">statement</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression.getexpr_python"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression.getexpr_python" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the expression object into a Python expression string.
+Raises a SyntaxError if conversion to a Python string is impossible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p>SyntaxError</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Python expression string, if valid. Returns None if validation fails.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.map_operator">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">map_operator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression.map_operator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression.map_operator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.operator_map">
+<span class="sig-name descname"><span class="pre">operator_map</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'!':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Not'&gt;,</span> <span class="pre">'!=':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.NotEq'&gt;,</span> <span class="pre">'%':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Mod'&gt;,</span> <span class="pre">'&amp;':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.BitAnd'&gt;,</span> <span class="pre">'*':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Mult'&gt;,</span> <span class="pre">'**':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Pow'&gt;,</span> <span class="pre">'+':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Add'&gt;,</span> <span class="pre">'-':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Sub'&gt;,</span> <span class="pre">'/':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Div'&gt;,</span> <span class="pre">'//':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.FloorDiv'&gt;,</span> <span class="pre">':=':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Assign'&gt;,</span> <span class="pre">'&lt;':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Lt'&gt;,</span> <span class="pre">'&lt;&lt;':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.LShift'&gt;,</span> <span class="pre">'&lt;=':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.LtE'&gt;,</span> <span class="pre">'=':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Assign'&gt;,</span> <span class="pre">'==':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Eq'&gt;,</span> <span class="pre">'&gt;':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Gt'&gt;,</span> <span class="pre">'&gt;=':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.GtE'&gt;,</span> <span class="pre">'&gt;&gt;':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.RShift'&gt;,</span> <span class="pre">'&#64;':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.MatMult'&gt;,</span> <span class="pre">'^':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.BitXor'&gt;,</span> <span class="pre">'and':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.And'&gt;,</span> <span class="pre">'or':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Or'&gt;,</span> <span class="pre">'|':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.BitOr'&gt;}</span></em><a class="headerlink" href="#spatialpy.expression.Expression.operator_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">statement</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spatialpy.expression.ExpressionResults" title="spatialpy.expression.ExpressionResults"><span class="pre">spatialpy.expression.ExpressionResults</span></a></span></span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using the information provided so far, ensure that the given Python expression is valid.
+The Python expression is parsed, raising a SyntaxError if it is an invalid Python expression.
+The expression is then checked against the given properties, such as namespace and operator blacklist.
+Additionally, the expression is rejected if it is not a single rvalue expression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>SyntaxError</strong> – The statement is not a valid Python expression.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if the statement is valid, otherwise returns false.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.with_blacklist">
+<span class="sig-name descname"><span class="pre">with_blacklist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blacklist</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spatialpy.expression.Expression" title="spatialpy.expression.Expression"><span class="pre">Expression</span></a></span></span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression.with_blacklist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression.with_blacklist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new duplicate of the current expression, with a different operator blacklist.
+Overrides operator handling behavior when converting or validating the expression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>blacklist</strong> (<em>list</em><em>[</em><em>ast.operator</em><em>]</em>) – List of operators which are not allowed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of operators which, based on the given parameters, are not valid.</p>
+</dd>
+</dl>
+<p>An empty list indicates that no invalid operators were found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.Expression.with_namespace">
+<span class="sig-name descname"><span class="pre">with_namespace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">any</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spatialpy.expression.Expression" title="spatialpy.expression.Expression"><span class="pre">Expression</span></a></span></span><a class="reference internal" href="../_modules/spatialpy/expression.html#Expression.with_namespace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.Expression.with_namespace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new duplicate of the current expression, with a different namespace.
+Any identifiers present in the expression which are not listed in the namespace
+will cause the expression to be flagged as an invalid namespace during validation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>namespace</strong> – A dictionary containing the namespace mappings for the expression.</p>
+</dd>
+</dl>
+<p>The keys of the dict are expected to be the “only” valid identifiers.
+The values of the namespace are what the keys map to during sanitization, if used.
+:type namespace: dict[str, str]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>New expression containing the given namespace.</p>
+</dd>
+</dl>
+<p>The returned expression is a <em>copy</em> of the current expression.
+:rtype: Expression</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">spatialpy.expression.</span></span><span class="sig-name descname"><span class="pre">ExpressionConverter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.AST</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ast.NodeVisitor</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.convert_str">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">convert_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.convert_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.convert_str" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.get_str">
+<span class="sig-name descname"><span class="pre">get_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.get_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.get_str" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.parse_comparison">
+<span class="sig-name descname"><span class="pre">parse_comparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comparator</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.parse_comparison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.parse_comparison" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.parse_logical">
+<span class="sig-name descname"><span class="pre">parse_logical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.parse_logical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.parse_logical" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.parse_operator">
+<span class="sig-name descname"><span class="pre">parse_operator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.parse_operator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.parse_operator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Add">
+<span class="sig-name descname"><span class="pre">visit_Add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Add</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_BinOp">
+<span class="sig-name descname"><span class="pre">visit_BinOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.BinOp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_BinOp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_BinOp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_BoolOp">
+<span class="sig-name descname"><span class="pre">visit_BoolOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.BoolOp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_BoolOp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_BoolOp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Bytes">
+<span class="sig-name descname"><span class="pre">visit_Bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">ast.Bytes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Bytes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Bytes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Call">
+<span class="sig-name descname"><span class="pre">visit_Call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Call</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Call" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Compare">
+<span class="sig-name descname"><span class="pre">visit_Compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Compare</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Compare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Compare" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Constant">
+<span class="sig-name descname"><span class="pre">visit_Constant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Constant</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Constant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Constant" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Div">
+<span class="sig-name descname"><span class="pre">visit_Div</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Div</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Div"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Div" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Ellipsis">
+<span class="sig-name descname"><span class="pre">visit_Ellipsis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">ast.Ellipsis</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Ellipsis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Ellipsis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Eq">
+<span class="sig-name descname"><span class="pre">visit_Eq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Eq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Eq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Eq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Gt">
+<span class="sig-name descname"><span class="pre">visit_Gt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Gt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Gt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Gt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_GtE">
+<span class="sig-name descname"><span class="pre">visit_GtE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.GtE</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_GtE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_GtE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Lt">
+<span class="sig-name descname"><span class="pre">visit_Lt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Lt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Lt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Lt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_LtE">
+<span class="sig-name descname"><span class="pre">visit_LtE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.LtE</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_LtE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_LtE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Mult">
+<span class="sig-name descname"><span class="pre">visit_Mult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Mult</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Mult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Mult" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Name">
+<span class="sig-name descname"><span class="pre">visit_Name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_NameConstant">
+<span class="sig-name descname"><span class="pre">visit_NameConstant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">ast.NameConstant</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_NameConstant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_NameConstant" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_NotEq">
+<span class="sig-name descname"><span class="pre">visit_NotEq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.NotEq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_NotEq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_NotEq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Num">
+<span class="sig-name descname"><span class="pre">visit_Num</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">ast.Num</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Num"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Num" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Pow">
+<span class="sig-name descname"><span class="pre">visit_Pow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Pow</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Pow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Pow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Str">
+<span class="sig-name descname"><span class="pre">visit_Str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">ast.Str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Str" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_Sub">
+<span class="sig-name descname"><span class="pre">visit_Sub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Sub</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_Sub"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_Sub" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_USub">
+<span class="sig-name descname"><span class="pre">visit_USub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.USub</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_USub"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_USub" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionConverter.visit_UnaryOp">
+<span class="sig-name descname"><span class="pre">visit_UnaryOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.UnaryOp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionConverter.visit_UnaryOp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionConverter.visit_UnaryOp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spatialpy.expression.ExpressionResults">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">spatialpy.expression.</span></span><span class="sig-name descname"><span class="pre">ExpressionResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">invalid_names</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalid_operators</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_valid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#ExpressionResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.ExpressionResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container struct for returning the results of expression validation.
+Any expression items which indicate an invalid expression are listed on an ExpressionResults instance.
+Empty lists indicate that the expression is valid.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spatialpy.expression.PythonConverter">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">spatialpy.expression.</span></span><span class="sig-name descname"><span class="pre">PythonConverter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.AST</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#PythonConverter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.PythonConverter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#spatialpy.expression.ExpressionConverter" title="spatialpy.expression.ExpressionConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">spatialpy.expression.ExpressionConverter</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.PythonConverter.visit_And">
+<span class="sig-name descname"><span class="pre">visit_And</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.And</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#PythonConverter.visit_And"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.PythonConverter.visit_And" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.expression.PythonConverter.visit_Or">
+<span class="sig-name descname"><span class="pre">visit_Or</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">_ast.Or</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/expression.html#PythonConverter.visit_Or"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.expression.PythonConverter.visit_Or" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
