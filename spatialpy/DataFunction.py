@@ -38,9 +38,9 @@ class DataFunction(BoundaryCondition):
               reevaluated as the fluid domain moves over time.
 
         Args:
-            x: vector of 3 doubles, the x,y,z position
+            x (vector of 3 doubles): the x,y,z position to evalute the function.
         Returns:
-            float: value of function at this spatial location.
+            float: value of the data function at the spatial location given by 'x'.
         """
         raise Exception("DataFunction.map() must be implemented.")
 

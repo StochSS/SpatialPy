@@ -295,10 +295,8 @@ class Model():
         spatialpy.DataFunction class. It must implement a function 'map(x)' which takes a
         the spatial positon 'x' as an array, and it returns a float value.
 
-        Attributes
-        ----------
-        obj : DataFunction, or list of DataFunction
-            The DataFunction or list of DataFunction to be added to the model object.
+        Args:
+            obj (DataFunction or list of DataFunctions):  DataFunction(s) to be added to the model.
         """
 
         if isinstance(obj, list):
