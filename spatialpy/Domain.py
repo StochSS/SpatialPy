@@ -31,25 +31,25 @@ class Domain():
         :type numpoints: int
         
         :param xlim: Range of domain along x-axis
-        :type xmax: tuple(float)
+        :type xlim: tuple(float)
 
         :param ylim: Range of domain along y-axis
-        :type ymin: tuple(float)
+        :type ylim: tuple(float)
         
         :param zlim: Range of domain along z-axis
-        :type ymax: tuple(float)
+        :type ylim: tuple(float)
 
         :param rho: Background density for the system
-        :type zmin: float
+        :type rho: float
         
         :param c0: Speed of sound for the system
-        :type zmax: float
+        :type c0: float
 
         :param P0: Background pressure for the system
-        :type typeid: float
+        :type P0: float
 
         :param gravity: Acceleration of gravity for the system.
-        :type species: float
+        :type gravity: float
     """
 
 
