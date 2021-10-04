@@ -51,8 +51,8 @@ class simple_diffusion2(URDMEModel):
     def __init__(self):
         URDMEModel.__init__(self,name="simple_diffusion2")
 
-        A = Species(name="A",diffusion_constant=1.0,dimension=2)
-        B = Species(name="B",diffusion_constant=0.1,dimension=1)
+        A = Species(name="A",diffusion_coefficient=1.0,dimension=2)
+        B = Species(name="B",diffusion_coefficient=0.1,dimension=1)
 
         self.add_species([A,B])
 

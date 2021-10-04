@@ -32,7 +32,7 @@ import re
 from spatialpy.Model import *
 from spatialpy.Result import *
 
-def read_from_stdout(stdout,verbose=True):
+def _read_from_stdout(stdout,verbose=True):
     ''' Used with subprocess.Popen and threading to capture all output and print
         to the screen notebook without waiting or storing the output ina buffer.'''
     try:
@@ -45,14 +45,22 @@ def read_from_stdout(stdout,verbose=True):
                 #got empty line, ending
                 return
     except Exception as e:
-        print("read_from_stdout(): {0}".format(e))
+        print("_read_from_stdout(): {0}".format(e))
 
 
 class Solver:
-    """ SpatialPy solver object."""
+    """ SpatialPy solver object.
+
+            :param model: Target model of solver simulation
+            :type model: spatialpy.Model.Model
+            :param debug_level: Target level of debugging
+            :type debug_level: int
+    """
 
     def __init__(self, model, debug_level=0):
-        """ Constructor. """
+        """ Constructor
+        """
+
         # TODO: fix class checking
         # if not isinstance(model, Model):
         #    raise SimulationError("Solver constructors must take a Model as an argument.")
@@ -95,7 +103,7 @@ class Solver:
         except Exception as e:
             pass
 
-    def run_debugger(self):
+    def __run_debugger(self):
         """ Start a gdbgui debugger at port 5000. """
         self.debugger_url = 'http://127.0.0.1:5000'
         if not hasattr(self, 'debugger_process'):
@@ -103,7 +111,13 @@ class Solver:
         print(f'Your debugger is running at {self.debugger_url}')
 
     def compile(self, debug=False, profile=False):
-        """ Compile the model."""
+        """ Compile the model.
+
+            :param debug: If True, will print additional build debugging
+            :type debug: bool
+            :param profile: If True, will print additional profiling information
+            :type profile: bool
+        """
 
         # Create the models expression utility
         self.model.get_expression_utility()
@@ -121,7 +135,7 @@ class Solver:
         self.prop_file_name = self.build_dir + '/' + self.propfilename + '.c'
         if self.debug_level >= 1:
             print("Creating propensity file {0}".format(self.prop_file_name))
-        self.create_propensity_file(file_name=self.prop_file_name)
+        self.__create_propensity_file(file_name=self.prop_file_name)
 
         # Build the solver
         makefile = self.SpatialPy_ROOTDIR+'/build/Makefile'
@@ -170,18 +184,23 @@ class Solver:
     def run(self, number_of_trajectories=1, seed=None, timeout=None,
                 number_of_threads=None, debug=False, profile=False, verbose=True):
         """ Run one simulation of the model.
-        Args:
-            number_of_trajectories: (int) How many trajectories should be simulated.
-            seed: (int) the random number seed (incremented by one for multiple runs).
-            timeout: (int) maximum number of seconds the solver can run.
-            number_of_threads: (int) the number threads the solver will use.
-            debug: (bool) start a gdbgui debugger (also compiles with debug symbols
+
+            :param number_of_trajectories: How many trajectories should be simulated.
+            :type number_of_trajectories: int
+            :param seed: the random number seed (incremented by one for multiple runs).
+            :type seed: int
+            :param timeout: maximum number of seconds the solver can run.
+            :type timeout: int
+            :param number_of_threads: the number threads the solver will use.
+            :type number_of_threads: int
+            :param debug: start a gdbgui debugger (also compiles with debug symbols
                 if compilation hasn't happened)
-            profile: (bool) output gprof profiling data if available
-        Returns:
-            Result object.
-                or, if number_of_trajectories > 1
-            a list of Result objects
+            :type debug: bool
+            :param profile: Output gprof profiling data if available
+            :type profile: bool
+
+            :rtype: spatialpy.Result.Result | list(spatialpy.Result.Result)
+
         """
         if number_of_trajectories > 1:
             result_list = []
@@ -216,7 +235,7 @@ class Solver:
                         start_new_session=True) as process:
                     try:
                         # start thread to read process stdout to stdout
-                        t = threading.Thread(target=read_from_stdout,
+                        t = threading.Thread(target=_read_from_stdout,
                             args=(process.stdout,verbose,))
                         t.start()
                         if timeout is not None:
@@ -250,7 +269,7 @@ class Solver:
 
             result.success = True
             if profile:
-                self.read_profile_info(result)
+                self.__read_profile_info(result)
             if number_of_trajectories > 1:
                 result_list.append(result)
             else:
@@ -258,7 +277,7 @@ class Solver:
 
         return result_list
 
-    def read_profile_info(self, result):
+    def __read_profile_info(self, result):
         profile_data_path = os.path.join(result.result_dir, 'gmon.out')
         exe_path = os.path.join(self.build_dir, self.executable_name)
         cmd = f'gprof {exe_path} {profile_data_path}'
@@ -269,7 +288,7 @@ class Solver:
         print(f'Gprof report for {result.result_dir}')
         print(stdout.decode('utf-8'))
 
-    def create_propensity_file(self, file_name=None):
+    def __create_propensity_file(self, file_name=None):
         """ Generate the C propensity file that is used to compile the solvers.
         """
 
@@ -302,7 +321,7 @@ class Solver:
             "__NUMBER_OF_VOXELS__", str(self.model.domain.get_num_voxels()))
 
         # Make sure all paramters are evaluated to scalars before we write them to the file.
-        self.model.resolve_parameters()
+        self.model._resolve_parameters()
         sanitized_parameters = self.model.sanitized_parameter_names()
         parameters = ""
         for pname in self.model.listOfParameters:
@@ -414,7 +433,7 @@ class Solver:
         propfilestr = propfilestr.replace("__INIT_PARTICLES__", init_particles)
 
         # process initial conditions here
-        self.model.apply_initial_conditions()
+        self.model._apply_initial_conditions()
         nspecies = self.model.u0.shape[0]
         ncells = self.model.u0.shape[1]
 
@@ -432,7 +451,7 @@ class Solver:
         input_constants += outstr + "\n"
 
         if len(self.model.listOfSpecies) > 0:
-            N = self.model.create_stoichiometric_matrix()
+            N = self.model._create_stoichiometric_matrix()
             if(min(N.shape) > 0):
                 Nd = N.todense() # this will not work if Nrxn or Nspecies is zero
                 outstr = "static int input_N_dense[{0}] = ".format(
@@ -474,7 +493,7 @@ class Solver:
                 input_constants += "static size_t input_jcN[0] = {};\n"
                 input_constants += "static int input_prN[0] = {};\n"
 
-            G = self.model.create_dependency_graph()
+            G = self.model._create_dependency_graph()
             outstr = "static size_t input_irG[{0}] = ".format(len(G.indices))
             outstr += "{"
             for i in range(len(G.indices)):
@@ -514,7 +533,7 @@ class Solver:
                 try:
                     if s not in self.model.listOfDiffusionRestrictions or \
                        sd_id in self.model.listOfDiffusionRestrictions[s]:
-                        outstr += "{0}".format(s.diffusion_constant)
+                        outstr += "{0}".format(s.diffusion_coefficient)
                     else:
                         outstr += "0.0"
                 except KeyError as e:

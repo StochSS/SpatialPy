@@ -31,7 +31,7 @@ import spatialpy
 #
 #        D_const = 0.01
 #
-#        A = spatialpy.Species(name="A", diffusion_constant=D_const)
+#        A = spatialpy.Species(name="A", diffusion_coefficient=D_const)
 #        self.add_species([A])
 #
 #        self.domain = spatialpy.Domain.create_2D_domain(
@@ -49,7 +49,7 @@ import spatialpy
 # class testPeriodicDiffusion(spatialpy.Model):
 #     def __init__(self, model_name="test1D"):
 #         spatialpy.Model.__init__(self, model_name)
-#         X = self.add_species(spatialpy.Species(name="X",  diffusion_constant=0.001))
+#         X = self.add_species(spatialpy.Species(name="X",  diffusion_coefficient=0.001))
 #         self.domain = spatialpy.Domain.generate_unit_interval_mesh(nx=100, periodic=True)
 #         self.add_initial_condition(spatialpy.PlaceInitialCondition(X, 1000))
 #         #self.set_initial_condition_place_near({X:1000}, 0.1)
@@ -85,8 +85,8 @@ class TestModelFunctionality(unittest.TestCase):
     def test_reaction_init(self):
         """ Test that we can instantate a Reaction is all the supported ways. """
         model = spatialpy.Model()
-        s1 = spatialpy.Species('s1', D=0)
-        s2 = spatialpy.Species('s2', D=0)
+        s1 = spatialpy.Species('s1', diffusion_coefficient=0)
+        s2 = spatialpy.Species('s2', diffusion_coefficient=0)
         model.add_species([s1, s2])
         p = spatialpy.Parameter('p',0,1)
         model.add_parameter(p)

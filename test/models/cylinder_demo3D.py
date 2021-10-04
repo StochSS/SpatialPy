@@ -46,8 +46,8 @@ class cylinderDemo3D(spatialpy.Model):
         D_const = 0.1
 
         # Define Species
-        A = spatialpy.Species(name="A", diffusion_constant=D_const)
-        B = spatialpy.Species(name="B", diffusion_constant=D_const)
+        A = spatialpy.Species(name="A", diffusion_coefficient=D_const)
+        B = spatialpy.Species(name="B", diffusion_coefficient=D_const)
         self.add_species([A, B])
 
         # Define Geometry
