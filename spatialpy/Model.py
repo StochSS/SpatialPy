@@ -304,7 +304,7 @@ class Model():
         :param domain: The Domain object to be added to the model
         :type domain: spatialpy.Domain.Domain
         '''
-        if not isinstance(domain,Domain) or type(domain).__name__ != 'Domain':
+        if not isinstance(domain,Domain) and type(domain).__name__ != 'Domain':
             raise ModelError("Unexpected parameter for add_domain. Parameter must be a Domain.")
 
         self.domain = domain
