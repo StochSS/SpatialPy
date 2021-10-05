@@ -22,6 +22,7 @@ import uuid
 from collections import OrderedDict
 from spatialpy.Solver import Solver
 from spatialpy.DataFunction import DataFunction
+from spatialpy.Domain import Domain
 from spatialpy.expression import Expression
 import numpy
 import scipy
@@ -303,7 +304,7 @@ class Model():
         :param domain: The Domain object to be added to the model
         :type domain: spatialpy.Domain.Domain
         '''
-        if type(domain).__name__ != 'Domain':
+        if not isinstance(domain,Domain) or type(domain).__name__ != 'Domain':
             raise ModelError("Unexpected parameter for add_domain. Parameter must be a Domain.")
 
         self.domain = domain
@@ -322,7 +323,7 @@ class Model():
         if isinstance(data_function, list):
             for S in data_function:
                 self.add_data_function(S)
-        elif isinstance(data_function, DataFunction):
+        elif isinstance(data_function, DataFunction) or type(data_function).__name__ == 'DataFunction':
             problem = self.__problem_with_name(data_function.name)
             if problem is not None:
                 raise problem
@@ -436,7 +437,7 @@ class Model():
         if isinstance(obj, list):
             for S in obj:
                 self.add_species(S)
-        elif type(obj).__name__ == 'Species':
+        elif isinstance(obj, Species) or type(obj).__name__ == 'Species':
             problem = self.__problem_with_name(obj.name)
             if problem is not None:
                 raise problem
@@ -509,9 +510,7 @@ class Model():
             for p in params:
                 self.add_parameter(p)
         else:
-            #if isinstance(params, type(Parameter())):
-            x = Parameter()
-            if str(type(params)) == str(type(x)):
+            if isinstance(params, Parameter) or  type(params).__name__ == 'Parameter':
                 problem = self.__problem_with_name(params.name)
                 if problem is not None:
                     raise problem
@@ -520,7 +519,7 @@ class Model():
                     raise ParameterError("Parameter '{0}' has already been added to the model.".format(params.name))
                 self.listOfParameters[params.name] = params
             else:
-                raise ParameterError("Parameter '{0}' needs to be of type '{2}', it is of type '{1}'".format(params.name,str(type(params)),str(type(x))))
+                raise ParameterError("Parameter '{0}' needs to be of type '{2}', it is of type '{1}'".format(params.name,str(params),str(type(Parameter))))
         return params
 
     def delete_parameter(self, obj):
@@ -569,7 +568,7 @@ class Model():
                 if r.name is None or r.name == "":
                     r.name = 'rxn' + str(uuid.uuid4()).replace('-', '_')
                 self.listOfReactions[r.name] = r
-        elif type(reacs).__name__ == "Reaction":
+        elif isinstance(reacs, Reaction) or type(reacs).__name__ == "Reaction":
                 reacs.initialize(self)
                 if reacs.name is None or reacs.name == "":
                     reacs.name = 'rxn' + str(uuid.uuid4()).replace('-', '_')
@@ -774,26 +773,21 @@ class Parameter():
 
     """
 
-    def __init__(self,name="",expression=None):
+    def __init__(self,name=None,expression=None):
 
         self.name = name
+        if name is None:
+            raise ParameterError("name is required for a Parameter.")
+
         # We allow expression to be passed in as a non-string type. Invalid strings
         # will be caught below. It is perfectly fine to give a scalar value as the expression.
         # This can then be evaluated in an empty namespace to the scalar value.
-        self.expression = expression
         if expression is not None:
             self.expression = str(expression)
+        else:
+            raise ParameterError("expression is required for a Parameter.")
 
-        self.value = value
-
-        # self.value is allowed to be None, but not self.expression. self.value
-        # might not be evaluable in the namespace of this parameter, but defined
-        # in the context of a model or reaction.
-        if self.expression is None:
-            raise TypeError
-
-            self._evaluate()
-        if self.value is None:
+        self._evaluate()
 
     def _evaluate(self,namespace={}):
         """ Evaluate the expression and return the (scalar) value """
