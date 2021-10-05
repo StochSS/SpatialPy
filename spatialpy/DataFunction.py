@@ -33,10 +33,11 @@ class DataFunction():
         NOTE: The spatial location is evaulated at t=0 and is not 
               reevaluated as the fluid domain moves over time.
 
-        Args:
-            x (vector of 3 doubles): the x,y,z position to evalute the function.
-        Returns:
-            float: value of the data function at the spatial location given by 'x'.
+        :param x: The x,y,z position
+        :type x: vector of 3 doubles
+
+        :returns: value of function at this spatial location.
+        :rtype: float
         """
         raise Exception("DataFunction.map() must be implemented.")
 

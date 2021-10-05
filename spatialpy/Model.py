@@ -548,7 +548,7 @@ class Model():
             try:
                 self.listOfParameters[param].__evaluate(self.namespace)
             except:
-                raise ParameterError("Could not resolve Parameter expression "+param + "to a scalar value.")
+                raise ParameterError("Could not resolve Parameter expression "+param + " to a scalar value.")
 
     def delete_all_parameters(self):
         """ Remove all parameters from model.listOfParameters
@@ -995,16 +995,6 @@ class Reaction():
         self.propensity_function = propensity_function
         self.ode_propensity_function = ode_propensity_function
 
-    def set_type(self,type):
-        """ Set type restriction for this Reaction.
-
-            :param type: Type for this reaction to be restricted to.
-            :type type: int
-
-        """
-        if type not in {'mass-action','customized'}:
-            raise ReactionError("Invalid reaction type.")
-        self.type = type
 
     def add_reactant(self,S,stoichiometry):
         """ Add a reactant to this reaction
