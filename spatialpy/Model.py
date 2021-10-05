@@ -520,7 +520,6 @@ class Model():
                     raise ParameterError("Parameter '{0}' has already been added to the model.".format(params.name))
                 self.listOfParameters[params.name] = params
             else:
-                #raise ParameterError("Could not resolve Parameter expression {} to a scalar value.".format(params))
                 raise ParameterError("Parameter '{0}' needs to be of type '{2}', it is of type '{1}'".format(params.name,str(type(params)),str(type(x))))
         return params
 
@@ -538,7 +537,7 @@ class Model():
         """
         p = self.listOfParameters[pname]
         p.expression = expression
-        p.__evaluate()
+        p._evaluate()
 
     def _resolve_parameters(self):
         """ Attempt to resolve all parameter expressions to scalar floating point values.
@@ -546,9 +545,9 @@ class Model():
         self.update_namespace()
         for param in self.listOfParameters:
             try:
-                self.listOfParameters[param].__evaluate(self.namespace)
+                self.listOfParameters[param]._evaluate(self.namespace)
             except:
-                raise ParameterError("Could not resolve Parameter expression "+param + " to a scalar value.")
+                raise ParameterError(f"Could not resolve Parameter '{param}' expression '{self.listOfParameters[param].expression}' to a scalar value.")
 
     def delete_all_parameters(self):
         """ Remove all parameters from model.listOfParameters
@@ -775,14 +774,14 @@ class Parameter():
 
     """
 
-    def __init__(self,name="",expression=None,value=None):
+    def __init__(self,name="",expression=None):
 
         self.name = name
         # We allow expression to be passed in as a non-string type. Invalid strings
         # will be caught below. It is perfectly fine to give a scalar value as the expression.
         # This can then be evaluated in an empty namespace to the scalar value.
         self.expression = expression
-        if expression != None:
+        if expression is not None:
             self.expression = str(expression)
 
         self.value = value
@@ -790,14 +789,13 @@ class Parameter():
         # self.value is allowed to be None, but not self.expression. self.value
         # might not be evaluable in the namespace of this parameter, but defined
         # in the context of a model or reaction.
-        if self.expression == None:
-            #raise TypeError
-            self.value = 0
+        if self.expression is None:
+            raise TypeError
 
+            self._evaluate()
         if self.value is None:
-            self.__evaluate()
 
-    def __evaluate(self,namespace={}):
+    def _evaluate(self,namespace={}):
         """ Evaluate the expression and return the (scalar) value """
         try:
             self.value = (float(eval(self.expression, namespace)))
@@ -820,7 +818,7 @@ class Parameter():
         if self.expression is None:
             raise TypeError
 
-        self.__evaluate()
+        self._evaluate()
 
     def __str__(self):
         print_string = f"{self.name}: {str(self.expression)}"
