@@ -138,16 +138,16 @@ class Domain():
                 return self.on_boundary
             from itertools import combinations
             triangle_in_tetrahedrons_count = {}
-            for i in range(self.get_num_voxels()):
+            for i in range(self.tetrahedrons.shape[0]):
                 tets = self.tetrahedrons[i,:]
                 tets.sort()
                 for p in combinations(tets,3):
                     key = ".".join([str(s) for s in p ])
-                #print(key)
-                if key in triangle_in_tetrahedrons_count:
-                    triangle_in_tetrahedrons_count[key]+=1
-                else:
-                    triangle_in_tetrahedrons_count[key]=1
+                    #print(key)
+                    if key in triangle_in_tetrahedrons_count:
+                        triangle_in_tetrahedrons_count[key]+=1
+                    else:
+                        triangle_in_tetrahedrons_count[key]=1
             boundary_points = set({})
             for key in triangle_in_tetrahedrons_count:
                 #print(key+" "+str(triangle_in_tetrahedrons_count[key]))
