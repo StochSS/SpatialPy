@@ -77,6 +77,7 @@ namespace Spatialpy{
                 this_particle->C[i] = (double) input_u0[id*num_chem_species+i];
             }
         }
+        __DATA_FUNCTION_ASSIGN__
     }
 
 

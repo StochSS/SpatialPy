@@ -16,12 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-#!/usr/bin/env python3
 
 import pickle
 import unittest
 import string
 import spatialpy
+
 
 
 #class diffusion_debug(spatialpy.Model):
@@ -81,6 +81,31 @@ class TestModelFunctionality(unittest.TestCase):
         result = model.run(debug_level=0) #this will fail with Exception in the names checking is not correct
 
 
+    def test_data_function(self):
+        """ Test if the data function is working correctly. """
+        model = spatialpy.Model()
+        for x in spatialpy.Model.reserved_names:
+            with self.subTest(name=x):
+                with self.assertRaises(spatialpy.ModelError):
+                    df = spatialpy.DataFunction(name=x)
+                    model.add_data_function(df)
+        # check if it actually changes at different places in the domain
+        df = spatialpy.DataFunction(name="df")
+        df.map = lambda x: x[0]*10000
+        model.add_data_function(df)
+        model.set_timesteps(output_interval=1,num_steps=1,timestep_size=1)
+        model.add_domain(spatialpy.Domain.create_2D_domain([0,1],[0,1],2,2))
+        model.add_species(spatialpy.Species('A',0))
+        model.add_reaction(spatialpy.Reaction(products={'A':1},propensity_function="df"))
+        df_res = model.run()
+        traj = df_res.get_species('A',-1)
+        self.assertTrue(traj[0] == 0)
+        self.assertTrue(traj[1] == 0)
+        self.assertTrue(traj[2] > 0)
+        self.assertTrue(traj[3] > 0)
+
+
+
 
     def test_reaction_init(self):
         """ Test that we can instantate a Reaction is all the supported ways. """
@@ -88,7 +113,7 @@ class TestModelFunctionality(unittest.TestCase):
         s1 = spatialpy.Species('s1', diffusion_coefficient=0)
         s2 = spatialpy.Species('s2', diffusion_coefficient=0)
         model.add_species([s1, s2])
-        p = spatialpy.Parameter('p',0,1)
+        p = spatialpy.Parameter('p',1)
         model.add_parameter(p)
         r1 = spatialpy.Reaction(reactants={s1:1},products={s2:1},rate=p)
         r2 = spatialpy.Reaction(reactants={'s1':1},products={'s2':1},rate='p')
@@ -96,6 +121,31 @@ class TestModelFunctionality(unittest.TestCase):
         r4 = spatialpy.Reaction(reactants={'s1':1},products={'s2':1},rate=5)
         model.add_reaction([r1,r2,r3,r4])
         self.assertEqual(r1.propensity_function, r2.propensity_function)
+
+    def test_parameters(self):
+        """ Test that we can create and add Parameters to a model."""
+        m1 = spatialpy.Model()
+        m1.set_timesteps(output_interval=1,num_steps=1,timestep_size=1)
+        m1.add_domain(spatialpy.Domain.create_2D_domain([0,1],[0,1],2,2))
+
+        p1 = spatialpy.Parameter(name="p1",expression="1+1")
+        m1.add_parameter(p1)
+        p2 = spatialpy.Parameter(name="p2",expression="2")
+        p3 = spatialpy.Parameter(name="p3",expression="2")
+        m1.add_parameter([p2,p3])
+
+        s1 = spatialpy.Solver(m1)
+        s1.compile()
+
+
+
+
+
+
+
+
+
+
 
 
 

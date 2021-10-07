@@ -21,6 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import uuid
 from collections import OrderedDict
 from spatialpy.Solver import Solver
+from spatialpy.DataFunction import DataFunction
+from spatialpy.Domain import Domain
 from spatialpy.expression import Expression
 import numpy
 import scipy
@@ -302,7 +304,7 @@ class Model():
         :param domain: The Domain object to be added to the model
         :type domain: spatialpy.Domain.Domain
         '''
-        if type(domain).__name__ != 'Domain':
+        if not isinstance(domain,Domain) and type(domain).__name__ != 'Domain':
             raise ModelError("Unexpected parameter for add_domain. Parameter must be a Domain.")
 
         self.domain = domain
@@ -315,9 +317,20 @@ class Model():
             the spatial positon 'x' as an array, and it returns a float value.
 
             :param data_function: Data function to be added.
-            :type data_function: spatialpy.DataFunction.DataFunction
+            :type data_function: spatialpy.DataFunction
         """
-        self.listOfDataFunctions.append(data_function)
+
+        if isinstance(data_function, list):
+            for S in data_function:
+                self.add_data_function(S)
+        elif isinstance(data_function, DataFunction) or type(data_function).__name__ == 'DataFunction':
+            problem = self.__problem_with_name(data_function.name)
+            if problem is not None:
+                raise problem
+            self.listOfDataFunctions.append(data_function)
+        else:
+            raise ModelError("Unexpected parameter for add_data_function. Parameter must be DataFunction or list of DataFunctions.")
+        return data_function
 
     def add_initial_condition(self, ic):
         """ Add an initial condition object to the initialization of the model.
@@ -424,7 +437,7 @@ class Model():
         if isinstance(obj, list):
             for S in obj:
                 self.add_species(S)
-        elif type(obj).__name__ == 'Species':
+        elif isinstance(obj, Species) or type(obj).__name__ == 'Species':
             problem = self.__problem_with_name(obj.name)
             if problem is not None:
                 raise problem
@@ -497,9 +510,7 @@ class Model():
             for p in params:
                 self.add_parameter(p)
         else:
-            #if isinstance(params, type(Parameter())):
-            x = Parameter()
-            if str(type(params)) == str(type(x)):
+            if isinstance(params, Parameter) or  type(params).__name__ == 'Parameter':
                 problem = self.__problem_with_name(params.name)
                 if problem is not None:
                     raise problem
@@ -508,8 +519,7 @@ class Model():
                     raise ParameterError("Parameter '{0}' has already been added to the model.".format(params.name))
                 self.listOfParameters[params.name] = params
             else:
-                #raise ParameterError("Could not resolve Parameter expression {} to a scalar value.".format(params))
-                raise ParameterError("Parameter '{0}' needs to be of type '{2}', it is of type '{1}'".format(params.name,str(type(params)),str(type(x))))
+                raise ParameterError("Parameter '{0}' needs to be of type '{2}', it is of type '{1}'".format(params.name,str(params),str(type(Parameter))))
         return params
 
     def delete_parameter(self, obj):
@@ -526,7 +536,7 @@ class Model():
         """
         p = self.listOfParameters[pname]
         p.expression = expression
-        p.__evaluate()
+        p._evaluate()
 
     def _resolve_parameters(self):
         """ Attempt to resolve all parameter expressions to scalar floating point values.
@@ -534,9 +544,9 @@ class Model():
         self.update_namespace()
         for param in self.listOfParameters:
             try:
-                self.listOfParameters[param].__evaluate(self.namespace)
+                self.listOfParameters[param]._evaluate(self.namespace)
             except:
-                raise ParameterError("Could not resolve Parameter expression "+param + "to a scalar value.")
+                raise ParameterError(f"Could not resolve Parameter '{param}' expression '{self.listOfParameters[param].expression}' to a scalar value.")
 
     def delete_all_parameters(self):
         """ Remove all parameters from model.listOfParameters
@@ -558,7 +568,7 @@ class Model():
                 if r.name is None or r.name == "":
                     r.name = 'rxn' + str(uuid.uuid4()).replace('-', '_')
                 self.listOfReactions[r.name] = r
-        elif type(reacs).__name__ == "Reaction":
+        elif isinstance(reacs, Reaction) or type(reacs).__name__ == "Reaction":
                 reacs.initialize(self)
                 if reacs.name is None or reacs.name == "":
                     reacs.name = 'rxn' + str(uuid.uuid4()).replace('-', '_')
@@ -763,29 +773,23 @@ class Parameter():
 
     """
 
-    def __init__(self,name="",expression=None,value=None):
+    def __init__(self,name=None,expression=None):
 
         self.name = name
+        if name is None:
+            raise ParameterError("name is required for a Parameter.")
+
         # We allow expression to be passed in as a non-string type. Invalid strings
         # will be caught below. It is perfectly fine to give a scalar value as the expression.
         # This can then be evaluated in an empty namespace to the scalar value.
-        self.expression = expression
-        if expression != None:
+        if expression is not None:
             self.expression = str(expression)
+        else:
+            raise ParameterError("expression is required for a Parameter.")
 
-        self.value = value
+        self._evaluate()
 
-        # self.value is allowed to be None, but not self.expression. self.value
-        # might not be evaluable in the namespace of this parameter, but defined
-        # in the context of a model or reaction.
-        if self.expression == None:
-            #raise TypeError
-            self.value = 0
-
-        if self.value is None:
-            self.__evaluate()
-
-    def __evaluate(self,namespace={}):
+    def _evaluate(self,namespace={}):
         """ Evaluate the expression and return the (scalar) value """
         try:
             self.value = (float(eval(self.expression, namespace)))
@@ -808,7 +812,7 @@ class Parameter():
         if self.expression is None:
             raise TypeError
 
-        self.__evaluate()
+        self._evaluate()
 
     def __str__(self):
         print_string = f"{self.name}: {str(self.expression)}"
@@ -854,7 +858,13 @@ class Reaction():
         self.massaction = massaction
         self.rate = rate
         self.annotation = annotation
-        self.restrict_to = restrict_to
+        if isinstance(restrict_to, int):
+            self.restrict_to = [restrict_to]
+        elif isinstance(restrict_to, list) or restrict_to is None:
+            self.restrict_to = restrict_to
+        else:
+            errmsg = f"Reaction {name}: restrict_to must be an integer or list of integers."
+            raise ReactionError(errmsg)
 
     def initialize(self, model):
         """ Defered object initialization, called by model.add_reaction(). """
@@ -977,16 +987,6 @@ class Reaction():
         self.propensity_function = propensity_function
         self.ode_propensity_function = ode_propensity_function
 
-    def set_type(self,type):
-        """ Set type restriction for this Reaction.
-
-            :param type: Type for this reaction to be restricted to.
-            :type type: int
-
-        """
-        if type not in {'mass-action','customized'}:
-            raise ReactionError("Invalid reaction type.")
-        self.type = type
 
     def add_reactant(self,S,stoichiometry):
         """ Add a reactant to this reaction

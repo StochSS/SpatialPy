@@ -138,16 +138,16 @@ class Domain():
                 return self.on_boundary
             from itertools import combinations
             triangle_in_tetrahedrons_count = {}
-            for i in range(self.get_num_voxels()):
+            for i in range(self.tetrahedrons.shape[0]):
                 tets = self.tetrahedrons[i,:]
                 tets.sort()
                 for p in combinations(tets,3):
                     key = ".".join([str(s) for s in p ])
-                #print(key)
-                if key in triangle_in_tetrahedrons_count:
-                    triangle_in_tetrahedrons_count[key]+=1
-                else:
-                    triangle_in_tetrahedrons_count[key]=1
+                    #print(key)
+                    if key in triangle_in_tetrahedrons_count:
+                        triangle_in_tetrahedrons_count[key]+=1
+                    else:
+                        triangle_in_tetrahedrons_count[key]=1
             boundary_points = set({})
             for key in triangle_in_tetrahedrons_count:
                 #print(key+" "+str(triangle_in_tetrahedrons_count[key]))
@@ -460,7 +460,10 @@ class Domain():
             :rtype: spatialpy.Domain.Domain
         """
         # create domain object
-        obj = Domain()
+        xlim = ( min(mesh_obj.points[:,0]) , max(mesh_obj.points[:,0]) )
+        ylim = ( min(mesh_obj.points[:,1]) , max(mesh_obj.points[:,1]) )
+        zlim = ( min(mesh_obj.points[:,2]) , max(mesh_obj.points[:,2]) )
+        obj = Domain(len(mesh_obj.points), xlim, ylim, zlim)
         #vertices
         obj.vertices = mesh_obj.points
         # triangles
@@ -471,6 +474,8 @@ class Domain():
             obj.tetrahedrons = mesh_obj.cells['tetra']
         # volume
         obj.calculate_vol()
+        # set Mass equal to the volume
+        obj.mass = obj.vol
         # return model ref
         return obj
 
@@ -500,6 +505,18 @@ class Domain():
 
         return cls.import_meshio_object(meshio.msh_io.read(filename))
 
+
+    def read_stochss_subdomain_file(self, filename):
+        """
+        Read a .txt file that conains the StochSS v1 spatial subdomain descriptions
+        """
+        with open(filename,'r') as fd:
+            for ln,line in enumerate(fd):
+                try:
+                    (ndx,type_id) = line.rstrip().split(',')
+                    self.type[int(ndx)] = int(type_id)
+                except ValueError as e:
+                    raise ModelError(f"Could not read in subdomain file, error on line {ln}: {line}")
 
 
     @classmethod
