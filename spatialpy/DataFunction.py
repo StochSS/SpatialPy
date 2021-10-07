@@ -16,12 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from spatialpy.BoundaryCondition import BoundaryCondition
 
-
-
-
-class DataFunction(BoundaryCondition):
+class DataFunction():
     """ Abstract class used to constuct the data function. """
 
     def __init__(self, name=None):
@@ -30,9 +26,19 @@ class DataFunction(BoundaryCondition):
         if self.name is None:
             raise Exception("DataFunction must have a 'name'")
 
-    def expression(self):
+    def map(self, x):
         """
+        This method must be overridden by the DataFunction subclass.
+
+        NOTE: The spatial location is evaulated at t=0 and is not 
+              reevaluated as the fluid domain moves over time.
+
+        :param x: The x,y,z position
+        :type x: vector of 3 doubles
+
+        :returns: value of function at this spatial location.
+        :rtype: float
         """
-        raise Exception("DataFunction.expression() must be implemented.")
+        raise Exception("DataFunction.map() must be implemented.")
 
 

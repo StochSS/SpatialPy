@@ -21,6 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import uuid
 from collections import OrderedDict
 from spatialpy.Solver import Solver
+from spatialpy.DataFunction import DataFunction
+from spatialpy.Domain import Domain
+from spatialpy.expression import Expression
 import numpy
 import scipy
 import warnings
@@ -31,13 +34,12 @@ def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
     """
     SpatialPy model to StochSS converter
 
-    Args:
-        spatialpy_model : spatialpy.Model
-            SpatialPy model to be converted to StochSS
-        filename : str
-            Path to the exported stochss model
-        return_stochss_model : bool
-            Whether or not to return the model
+        :param spatailpy_model: SpatialPy model to be converted to StochSS
+        :type spatialpy_model: spatialpy.Model
+        :param filename: Path to the exported stochss model
+        :type filename: str
+        :param return_stochss_model: Whether or not to return the model
+        :type return_stochss_model: bool
     """
     try:
         from spatialpy.stochss.StochSSexport import export
@@ -48,12 +50,18 @@ def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
 
 
 class Model():
-    """ Representation of a spatial biochemical model. """
-    reserved_names = ['vol']
+    """ Representation of a spatial biochemical model.
+
+            :param name: Name of the model
+            :type name: str
+
+    """
+    reserved_names = ['vol', 't']
     special_characters = ['[', ']', '+', '-', '*', '/', '.', '^']
 
 
-    def __init__(self, name=""):
+
+    def __init__(self, name="spatialpy"):
         """ Create an empty SpatialPy model. """
 
         # The name that the model is referenced by (should be a String)
@@ -91,6 +99,11 @@ class Model():
         self.num_timesteps = None
         self.output_freq = None
 
+        ######################
+        # Expression utility used by the solver
+        # Should be None until the solver is compiled
+        self.expr = None
+
 
     def __str__(self):
         divider = f"\n{'*'*10}\n"
@@ -126,16 +139,35 @@ class Model():
         return print_string
 
 
-    def run(self, number_of_trajectories=1, seed=None, timeout=None, number_of_threads=None, debug_level=0, debug=False, profile=False):
-        """ Simulate the model.
-        Args:
-            number_of_trajectories: How many trajectories should be run.
-            seed: (int) The random seed given to the solver.
-            number_of_threads: (int) The number threads the solver will use.
-            debug_level: (int) Level of output from the solver: 0, 1, or 2. Default: 0.
-        Returns:
-            A SpatialPy.Result object with the results of the simulation.
+    def get_expression_utility(self):
         """
+        Create a new expression.
+        """
+        base_namespace = {
+            **{name: name for name in math.__dict__.keys()},
+            **self.sanitized_species_names(),
+            **self.sanitized_parameter_names(),
+            **self.sanitized_data_function_names(),
+            **{name: name for name in self.reserved_names}
+        }
+        self.expr = Expression(namespace=base_namespace, blacklist=["="], sanitize=True)
+
+
+    def run(self, number_of_trajectories=1, seed=None, timeout=None, number_of_threads=None, debug_level=0, debug=False, profile=False):
+        """ Simulate the model. Returns a result object containing simulation results.
+
+            :param number_of_trajectories: How many trajectories should be run.
+            :type number_of_trajectories: int
+            :param seed: The random seed given to the solver.
+            :type seed: int
+            :param number_of_threads: The number threads the solver will use.
+            :type number_of_threads: int
+            :param debug_level: Level of output from the solver: 0, 1, or 2. Default: 0.
+            :type debug_level: int
+
+            :rtype: spatialpy.Result.Result
+        """
+        self.__check_if_complete()
 
         sol = Solver(self, debug_level=debug_level)
 
@@ -143,33 +175,52 @@ class Model():
                        number_of_threads=number_of_threads, debug=debug, profile=profile)
 
 
-    def set_timesteps(self, step_size, num_steps):
+
+    def __check_if_complete(self):
+        """ Check if the model is complete, otherwise raise an approprate exception.
+        Raises:
+            ModelError
+        """
+        if self.timestep_size is None or self.num_timesteps is None:
+            raise ModelError("The model's timespan is not set.  Use 'timespan()' or 'set_timesteps()'.")
+        if self.domain is None:
+            raise ModelError("The model's domain is not set.  Use 'add_domain()'.")
+            
+    def set_timesteps(self, output_interval, num_steps, timestep_size=None):
         """" Set the simlation time span parameters
         Args:
-            step_size: float, size of each timestep in seconds
-            num_steps: int, total number of steps to take
-
-        Note: the number of output times will be num_steps+1 as the first
+            :param output_interval: size of each output timestep in seconds
+            :type output_interval:  float
+            :param num_steps: total number of steps to take. Note: the number of output times will be num_steps+1 as the first
               output will be at time zero.
+            :type num_steps: int
+            :param step_size: Size of each timestep in seconds
+            :type step_size: float
+            :param num_steps: Total number of steps to take
+            :type num_steps: int
+
         """
+        if timestep_size is not None:
+            self.timestep_size = timestep_size
         if self.timestep_size is None:
             raise ModelError("timestep_size is not set")
 
-        self.output_freq = math.ceil(step_size/self.timestep_size)
+        self.output_freq = math.ceil(output_interval/self.timestep_size)
 
         self.num_timesteps = math.ceil(num_steps * self.output_freq)
         # array of step numbers corresponding to the simulation times in the timespan
         self.timespan_steps = numpy.linspace(0,self.num_timesteps,
                         num=math.ceil(self.num_timesteps/self.output_freq)+1, dtype=int)
 
+        self.tspan = numpy.linspace(0,self.num_timesteps*self.timestep_size,self.num_timesteps)
+
     def timespan(self, time_span, timestep_size=None):
         """
         Set the time span of simulation. The SSA-SDPD engine does not support
         non-uniform timespans.
 
-        tspan : numpy ndarray
-            Evenly-spaced list of times at which to sample the species
-            populations during the simulation.
+        :param tspan: Evenly-spaced list of times at which to sample the species populations during the simulation.
+        :type tspan: numpy.ndarray
         """
 
         self.tspan = time_span
@@ -189,16 +240,21 @@ class Model():
 
     def set_type(self, geometry_ivar, type_id, mass=None, nu=None, fixed=False):
         """ Add a type definition to the model.  By default, all regions are set to
-        type 0.
-        Args:
-            geometry_ivar: an instance of a 'spatialpy.Geometry' subclass.  The 'inside()' method
+        type 0. Returns the number of domain points that were tagged with this type_id
+
+            :param geometry_ivar: an instance of a 'spatialpy.Geometry' subclass.  The 'inside()' method
                        of this object will be used to assign type_id to points.
-            type_id: (usually an int) the identifier for this type
-            mass: (float) the mass of each particle in the type
-            nu: (float) the viscosity of each particle in the type
-            fixed: (bool) are the particles in this type immobile
-        Return values:
-            Number of domain points that were tagged with this type_id
+            :type geometry_ivar: spatialpy.Geometry.Geometry
+            :param type_id: (usually an int) the identifier for this type
+            :type type_id: int
+            :param mass: The mass of each particle in the type
+            :type mass: float
+            :param nu: The viscosity of each particle in the type
+            :type nu: float
+            :param fixed: Are the particles in this type immobile
+            :type fixed: bool
+
+            :rtype: int
         """
 
         if self.domain is None:
@@ -226,9 +282,11 @@ class Model():
         """ Set the diffusion coefficient to zero for 'species' in all types not in
             'listOfTypes'. This effectively restricts the movement of 'species' to
             the types specified in 'listOfTypes'.
-        Args:
-            species: an instance of a 'spatialpy.Species'.
-            listOfTypes: a list, each object in the list should be a 'type_id'
+
+            :param species: Target species to restrict
+            :type species: spatialpy.Model.Species
+            :param listOfTypes: a list, each object in the list should be a 'type_id'
+            :type listOfTypes: list(int)
         """
         #x = Species()
         #if not isinstance(species, Species):
@@ -241,12 +299,12 @@ class Model():
 
     def add_domain(self, domain):
         '''
-        Add a domain to the model
+        Add a spatial domain to the model
 
-        domain : Domain
-            The Domain object to be added to the model
+        :param domain: The Domain object to be added to the model
+        :type domain: spatialpy.Domain.Domain
         '''
-        if type(domain).__name__ != 'Domain':
+        if not isinstance(domain,Domain) and type(domain).__name__ != 'Domain':
             raise ModelError("Unexpected parameter for add_domain. Parameter must be a Domain.")
 
         self.domain = domain
@@ -257,15 +315,39 @@ class Model():
             spatially varying in put to your model. Argument is a instances of subclass of the
             spatialpy.DataFunction class. It must implement a function 'map(x)' which takes a
             the spatial positon 'x' as an array, and it returns a float value.
+
+            :param data_function: Data function to be added.
+            :type data_function: spatialpy.DataFunction
         """
-        self.listOfDataFunctions.append(data_function)
+
+        if isinstance(data_function, list):
+            for S in data_function:
+                self.add_data_function(S)
+        elif isinstance(data_function, DataFunction) or type(data_function).__name__ == 'DataFunction':
+            problem = self.__problem_with_name(data_function.name)
+            if problem is not None:
+                raise problem
+            self.listOfDataFunctions.append(data_function)
+        else:
+            raise ModelError("Unexpected parameter for add_data_function. Parameter must be DataFunction or list of DataFunctions.")
+        return data_function
 
     def add_initial_condition(self, ic):
-        """ Add an initial condition object to the initialization of the model."""
+        """ Add an initial condition object to the initialization of the model.
+
+                :param ic: Initial condition to be added
+                :type ic: spatialpy.InitialCondition.InitialCondition
+
+        """
         self.listOfInitialConditions.append(ic)
 
     def add_boundary_condition(self, bc):
-        """ Add an BoundaryCondition object to the model."""
+        """ Add an BoundaryCondition object to the model.
+
+            :param bc: Boundary condition to be added
+            :type bc: spatialpy.BoundaryCondition.BoundaryCondition
+
+        """
         bc.model = self
         self.listOfBoundaryConditions.append(bc)
 
@@ -277,31 +359,86 @@ class Model():
         # Dictionary of expressions that can be evaluated in the scope of this model.
         self.expressions = {}
 
+    def sanitized_species_names(self):
+        """
+        Generate a dictionary mapping user chosen species names to simplified formats which will be used
+        later on by SpatialPySolvers evaluating reaction propensity functions.
+
+        :returns: the dictionary mapping user species names to their internal SpatialPy notation.
+        """
+        species_name_mapping = OrderedDict([])
+        for i, name in enumerate(self.listOfSpecies.keys()):
+            species_name_mapping[name] = 'x[{}]'.format(i)
+        return species_name_mapping
+
+    def sanitized_data_function_names(self):
+        """
+        Generate a dictionary mapping user chosen data function names to simplified formats which will be used
+        later on by SpatialPySolvers evaluating reaction propensity functions.
+
+        :returns: the dictionary mapping user data function names to their internal SpatialPy notation.
+        """
+        data_fn_name_mapping = OrderedDict([])
+        for i, data_fn in enumerate(self.listOfDataFunctions):
+            data_fn_name_mapping[data_fn.name] = 'data_fn[{}]'.format(i)
+        return data_fn_name_mapping
+
+    def sanitized_parameter_names(self):
+        """
+        Generate a dictionary mapping user chosen parameter names to simplified formats which will be used
+        later on by SpatialPySolvers evaluating reaction propensity functions.
+
+        :returns: the dictionary mapping user parameter names to their internal SpatialPy notation.
+        """
+        parameter_name_mapping = OrderedDict()
+        for i, name in enumerate(self.listOfParameters.keys()):
+            if name not in parameter_name_mapping:
+                parameter_name_mapping[name] = 'P{}'.format(i)
+        return parameter_name_mapping
+
     def get_species(self, sname):
+        """ Returns target species from model as object.
+
+                :param sname: name of species to be returned
+                :type sname: str
+
+                :rtype: spatialpy.Model.Species
+
+        """
         return self.listOfSpecies[sname]
 
     def get_num_species(self):
+        """ Returns total number of species contained in the model.
+
+                :rtype: int
+
+        """
         return len(self.listOfSpecies)
 
     def get_all_species(self):
+        """ Returns a dictionary of all species in the model using names as keys.
+
+                :rtype: dict
+
+        """
         return self.listOfSpecies
 
     def add_species(self, obj):
         """
-        Adds a species, or list of species to the model.
+        Adds a species, or list of species to the model. Will return the added object upon success.
 
-        Attributes
-        ----------
-        obj : Species, or list of Species
-            The species or list of species to be added to the model object.
+        :param obj: The species or list of species to be added to the model object.
+        :type obj: spatialpy.Model.Species | list(spatialpy.Model.Species
+
+        :rtype: spatialpy.Model.Species | list(spatialpy.Model.Species
         """
 
 
         if isinstance(obj, list):
             for S in obj:
                 self.add_species(S)
-        elif type(obj).__name__ == 'Species':
-            problem = self.problem_with_name(obj.name)
+        elif isinstance(obj, Species) or type(obj).__name__ == 'Species':
+            problem = self.__problem_with_name(obj.name)
             if problem is not None:
                 raise problem
             self.species_map[obj] = len(self.listOfSpecies)
@@ -312,22 +449,42 @@ class Model():
 
 
     def delete_species(self, obj):
-        """ Remove a Species from model.listOfSpecies. """
+        """ Remove a Species from model.listOfSpecies. 
+
+                :param obj: Species object to be removed
+                :type obj: spatialpy.Model.Species
+
+        """
         self.listOfSpecies.pop(obj)
 
     def delete_all_species(self):
+        """ Remove all species from model.listOfSpecies.
+        """
+
         self.listOfSpecies.clear()
 
     def get_parameter(self,pname):
+        """ Remove a Parameter from model.listOfParameters. 
+
+                :param pname: Name of parameter to be removed
+                :type pname: spatialpy.Model.Parameter
+
+        """
         try:
             return self.listOfParameters[pname]
         except:
             raise ModelError("No parameter named "+pname)
 
     def get_all_parameters(self):
+        """ Return a dictionary of all model parameters, indexed by name.
+
+            :rtype: dict
+
+        """
+
         return self.listOfParameters
 
-    def problem_with_name(self, name):
+    def __problem_with_name(self, name):
         if name in Model.reserved_names:
             return ModelError('Name "{}" is unavailable. It is reserved for internal SpatialPy use. Reserved Names: ({}).'.format(name, Model.reserved_names))
         if name in self.listOfSpecies:
@@ -345,15 +502,16 @@ class Model():
     def add_parameter(self,params):
         """ Add Parameter(s) to model.listOfParameters. Input can be either a single
             Parameter object or a list of Parameter objects.
+
+                :param params: Parameter object or list of Parameters to be added.
+                :type params: spatialpy.Model.Parameter | list(spatialpy.Model.Parameter)
         """
         if isinstance(params,list):
             for p in params:
                 self.add_parameter(p)
         else:
-            #if isinstance(params, type(Parameter())):
-            x = Parameter()
-            if str(type(params)) == str(type(x)):
-                problem = self.problem_with_name(params.name)
+            if isinstance(params, Parameter) or  type(params).__name__ == 'Parameter':
+                problem = self.__problem_with_name(params.name)
                 if problem is not None:
                     raise problem
                 # make sure that you don't overwrite an existing parameter??
@@ -361,42 +519,56 @@ class Model():
                     raise ParameterError("Parameter '{0}' has already been added to the model.".format(params.name))
                 self.listOfParameters[params.name] = params
             else:
-                #raise ParameterError("Could not resolve Parameter expression {} to a scalar value.".format(params))
-                raise ParameterError("Parameter '{0}' needs to be of type '{2}', it is of type '{1}'".format(params.name,str(type(params)),str(type(x))))
+                raise ParameterError("Parameter '{0}' needs to be of type '{2}', it is of type '{1}'".format(params.name,str(params),str(type(Parameter))))
         return params
 
     def delete_parameter(self, obj):
         self.listOfParameters.pop(obj)
 
     def set_parameter(self,pname,expression):
-        """ Set the expression of an existing paramter. """
+        """ Set the expression of an existing paramter. 
+
+                :param pname: Name of target parameter for expression
+                :type pname: str
+                :param expression: math expression to be assigned to target parameter
+                :type expression: str
+
+        """
         p = self.listOfParameters[pname]
         p.expression = expression
-        p.evaluate()
+        p._evaluate()
 
-    def resolve_parameters(self):
+    def _resolve_parameters(self):
         """ Attempt to resolve all parameter expressions to scalar floating point values.
             Must be called prior to exporting the model.  """
         self.update_namespace()
         for param in self.listOfParameters:
             try:
-                self.listOfParameters[param].evaluate(self.namespace)
+                self.listOfParameters[param]._evaluate(self.namespace)
             except:
-                raise ParameterError("Could not resolve Parameter expression "+param + "to a scalar value.")
+                raise ParameterError(f"Could not resolve Parameter '{param}' expression '{self.listOfParameters[param].expression}' to a scalar value.")
 
     def delete_all_parameters(self):
+        """ Remove all parameters from model.listOfParameters
+        """
+
         self.listOfParameters.clear()
 
     def add_reaction(self,reacs):
         """ Add Reaction(s) to the model. Input can be single instance, a list of instances
-            or a dict with name, instance pairs. """
+            or a dict with name, instance pairs. 
+
+            :param reacs: Reaction or list of Reactions to be added.
+            :type reacs: spatialpy.Model.Reaction | list(spatialpy.Model.Reaction)
+
+        """
         if isinstance(reacs, list):
             for r in reacs:
                 r.initialize(self)
                 if r.name is None or r.name == "":
                     r.name = 'rxn' + str(uuid.uuid4()).replace('-', '_')
                 self.listOfReactions[r.name] = r
-        elif type(reacs).__name__ == "Reaction":
+        elif isinstance(reacs, Reaction) or type(reacs).__name__ == "Reaction":
                 reacs.initialize(self)
                 if reacs.name is None or reacs.name == "":
                     reacs.name = 'rxn' + str(uuid.uuid4()).replace('-', '_')
@@ -405,18 +577,43 @@ class Model():
             raise ModelError("add_reaction() takes a spatialpy.Reaction object or list of objects")
 
     def get_reaction(self, rname):
+        """ Retrieve a reaction object from the model by name
+
+                :param rname: name of Reaction to retrieve
+                :type rname: str
+
+                :rtype: spatialpy.Model.Reaction
+
+        """
         return self.listOfReactions[rname]
 
     def get_num_reactions(self):
+        """ Returns the number of reactions in this model.
+
+                :rtype: int
+        """
         return len(self.listOfReactions)
 
     def get_all_reactions(self):
+        """ Returns a dictionary of all model reactions using names as keys.
+
+            :rtype: dict
+        """
+
         return self.listOfReactions
 
     def delete_reaction(self, obj):
+        """ Remove reaction from model.listOfReactions
+
+            :param obj: Reaction to be removed.
+            :type obj: spatialpy.Model.Reaction
+
+        """
         self.listOfReactions.pop(obj)
 
     def delete_all_reactions(self):
+        """ Remove all reactions from model.listOfReactions
+        """
         self.listOfReactions.clear()
 
     def __ne__(self, other):
@@ -428,7 +625,7 @@ class Model():
             self.listOfReactions == other.listOfReactions and \
             self.name == other.name)
 
-    def create_stoichiometric_matrix(self):
+    def _create_stoichiometric_matrix(self):
         """ Generate a stoichiometric matrix in sparse CSC format. """
 
         if self.get_num_reactions() > 0:
@@ -450,7 +647,7 @@ class Model():
         return N
 
 
-    def create_dependency_graph(self):
+    def _create_dependency_graph(self):
         """ Construct the sparse dependency graph. """
         # We cannot safely generate a dependency graph (without attempting to analyze the
         # propensity string itself) if the model contains custom propensities.
@@ -518,7 +715,7 @@ class Model():
 
         return G
 
-    def apply_initial_conditions(self):
+    def _apply_initial_conditions(self):
         """ Initalize the u0 matrix (zeros) and then apply each initial condition"""
         # initalize
         ns = self.get_num_species()
@@ -533,26 +730,32 @@ class Model():
 
 
 class Species():
-    """ Model of a biochemical species. """
+    """ Model of a biochemical species. Must be assigned a diffusion coefficent.
 
-    def __init__(self,name=None,diffusion_constant=None,diffusion_coefficient=None,D=None):
+            :param name: Name of the Species
+            :type name: str
+            :param diffusion_coefficient: non-constant coefficient of diffusion for Species
+            :type diffusion_coefficient: float
+            """
+
+    reserved_names = ["x", "vol","sd","data_fn","t","debug_flag","Spatialpy"]
+
+
+
+    def __init__(self,name=None, diffusion_coefficient=None):
         # A species has a name (string) and an initial value (positive integer)
         if name is None:
             raise ModelError("Species must have a name")
         else:
             self.name = name
-        if diffusion_constant is not None:
-            self.diffusion_constant=diffusion_constant
-        elif  diffusion_coefficient is not None:
-            self.diffusion_constant=diffusion_coefficient
-        elif D is not None:
-            self.diffusion_constant=D
+        if  diffusion_coefficient is not None:
+            self.diffusion_coefficient=diffusion_coefficient
         else:
-            raise ModelError("Species must have a diffusion_constant")
+            raise ModelError("Species must have a diffusion_coefficient")
 
 
     def __str__(self):
-        print_string = f"{self.name}: {str(self.diffusion_constant)}"
+        print_string = f"{self.name}: {str(self.diffusion_coefficient)}"
         return print_string
 
 class Parameter():
@@ -561,31 +764,32 @@ class Parameter():
         A parameter can be given as a String expression (function) or directly as a scalar value.
         If given a String expression, it should be evaluable in the namespace of a parent Model.
 
+            :param name: Name of the Parameter
+            :type name: str
+            :param expression: Mathematical expression of Parameter
+            :type expression: str
+            :param value: Parameter as value rather than expression.
+            :type value: float
+
     """
 
-    def __init__(self,name="",expression=None,value=None):
+    def __init__(self,name=None,expression=None):
 
         self.name = name
+        if name is None:
+            raise ParameterError("name is required for a Parameter.")
+
         # We allow expression to be passed in as a non-string type. Invalid strings
         # will be caught below. It is perfectly fine to give a scalar value as the expression.
         # This can then be evaluated in an empty namespace to the scalar value.
-        self.expression = expression
-        if expression != None:
+        if expression is not None:
             self.expression = str(expression)
+        else:
+            raise ParameterError("expression is required for a Parameter.")
 
-        self.value = value
+        self._evaluate()
 
-        # self.value is allowed to be None, but not self.expression. self.value
-        # might not be evaluable in the namespace of this parameter, but defined
-        # in the context of a model or reaction.
-        if self.expression == None:
-            #raise TypeError
-            self.value = 0
-
-        if self.value is None:
-            self.evaluate()
-
-    def evaluate(self,namespace={}):
+    def _evaluate(self,namespace={}):
         """ Evaluate the expression and return the (scalar) value """
         try:
             self.value = (float(eval(self.expression, namespace)))
@@ -593,6 +797,11 @@ class Parameter():
             self.value = None
 
     def set_expression(self,expression):
+        """ Sets the Parameters expression
+
+            :param expression: Expression to be set for Parameter
+            :type expression: str
+        """
         self.expression = expression
         # We allow expression to be passed in as a non-string type. Invalid strings
         # will be caught below. It is perfectly fine to give a scalar value as the expression.
@@ -603,7 +812,7 @@ class Parameter():
         if self.expression is None:
             raise TypeError
 
-        self.evaluate()
+        self._evaluate()
 
     def __str__(self):
         print_string = f"{self.name}: {str(self.expression)}"
@@ -612,34 +821,34 @@ class Parameter():
 
 class Reaction():
     """
-        Models a biochemical reaction. A reaction conatains dictinaries of species (reactants and products) and parameters.
-        The reaction's propensity function needs to be evaluable and result in a non-negative scalar value
-        in the namespace defined by the union of its Reactant, Product and Parameter dictionaries.
+        Models a biochemical reaction. A reaction conatains dictionaries of species (reactants and products) \
+        and parameters. The reaction's propensity function needs to be evaluable and result in a \
+        non-negative scalar value in the namespace defined by the union of its Reactant, Product and \
+        Parameter dictionaries. If massaction is set to true, propensity_function is not a valid argument. \
+        Instead, the propensity function is constructed automatically. For mass-action, zeroth, first \
+        and second order reactions are supported, attempting to used higher orders will result in an error.
+
+            :param name: String that the model is referenced by
+            :type name: str
+            :param parameters: A list of parameter instances
+            :type parameters: list(spatialpy.Model.Parameter)
+            :param propensity_function: String with the expression for the reaction's propensity
+            :type propensity_function: str
+            :param reactants: Dictionary of {species:stoichiometry} of reaction reactants
+            :type reactants: dict
+            :param products: Dictionary of {species:stoichiometry} of reaction products
+            :type products: dict
+            :param annotation: Description of the reaction (meta)
+            :type annotation: str
+            :param massaction: Is the reaction of mass action type or not?
+            :type massaction: bool
+            :param rate: if mass action, rate is a reference to a parameter instance.
+            :type rate: spatialpy.model.Parameter
+
 
     """
 
     def __init__(self, name = "", reactants = {}, products = {}, propensity_function=None, massaction=None, rate=None, annotation=None,restrict_to=None):
-        """
-            Initializes the reaction using short-hand notation.
-
-            Input:
-                name:                       string that the model is referenced by
-                parameters:                 a list of parameter instances
-                propensity_function:        String with the expression for the reaction's propensity
-                reactants:                  List of (species,stoichiometry) tuples
-                product:                    List of (species,stoichiometry) tuples
-                annotation:                 Description of the reaction (meta)
-
-                massaction True,{False}     is the reaction of mass action type or not?
-                rate                        if mass action, rate is a reference to a parameter instance.
-
-            If massaction is set to true, propensity_function is not a valid argument. Instead, the
-            propensity function is constructed automatically. For mass-action, zeroth, first and second
-            order reactions are supported, attempting to used higher orders will result in an error.
-
-            Raises: ReactionError
-
-        """
 
         # Metadata
         self.name = name
@@ -649,7 +858,13 @@ class Reaction():
         self.massaction = massaction
         self.rate = rate
         self.annotation = annotation
-        self.restrict_to = restrict_to
+        if isinstance(restrict_to, int):
+            self.restrict_to = [restrict_to]
+        elif isinstance(restrict_to, list) or restrict_to is None:
+            self.restrict_to = restrict_to
+        else:
+            errmsg = f"Reaction {name}: restrict_to must be an integer or list of integers."
+            raise ReactionError(errmsg)
 
     def initialize(self, model):
         """ Defered object initialization, called by model.add_reaction(). """
@@ -703,7 +918,7 @@ class Reaction():
                 self.marate = str(self.rate)
             else:
                 self.marate = self.rate
-            self.create_mass_action()
+            self.__create_mass_action()
         else:
             self.type = "customized"
 
@@ -724,7 +939,7 @@ class Reaction():
         return print_string
 
 
-    def create_mass_action(self):
+    def __create_mass_action(self):
         """ Create a mass action propensity function given self.reactants and a single parameter value.
 
          We support zeroth, first and second order propensities only.
@@ -772,20 +987,38 @@ class Reaction():
         self.propensity_function = propensity_function
         self.ode_propensity_function = ode_propensity_function
 
-    def set_type(self,type):
-        if type not in {'mass-action','customized'}:
-            raise ReactionError("Invalid reaction type.")
-        self.type = type
 
     def add_reactant(self,S,stoichiometry):
+        """ Add a reactant to this reaction
+            
+            :param s: reactant Species object
+            :type s: spatialpy.Model.Species
+            :param stoichiometry: Stoichiometry of this participant reactant
+            :type stoichiometry: int
+
+        """
         if stoichiometry <= 0:
             raise ReactionError("Reaction "+self.name+"Stoichiometry must be a positive integer.")
         self.reactants[S.name]=stoichiometry
 
     def add_product(self,S,stoichiometry):
+        """ Add a product to this reaction
+
+            :param s: Species object to be produced by the reaction
+            :type s: spatialpy.Model.Species
+            :param stoichiometry: Stoichiometry of this product.
+            :type stoichiometry: int
+
+        """
         self.products[S.name]=stoichiometry
 
     def annotate(self,annotation):
+        """ Add an annotation to this reaction.
+
+                :param annotation: Annotation note to be added to reaction
+                :type annotation: str
+
+        """
         self.annotation = annotation
 
 
