@@ -205,14 +205,12 @@ class Model():
         self.num_timesteps = math.ceil(num_steps * self.output_freq)
 
         # array of step numbers corresponding to the simulation times in the timespan
-        self.tspan = numpy.arange(0, self.num_timesteps+self.timestep_size, output_interval)
-        output_steps = numpy.arange(0, self.num_timesteps+self.timestep_size, self.output_freq)
+        output_steps = numpy.arange(0, self.num_timesteps + self.timestep_size, self.output_freq)
         self.output_steps = numpy.round(output_steps).astype(int)
-
-        # self.timespan_steps = numpy.linspace(0,self.num_timesteps,
-        #                 num=math.ceil(self.num_timesteps/self.output_freq)+1, dtype=int)
-
-        # self.tspan = numpy.linspace(0,self.num_timesteps*self.timestep_size,self.num_timesteps)
+        sim_steps = numpy.arange(0, self.num_timesteps + self.timestep_size, self.timestep_size)
+        self.tspan = numpy.zeros((self.output_steps.size), dtype=float)
+        for i, step in enumerate(self.output_steps):
+            self.tspan[i] = sim_steps[step]
 
     def timespan(self, time_span, timestep_size=None):
         """
