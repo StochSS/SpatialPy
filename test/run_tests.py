@@ -30,13 +30,13 @@ if __name__ == '__main__':
         print('Running tests in develop mode. Appending repository directory to system path.')
         sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-    import test_solver
     import test_model
+    import test_solver
     #import test_mincde
 
     modules = [
+        test_model,
         test_solver,
-        test_model
         #test_mincde,
     ]
 
