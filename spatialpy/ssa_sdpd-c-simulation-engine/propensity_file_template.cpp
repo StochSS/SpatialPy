@@ -41,6 +41,8 @@ namespace Spatialpy{
     __DEFINE_REACTIONS__
     /* Deterministic RHS definitions */
     __DEFINE_CHEM_FUNS__
+    /* Definition for get next output step */
+    __DEFINE_GET_NEXT_OUTPUT__
 
     PropensityFun *ALLOC_propensities(void)
     {

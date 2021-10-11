@@ -275,10 +275,6 @@ class Result():
         if spec_name not in self.model.listOfSpecies.keys():
             raise ResultError("Species '{0}' not found".format(spec_name))
 
-        #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
-        #                    num=self.model.num_timesteps+1, dtype=int)
-        #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
-        #        num=math.ceil(self.model.num_timesteps/self.model.output_freq)+1) 
         lt=len(self.get_timespan())-1
         t_index_arr = numpy.linspace(0,lt,num=lt+1,dtype=int)
 
