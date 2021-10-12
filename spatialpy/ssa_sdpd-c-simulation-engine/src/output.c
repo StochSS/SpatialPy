@@ -106,6 +106,7 @@ namespace Spatialpy{
         int i;
         char filename[256];
         int np = output_buffer_current_num_particles;
+        static unsigned int output_index = 0;
         if(output_buffer_current_step == 0){
             sprintf(filename, "output0_boundingBox.vtk");
             if(debug_flag){printf("Writing file '%s'\n", filename);}
@@ -125,7 +126,7 @@ namespace Spatialpy{
             fprintf(fp, "%lf %lf\n", system->zlo, system->zhi);
             fclose(fp);
         }
-        sprintf(filename,"output%u.vtk",output_buffer_current_step);
+        sprintf(filename,"output%u.vtk", output_index++);
         if(debug_flag){printf("Writing file '%s'\n", filename);}
         if((fp = fopen(filename,"w+"))==NULL){
             perror("Can't write output vtk file");exit(1);

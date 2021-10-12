@@ -36,6 +36,7 @@ namespace Spatialpy{
     /* Global variable that can be used to pass parameters to the propensity functions. */
     extern double *parameters;
 
+    unsigned int get_next_output(ParticleSystem* system);
     /* Definition of the propensity function. */
     // double rfun(const int *x, double t, const double vol, const double *data, int sd, int voxel, int *xx, const size_t *irK, const size_t *jcK, const double *prK)
     //typedef double (*PropensityFun)(const int *, double, double, const double *, int, int, int *, const size_t *, const size_t *, const double *);

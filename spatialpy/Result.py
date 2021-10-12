@@ -193,9 +193,7 @@ class Result():
 
         if debug:
             print("read_step({0}) ".format(step_num), end='')
-        #num = int(step_num * self.model.output_freq)
-        #num = int(step_num / self.model.timestep_size)
-        num = self.model.timespan_steps[step_num]
+        num = self.model.output_steps[step_num]
         filename = os.path.join(self.result_dir, "output{0}.vtk".format(num))
 
         if debug:
@@ -238,8 +236,7 @@ class Result():
 
         """
 
-        self.tspan = numpy.linspace(0,self.model.num_timesteps,
-                num=math.ceil(self.model.num_timesteps/self.model.output_freq)+1) * self.model.timestep_size
+        self.tspan = self.model.tspan
         return self.tspan
 
     def get_species(self, species, timepoints=None, concentration=False, deterministic=False, debug=False):
@@ -278,10 +275,6 @@ class Result():
         if spec_name not in self.model.listOfSpecies.keys():
             raise ResultError("Species '{0}' not found".format(spec_name))
 
-        #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
-        #                    num=self.model.num_timesteps+1, dtype=int)
-        #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
-        #        num=math.ceil(self.model.num_timesteps/self.model.output_freq)+1) 
         lt=len(self.get_timespan())-1
         t_index_arr = numpy.linspace(0,lt,num=lt+1,dtype=int)
 
