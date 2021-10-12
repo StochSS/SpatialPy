@@ -352,6 +352,13 @@ class Domain():
         if height is None:
             height = 4.8 if use_matplotlib else 500
 
+        if not numpy.count_nonzero(self.vertices[:,1]):
+            self.dimensions = 1
+        elif not numpy.count_nonzero(self.vertices[:,2]):
+            self.dimensions = 2
+        else:
+            self.dimensions = 3
+
         if use_matplotlib:
             import matplotlib.pyplot as plt
 
