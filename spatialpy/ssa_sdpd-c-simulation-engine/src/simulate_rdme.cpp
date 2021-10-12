@@ -412,14 +412,21 @@ namespace Spatialpy{
 
 
                 if(debug_flag){printf("nsm: tt=%e subvol=%i type=%i ",tt,subvol->id,subvol->type);}
-                if(debug_flag){printf("Diff %i->%i\n",subvol->id,dest_subvol->id);}
+                if(debug_flag){printf("Diff %i->%i",subvol->id,dest_subvol->id);}
+                if(debug_flag){
+                    printf("    xx[%i]=[",subvol->id);
+                    for(i=0;i<system->num_stoch_species;i++){
+                        printf("%i ",i,subvol->xx[i]);
+                    }
+                    printf("]\n");
+                }
+
 
                 /* Save reaction and diffusion rates. */
                 /* Recalculate the reaction rates using dependency graph G. */
                 if (system->num_stoch_rxns > 0){
                     for (i = system->jcG[spec], rdelta = 0.0, rrdelta = 0.0; i < system->jcG[spec+1]; i++) {
 
-    // herehere
                         j = system->irG[i];
                         // update this voxel's reactions
                         old = subvol->rrate[j];

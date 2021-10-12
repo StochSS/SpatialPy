@@ -67,10 +67,8 @@ namespace Spatialpy{
         //std::shared_ptr<double[]> data_fn;
         // chem_rxn_system
         unsigned int*xx; // populaion of discrete/stochastic species
-        double *C;
-        double *Q;
-        //std::shared_ptr<double[]> C;  // concentration of chem species
-        //std::shared_ptr<double[]> Q;  // flux of chem species
+        double *C; // concentration of chem species
+        double *Q; // flux of chem species
         // below here for simulation
         std::vector<NeighborNode> neighbors;
 
