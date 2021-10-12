@@ -276,8 +276,7 @@ class Result():
 
         lt=len(self.get_timespan())-1
         t_index_arr = numpy.linspace(0,lt,num=lt+1,dtype=int)
-        print(t_index_arr)
-
+        
         if timepoints is not None:
             if isinstance(timepoints,float):
                 raise ResultError("timepoints argument must be an integer, the index of time timespan")
