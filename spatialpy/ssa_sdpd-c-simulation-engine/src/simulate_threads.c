@@ -239,7 +239,7 @@ namespace Spatialpy{
                 // Release output thread
                 if(debug_flag) printf("[%i] Starting the Output threads\n",system->current_step);
                 pthread_barrier_wait(&begin_output_barrier);
-                next_output_step = get_next_output(system)
+                next_output_step = get_next_output(system);
                 // Wait until output threads are done
                 pthread_barrier_wait(&end_output_barrier);
                 if(debug_flag) printf("[%i] Output threads finished\n",system->current_step);
