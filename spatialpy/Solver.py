@@ -32,7 +32,7 @@ import re
 from spatialpy.Model import *
 from spatialpy.Result import *
 
-def read_from_stdout(stdout,verbose=True):
+def _read_from_stdout(stdout,verbose=True):
     ''' Used with subprocess.Popen and threading to capture all output and print
         to the screen notebook without waiting or storing the output ina buffer.'''
     try:
@@ -45,14 +45,22 @@ def read_from_stdout(stdout,verbose=True):
                 #got empty line, ending
                 return
     except Exception as e:
-        print("read_from_stdout(): {0}".format(e))
+        print("_read_from_stdout(): {0}".format(e))
 
 
 class Solver:
-    """ SpatialPy solver object."""
+    """ SpatialPy solver object.
+
+            :param model: Target model of solver simulation
+            :type model: spatialpy.Model.Model
+            :param debug_level: Target level of debugging
+            :type debug_level: int
+    """
 
     def __init__(self, model, debug_level=0):
-        """ Constructor. """
+        """ Constructor
+        """
+
         # TODO: fix class checking
         # if not isinstance(model, Model):
         #    raise SimulationError("Solver constructors must take a Model as an argument.")
@@ -95,7 +103,7 @@ class Solver:
         except Exception as e:
             pass
 
-    def run_debugger(self):
+    def __run_debugger(self):
         """ Start a gdbgui debugger at port 5000. """
         self.debugger_url = 'http://127.0.0.1:5000'
         if not hasattr(self, 'debugger_process'):
@@ -103,7 +111,16 @@ class Solver:
         print(f'Your debugger is running at {self.debugger_url}')
 
     def compile(self, debug=False, profile=False):
-        """ Compile the model."""
+        """ Compile the model.
+
+            :param debug: If True, will print additional build debugging
+            :type debug: bool
+            :param profile: If True, will print additional profiling information
+            :type profile: bool
+        """
+
+        # Create the models expression utility
+        self.model.get_expression_utility()
 
         # Create a unique directory each time call to compile.
         self.build_dir = tempfile.mkdtemp(
@@ -116,9 +133,9 @@ class Solver:
         self.propfilename = re.sub('[^\w\_]', '', self.model_name) # Match except word characters \w = ([a-zA-Z0-9_]) and \_ = _ replace with ''
         self.propfilename = self.propfilename + '_generated_model'
         self.prop_file_name = self.build_dir + '/' + self.propfilename + '.c'
-        if self.debug_level > 1:
+        if self.debug_level >= 1:
             print("Creating propensity file {0}".format(self.prop_file_name))
-        self.create_propensity_file(file_name=self.prop_file_name)
+        self.__create_propensity_file(file_name=self.prop_file_name)
 
         # Build the solver
         makefile = self.SpatialPy_ROOTDIR+'/build/Makefile'
@@ -167,18 +184,23 @@ class Solver:
     def run(self, number_of_trajectories=1, seed=None, timeout=None,
                 number_of_threads=None, debug=False, profile=False, verbose=True):
         """ Run one simulation of the model.
-        Args:
-            number_of_trajectories: (int) How many trajectories should be simulated.
-            seed: (int) the random number seed (incremented by one for multiple runs).
-            timeout: (int) maximum number of seconds the solver can run.
-            number_of_threads: (int) the number threads the solver will use.
-            debug: (bool) start a gdbgui debugger (also compiles with debug symbols
+
+            :param number_of_trajectories: How many trajectories should be simulated.
+            :type number_of_trajectories: int
+            :param seed: the random number seed (incremented by one for multiple runs).
+            :type seed: int
+            :param timeout: maximum number of seconds the solver can run.
+            :type timeout: int
+            :param number_of_threads: the number threads the solver will use.
+            :type number_of_threads: int
+            :param debug: start a gdbgui debugger (also compiles with debug symbols
                 if compilation hasn't happened)
-            profile: (bool) output gprof profiling data if available
-        Returns:
-            Result object.
-                or, if number_of_trajectories > 1
-            a list of Result objects
+            :type debug: bool
+            :param profile: Output gprof profiling data if available
+            :type profile: bool
+
+            :rtype: spatialpy.Result.Result | list(spatialpy.Result.Result)
+
         """
         if number_of_trajectories > 1:
             result_list = []
@@ -191,6 +213,8 @@ class Solver:
             outfile = tempfile.mkdtemp(
                 prefix='spatialpy_result_', dir=os.environ.get('SPATIALPY_TMPDIR'))
             result = Result(self.model, outfile)
+            if self.debug_level >= 1:
+                print("Running simulation. Result dir: {0}".format(outfile))
             solver_cmd = 'cd {0}'.format(
                 outfile) + ";" + os.path.join(self.build_dir, self.executable_name)
 
@@ -200,8 +224,8 @@ class Solver:
             if seed is not None:
                 solver_cmd += " -s "+str(seed+run_ndx)
 
-            if self.debug_level > 1:
-                print('cmd: {0}\n'.format(solver_cmd))
+            if self.debug_level >= 1:
+                print('cmd: {0}'.format(solver_cmd))
 
             start = time.monotonic()
             return_code = None
@@ -211,7 +235,7 @@ class Solver:
                         start_new_session=True) as process:
                     try:
                         # start thread to read process stdout to stdout
-                        t = threading.Thread(target=read_from_stdout,
+                        t = threading.Thread(target=_read_from_stdout,
                             args=(process.stdout,verbose,))
                         t.start()
                         if timeout is not None:
@@ -245,7 +269,7 @@ class Solver:
 
             result.success = True
             if profile:
-                self.read_profile_info(result)
+                self.__read_profile_info(result)
             if number_of_trajectories > 1:
                 result_list.append(result)
             else:
@@ -253,7 +277,7 @@ class Solver:
 
         return result_list
 
-    def read_profile_info(self, result):
+    def __read_profile_info(self, result):
         profile_data_path = os.path.join(result.result_dir, 'gmon.out')
         exe_path = os.path.join(self.build_dir, self.executable_name)
         cmd = f'gprof {exe_path} {profile_data_path}'
@@ -264,7 +288,7 @@ class Solver:
         print(f'Gprof report for {result.result_dir}')
         print(stdout.decode('utf-8'))
 
-    def create_propensity_file(self, file_name=None):
+    def __create_propensity_file(self, file_name=None):
         """ Generate the C propensity file that is used to compile the solvers.
         """
 
@@ -289,14 +313,6 @@ class Solver:
         propfile = open(file_name, "w")
         propfilestr = template.read()
 
-        speciesdef = ""
-        i = 0
-        for S in self.model.listOfSpecies:
-            speciesdef += "#define " + S + " " + "x[" + str(i) + "]" + "\n"
-            i += 1
-
-        propfilestr = propfilestr.replace("__DEFINE_SPECIES__", speciesdef)
-
         propfilestr = propfilestr.replace(
             "__NUMBER_OF_REACTIONS__", str(self.model.get_num_reactions()))
         propfilestr = propfilestr.replace(
@@ -305,11 +321,13 @@ class Solver:
             "__NUMBER_OF_VOXELS__", str(self.model.domain.get_num_voxels()))
 
         # Make sure all paramters are evaluated to scalars before we write them to the file.
-        self.model.resolve_parameters()
+        self.model._resolve_parameters()
+        sanitized_parameters = self.model.sanitized_parameter_names()
         parameters = ""
-        for p in self.model.listOfParameters:
+        for pname in self.model.listOfParameters:
+            p = sanitized_parameters[pname]
             parameters += "const double " + p + " = " + \
-                str(self.model.listOfParameters[p].value) + ";\n"
+                str(self.model.listOfParameters[pname].value) + ";\n"
         propfilestr = propfilestr.replace(
             "__DEFINE_PARAMETERS__", str(parameters))
 
@@ -320,12 +338,13 @@ class Solver:
         funcinits = ""
         i = 0
         for R in self.model.listOfReactions:
+            propensity_function = self.model.expr.getexpr_cpp(self.model.listOfReactions[R].propensity_function)
             func = ""
             rname = self.model.listOfReactions[R].name
             func += funheader.replace("__NAME__", rname) + "\n{\n"
             if self.model.listOfReactions[R].restrict_to == None or (isinstance(self.model.listOfReactions[R].restrict_to, list) and len(self.model.listOfReactions[R].restrict_to) == 0):
                 func += "return "
-                func += self.model.listOfReactions[R].propensity_function
+                func += propensity_function
                 func += ";"
             else:
                 func += "if("
@@ -341,7 +360,7 @@ class Solver:
                         "When restricting reaction to types, you must specify either a list or an int")
                 func += "){\n"
                 func += "return "
-                func += self.model.listOfReactions[R].propensity_function
+                func += propensity_function
                 func += ";"
                 func += "\n}else{"
                 func += "\n\treturn 0.0;}"
@@ -355,19 +374,19 @@ class Solver:
         propfilestr = propfilestr.replace("__DEFINE_REACTIONS__", funcs)
         propfilestr = propfilestr.replace("__DEFINE_PROPFUNS__", funcinits)
 
-        # TODO make deterministic chemical reaction functions work
         funheader = "double det__NAME__(const double *x, double t, const double vol, const double *data_fn, int sd)"
         deterministic_chem_rxn_functions = ""
         deterministic_chem_rxn_function_init = ""
         ############################################
         i = 0
         for R in self.model.listOfReactions:
+            ode_propensity_function = self.model.expr.getexpr_cpp(self.model.listOfReactions[R].ode_propensity_function)
             func = ""
             rname = self.model.listOfReactions[R].name
             func += funheader.replace("__NAME__", rname) + "\n{\n"
             if self.model.listOfReactions[R].restrict_to == None or (isinstance(self.model.listOfReactions[R].restrict_to, list) and len(self.model.listOfReactions[R].restrict_to) == 0):
                 func += "return "
-                func += self.model.listOfReactions[R].ode_propensity_function
+                func += ode_propensity_function
                 func += ";"
             else:
                 func += "if("
@@ -383,7 +402,7 @@ class Solver:
                         "When restricting reaction to types, you must specify either a list or an int")
                 func += "){\n"
                 func += "return "
-                func += self.model.listOfReactions[R].ode_propensity_function
+                func += ode_propensity_function
                 func += ";"
                 func += "\n}else{"
                 func += "\n\treturn 0.0;}"
@@ -413,7 +432,7 @@ class Solver:
         propfilestr = propfilestr.replace("__INIT_PARTICLES__", init_particles)
 
         # process initial conditions here
-        self.model.apply_initial_conditions()
+        self.model._apply_initial_conditions()
         nspecies = self.model.u0.shape[0]
         ncells = self.model.u0.shape[1]
 
@@ -430,16 +449,16 @@ class Solver:
         outstr += "};"
         input_constants += outstr + "\n"
 
-        data_fn_defs = ""
+        data_fn_assign = ""
         if len(self.model.listOfSpecies) > 0:
             for ndf in range(len(self.model.listOfDataFunctions)):
-                data_fn_defs += "#define {0} data_fn[{1}]\n".format(
-                    self.model.listOfDataFunctions[ndf].name, ndf)
+                data_fn_assign += "this_particle->data_fn[{0}] = input_data_fn[{0}*{1}+id]; ".format(ndf,ncells)
+
         propfilestr = propfilestr.replace(
-            "__DATA_FUNCTION_DEFINITIONS__", data_fn_defs)
+            "__DATA_FUNCTION_ASSIGN__", data_fn_assign)
 
         if len(self.model.listOfSpecies) > 0:
-            N = self.model.create_stoichiometric_matrix()
+            N = self.model._create_stoichiometric_matrix()
             if(min(N.shape) > 0):
                 Nd = N.todense() # this will not work if Nrxn or Nspecies is zero
                 outstr = "static int input_N_dense[{0}] = ".format(
@@ -475,13 +494,25 @@ class Solver:
                     outstr += str(int(N.data[i]))
                 outstr += "};"
                 input_constants += outstr + "\n"
+
+                outstr = "static double input_data_fn[{0}] = ".format(len(self.model.listOfDataFunctions)*ncells)
+                outstr += "{"
+                for ndf, df in enumerate(self.model.listOfDataFunctions):
+                    for i in range(ncells):
+                        if i > 0 and ndf==0:
+                            outstr += ','
+                        c = self.model.domain.coordinates()
+                        outstr += str(df.map( [c[i,0],c[i,1],c[i,2]] ))
+                outstr += "};"
+                input_constants += outstr + "\n"
             else:
                 input_constants += "static int input_N_dense[0] = {};\n"
                 input_constants += "static size_t input_irN[0] = {};\n"
                 input_constants += "static size_t input_jcN[0] = {};\n"
                 input_constants += "static int input_prN[0] = {};\n"
+                input_constants += "static double input_data_fn[0] = {};\n"
 
-            G = self.model.create_dependency_graph()
+            G = self.model._create_dependency_graph()
             outstr = "static size_t input_irG[{0}] = ".format(len(G.indices))
             outstr += "{"
             for i in range(len(G.indices)):
@@ -521,7 +552,7 @@ class Solver:
                 try:
                     if s not in self.model.listOfDiffusionRestrictions or \
                        sd_id in self.model.listOfDiffusionRestrictions[s]:
-                        outstr += "{0}".format(s.diffusion_constant)
+                        outstr += "{0}".format(s.diffusion_coefficient)
                     else:
                         outstr += "0.0"
                 except KeyError as e:
@@ -592,8 +623,6 @@ class Solver:
         init_bc = ""
         for bc in self.model.listOfBoundaryConditions:
             init_bc += bc.expression()
-        for ndf, df in enumerate(self.model.listOfDataFunctions):
-            init_bc += "me->data_fn[{0}] = {1};\n".format(ndf,df.expression())
         propfilestr = propfilestr.replace("__BOUNDARY_CONDITIONS__", init_bc)
 
         #### Write the data to the file ####

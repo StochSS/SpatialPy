@@ -24,3 +24,24 @@ class Geometry:
 
     def inside(self, x, on_boundary):
         raise Exception("Subclasses of spatialpy.Geometry must implement the inside() method")
+
+
+class GeometryAll(Geometry):
+    """ Mark all particles. """
+    def inside(self, x, on_boundary):
+        return True
+
+class GeometryExterior(Geometry):
+    """ Mark particles that are on the edge of the domain. 
+        Only works for meshes that define triangles and tetrahedrons.
+    """
+    def inside(self, x, on_boundary):
+        return on_boundary
+
+
+class GeometryInterior(Geometry):
+    """ Mark particles that are not on the edge of the domain. 
+        Only works for meshes that define triangles and tetrahedrons.
+    """
+    def inside(self, x, on_boundary):
+        return not on_boundary
