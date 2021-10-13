@@ -204,18 +204,17 @@ class Model():
         self.output_freq = output_interval/self.timestep_size
         if self.output_freq < self.timestep_size:
             raise ModelError("Timestep size exceeds output frequency.")
-            
+
         self.num_timesteps = math.ceil(num_steps * self.output_freq)
 
         # array of step numbers corresponding to the simulation times in the timespan
         output_steps = numpy.arange(0, self.num_timesteps + self.timestep_size, self.output_freq)
-        self.output_steps = numpy.round(output_steps).astype(int)
+        self.output_steps = numpy.unique(numpy.round(output_steps).astype(int))
         sim_steps = numpy.arange(0, self.num_timesteps + self.timestep_size, self.timestep_size)
-        tspan = numpy.zeros((self.output_steps.size), dtype=float)
+        self.tspan = numpy.zeros((self.output_steps.size), dtype=float)
         for i, step in enumerate(self.output_steps):
-            tspan[i] = sim_steps[step]
-        self.tspan = numpy.unique(tsapn)
-
+            self.tspan[i] = sim_steps[step]
+    
     def timespan(self, time_span, timestep_size=None):
         """
         Set the time span of simulation. The SSA-SDPD engine does not support
