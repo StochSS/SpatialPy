@@ -100,6 +100,9 @@ class Domain():
 
         return "\n".join(domain_strs)
 
+    def _ipython_display_(self, use_matplotlib=False):
+        self.plot_types(width="auto", height="auto", use_matplotlib=use_matplotlib)
+
     def add_point(self, x, vol, mass, type, nu, fixed):
         """ Add a single point particle to the domain space.
 
@@ -347,10 +350,14 @@ class Domain():
         :type use_matplotlib: bool
         '''
 
-        if width is None:
-            width = 6.4 if use_matplotlib else 500
-        if height is None:
-            height = 4.8 if use_matplotlib else 500
+        if use_matplotlib:
+            width = 6.4 if width in (None, "auto") else width
+            height = 4.8 if height in (None, "auto") else height
+        else:
+            if width in (None, "auto"):
+                width = None if width == "auto" else 500
+            if height is None:
+                height = None if height == "auto" else 500
 
         if not numpy.count_nonzero(self.vertices[:,1]):
             self.dimensions = 1
