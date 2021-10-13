@@ -199,18 +199,22 @@ class Model():
         if timestep_size is not None:
             self.timestep_size = timestep_size
         if self.timestep_size is None:
-            raise ModelError("timestep_size is not set")
-
+            self.timestep_size = output_interval
+        
         self.output_freq = output_interval/self.timestep_size
+        if self.output_freq < self.timestep_size:
+            raise ModelError("Timestep size exceeds output frequency.")
+            
         self.num_timesteps = math.ceil(num_steps * self.output_freq)
 
         # array of step numbers corresponding to the simulation times in the timespan
         output_steps = numpy.arange(0, self.num_timesteps + self.timestep_size, self.output_freq)
         self.output_steps = numpy.round(output_steps).astype(int)
         sim_steps = numpy.arange(0, self.num_timesteps + self.timestep_size, self.timestep_size)
-        self.tspan = numpy.zeros((self.output_steps.size), dtype=float)
+        tspan = numpy.zeros((self.output_steps.size), dtype=float)
         for i, step in enumerate(self.output_steps):
-            self.tspan[i] = sim_steps[step]
+            tspan[i] = sim_steps[step]
+        self.tspan = numpy.unique(tsapn)
 
     def timespan(self, time_span, timestep_size=None):
         """

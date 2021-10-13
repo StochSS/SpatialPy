@@ -119,6 +119,9 @@ class Solver:
             :type profile: bool
         """
 
+        if self.output_freq < self.model.timestep_size:
+            raise ModelError("Timestep size exceeds output frequency.")
+
         # Create the models expression utility
         self.model.get_expression_utility()
 
