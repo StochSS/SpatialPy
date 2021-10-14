@@ -624,10 +624,10 @@ class Domain():
         z_list = numpy.linspace(zlim[0],zlim[1],nz)
         ndx = 0
         totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0]) * (zlim[1] - zlim[0])
+        vol = totalvolume / numberparticles
         for x in x_list:
             for y in y_list:
                 for z in z_list:
-                    vol = totalvolume / numberparticles
                     if rho is None:
                         rho = mass / vol
                     obj.vol[ndx] = vol
@@ -695,10 +695,9 @@ class Domain():
         y_list = numpy.linspace(ylim[0],ylim[1],ny)
         ndx = 0
         totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0])
-        #print("totalvolume",totalvolume)
+        vol = totalvolume / numberparticles
         for x in x_list:
             for y in y_list:
-                vol = totalvolume / numberparticles
                 if rho is None:
                     rho = mass / vol
                 obj.vol[ndx] = vol
