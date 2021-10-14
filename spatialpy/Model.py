@@ -238,7 +238,7 @@ class Model():
 
 
 
-    def set_type(self, geometry_ivar, type_id, mass=None, nu=None, fixed=False):
+    def set_type(self, geometry_ivar, type_id, mass=None, nu=None, rho=None, fixed=False):
         """ Add a type definition to the model.  By default, all regions are set to
         type 0. Returns the number of domain points that were tagged with this type_id
 
@@ -249,6 +249,8 @@ class Model():
             :type type_id: int
             :param mass: The mass of each particle in the type
             :type mass: float
+            :param rho: The density of each particle in the type
+            :type rho: float
             :param nu: The viscosity of each particle in the type
             :type nu: float
             :param fixed: Are the particles in this type immobile
@@ -268,9 +270,11 @@ class Model():
         for v_ndx in range(self.domain.get_num_voxels()):
             if geometry_ivar.inside( self.domain.coordinates()[v_ndx,:], on_boundary[v_ndx]):
                 self.domain.type[v_ndx] = type_id
-                if (mass is not None):
+                if mass is not None:
                     self.domain.mass[v_ndx] = mass
-                if (nu is not None):
+                if rho is not None:
+                    self.domain.rho[v_ndx] = rho
+                if nu is not None:
                     self.domain.nu[v_ndx] = nu
                 self.domain.fixed[v_ndx] = fixed
                 count +=1
