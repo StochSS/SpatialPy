@@ -67,6 +67,7 @@ class Domain():
         self.mass = numpy.zeros((numpoints), dtype=float)
         self.type = numpy.zeros((numpoints), dtype=int)
         self.nu = numpy.zeros((numpoints), dtype=float)
+        self.c = numpy.zeros((numpoints), dtype=float)
         self.fixed = numpy.zeros((numpoints), dtype=bool)
 
         self.rho0 = rho0
@@ -87,7 +88,8 @@ class Domain():
         domain_strs.extend(["", "Paritcles", ""])
         for i, vertex in enumerate(self.vertices):
             v_str = f"{pad}{i+1}: {vertex}\n{pad}   Volume:{self.vol[i]}, Mass: {self.mass[i]}, "
-            v_str += f"Type: {self.type[i]}, nu: {self.nu[i]}, Fixed: {self.fixed[i]}"
+            v_str += f"Type: {self.type[i]}, nu: {self.nu[i]}, Fixed: {self.fixed[i]}, "
+            v_str += f"Artificial Speed of Sound: {self.c[i]}"
             domain_strs.append(v_str)
         if self.triangles is not None:
             domain_strs.extend(["", "Triangles", ""])
@@ -100,7 +102,7 @@ class Domain():
 
         return "\n".join(domain_strs)
 
-    def add_point(self, x, vol, mass, type, nu, fixed):
+    def add_point(self, x, vol, mass, type, nu, fixed, c=0):
         """ Add a single point particle to the domain space.
 
             :param x: Spatial coordinate vertices of point to be added
@@ -120,12 +122,16 @@ class Domain():
 
             :param fixed: True if particle is spatially fixed, else False
             :type fixed: bool
+
+            :param c: Default artificial speed of sound of particle to be created
+            :type c: float
         """
 
         self.vol = numpy.append(self.vol, vol)
         self.mass = numpy.append(self.mass, mass)
         self.type = numpy.append(self.type, type)
         self.nu = numpy.append(self.nu, nu)
+        self.c = numpy.append(self.c, c)
         self.fixed = numpy.append(self.fixed, fixed)
 
         self.vertices = numpy.append(self.vertices, [x], axis=0)
@@ -546,8 +552,10 @@ class Domain():
                         rho0=domain['rho_0'], c0=domain['c_0'], P0=domain['p_0'], gravity=domain['gravity'])
 
             for particle in domain['particles']:
+                # StochSS backward compatability check for c
+                c = 0 if "c" not in particle.keys() else particle['c']
                 obj.add_point(particle['point'], particle['volume'], particle['mass'],
-                               particle['type'], particle['nu'], particle['fixed'])
+                               particle['type'], particle['nu'], particle['fixed'], c=c)
 
             return obj
         except KeyError as e:
@@ -555,7 +563,7 @@ class Domain():
 
 
     @classmethod
-    def create_3D_domain(cls, xlim, ylim, zlim, nx, ny, nz, type_id=1, mass=1.0, nu=1.0, fixed=False, **kwargs):
+    def create_3D_domain(cls, xlim, ylim, zlim, nx, ny, nz, type_id=1, mass=1.0, nu=1.0, c=0, fixed=False, **kwargs):
         """ Create a filled 3D domain
 
             :param xlim: highest and lowest coordinate in the x dimension
@@ -584,6 +592,9 @@ class Domain():
 
             :param nu: default viscosity of particles created to be created. Defaults to 1.0
             :type nu: float
+
+            :param c: default artificial speed of sound of particles to be created. Defaults to 0.0.
+            :type c: float
 
             :param fixed: spatially fixed flag of particles created to be created. Defaults to false.
             :type fixed: bool
@@ -619,6 +630,7 @@ class Domain():
                     obj.type[ndx] = type_id
                     obj.mass[ndx] = mass
                     obj.nu[ndx] = nu
+                    obj.c[ndx] = c
                     obj.fixed[ndx] = fixed
                     ndx+=1
 
@@ -626,7 +638,7 @@ class Domain():
         return obj
 
     @classmethod
-    def create_2D_domain(cls, xlim, ylim, nx, ny, type_id=1, mass=1.0, nu=1.0, fixed=False, **kwargs):
+    def create_2D_domain(cls, xlim, ylim, nx, ny, type_id=1, mass=1.0, nu=1.0, c=0, fixed=False, **kwargs):
         """ Create a filled 2D domain
 
             :param xlim: highest and lowest coordinate in the x dimension
@@ -649,6 +661,9 @@ class Domain():
 
             :param nu: default viscosity of particles created to be created. Defaults to 1.0
             :type nu: float
+
+            :param c: default artificial speed of sound of particles to be created. Defaults to 0.0.
+            :type c: float
 
             :param fixed: spatially fixed flag of particles created to be created. Defaults to false.
             :type fixed: bool
@@ -683,6 +698,7 @@ class Domain():
                 obj.type[ndx] = type_id
                 obj.mass[ndx] = mass
                 obj.nu[ndx] = nu
+                obj.c[ndx] = c
                 obj.fixed[ndx] = fixed
                 ndx+=1
 
