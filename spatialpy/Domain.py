@@ -462,6 +462,8 @@ class Domain():
             obj.tetrahedrons[ int(c.attrib['index']),3] = int(c.attrib['v3'])
         # volume
         obj.calculate_vol()
+        if numpy.count_nonzero(obj.vol):
+            raise DomainError("Paritcles cannot have 0 volume")
         # set Mass equal to the volume
         obj.mass = obj.vol
         # Calculate density
@@ -494,6 +496,8 @@ class Domain():
             obj.tetrahedrons = mesh_obj.cells['tetra']
         # volume
         obj.calculate_vol()
+        if numpy.count_nonzero(obj.vol):
+            raise DomainError("Paritcles cannot have 0 volume")
         # set Mass equal to the volume
         obj.mass = obj.vol
         # Calculate density
@@ -625,6 +629,8 @@ class Domain():
         ndx = 0
         totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0]) * (zlim[1] - zlim[0])
         vol = totalvolume / numberparticles
+        if vol < 0:
+            raise DomainError("Paritcles cannot have 0 volume")
         for x in x_list:
             for y in y_list:
                 for z in z_list:
@@ -696,6 +702,8 @@ class Domain():
         ndx = 0
         totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0])
         vol = totalvolume / numberparticles
+        if vol < 0:
+            raise DomainError("Paritcles cannot have 0 volume")
         for x in x_list:
             for y in y_list:
                 if rho is None:
