@@ -238,7 +238,7 @@ class Model():
 
 
 
-    def set_type(self, geometry_ivar, type_id, mass=None, nu=None, fixed=False):
+    def set_type(self, geometry_ivar, type_id, mass=None, nu=None, c=None, fixed=False):
         """ Add a type definition to the model.  By default, all regions are set to
         type 0. Returns the number of domain points that were tagged with this type_id
 
@@ -251,6 +251,8 @@ class Model():
             :type mass: float
             :param nu: The viscosity of each particle in the type
             :type nu: float
+            :param c: The artificial speed of sound of each particle in the type
+            :type c: float
             :param fixed: Are the particles in this type immobile
             :type fixed: bool
 
@@ -272,6 +274,8 @@ class Model():
                     self.domain.mass[v_ndx] = mass
                 if (nu is not None):
                     self.domain.nu[v_ndx] = nu
+                if c is not None:
+                    self.domain.c[v_ndx] = c
                 self.domain.fixed[v_ndx] = fixed
                 count +=1
         if count == 0:
