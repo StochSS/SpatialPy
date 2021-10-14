@@ -427,7 +427,7 @@ class Solver:
                     "Not all particles have been defined in a type. Mass and other properties must be defined")
             init_particles += "init_create_particle(sys,id++,{0},{1},{2},{3},{4},{5},{6},{7},{8});".format(
                 self.model.domain.coordinates()[i,0],self.model.domain.coordinates()[i,1],self.model.domain.coordinates()[i,2],
-                self.model.domain.type[i],self.model.domain.nu[i],self.model.domain.mass[i],
+                self.model.domain.type[i],self.model.domain.nu[i],self.model.domain.mass[i],self.model.domain.c[i],
                 (self.model.domain.mass[i] / self.model.domain.vol[i]),int(self.model.domain.fixed[i]),num_chem_species )+"\n"
         propfilestr = propfilestr.replace("__INIT_PARTICLES__", init_particles)
 
