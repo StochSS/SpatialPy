@@ -316,7 +316,7 @@ class Domain():
 
 
     def plot_types(self, width=None, height=None, colormap=None, size=5, title=None,
-                                            use_matplotlib=False, return_plotly_figure=False):
+                        included_types_list=None, use_matplotlib=False, return_plotly_figure=False):
         '''
         Plots the domain using plotly. Can only be viewed in a Jupyter Notebook.
 
@@ -338,6 +338,9 @@ class Domain():
 
         :param title: The title of the graph
         :type title: str
+
+        :param included_types_list: A list of strings describing which types to include. By default displays all types.
+        :type included_types_list: list
 
         :param return_plotly_figure: Whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
@@ -362,8 +365,19 @@ class Domain():
         if use_matplotlib:
             import matplotlib.pyplot as plt
 
+            if included_types_list is None:
+                coords = self.vertices
+                type_list = self.types
+            else:
+                coords = []
+                type_list = []
+                for i, val in enumerate(self.type):
+                    if val in included_types_list:
+                        coords.append(self.vertices[i])
+                        type_list.append(val)
+
             plt.figure(figsize=(width, height))
-            plt.scatter(self.vertices[:,0], self.vertices[:,1], c=self.type, cmap=colormap)
+            plt.scatter(coords[:,0], coords[:,1], c=type_list, cmap=colormap)
             plt.axis('scaled')
             plt.colorbar()
             if title is not None:
@@ -378,11 +392,12 @@ class Domain():
         for i, val in enumerate(self.type):
             name = "type {}".format(val)
 
-            if name in types.keys():
-                types[name]['points'].append(self.vertices[i])
-                types[name]['data'].append(self.type[i])
-            else:
-                types[name] = {"points":[self.vertices[i]], "data":[self.type[i]]}
+            if included_types_list is None or val in included_types_list:
+                if name in types.keys():
+                    types[name]['points'].append(self.vertices[i])
+                    types[name]['data'].append(self.type[i])
+                else:
+                    types[name] = {"points":[self.vertices[i]], "data":[self.type[i]]}
 
         is_2d = self.dimensions == 2
 
