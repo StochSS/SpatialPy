@@ -462,7 +462,7 @@ class Domain():
             obj.tetrahedrons[ int(c.attrib['index']),3] = int(c.attrib['v3'])
         # volume
         obj.calculate_vol()
-        if numpy.count_nonzero(obj.vol):
+        if not numpy.count_nonzero(obj.vol):
             raise DomainError("Paritcles cannot have 0 volume")
         # set Mass equal to the volume
         obj.mass = obj.vol
@@ -496,7 +496,7 @@ class Domain():
             obj.tetrahedrons = mesh_obj.cells['tetra']
         # volume
         obj.calculate_vol()
-        if numpy.count_nonzero(obj.vol):
+        if not numpy.count_nonzero(obj.vol):
             raise DomainError("Paritcles cannot have 0 volume")
         # set Mass equal to the volume
         obj.mass = obj.vol
