@@ -119,6 +119,11 @@ class Solver:
             :type profile: bool
         """
 
+        if self.model.timestep_size is None:
+            self.model.timestep_size = 1e-5
+        if self.model.output_freq < self.model.timestep_size:
+            raise ModelError("Timestep size exceeds output frequency.")
+
         # Create the models expression utility
         self.model.get_expression_utility()
 
@@ -626,7 +631,7 @@ class Solver:
 
         output_step = "unsigned int get_next_output(ParticleSystem* system)\n{\n"
         output_step += "static int index = 0;\n"
-        output_step += "std::vector<unsigned int> output_steps = {"
+        output_step += "const std::vector<unsigned int> output_steps = {"
         output_step += f"{', '.join(self.model.output_steps.astype(str).tolist())}"
         output_step += "};\nunsigned int next_step = output_steps[index];\n"
         output_step += "index++;\n"

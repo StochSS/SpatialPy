@@ -228,16 +228,18 @@ namespace Spatialpy{
         if(debug_flag) printf("Creating thread to create output files\n");
 
         // Start simulation, coordinate simulation
+        unsigned int next_output_step = 0;
         for(system->current_step=0; system->current_step < system->nt; system->current_step++){
 
             // Release the Sort Index threads
             if(debug_flag) printf("[%i] Starting the Sort Index threads\n",system->current_step);
             pthread_barrier_wait(&begin_sort_barrier);
             // Output state
-            if(system->current_step >= get_next_output(system)){
+            if(system->current_step >= next_output_step){
                 // Release output thread
                 if(debug_flag) printf("[%i] Starting the Output threads\n",system->current_step);
                 pthread_barrier_wait(&begin_output_barrier);
+                next_output_step = get_next_output(system);
                 // Wait until output threads are done
                 pthread_barrier_wait(&end_output_barrier);
                 if(debug_flag) printf("[%i] Output threads finished\n",system->current_step);
