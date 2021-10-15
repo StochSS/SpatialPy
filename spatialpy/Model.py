@@ -95,7 +95,7 @@ class Model():
 
         ######################
         self.tspan = None
-        self.timestep_size = 1e-5
+        self.timestep_size = None
         self.num_timesteps = None
         self.output_freq = None
 
