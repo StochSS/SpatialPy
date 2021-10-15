@@ -119,6 +119,8 @@ class Solver:
             :type profile: bool
         """
 
+        if self.model.timestep_size is None:
+            self.model.timestep_size = 1e-5
         if self.model.output_freq < self.model.timestep_size:
             raise ModelError("Timestep size exceeds output frequency.")
 
