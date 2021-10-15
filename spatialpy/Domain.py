@@ -339,7 +339,7 @@ class Domain():
         :param title: The title of the graph
         :type title: str
 
-        :param included_types_list: A list of strings describing which types to include. By default displays all types.
+        :param included_types_list: A list of ints describing which types to include. By default displays all types.
         :type included_types_list: list
 
         :param return_plotly_figure: Whether or not to return a figure dictionary of data(graph object traces) and layout options
@@ -367,7 +367,7 @@ class Domain():
 
             if included_types_list is None:
                 coords = self.vertices
-                type_list = self.types
+                type_list = self.type
             else:
                 coords = []
                 type_list = []
@@ -375,6 +375,7 @@ class Domain():
                     if val in included_types_list:
                         coords.append(self.vertices[i])
                         type_list.append(val)
+                coords = numpy.array(coords)
 
             plt.figure(figsize=(width, height))
             plt.scatter(coords[:,0], coords[:,1], c=type_list, cmap=colormap)
