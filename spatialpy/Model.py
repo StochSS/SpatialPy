@@ -274,7 +274,7 @@ class Model():
             if geometry_ivar.inside( self.domain.coordinates()[v_ndx,:], on_boundary[v_ndx]):
                 self.domain.type[v_ndx] = type_id
                 if vol is not None:
-                    self.domain.vol[n_ndx] = vol
+                    self.domain.vol[v_ndx] = vol
                 if mass is not None:
                     self.domain.mass[v_ndx] = mass
                 if rho is not None:
