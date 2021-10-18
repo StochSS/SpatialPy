@@ -67,6 +67,8 @@ class Domain():
         self.mass = numpy.zeros((numpoints), dtype=float)
         self.type = numpy.zeros((numpoints), dtype=int)
         self.nu = numpy.zeros((numpoints), dtype=float)
+        self.c = numpy.zeros((numpoints), dtype=float)
+        self.rho = numpy.zeros((numpoints), dtype=float)
         self.fixed = numpy.zeros((numpoints), dtype=bool)
 
         self.rho0 = rho0
@@ -87,7 +89,9 @@ class Domain():
         domain_strs.extend(["", "Paritcles", ""])
         for i, vertex in enumerate(self.vertices):
             v_str = f"{pad}{i+1}: {vertex}\n{pad}   Volume:{self.vol[i]}, Mass: {self.mass[i]}, "
-            v_str += f"Type: {self.type[i]}, nu: {self.nu[i]}, Fixed: {self.fixed[i]}"
+            v_str += f"Type: {self.type[i]}, Viscosity: {self.nu[i]}, Density: {self.rho[i]}, "
+            v_str += f"Artificial Speed of Sound: {self.c[i]}, Fixed: {self.fixed[i]}"
+            v_str += f"Type: {self.type[i]}, Viscosity: {self.nu[i]}, Density: {self.rho[i]}, Fixed: {self.fixed[i]}"
             domain_strs.append(v_str)
         if self.triangles is not None:
             domain_strs.extend(["", "Triangles", ""])
@@ -100,7 +104,10 @@ class Domain():
 
         return "\n".join(domain_strs)
 
-    def add_point(self, x, vol, mass, type, nu, fixed):
+    def _ipython_display_(self, use_matplotlib=False):
+        self.plot_types(width="auto", height="auto", use_matplotlib=use_matplotlib)
+
+    def add_point(self, x, vol, mass, type, nu, fixed, rho=None, c=0):
         """ Add a single point particle to the domain space.
 
             :param x: Spatial coordinate vertices of point to be added
@@ -120,12 +127,26 @@ class Domain():
 
             :param fixed: True if particle is spatially fixed, else False
             :type fixed: bool
+
+            :param c: Default artificial speed of sound of particle to be created
+            :type c: float
+
+            :param rho: Default density of particle to be created
+            :type rho: float
         """
+
+        if vol < 0:
+            raise DomainError("Volume must be a positive value.")
+
+        if rho is None:
+            rho = mass/vol
 
         self.vol = numpy.append(self.vol, vol)
         self.mass = numpy.append(self.mass, mass)
         self.type = numpy.append(self.type, type)
         self.nu = numpy.append(self.nu, nu)
+        self.c = numpy.append(self.c, c)
+        self.rho = numpy.append(self.rho, rho)
         self.fixed = numpy.append(self.fixed, fixed)
 
         self.vertices = numpy.append(self.vertices, [x], axis=0)
@@ -316,7 +337,7 @@ class Domain():
 
 
     def plot_types(self, width=None, height=None, colormap=None, size=5, title=None,
-                                            use_matplotlib=False, return_plotly_figure=False):
+                        included_types_list=None, use_matplotlib=False, return_plotly_figure=False):
         '''
         Plots the domain using plotly. Can only be viewed in a Jupyter Notebook.
 
@@ -339,6 +360,9 @@ class Domain():
         :param title: The title of the graph
         :type title: str
 
+        :param included_types_list: A list of ints describing which types to include. By default displays all types.
+        :type included_types_list: list
+
         :param return_plotly_figure: Whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
         :type return_plotly_figure: bool
@@ -347,10 +371,14 @@ class Domain():
         :type use_matplotlib: bool
         '''
 
-        if width is None:
-            width = 6.4 if use_matplotlib else 500
-        if height is None:
-            height = 4.8 if use_matplotlib else 500
+        if use_matplotlib:
+            width = 6.4 if width in (None, "auto") else width
+            height = 4.8 if height in (None, "auto") else height
+        else:
+            if width in (None, "auto"):
+                width = None if width == "auto" else 500
+            if height is None:
+                height = None if height == "auto" else 500
 
         if not numpy.count_nonzero(self.vertices[:,1]):
             self.dimensions = 1
@@ -362,8 +390,20 @@ class Domain():
         if use_matplotlib:
             import matplotlib.pyplot as plt
 
+            if included_types_list is None:
+                coords = self.vertices
+                type_list = self.type
+            else:
+                coords = []
+                type_list = []
+                for i, val in enumerate(self.type):
+                    if val in included_types_list:
+                        coords.append(self.vertices[i])
+                        type_list.append(val)
+                coords = numpy.array(coords)
+
             plt.figure(figsize=(width, height))
-            plt.scatter(self.vertices[:,0], self.vertices[:,1], c=self.type, cmap=colormap)
+            plt.scatter(coords[:,0], coords[:,1], c=type_list, cmap=colormap)
             plt.axis('scaled')
             plt.colorbar()
             if title is not None:
@@ -378,11 +418,12 @@ class Domain():
         for i, val in enumerate(self.type):
             name = "type {}".format(val)
 
-            if name in types.keys():
-                types[name]['points'].append(self.vertices[i])
-                types[name]['data'].append(self.type[i])
-            else:
-                types[name] = {"points":[self.vertices[i]], "data":[self.type[i]]}
+            if included_types_list is None or val in included_types_list:
+                if name in types.keys():
+                    types[name]['points'].append(self.vertices[i])
+                    types[name]['data'].append(self.type[i])
+                else:
+                    types[name] = {"points":[self.vertices[i]], "data":[self.type[i]]}
 
         is_2d = self.dimensions == 2
 
@@ -451,8 +492,12 @@ class Domain():
             obj.tetrahedrons[ int(c.attrib['index']),3] = int(c.attrib['v3'])
         # volume
         obj.calculate_vol()
+        if not numpy.count_nonzero(obj.vol):
+            raise DomainError("Paritcles cannot have 0 volume")
         # set Mass equal to the volume
         obj.mass = obj.vol
+        # Calculate density
+        obj.rho = obj.mass/obj.vol
         # return model ref
         return obj
 
@@ -481,8 +526,12 @@ class Domain():
             obj.tetrahedrons = mesh_obj.cells['tetra']
         # volume
         obj.calculate_vol()
+        if not numpy.count_nonzero(obj.vol):
+            raise DomainError("Paritcles cannot have 0 volume")
         # set Mass equal to the volume
         obj.mass = obj.vol
+        # Calculate density
+        obj.rho = obj.mass/obj.vol
         # return model ref
         return obj
 
@@ -500,11 +549,6 @@ class Domain():
             import pygmsh
         except ImportError as e:
             raise DomainError("The python package 'pygmsh' is not installed.")
-       # try:
-       #     _ = pygmsh.get_gmsh_major_version()
-       # except FileNotFoundError as e:
-       #     raise DomainError("The command line program 'gmsh' is not installed or is not found in the current PATH")
-
         try:
             import meshio
         except ImportError as e:
@@ -546,8 +590,12 @@ class Domain():
                         rho0=domain['rho_0'], c0=domain['c_0'], P0=domain['p_0'], gravity=domain['gravity'])
 
             for particle in domain['particles']:
+                # StochSS backward compatability check for rho
+                rho = None if "rho" not in particle.keys() else particle['rho']
+                # StochSS backward compatability check for c
+                c = 0 if "c" not in particle.keys() else particle['c']
                 obj.add_point(particle['point'], particle['volume'], particle['mass'],
-                               particle['type'], particle['nu'], particle['fixed'])
+                              particle['type'], particle['nu'], particle['fixed'], rho=rho, c=c)
 
             return obj
         except KeyError as e:
@@ -555,7 +603,7 @@ class Domain():
 
 
     @classmethod
-    def create_3D_domain(cls, xlim, ylim, zlim, nx, ny, nz, type_id=1, mass=1.0, nu=1.0, fixed=False, **kwargs):
+    def create_3D_domain(cls, xlim, ylim, zlim, nx, ny, nz, type_id=1, mass=1.0, nu=1.0, rho=None, c=0, fixed=False, **kwargs):
         """ Create a filled 3D domain
 
             :param xlim: highest and lowest coordinate in the x dimension
@@ -576,16 +624,22 @@ class Domain():
             :param nz: number of particle spacing in the z dimension
             :type nz: int
 
-            :param type_id: default type ID of particles created to be created. Defaults to 1
+            :param type_id: default type ID of particles to be created. Defaults to 1
             :type type_id: int
 
-            :param mass: default mass of particles created to be created. Defaults to 1.0
+            :param mass: default mass of particles to be created. Defaults to 1.0
             :type mass: float
 
-            :param nu: default viscosity of particles created to be created. Defaults to 1.0
+            :param nu: default viscosity of particles to be created. Defaults to 1.0
             :type nu: float
 
-            :param fixed: spatially fixed flag of particles created to be created. Defaults to false.
+            :param c: default artificial speed of sound of particles to be created. Defaults to 0.0.
+            :type c: float
+
+            :param rho: default density of particles to be created.
+            :type rho:
+
+            :param fixed: spatially fixed flag of particles to be created. Defaults to false.
             :type fixed: bool
 
             :param rho0: background density for the system. Defaults to 1.0
@@ -595,7 +649,7 @@ class Domain():
             :type c0: float
 
             :param P0: background pressure for the system. Defaults to 10
-            :type p0: float
+            :type P0: float
 
             :rtype: spatialpy.Domain.Domain
         """
@@ -609,16 +663,23 @@ class Domain():
         z_list = numpy.linspace(zlim[0],zlim[1],nz)
         ndx = 0
         totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0]) * (zlim[1] - zlim[0])
+        vol = totalvolume / numberparticles
+        if vol < 0:
+            raise DomainError("Paritcles cannot have 0 volume")
         for x in x_list:
             for y in y_list:
                 for z in z_list:
-                    obj.vol[ndx] = totalvolume / numberparticles
+                    if rho is None:
+                        rho = mass / vol
+                    obj.vol[ndx] = vol
                     obj.vertices[ndx,0] = x
                     obj.vertices[ndx,1] = y
                     obj.vertices[ndx,2] = z
                     obj.type[ndx] = type_id
                     obj.mass[ndx] = mass
                     obj.nu[ndx] = nu
+                    obj.c[ndx] = c
+                    obj.rho[ndx] = rho
                     obj.fixed[ndx] = fixed
                     ndx+=1
 
@@ -626,7 +687,7 @@ class Domain():
         return obj
 
     @classmethod
-    def create_2D_domain(cls, xlim, ylim, nx, ny, type_id=1, mass=1.0, nu=1.0, fixed=False, **kwargs):
+    def create_2D_domain(cls, xlim, ylim, nx, ny, type_id=1, mass=1.0, nu=1.0, rho=None, c=0, fixed=False, **kwargs):
         """ Create a filled 2D domain
 
             :param xlim: highest and lowest coordinate in the x dimension
@@ -641,16 +702,22 @@ class Domain():
             :param ny: number of particle spacing in the y dimension
             :type ny: int
 
-            :param type_id: default type ID of particles created to be created. Defaults to 1
+            :param type_id: default type ID of particles to be created. Defaults to 1
             :type type_id: int
 
-            :param mass: default mass of particles created to be created. Defaults to 1.0
+            :param mass: default mass of particles to be created. Defaults to 1.0
             :type mass: float
 
-            :param nu: default viscosity of particles created to be created. Defaults to 1.0
+            :param nu: default viscosity of particles to be created. Defaults to 1.0
             :type nu: float
 
-            :param fixed: spatially fixed flag of particles created to be created. Defaults to false.
+            :param c: default artificial speed of sound of particles to be created. Defaults to 0.0.
+            :type c: float
+
+            :param rho: default density of particles to be created.
+            :type rho:
+
+            :param fixed: spatially fixed flag of particles to be created. Defaults to false.
             :type fixed: bool
 
             :param rho0: background density for the system. Defaults to 1.0
@@ -660,7 +727,7 @@ class Domain():
             :type c0: float
 
             :param P0: background pressure for the system. Defaults to 10
-            :type p0: float
+            :type P0: float
 
             :rtype: spatialpy.Domain.Domain
         """
@@ -673,16 +740,22 @@ class Domain():
         y_list = numpy.linspace(ylim[0],ylim[1],ny)
         ndx = 0
         totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0])
-        #print("totalvolume",totalvolume)
+        vol = totalvolume / numberparticles
+        if vol < 0:
+            raise DomainError("Paritcles cannot have 0 volume")
         for x in x_list:
             for y in y_list:
-                obj.vol[ndx] = totalvolume / numberparticles
+                if rho is None:
+                    rho = mass / vol
+                obj.vol[ndx] = vol
                 obj.vertices[ndx,0] = x
                 obj.vertices[ndx,1] = y
                 obj.vertices[ndx,2] = 0.0
                 obj.type[ndx] = type_id
                 obj.mass[ndx] = mass
                 obj.nu[ndx] = nu
+                obj.c[ndx] = c
+                obj.rho[ndx] = rho
                 obj.fixed[ndx] = fixed
                 ndx+=1
 
