@@ -41,6 +41,8 @@ namespace Spatialpy{
     __DEFINE_REACTIONS__
     /* Deterministic RHS definitions */
     __DEFINE_CHEM_FUNS__
+    /* Definition for get next output step */
+    __DEFINE_GET_NEXT_OUTPUT__
 
     PropensityFun *ALLOC_propensities(void)
     {
@@ -68,8 +70,8 @@ namespace Spatialpy{
 
     //dsfmt_t dsfmt;
 
-    void init_create_particle(ParticleSystem *sys, unsigned int id, double x, double y, double z, int type, double nu, double mass, double rho, int solidTag, int num_chem_species){
-        sys->particles.emplace_back(Particle(sys, id, x, y, z, type, nu, mass, rho,
+    void init_create_particle(ParticleSystem *sys, unsigned int id, double x, double y, double z, int type, double nu, double mass, double c, double rho, int solidTag, int num_chem_species){
+        sys->particles.emplace_back(Particle(sys, id, x, y, z, type, nu, mass, c, rho,
             solidTag));
         Particle *this_particle = &sys->particles.back() ;
         if(num_chem_species > 0){

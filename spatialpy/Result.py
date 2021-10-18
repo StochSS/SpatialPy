@@ -193,10 +193,7 @@ class Result():
 
         if debug:
             print("read_step({0}) ".format(step_num), end='')
-        #num = int(step_num * self.model.output_freq)
-        #num = int(step_num / self.model.timestep_size)
-        num = self.model.timespan_steps[step_num]
-        filename = os.path.join(self.result_dir, "output{0}.vtk".format(num))
+        filename = os.path.join(self.result_dir, "output{0}.vtk".format(step_num))
 
         if debug:
             print("opening '{0}'".format(filename))
@@ -238,8 +235,7 @@ class Result():
 
         """
 
-        self.tspan = numpy.linspace(0,self.model.num_timesteps,
-                num=math.ceil(self.model.num_timesteps/self.model.output_freq)+1) * self.model.timestep_size
+        self.tspan = self.model.tspan
         return self.tspan
 
     def get_species(self, species, timepoints=None, concentration=False, deterministic=False, debug=False):
@@ -278,13 +274,9 @@ class Result():
         if spec_name not in self.model.listOfSpecies.keys():
             raise ResultError("Species '{0}' not found".format(spec_name))
 
-        #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
-        #                    num=self.model.num_timesteps+1, dtype=int)
-        #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
-        #        num=math.ceil(self.model.num_timesteps/self.model.output_freq)+1) 
         lt=len(self.get_timespan())-1
         t_index_arr = numpy.linspace(0,lt,num=lt+1,dtype=int)
-
+        
         if timepoints is not None:
             if isinstance(timepoints,float):
                 raise ResultError("timepoints argument must be an integer, the index of time timespan")
@@ -572,8 +564,9 @@ class Result():
             :rtype: numpy.ndarray
         """
 
-        t_index_arr = numpy.linspace(0,self.model.num_timesteps,
-                            num=self.model.num_timesteps+1, dtype=int)
+        lt=len(self.get_timespan())-1
+        t_index_arr = numpy.linspace(0,lt,num=lt+1,dtype=int)
+        
         num_voxel = self.model.domain.get_num_voxels()
 
         if timepoints is not None:
