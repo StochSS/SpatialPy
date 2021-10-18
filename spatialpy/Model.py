@@ -775,18 +775,18 @@ class Parameter():
 
     def __init__(self,name=None,expression=None):
 
-        self.name = name
         if name is None:
             raise ParameterError("name is required for a Parameter.")
-
+        if expression is None:
+            raise ParameterError("expression is required for a Parameter.")
+        
+        self.name = name
+        self.value = None
         # We allow expression to be passed in as a non-string type. Invalid strings
         # will be caught below. It is perfectly fine to give a scalar value as the expression.
         # This can then be evaluated in an empty namespace to the scalar value.
-        if expression is not None:
-            self.expression = str(expression)
-        else:
-            raise ParameterError("expression is required for a Parameter.")
-
+        self.expression = str(expression)
+        
         self._evaluate()
 
     def _evaluate(self,namespace={}):
