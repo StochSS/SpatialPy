@@ -524,19 +524,6 @@ class Model():
     def delete_parameter(self, obj):
         self.listOfParameters.pop(obj)
 
-    def set_parameter(self,pname,expression):
-        """ Set the expression of an existing paramter. 
-
-                :param pname: Name of target parameter for expression
-                :type pname: str
-                :param expression: math expression to be assigned to target parameter
-                :type expression: str
-
-        """
-        p = self.listOfParameters[pname]
-        p.expression = expression
-        p._evaluate()
-
     def _resolve_parameters(self):
         """ Attempt to resolve all parameter expressions to scalar floating point values.
             Must be called prior to exporting the model.  """
