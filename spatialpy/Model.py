@@ -514,9 +514,8 @@ class Model():
                 problem = self.__problem_with_name(params.name)
                 if problem is not None:
                     raise problem
-                # make sure that you don't overwrite an existing parameter??
-                if params.name in self.listOfParameters.keys():
-                    raise ParameterError("Parameter '{0}' has already been added to the model.".format(params.name))
+                self.update_namespace()
+                params._evaluate(self.namespace)
                 self.listOfParameters[params.name] = params
             else:
                 raise ParameterError("Parameter '{0}' needs to be of type '{2}', it is of type '{1}'".format(params.name,str(params),str(type(Parameter))))
