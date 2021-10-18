@@ -26,21 +26,11 @@ def cleanup_tempfiles():
 	'''
 	cleanup_core_files()
 	tempdir = tempfile.gettempdir()
-	count = 0
 	for file_obj in os.listdir(tempdir):
 		if file_obj.startswith("spatialpy_build"):
 			cleanup_build_files(build_dir=os.path.join(tempdir, file_obj))
 		elif file_obj.startswith("spatialpy_result"):
 			cleanup_result_files(result_dir=os.path.join(tempdir, file_obj))
-		elif "spatialpy" in file_obj:
-			count += 1
-			path = os.path.join(tempdir, file_obj)
-			if os.path.isdir:
-				shutil.rmtree(path)
-			else:
-				os.remove(path)
-	if count > 0
-		print(f"{count} other spatialpy files were removed")
 
 def cleanup_core_files():
 	'''
