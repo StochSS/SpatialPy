@@ -778,7 +778,7 @@ class Parameter():
         try:
             self.value = (float(eval(self.expression, namespace)))
         except Exception as err:
-            message = f"Could not evaluate expression '{self.expression}' {err}."
+            message = f"Could not evaluate expression '{self.expression}': {err}."
             raise ParameterError(message) from err
 
 
