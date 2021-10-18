@@ -95,7 +95,7 @@ class Model():
 
         ######################
         self.tspan = None
-        self.timestep_size = 1e-5
+        self.timestep_size = None
         self.num_timesteps = None
         self.output_freq = None
 
@@ -188,32 +188,33 @@ class Model():
             
     def set_timesteps(self, output_interval, num_steps, timestep_size=None):
         """" Set the simlation time span parameters
-        Args:
-            :param output_interval: size of each output timestep in seconds
-            :type output_interval:  float
-            :param num_steps: total number of steps to take. Note: the number of output times will be num_steps+1 as the first
-              output will be at time zero.
-            :type num_steps: int
-            :param step_size: Size of each timestep in seconds
-            :type step_size: float
-            :param num_steps: Total number of steps to take
-            :type num_steps: int
-
+        :param output_interval: size of each output timestep in seconds
+        :type output_interval:  float
+        :param num_steps: total number of steps to take. Note: the number of output times will be num_steps+1 as the first
+          output will be at time zero.
+        :type num_steps: int
+        :param timestep_size: Size of each timestep in seconds
+        :type timestep_size: float
         """
         if timestep_size is not None:
             self.timestep_size = timestep_size
         if self.timestep_size is None:
-            raise ModelError("timestep_size is not set")
-
-        self.output_freq = math.ceil(output_interval/self.timestep_size)
+            self.timestep_size = output_interval
+        
+        self.output_freq = output_interval/self.timestep_size
+        if self.output_freq < self.timestep_size:
+            raise ModelError("Timestep size exceeds output frequency.")
 
         self.num_timesteps = math.ceil(num_steps * self.output_freq)
+
         # array of step numbers corresponding to the simulation times in the timespan
-        self.timespan_steps = numpy.linspace(0,self.num_timesteps,
-                        num=math.ceil(self.num_timesteps/self.output_freq)+1, dtype=int)
-
-        self.tspan = numpy.linspace(0,self.num_timesteps*self.timestep_size,self.num_timesteps)
-
+        output_steps = numpy.arange(0, self.num_timesteps + self.timestep_size, self.output_freq)
+        self.output_steps = numpy.unique(numpy.round(output_steps).astype(int))
+        sim_steps = numpy.arange(0, self.num_timesteps + self.timestep_size, self.timestep_size)
+        self.tspan = numpy.zeros((self.output_steps.size), dtype=float)
+        for i, step in enumerate(self.output_steps):
+            self.tspan[i] = sim_steps[step]
+    
     def timespan(self, time_span, timestep_size=None):
         """
         Set the time span of simulation. The SSA-SDPD engine does not support
@@ -221,24 +222,22 @@ class Model():
 
         :param tspan: Evenly-spaced list of times at which to sample the species populations during the simulation.
         :type tspan: numpy.ndarray
+        :param timestep_size: Size of each timestep in seconds
+        :type timestep_size: float
         """
-
-        self.tspan = time_span
-        if timestep_size is not None:
-            self.timestep_size = timestep_size
 
         items_diff = numpy.diff(time_span)
         items = map(lambda x: round(x, 10), items_diff)
         isuniform = (len(set(items)) == 1)
 
         if isuniform:
-            self.set_timesteps( items_diff[0], len(items_diff) )
+            self.set_timesteps(items_diff[0], len(items_diff), timestep_size=timestep_size)
         else:
             raise ModelError("Only uniform timespans are supported")
 
 
 
-    def set_type(self, geometry_ivar, type_id, mass=None, nu=None, c=None, fixed=False):
+    def set_type(self, geometry_ivar, type_id, mass=None, nu=None, rho=None, c=None, fixed=False):
         """ Add a type definition to the model.  By default, all regions are set to
         type 0. Returns the number of domain points that were tagged with this type_id
 
@@ -249,6 +248,8 @@ class Model():
             :type type_id: int
             :param mass: The mass of each particle in the type
             :type mass: float
+            :param rho: The density of each particle in the type
+            :type rho: float
             :param nu: The viscosity of each particle in the type
             :type nu: float
             :param c: The artificial speed of sound of each particle in the type
@@ -270,9 +271,11 @@ class Model():
         for v_ndx in range(self.domain.get_num_voxels()):
             if geometry_ivar.inside( self.domain.coordinates()[v_ndx,:], on_boundary[v_ndx]):
                 self.domain.type[v_ndx] = type_id
-                if (mass is not None):
+                if mass is not None:
                     self.domain.mass[v_ndx] = mass
-                if (nu is not None):
+                if rho is not None:
+                    self.domain.rho[v_ndx] = rho
+                if nu is not None:
                     self.domain.nu[v_ndx] = nu
                 if c is not None:
                     self.domain.c[v_ndx] = c
