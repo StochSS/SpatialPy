@@ -106,6 +106,7 @@ class Model():
 
 
     def __str__(self):
+        self._resolve_parameters()
         divider = f"\n{'*'*10}\n"
 
         def decorate(header):
@@ -367,8 +368,6 @@ class Model():
 
         for param in self.listOfParameters:
             self.namespace[param]=self.listOfParameters[param].value
-        # Dictionary of expressions that can be evaluated in the scope of this model.
-        self.expressions = {}
 
     def sanitized_species_names(self):
         """
@@ -525,9 +524,8 @@ class Model():
                 problem = self.__problem_with_name(params.name)
                 if problem is not None:
                     raise problem
-                # make sure that you don't overwrite an existing parameter??
-                if params.name in self.listOfParameters.keys():
-                    raise ParameterError("Parameter '{0}' has already been added to the model.".format(params.name))
+                self.update_namespace()
+                params._evaluate(self.namespace)
                 self.listOfParameters[params.name] = params
             else:
                 raise ParameterError("Parameter '{0}' needs to be of type '{2}', it is of type '{1}'".format(params.name,str(params),str(type(Parameter))))
@@ -536,28 +534,12 @@ class Model():
     def delete_parameter(self, obj):
         self.listOfParameters.pop(obj)
 
-    def set_parameter(self,pname,expression):
-        """ Set the expression of an existing paramter. 
-
-                :param pname: Name of target parameter for expression
-                :type pname: str
-                :param expression: math expression to be assigned to target parameter
-                :type expression: str
-
-        """
-        p = self.listOfParameters[pname]
-        p.expression = expression
-        p._evaluate()
-
     def _resolve_parameters(self):
         """ Attempt to resolve all parameter expressions to scalar floating point values.
             Must be called prior to exporting the model.  """
         self.update_namespace()
         for param in self.listOfParameters:
-            try:
-                self.listOfParameters[param]._evaluate(self.namespace)
-            except:
-                raise ParameterError(f"Could not resolve Parameter '{param}' expression '{self.listOfParameters[param].expression}' to a scalar value.")
+            self.listOfParameters[param]._evaluate(self.namespace)
 
     def delete_all_parameters(self):
         """ Remove all parameters from model.listOfParameters
@@ -786,48 +768,29 @@ class Parameter():
 
     def __init__(self,name=None,expression=None):
 
-        self.name = name
         if name is None:
             raise ParameterError("name is required for a Parameter.")
-
+        if expression is None:
+            raise ParameterError("expression is required for a Parameter.")
+        
+        self.name = name
+        self.value = None
         # We allow expression to be passed in as a non-string type. Invalid strings
         # will be caught below. It is perfectly fine to give a scalar value as the expression.
         # This can then be evaluated in an empty namespace to the scalar value.
-        if expression is not None:
-            self.expression = str(expression)
-        else:
-            raise ParameterError("expression is required for a Parameter.")
+        self.expression = str(expression)
 
-        self._evaluate()
+    def __str__(self):
+        print_string = f"{self.name}: {str(self.expression)}"
+        return print_string
 
     def _evaluate(self,namespace={}):
         """ Evaluate the expression and return the (scalar) value """
         try:
             self.value = (float(eval(self.expression, namespace)))
-        except:
-            self.value = None
-
-    def set_expression(self,expression):
-        """ Sets the Parameters expression
-
-            :param expression: Expression to be set for Parameter
-            :type expression: str
-        """
-        self.expression = expression
-        # We allow expression to be passed in as a non-string type. Invalid strings
-        # will be caught below. It is perfectly fine to give a scalar value as the expression.
-        # This can then be evaluated in an empty namespace to the scalar value.
-        if expression is not None:
-            self.expression = str(expression)
-
-        if self.expression is None:
-            raise TypeError
-
-        self._evaluate()
-
-    def __str__(self):
-        print_string = f"{self.name}: {str(self.expression)}"
-        return print_string
+        except Exception as err:
+            message = f"Could not evaluate expression '{self.expression}': {err}."
+            raise ParameterError(message) from err
 
 
 class Reaction():
