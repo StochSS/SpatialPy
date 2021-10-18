@@ -543,10 +543,7 @@ class Model():
             Must be called prior to exporting the model.  """
         self.update_namespace()
         for param in self.listOfParameters:
-            try:
-                self.listOfParameters[param]._evaluate(self.namespace)
-            except:
-                raise ParameterError(f"Could not resolve Parameter '{param}' expression '{self.listOfParameters[param].expression}' to a scalar value.")
+            self.listOfParameters[param]._evaluate(self.namespace)
 
     def delete_all_parameters(self):
         """ Remove all parameters from model.listOfParameters
@@ -796,8 +793,8 @@ class Parameter():
         try:
             self.value = (float(eval(self.expression, namespace)))
         except:
-            message = f"Could not evaluate Parameter '{param}' expression \
-                                '{self.listOfParameters[param].expression}' to a scalar value."
+            message = f"Could not evaluate Parameter '{self.name}' expression \
+                                            '{self.expression}' to a scalar value."
             raise ParameterError(message)
 
 
