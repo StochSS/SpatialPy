@@ -237,7 +237,7 @@ class Model():
 
 
 
-    def set_type(self, geometry_ivar, type_id, mass=None, nu=None, rho=None, c=None, fixed=False):
+    def set_type(self, geometry_ivar, type_id, vol=None, mass=None, nu=None, rho=None, c=None, fixed=False):
         """ Add a type definition to the model.  By default, all regions are set to
         type 0. Returns the number of domain points that were tagged with this type_id
 
@@ -246,6 +246,8 @@ class Model():
             :type geometry_ivar: spatialpy.Geometry.Geometry
             :param type_id: (usually an int) the identifier for this type
             :type type_id: int
+            :param vol: The volume of each particle in the type
+            :type vol: float
             :param mass: The mass of each particle in the type
             :type mass: float
             :param rho: The density of each particle in the type
@@ -271,6 +273,8 @@ class Model():
         for v_ndx in range(self.domain.get_num_voxels()):
             if geometry_ivar.inside( self.domain.coordinates()[v_ndx,:], on_boundary[v_ndx]):
                 self.domain.type[v_ndx] = type_id
+                if vol is not None:
+                    self.domain.vol[v_ndx] = vol
                 if mass is not None:
                     self.domain.mass[v_ndx] = mass
                 if rho is not None:
