@@ -119,6 +119,11 @@ class Solver:
             :type profile: bool
         """
 
+        if self.model.timestep_size is None:
+            self.model.timestep_size = 1e-5
+        if self.model.output_freq < self.model.timestep_size:
+            raise ModelError("Timestep size exceeds output frequency.")
+
         # Create the models expression utility
         self.model.get_expression_utility()
 
@@ -580,7 +585,6 @@ class Solver:
 
         system_config += "system->dt = {0};\n".format(self.model.timestep_size)
         system_config += "system->nt = {0};\n".format(self.model.num_timesteps)
-        system_config += "system->output_freq = {0};\n".format(self.model.output_freq)
         if self.h is None:
             self.h = self.model.domain.find_h()
         if self.h == 0.0:
@@ -624,6 +628,15 @@ class Solver:
         for bc in self.model.listOfBoundaryConditions:
             init_bc += bc.expression()
         propfilestr = propfilestr.replace("__BOUNDARY_CONDITIONS__", init_bc)
+
+        output_step = "unsigned int get_next_output(ParticleSystem* system)\n{\n"
+        output_step += "static int index = 0;\n"
+        output_step += "const std::vector<unsigned int> output_steps = {"
+        output_step += f"{', '.join(self.model.output_steps.astype(str).tolist())}"
+        output_step += "};\nunsigned int next_step = output_steps[index];\n"
+        output_step += "index++;\n"
+        output_step += "return next_step;\n}\n"
+        propfilestr = propfilestr.replace("__DEFINE_GET_NEXT_OUTPUT__", output_step)
 
         #### Write the data to the file ####
         propfile.write(propfilestr)
