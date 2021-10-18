@@ -40,7 +40,7 @@ def cleanup_core_files():
 	core_dir = os.path.join(tempdir, "spatialpy_core")
 	if os.path.isdir(core_dir):
 		shutil.rmtree(core_dir)
-	print(f"Spatialpy core directory were removed")
+	print(f"Spatialpy core directory was removed")
 
 def cleanup_build_files(build_dir=None):
 	'''
