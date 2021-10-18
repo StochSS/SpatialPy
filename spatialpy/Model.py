@@ -776,9 +776,9 @@ class Parameter():
         """ Evaluate the expression and return the (scalar) value """
         try:
             self.value = (float(eval(self.expression, namespace)))
-        except:
-            message = f"Could not evaluate Parameter '{self.name}' expression '{self.expression}' to a scalar value."
-            raise ParameterError(message)
+        except Exception as err:
+            message = f"Could not evaluate expression: {err}."
+            raise ParameterError(message) from err
 
 
 class Reaction():
