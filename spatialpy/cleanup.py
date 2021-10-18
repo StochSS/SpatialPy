@@ -26,17 +26,21 @@ def cleanup_tempfiles():
 	'''
 	cleanup_core_files()
 	tempdir = tempfile.gettempdir()
+	count = 0
 	for file_obj in os.listdir(tempdir):
 		if file_obj.startswith("spatialpy_build"):
 			cleanup_build_files(build_dir=os.path.join(tempdir, file_obj))
 		elif file_obj.startswith("spatialpy_result"):
 			cleanup_result_files(result_dir=os.path.join(tempdir, file_obj))
 		elif "spatialpy" in file_obj:
+			count += 1
 			path = os.path.join(tempdir, file_obj)
 			if os.path.isdir:
 				shutil.rmtree(path)
 			else:
 				os.remove(path)
+	if count > 0
+		print(f"{count} other spatialpy files were removed")
 
 def cleanup_core_files():
 	'''
@@ -46,6 +50,7 @@ def cleanup_core_files():
 	core_dir = os.path.join(tempdir, "spatialpy_core")
 	if os.path.isdir(core_dir):
 		shutil.rmtree(core_dir)
+	print(f"Spatialpy core directory were removed")
 
 def cleanup_build_files(build_dir=None):
 	'''
@@ -54,14 +59,19 @@ def cleanup_build_files(build_dir=None):
 	:param build_dir: Path to the build directory to be removed. (optional)
 	:type build_dir: string
 	'''
+
 	if build_dir is not None:
 		shutil.rmtree(build_dir)
+		print(f"Build directory'{build_dir}' was removed")
 	else:
+		count = 0
 		tempdir = tempfile.gettempdir()
 		for file_obj in os.listdir(tempdir):
 			if file_obj.startswith("spatialpy_build"):
 				build_dir = os.path.join(tempdir, file_obj)
 				shutil.rmtree(build_dir)
+				count += 1
+		print(f"{count} build directories were removed")
 
 def cleanup_result_files(result_dir=None):
 	'''
@@ -72,9 +82,13 @@ def cleanup_result_files(result_dir=None):
 	'''
 	if result_dir is not None:
 		shutil.rmtree(result_dir)
+		print(f"Result directory '{result_dir}' was removed")
 	else:
+		count = 0
 		tempdir = tempfile.gettempdir()
 		for file_obj in os.listdir(tempdir):
 			if file_obj.startswith("spatialpy_result"):
 				result_dir = os.path.join(tempdir, file_obj)
 				shutil.rmtree(result_dir)
+				count += 1
+		print(f"{count} result directories were removed")
