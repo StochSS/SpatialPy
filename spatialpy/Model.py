@@ -794,7 +794,9 @@ class Parameter():
         try:
             self.value = (float(eval(self.expression, namespace)))
         except:
-            self.value = None
+            message = f"Could not evaluate Parameter '{param}' expression \
+                                '{self.listOfParameters[param].expression}' to a scalar value."
+            raise ParameterError(message)
 
     def set_expression(self,expression):
         """ Sets the Parameters expression
