@@ -356,8 +356,6 @@ class Model():
 
         for param in self.listOfParameters:
             self.namespace[param]=self.listOfParameters[param].value
-        # Dictionary of expressions that can be evaluated in the scope of this model.
-        self.expressions = {}
 
     def sanitized_species_names(self):
         """
@@ -779,8 +777,7 @@ class Parameter():
         try:
             self.value = (float(eval(self.expression, namespace)))
         except:
-            message = f"Could not evaluate Parameter '{self.name}' expression \
-                                            '{self.expression}' to a scalar value."
+            message = f"Could not evaluate Parameter '{self.name}' expression '{self.expression}' to a scalar value."
             raise ParameterError(message)
 
 
