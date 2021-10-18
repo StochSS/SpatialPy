@@ -61,7 +61,6 @@ namespace Spatialpy{
         double dt;
         unsigned int nt;
         unsigned int current_step;
-        unsigned int output_freq;
         double xlo, xhi, ylo, yhi, zlo, zhi;
         double h;
         double c0;
