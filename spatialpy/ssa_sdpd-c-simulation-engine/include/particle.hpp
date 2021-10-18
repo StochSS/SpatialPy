@@ -42,7 +42,7 @@ namespace Spatialpy{
 
     struct Particle{
         Particle(ParticleSystem *sys, unsigned int id=0, double x=0, double y=0, double z=0,
-                    int type=0, double nu=0.01, double mass=1,
+                    int type=0, double nu=0.01, double mass=1, double c=0,
                     double rho=1, int solidTag=0);
         ParticleSystem *sys;
         unsigned int id;
@@ -56,6 +56,7 @@ namespace Spatialpy{
         double mass;
         double rho;
         double nu;
+        double c;
         int solidTag;
         double bvf_phi;
         double normal[3];

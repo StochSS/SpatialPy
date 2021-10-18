@@ -67,6 +67,7 @@ class Domain():
         self.mass = numpy.zeros((numpoints), dtype=float)
         self.type = numpy.zeros((numpoints), dtype=int)
         self.nu = numpy.zeros((numpoints), dtype=float)
+        self.c = numpy.zeros((numpoints), dtype=float)
         self.rho = numpy.zeros((numpoints), dtype=float)
         self.fixed = numpy.zeros((numpoints), dtype=bool)
 
@@ -88,6 +89,8 @@ class Domain():
         domain_strs.extend(["", "Paritcles", ""])
         for i, vertex in enumerate(self.vertices):
             v_str = f"{pad}{i+1}: {vertex}\n{pad}   Volume:{self.vol[i]}, Mass: {self.mass[i]}, "
+            v_str += f"Type: {self.type[i]}, Viscosity: {self.nu[i]}, Density: {self.rho[i]}, "
+            v_str += f"Artificial Speed of Sound: {self.c[i]}, Fixed: {self.fixed[i]}"
             v_str += f"Type: {self.type[i]}, Viscosity: {self.nu[i]}, Density: {self.rho[i]}, Fixed: {self.fixed[i]}"
             domain_strs.append(v_str)
         if self.triangles is not None:
@@ -104,7 +107,7 @@ class Domain():
     def _ipython_display_(self, use_matplotlib=False):
         self.plot_types(width="auto", height="auto", use_matplotlib=use_matplotlib)
 
-    def add_point(self, x, vol, mass, type, nu, fixed, rho=None):
+    def add_point(self, x, vol, mass, type, nu, fixed, rho=None, c=0):
         """ Add a single point particle to the domain space.
 
             :param x: Spatial coordinate vertices of point to be added
@@ -125,6 +128,9 @@ class Domain():
             :param fixed: True if particle is spatially fixed, else False
             :type fixed: bool
 
+            :param c: Default artificial speed of sound of particle to be created
+            :type c: float
+
             :param rho: Default density of particle to be created
             :type rho: float
         """
@@ -139,6 +145,7 @@ class Domain():
         self.mass = numpy.append(self.mass, mass)
         self.type = numpy.append(self.type, type)
         self.nu = numpy.append(self.nu, nu)
+        self.c = numpy.append(self.c, c)
         self.rho = numpy.append(self.rho, rho)
         self.fixed = numpy.append(self.fixed, fixed)
 
@@ -569,8 +576,10 @@ class Domain():
             for particle in domain['particles']:
                 # StochSS backward compatability check for rho
                 rho = None if "rho" not in particle.keys() else particle['rho']
+                # StochSS backward compatability check for c
+                c = 0 if "c" not in particle.keys() else particle['c']
                 obj.add_point(particle['point'], particle['volume'], particle['mass'],
-                              particle['type'], particle['nu'], particle['fixed'], rho=rho)
+                              particle['type'], particle['nu'], particle['fixed'], rho=rho, c=c)
 
             return obj
         except KeyError as e:
@@ -578,7 +587,7 @@ class Domain():
 
 
     @classmethod
-    def create_3D_domain(cls, xlim, ylim, zlim, nx, ny, nz, type_id=1, mass=1.0, nu=1.0, rho=None, fixed=False, **kwargs):
+    def create_3D_domain(cls, xlim, ylim, zlim, nx, ny, nz, type_id=1, mass=1.0, nu=1.0, rho=None, c=0, fixed=False, **kwargs):
         """ Create a filled 3D domain
 
             :param xlim: highest and lowest coordinate in the x dimension
@@ -607,6 +616,9 @@ class Domain():
 
             :param nu: default viscosity of particles to be created. Defaults to 1.0
             :type nu: float
+
+            :param c: default artificial speed of sound of particles to be created. Defaults to 0.0.
+            :type c: float
 
             :param rho: default density of particles to be created.
             :type rho:
@@ -650,6 +662,7 @@ class Domain():
                     obj.type[ndx] = type_id
                     obj.mass[ndx] = mass
                     obj.nu[ndx] = nu
+                    obj.c[ndx] = c
                     obj.rho[ndx] = rho
                     obj.fixed[ndx] = fixed
                     ndx+=1
@@ -658,7 +671,7 @@ class Domain():
         return obj
 
     @classmethod
-    def create_2D_domain(cls, xlim, ylim, nx, ny, type_id=1, mass=1.0, nu=1.0, rho=None, fixed=False, **kwargs):
+    def create_2D_domain(cls, xlim, ylim, nx, ny, type_id=1, mass=1.0, nu=1.0, rho=None, c=0, fixed=False, **kwargs):
         """ Create a filled 2D domain
 
             :param xlim: highest and lowest coordinate in the x dimension
@@ -681,6 +694,9 @@ class Domain():
 
             :param nu: default viscosity of particles to be created. Defaults to 1.0
             :type nu: float
+
+            :param c: default artificial speed of sound of particles to be created. Defaults to 0.0.
+            :type c: float
 
             :param rho: default density of particles to be created.
             :type rho:
@@ -722,6 +738,7 @@ class Domain():
                 obj.type[ndx] = type_id
                 obj.mass[ndx] = mass
                 obj.nu[ndx] = nu
+                obj.c[ndx] = c
                 obj.rho[ndx] = rho
                 obj.fixed[ndx] = fixed
                 ndx+=1

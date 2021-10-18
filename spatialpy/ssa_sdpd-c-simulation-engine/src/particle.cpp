@@ -66,9 +66,9 @@ namespace Spatialpy{
 
     Particle::Particle(ParticleSystem *sys, unsigned int id, 
                         double xl, double yl, double zl, int type, double nu, 
-                        double mass, double rho, int solidTag) : 
-                        sys(sys), id(id), type(type), 
-                        nu(nu), mass(mass), rho(rho), solidTag(solidTag)
+                        double mass, double c, double rho, int solidTag) : 
+                        sys(sys), id(id), type(type), nu(nu),
+                        c(c), mass(mass), rho(rho), solidTag(solidTag)
     {
     	x[0] = xl ;
         x[1] = yl ;
