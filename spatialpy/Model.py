@@ -106,6 +106,7 @@ class Model():
 
 
     def __str__(self):
+        self._resolve_parameters()
         divider = f"\n{'*'*10}\n"
 
         def decorate(header):
