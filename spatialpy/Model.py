@@ -786,8 +786,10 @@ class Parameter():
         # will be caught below. It is perfectly fine to give a scalar value as the expression.
         # This can then be evaluated in an empty namespace to the scalar value.
         self.expression = str(expression)
-        
-        self._evaluate()
+
+    def __str__(self):
+        print_string = f"{self.name}: {str(self.expression)}"
+        return print_string
 
     def _evaluate(self,namespace={}):
         """ Evaluate the expression and return the (scalar) value """
@@ -797,28 +799,6 @@ class Parameter():
             message = f"Could not evaluate Parameter '{param}' expression \
                                 '{self.listOfParameters[param].expression}' to a scalar value."
             raise ParameterError(message)
-
-    def set_expression(self,expression):
-        """ Sets the Parameters expression
-
-            :param expression: Expression to be set for Parameter
-            :type expression: str
-        """
-        self.expression = expression
-        # We allow expression to be passed in as a non-string type. Invalid strings
-        # will be caught below. It is perfectly fine to give a scalar value as the expression.
-        # This can then be evaluated in an empty namespace to the scalar value.
-        if expression is not None:
-            self.expression = str(expression)
-
-        if self.expression is None:
-            raise TypeError
-
-        self._evaluate()
-
-    def __str__(self):
-        print_string = f"{self.name}: {str(self.expression)}"
-        return print_string
 
 
 class Reaction():
