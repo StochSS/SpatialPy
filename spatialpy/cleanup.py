@@ -29,7 +29,7 @@ def cleanup_tempfiles():
 	for file_obj in os.listdir(tempdir):
 		if file_obj.startswith("spatialpy_build"):
 			cleanup_build_files(build_dir=os.path.join(tempdir, file_obj))
-		elif file_obj.startswith("spatialpy_result")::
+		elif file_obj.startswith("spatialpy_result"):
 			cleanup_result_files(result_dir=os.path.join(tempdir, file_obj))
 		elif "spatialpy" in file_obj:
 			path = os.path.join(tempdir, file_obj)
