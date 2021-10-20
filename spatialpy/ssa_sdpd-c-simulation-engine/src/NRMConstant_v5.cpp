@@ -28,12 +28,6 @@ namespace Spatialpy{
                double propensitySum, std::size_t activeChannels,
                std::mt19937_64& rng, double timeOffset,
                double simulationEndTime) {
-        printf("NRMConstant_v5::build(");
-        printf("propensitySum=%e,",propensitySum);
-        printf("activeChannels=%lu,",activeChannels);
-        printf("timeOffset=%e,",timeOffset);
-        printf("simulationEndTime=%e,",simulationEndTime);
-        printf(")\n");
 
         activeChannelCounter=activeChannels;
         endTime=simulationEndTime;
