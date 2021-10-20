@@ -50,8 +50,10 @@ namespace Spatialpy{
         }
         minBin=0;
         std::vector<std::pair<double, std::size_t> > emptyVector;
+        theHashTable.clear();
         theHashTable.resize(numberOfBins,emptyVector);
         std::size_t active_channel_count=0; //for verifying build input
+        int numNonZero=0;
 
         for (std::size_t i=0; i!=propensities.size(); ++i) {
             double firingTime;
@@ -68,10 +70,12 @@ namespace Spatialpy{
             if (bin>=0) {
                 theHashTable[bin].push_back(std::make_pair(firingTime,i)); //place this rxn at back of bin
                 binIndexAndPositionInBin[i]=std::make_pair(bin,theHashTable[bin].size()-1);
+                numNonZero++;
             } else {
                 binIndexAndPositionInBin[i]=std::make_pair<int,int>(-1,-1); //bin (and index within bin) is -1 if not in the hash table
             }
         }
+        std::cout << " numNonZero="<<numNonZero<<"\n";
         //set rxn counter to 0
         rxnCountThisBuildOrRebuild=0;
         //record info from build
@@ -155,11 +159,15 @@ namespace Spatialpy{
         std::cout << " width=" << (currentUpperBound-currentLowerBound)/numberOfBins << std::endl;
         for (std::size_t i=0; i!=theHashTable.size(); ++i) {
             std::cout << "[" << i << "] (sz=" << theHashTable[i].size() << "): ";
+            double mint = std::numeric_limits<double>::infinity();
+            double maxt = -1 * std::numeric_limits<double>::infinity();
             for (std::size_t j=0; j!=theHashTable[i].size(); ++j) {
+                if(theHashTable[i][j].first < mint){ mint = theHashTable[i][j].first; }
+                if(theHashTable[i][j].first > maxt){ maxt = theHashTable[i][j].first; }
                 //std::cout << theHashTable[i][j].second << "(" << theHashTable[i][j].first << "), ";
                 printf("%lu(%.3e) ",theHashTable[i][j].second, theHashTable[i][j].first);
             }
-            std::cout << "\n";
+            std::cout << " ["<<mint<< " "<<maxt<<"] ["<<(maxt-mint)<<"]\n";
         }
         std::cout << "###########################################\n";
     }
@@ -206,7 +214,7 @@ namespace Spatialpy{
 
     int NRMConstant_v5::computeBinIndex(double firingTime) {
         if (firingTime>currentUpperBound) {
-            std::cout << "computeBinIndex("<<firingTime<<")==-1\n";
+            //std::cout << "computeBinIndex("<<firingTime<<")==-1\n";
             return -1;
         }
         int binIndex=(int)((firingTime-currentLowerBound)/(currentUpperBound-currentLowerBound)*numberOfBins);
@@ -240,24 +248,23 @@ namespace Spatialpy{
 
         std::vector<std::pair<double, std::size_t> > emptyVector;
 
-        //theHashTable.clear();
+        theHashTable.clear();
         theHashTable.resize(numberOfBins,emptyVector);
 
-        bool allPropensitiesZero=true;
+        int numNonZero=0;
         for (auto it = nextFiringTime.cbegin(); it != nextFiringTime.end(); it++) {
             //insert into hashTable
-            if (allPropensitiesZero && it->second!=std::numeric_limits<double>::infinity()) {
-                allPropensitiesZero=false;
-            }
             int bin=computeBinIndex(it->second); // it->second is firing time
             if (bin>=0) {
                 theHashTable[bin].push_back(std::make_pair(it->second,it->first)); //place this rxn at back of bin
                 binIndexAndPositionInBin[it->first]=std::make_pair(bin,theHashTable[bin].size()-1);
-            }
-            else {
+                numNonZero++;
+            } else {
                 binIndexAndPositionInBin[it->first]=std::make_pair<int,int>(-1,-1);
             }
         }
+        std::cout << " numNonZero="<<numNonZero<<"\n";
+
 
         //record info from build
         rxnsBetweenBuildOrRebuild.push_back(rxnCountThisBuildOrRebuild);
@@ -268,7 +275,7 @@ namespace Spatialpy{
         rxnCountThisBuildOrRebuild=0;
 
         printHashTable();
-        return !allPropensitiesZero;
+        return numNonZero>0;
     }
 
     //fixed number of bins
@@ -307,6 +314,10 @@ namespace Spatialpy{
                 currentUpperBound=currentLowerBound+binWidth*(double)numberOfBins;
             }
         }
+        std::cout << "NRMConstant_v5::setBinNumberAndBounds()";
+        std::cout << " currentLowerBound="<<currentLowerBound;
+        std::cout << " currentUpperBound="<<currentUpperBound;
+        std::cout << " numberOfBins="<<numberOfBins<<"\n";
         return true;
     }
 }

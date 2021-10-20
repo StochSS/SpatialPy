@@ -221,7 +221,6 @@ namespace Spatialpy{
         double rand1,rand2,cum2,old;
         double vol,diff_const;
         Particle *dest_subvol = NULL;
-        NeighborNode *nn = NULL;
 
         if(debug_flag>1){
             printf("take_step() tt=%e end_time=%e\n",tt,end_time);
@@ -229,7 +228,7 @@ namespace Spatialpy{
         }
 
         std::pair<double,int> timeRxnPair;
-        int reactionIndex, subvol_index;
+        int subvol_index;
         /* Main loop. */
         while(tt <= end_time){
             /* Get the subvolume in which the next event occurred.
@@ -416,7 +415,7 @@ namespace Spatialpy{
                 if(debug_flag){
                     printf("    xx[%i]=[",subvol->id);
                     for(i=0;i<system->num_stoch_species;i++){
-                        printf("%i ",i,subvol->xx[i]);
+                        printf("%u ",subvol->xx[i]);
                     }
                     printf("]\n");
                 }
