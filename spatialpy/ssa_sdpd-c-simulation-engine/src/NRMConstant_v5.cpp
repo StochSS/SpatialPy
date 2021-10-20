@@ -75,7 +75,6 @@ namespace Spatialpy{
                 binIndexAndPositionInBin[i]=std::make_pair<int,int>(-1,-1); //bin (and index within bin) is -1 if not in the hash table
             }
         }
-        std::cout << " numNonZero="<<numNonZero<<"\n";
         //set rxn counter to 0
         rxnCountThisBuildOrRebuild=0;
         //record info from build
@@ -84,11 +83,10 @@ namespace Spatialpy{
         upperBoundsBuildOrRebuild.push_back(currentUpperBound);
 
         if (active_channel_count!=activeChannelCounter) {
-            std::cout << "ERROR: active channel count is inconsistent.\n";
             return false;
         }
 
-        printHashTable();
+        //printHashTable();
         return true;
     }
 
@@ -96,11 +94,6 @@ namespace Spatialpy{
     // reactionIndex is particle id
     void NRMConstant_v5::update(std::size_t reactionIndex, double newPropensity, double currentTime, std::mt19937_64& rng) {
 
-        printf("NRMConstant_v5::update(");
-        printf("reactionIndex=%lu,",reactionIndex);
-        printf("newPropensity=%e,",newPropensity);
-        printf("currentTime=%e,",currentTime);
-        printf(")\n");
         double firingTime;
         if (newPropensity <= 0.0) {
             firingTime=std::numeric_limits<double>::infinity();
@@ -118,22 +111,17 @@ namespace Spatialpy{
 
         int oldBin=binIndexAndPositionInBin[reactionIndex].first;
         int oldPositionInBin=binIndexAndPositionInBin[reactionIndex].second;
-        std::cout << "\tnewBin="<<newBin<<" oldBin="<<oldBin<<"  oldPositionInBin="<<oldPositionInBin<<"\n";
         if (newBin!=oldBin) {
-            std::cout << "\tnewBin!=oldBin\n";
             if (oldBin>=0) {
                 //remove from old bin
                 if (theHashTable[oldBin].size()>1) {
-                    std::cout << "\tdoing swap\n";
                     //take last element in old bin and place in this element's spot
                     theHashTable[oldBin][oldPositionInBin]=theHashTable[oldBin].back();
                     std::size_t movedElementIndex=theHashTable[oldBin][oldPositionInBin].second;
                     //update old last element's ...within bin index
                     binIndexAndPositionInBin[movedElementIndex].second=oldPositionInBin;
                 }
-                std::cout << "\ttheHashTable[oldBin].size()="<<theHashTable[oldBin].size()<<" (before)\n";
                 theHashTable[oldBin].pop_back();
-                std::cout << "\ttheHashTable[oldBin].size()="<<theHashTable[oldBin].size()<<" (after)\n";
             }
             binIndexAndPositionInBin[reactionIndex].first=newBin;
             if (newBin>=0) {
@@ -141,7 +129,6 @@ namespace Spatialpy{
                 binIndexAndPositionInBin[reactionIndex].second=theHashTable[newBin].size()-1;
             }
         } else {
-            std::cout << "\tnewBin==oldBin\n";
             //just update firing time
             if (newBin>=0) {
                 theHashTable[newBin][binIndexAndPositionInBin[reactionIndex].second].first=firingTime;
@@ -173,19 +160,12 @@ namespace Spatialpy{
     }
 
     NRMConstant_v5::timeIndexPair NRMConstant_v5::selectReaction() {
-        std::cout << "NRMConstant_v5::selectReaction()\n";
-        printHashTable();
+        //printHashTable();
         //while front of queue is empty, pop it
-        std::cout << " minBin="<<minBin;
-        std::cout << " theHashTable[minBin].size()="<<theHashTable[minBin].size()<<"\n";
         while (theHashTable[minBin].size()==0) {
             ++minBin;
-            std::cout << " ++minBin="<<minBin;
-            std::cout << " theHashTable[minBin].size()="<<theHashTable[minBin].size()<<"\n";
             if (minBin==theHashTable.size()) {
-                std::cout << " rebuild\n";
                 if (!rebuild()) {
-                    std::cout << " rebuild returned False\n";
                     return std::make_pair(std::numeric_limits<double>::max(),-1);
                 }
             }
@@ -197,14 +177,8 @@ namespace Spatialpy{
                 minTimeRxnIndex=i;
             }
         }
-        std::cout << " minTimeRxnIndex="<<minTimeRxnIndex<<"\n";
         previousFiringTime=theHashTable[minBin][minTimeRxnIndex].first;
-        std::cout << " previousFiringTime="<<previousFiringTime<<"\n";
         ++rxnCountThisBuildOrRebuild;
-        std::cout << " rxnCountThisBuildOrRebuild=" << rxnCountThisBuildOrRebuild << "\n";
-        std::cout << "=theHashTable[minBin][minTimeRxnIndex]=(";
-        std::cout <<theHashTable[minBin][minTimeRxnIndex].first<<" , ";
-        std::cout <<theHashTable[minBin][minTimeRxnIndex].second<<")\n";
 
         return theHashTable[minBin][minTimeRxnIndex];
     }
@@ -214,19 +188,16 @@ namespace Spatialpy{
 
     int NRMConstant_v5::computeBinIndex(double firingTime) {
         if (firingTime>currentUpperBound) {
-            //std::cout << "computeBinIndex("<<firingTime<<")==-1\n";
             return -1;
         }
         int binIndex=(int)((firingTime-currentLowerBound)/(currentUpperBound-currentLowerBound)*numberOfBins);
         int returnVal=std::max(binIndex,(int)minBin);
         int ret = std::min<int>(returnVal, numberOfBins-1);
-        std::cout << "computeBinIndex("<<firingTime<<")=="<<ret<<"\n";
         return ret;
     }
 
     //returns false if all propensities are 0
     bool NRMConstant_v5::rebuild() {
-        std::cout << "NRMConstant_v5::rebuild()\n";
 
         //estimate propensitySum based on number of steps since last build or rebuild
         double propensitySumEstimate;
@@ -237,7 +208,6 @@ namespace Spatialpy{
             //rebuild!  This should only arise in toy problems, but need a strategy.
             double previousBinWidth=(currentUpperBound-currentLowerBound)/(double)numberOfBins;
             propensitySumEstimate=1.0/previousBinWidth;
-            std::cout << "WARNING: 0 reactions fired before rebuild.\n";
         }
 
         if(!setBinNumberAndBounds(currentUpperBound,propensitySumEstimate,activeChannelCounter)){//
@@ -263,7 +233,6 @@ namespace Spatialpy{
                 binIndexAndPositionInBin[it->first]=std::make_pair<int,int>(-1,-1);
             }
         }
-        std::cout << " numNonZero="<<numNonZero<<"\n";
 
 
         //record info from build
@@ -274,7 +243,7 @@ namespace Spatialpy{
         //set rxn counter to 0
         rxnCountThisBuildOrRebuild=0;
 
-        printHashTable();
+        //printHashTable();
         return numNonZero>0;
     }
 
@@ -314,10 +283,6 @@ namespace Spatialpy{
                 currentUpperBound=currentLowerBound+binWidth*(double)numberOfBins;
             }
         }
-        std::cout << "NRMConstant_v5::setBinNumberAndBounds()";
-        std::cout << " currentLowerBound="<<currentLowerBound;
-        std::cout << " currentUpperBound="<<currentUpperBound;
-        std::cout << " numberOfBins="<<numberOfBins<<"\n";
         return true;
     }
 }
