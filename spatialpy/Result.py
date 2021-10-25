@@ -193,10 +193,7 @@ class Result():
 
         if debug:
             print("read_step({0}) ".format(step_num), end='')
-        #num = int(step_num * self.model.output_freq)
-        #num = int(step_num / self.model.timestep_size)
-        num = self.model.timespan_steps[step_num]
-        filename = os.path.join(self.result_dir, "output{0}.vtk".format(num))
+        filename = os.path.join(self.result_dir, "output{0}.vtk".format(step_num))
 
         if debug:
             print("opening '{0}'".format(filename))
@@ -238,8 +235,7 @@ class Result():
 
         """
 
-        self.tspan = numpy.linspace(0,self.model.num_timesteps,
-                num=math.ceil(self.model.num_timesteps/self.model.output_freq)+1) * self.model.timestep_size
+        self.tspan = self.model.tspan
         return self.tspan
 
     def get_species(self, species, timepoints=None, concentration=False, deterministic=False, debug=False):
@@ -278,13 +274,9 @@ class Result():
         if spec_name not in self.model.listOfSpecies.keys():
             raise ResultError("Species '{0}' not found".format(spec_name))
 
-        #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
-        #                    num=self.model.num_timesteps+1, dtype=int)
-        #t_index_arr = numpy.linspace(0,self.model.num_timesteps,
-        #        num=math.ceil(self.model.num_timesteps/self.model.output_freq)+1) 
         lt=len(self.get_timespan())-1
         t_index_arr = numpy.linspace(0,lt,num=lt+1,dtype=int)
-
+        
         if timepoints is not None:
             if isinstance(timepoints,float):
                 raise ResultError("timepoints argument must be an integer, the index of time timespan")
@@ -572,8 +564,9 @@ class Result():
             :rtype: numpy.ndarray
         """
 
-        t_index_arr = numpy.linspace(0,self.model.num_timesteps,
-                            num=self.model.num_timesteps+1, dtype=int)
+        lt=len(self.get_timespan())-1
+        t_index_arr = numpy.linspace(0,lt,num=lt+1,dtype=int)
+        
         num_voxel = self.model.domain.get_num_voxels()
 
         if timepoints is not None:
@@ -596,8 +589,8 @@ class Result():
 
     def plot_property(self, property_name, t_ndx=None, t_val=None, p_ndx=0, width=None, height=None,
                       colormap=None, size=5, title=None, animated=False, t_ndx_list=None, speed=1,
-                      f_duration=500, t_duration=300, return_plotly_figure=False, use_matplotlib=False,
-                      debug=False):
+                      f_duration=500, t_duration=300, included_types_list=None, return_plotly_figure=False,
+                      use_matplotlib=False, debug=False):
         """
         Plots the Results using plotly. Can only be viewed in a Jupyter Notebook.
 
@@ -632,6 +625,8 @@ class Result():
         :type f_duration: int
         :param t_duration: The duration of time to execute the transition between frames
         :type t_duration: int
+        :param included_types_list: A list of ints describing which types to include. By default displays all types.
+        :type included_types_list: list
         :param return_plotly_figure: whether or not to return a figure dictionary of data(graph object traces) and layout options
             which may be edited by the user.
         :type return_plotly_figure: bool
@@ -675,8 +670,16 @@ class Result():
                 width = 6.4
             if height is None:
                 height = 4.8
-            
-            if property_name == 'v':
+
+            if property_name == "type" and included_types_list is not None:
+                coords = []
+                d = []
+                for i, val in enumerate(data[property_name]):
+                    if val in included_types_list:
+                        coords.append(points[i])
+                        d.append(val)
+                points = numpy.array(coords)
+            elif property_name == 'v':
                 d = data[property_name]
                 d = [d[i][p_ndx] for i in range(0,len(d))]
             else:
@@ -706,11 +709,12 @@ class Result():
             for i, val in enumerate(data['type']):
                 name = "type {}".format(val)
 
-                if name in types.keys():
-                    types[name]['points'].append(points[i])
-                    types[name]['data'].append(data[property_name][i])
-                else:
-                    types[name] = {"points":[points[i]], "data":[data[property_name][i]]}
+                if included_types_list is None or val in included_types_list:
+                    if name in types.keys():
+                        types[name]['points'].append(points[i])
+                        types[name]['data'].append(data[property_name][i])
+                    else:
+                        types[name] = {"points":[points[i]], "data":[data[property_name][i]]}
         elif property_name == 'v':
             types[property_name] = {
                 "points": points,
@@ -803,11 +807,12 @@ class Result():
                     for i, val in enumerate(data['type']):
                         name = "type {}".format(val)
 
-                        if name in types.keys():
-                            types[name]['points'].append(points[i])
-                            types[name]['data'].append(data[property_name][i])
-                        else:
-                            types[name] = {"points":[points[i]], "data":[data[property_name][i]]}
+                        if included_types_list is None or val in included_types_list:
+                            if name in types.keys():
+                                types[name]['points'].append(points[i])
+                                types[name]['data'].append(data[property_name][i])
+                            else:
+                                types[name] = {"points":[points[i]], "data":[data[property_name][i]]}
                 elif property_name == 'v':
                     types[property_name] = {
                         "points": points,

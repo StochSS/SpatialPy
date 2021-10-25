@@ -31,3 +31,4 @@ from spatialpy.DataFunction import DataFunction
 from spatialpy.InitialCondition import *
 from spatialpy.BoundaryCondition import BoundaryCondition
 from spatialpy.VTKReader import *
+from spatialpy.cleanup import *
