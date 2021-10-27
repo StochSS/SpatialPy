@@ -46,7 +46,7 @@ class TestNotebooks(unittest.TestCase):
         elif test_set == MINIMAL:
             files = [os.path.join('cylinderDemo', 'SpatialPy_cylinderDemo3D.ipynb'), 
                         os.path.join('tests', 'Diffusion_validation.ipynb'),
-                        os.path.join('tests', 'Spatial_Birth_Death.ipynb']
+                        os.path.join('tests', 'Spatial_Birth_Death.ipynb')]
             root = os.path.join('..', 'examples') 
             for file in files:
                  with open(os.path.join(root, file)) as f:
