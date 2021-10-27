@@ -31,7 +31,7 @@ class TestNotebooks(unittest.TestCase):
         errors = {}
         ep = ExecutePreprocessor(timeout=600, kernel_name='python3', allow_errors=True)
         if test_set == FULL:
-            test_dir = os.path.join('..', 'examples')
+            test_dir = os.path.join(os.path.dirname(os.cwd()), 'examples')
             for root, dirs, files in os.walk(test_dir):
                 for file in files:
                     if file.endswith(".ipynb"):
@@ -47,9 +47,10 @@ class TestNotebooks(unittest.TestCase):
             files = [os.path.join('cylinderDemo', 'SpatialPy_cylinderDemo3D.ipynb'), 
                         os.path.join('tests', 'Diffusion_validation.ipynb'),
                         os.path.join('tests', 'Spatial_Birth_Death.ipynb')]
-            root = os.path.join('..', 'examples') 
+            root = os.path.join(os.path.dirname(os.cwd()), 'examples') 
             for file in files:
-                 with open(os.path.join(root, file)) as f:
+                print(os.cwd)
+                with open(os.path.join(root, file)) as f:
                     print('Executing {}...'.format(file))
                     nb = nbformat.read(f, as_version=nbformat.NO_CONVERT)
                     try:
