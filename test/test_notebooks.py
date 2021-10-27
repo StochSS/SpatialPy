@@ -62,4 +62,5 @@ class TestNotebooks(unittest.TestCase):
                 print('{}:\n{}\n...\n{}'.format(fname, err.__str__()[:251], err.__str__()[-251:]))
             else:
                 print('{}:\n{}'.format(fname, err))
+        self.assertFalse(bool(errors))
 
