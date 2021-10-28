@@ -43,7 +43,7 @@ class TestNotebooks(unittest.TestCase):
             files = [os.path.join('cylinderDemo', 'SpatialPy_cylinderDemo3D.ipynb'), 
                     os.path.join('tests', 'Diffusion_validation.ipynb'),
                     os.path.join('tests', 'Spatial_Birth_Death.ipynb')]
-            root = os.path.join(os.path.dirname(os.getcwd()), 'examples') 
+            root = os.path.join('SpatialPy', 'examples') 
             for file in files:
                 with open(os.path.join(root, file)) as f:
                     print('Reading {}...'.format(file))
