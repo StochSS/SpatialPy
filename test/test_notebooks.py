@@ -25,39 +25,39 @@ from nbconvert.preprocessors import ExecutePreprocessor
 class TestNotebooks(unittest.TestCase):
     
     def test_notebooks(self):
-        FULL = 0
-        MINIMAL = 1
+        FULL, MINIMAL = 0, 1
         test_set = MINIMAL
+        notebooks = {}
         errors = {}
         ep = ExecutePreprocessor(timeout=600, kernel_name='python3', allow_errors=True)
+
         if test_set == FULL:
-            test_dir = os.path.join(os.path.dirname(os.cwd()), 'examples')
-            for root, dirs, files in os.walk(test_dir):
+            for root, dirs, files in os.walk("../examples/"):
                 for file in files:
                     if file.endswith(".ipynb"):
                          with open(os.path.join(root, file)) as f:
-                            print('Executing {}...'.format(file))
-                            nb = nbformat.read(f, as_version=nbformat.NO_CONVERT)
-                            try:
-                                ep.preprocess(nb, {'metadata': {'path': root}})
-                            except Exception as err:
-                                print('Error executing the notebook "{}".\n\n'.format(file))
-                                errors[file] = err
+                            print('Reading {}...'.format(file))
+                            notebooks[file] = nbformat.read(f, as_version=nbformat.NO_CONVERT)
+
         elif test_set == MINIMAL:
             files = [os.path.join('cylinderDemo', 'SpatialPy_cylinderDemo3D.ipynb'), 
-                        os.path.join('tests', 'Diffusion_validation.ipynb'),
-                        os.path.join('tests', 'Spatial_Birth_Death.ipynb')]
-            root = os.path.join(os.path.dirname(os.cwd()), 'examples') 
+                    os.path.join('tests', 'Diffusion_validation.ipynb'),
+                    os.path.join('tests', 'Spatial_Birth_Death.ipynb')]
+            root = os.path.join(os.path.dirname(os.getcwd()), 'examples') 
             for file in files:
-                print(os.cwd)
                 with open(os.path.join(root, file)) as f:
+                    print('Reading {}...'.format(file))
+                    notebooks[file] = nbformat.read(f, as_version=nbformat.NO_CONVERT)
+
+        for file, nb in notebooks.items():
+            with self.subTest(msg=file):
+                try:
                     print('Executing {}...'.format(file))
-                    nb = nbformat.read(f, as_version=nbformat.NO_CONVERT)
-                    try:
-                        ep.preprocess(nb, {'metadata': {'path': root}})
-                    except Exception as err:
-                        print('Error executing the notebook "{}".\n\n'.format(file))
-                        errors[file] = err
+                    ep.preprocess(nb, {'metadata': {'path': root}})
+                except Exception as err:
+                    print('Error executing the notebook "{}".\n\n'.format(file))
+                    errors[file] = err
+
         for fname, err in errors.items():
             if len(err.__str__()) > 500:
                 print('{}:\n{}\n...\n{}'.format(fname, err.__str__()[:251], err.__str__()[-251:]))
@@ -65,3 +65,6 @@ class TestNotebooks(unittest.TestCase):
                 print('{}:\n{}'.format(fname, err))
         self.assertFalse(bool(errors))
 
+        
+if __name__ == '__main__':
+    unittest.main()
