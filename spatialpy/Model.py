@@ -133,11 +133,13 @@ class Model():
             print_string += decorate("Reactions")
             for _, reaction in self.listOfReactions.items():
                 print_string += f"\n{str(reaction)}"
-        if self.domain is not None:
-            print_string += decorate("Domain")
-            print_string += f"\n{str(self.domain)}"
+        print(print_string)
 
-        return print_string
+        if self.domain is not None:
+            print(decorate("Domain"))
+            print(f"\n{str(self.domain)}")
+
+        return ""
 
 
     def get_expression_utility(self):
