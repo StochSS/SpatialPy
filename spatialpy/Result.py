@@ -393,12 +393,16 @@ class Result():
         points, data = self.read_step(t_ndx, debug=debug)
 
         if use_matplotlib:
-            import matplotlib.pyplot as plt
-
-            if width is None:
-                width = 6.4
+            width = 6.4 if width in (None, "auto") else width
+            height = 4.8 if height in (None, "auto") else height
+        else:
+            if width in (None, "auto"):
+                width = None if width == "auto" else 500
             if height is None:
-                height = 4.8
+                height = None if height == "auto" else 500
+
+        if use_matplotlib:
+            import matplotlib.pyplot as plt
 
             if deterministic or not concentration:
                 d = data[spec_name]
@@ -416,11 +420,6 @@ class Result():
             plt.grid(linestyle='--', linewidth=1)
             plt.plot()
             return
-
-        if width is None:
-            width = 500
-        if height is None:
-            height = 500
 
         # map data to types
         types = {}
@@ -664,12 +663,16 @@ class Result():
         points, data = self.read_step(t_ndx, debug=debug)
 
         if use_matplotlib:
-            import matplotlib.pyplot as plt
-
-            if width is None:
-                width = 6.4
+            width = 6.4 if width in (None, "auto") else width
+            height = 4.8 if height in (None, "auto") else height
+        else:
+            if width in (None, "auto"):
+                width = None if width == "auto" else 500
             if height is None:
-                height = 4.8
+                height = None if height == "auto" else 500
+
+        if use_matplotlib:
+            import matplotlib.pyplot as plt
 
             if property_name == "type" and included_types_list is not None:
                 coords = []
@@ -696,11 +699,6 @@ class Result():
             plt.grid(linestyle='--', linewidth=1)
             plt.plot()
             return
-
-        if width is None:
-            width = 500
-        if height is None:
-            height = 500
 
         from plotly.offline import init_notebook_mode, iplot
 
