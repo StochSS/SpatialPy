@@ -142,6 +142,13 @@ class Model():
         return ""
 
 
+    def _ipython_display_(self, use_matplotlib=False):
+        if self.domain is None:
+            print(self)
+        else:
+            self.domain.plot_types(width="auto", height="auto", use_matplotlib=use_matplotlib)
+
+
     def get_expression_utility(self):
         """
         Create a new expression.
