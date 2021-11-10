@@ -178,6 +178,102 @@ class Result():
         except Exception as e:
             pass
 
+    def __configure_buttons(self, f_duration, t_duration):
+        play_btn = {"args": [None, {"frame": {"duration": f_duration, "redraw": False},
+                                     "fromcurrent": True,
+                                     "transition": {"duration": t_duration, "easing": "quadratic-in-out"}}],
+                     "label": "Play",
+                     "method": "animate"
+                    }
+        pause_btn = {"args": [[None], {"frame": {"duration": 0, "redraw": False},
+                                       "mode": "immediate",
+                                       "transition": {"duration": 0}}],
+                     "label": "Pause",
+                     "method": "animate"
+                    }
+        return [play_btn, pause_btn]
+
+    def __setup_updatemenues(self, f_duration, t_duration):
+        menues = {"buttons": self.__configure_buttons(f_duration, t_duration),
+                  "direction": "left",
+                  "pad": {"r": 10, "t": 87},
+                  "showactive": False,
+                  "type": "buttons",
+                  "x": 0.1,
+                  "xanchor": "right",
+                  "y": 0,
+                  "yanchor": "top"
+                 }
+        return menues
+
+    def __setup_sliders(self, t_duration):
+        sliders = {"active": 0,
+                   "yanchor": "top",
+                   "xanchor": "left",
+                   "currentvalue": {
+                       "font": {"size": 20},
+                       "prefix": "Time:",
+                       "visible": True,
+                       "xanchor": "right"
+                   },
+                   "transition": {"duration": t_duration, "easing": "cubic-in-out"},
+                   "pad": {"b": 10, "t": 50},
+                   "len": 0.9,
+                   "x": 0.1,
+                   "y": 0,
+                   "steps": []
+                  }
+        return sliders
+
+    def __get_slider_step(self, t_ndx_list, index, f_duration, t_duration):
+        step = {"args": [[str(t_ndx_list[index])],
+                        {"frame": {"duration": f_duration, "redraw": True},
+                         "mode": "immediate",
+                         "transition": {"duration": t_duration}
+                        }],
+               "label": str(t_ndx_list[index]),
+               "method": "animate"}
+        return step
+
+    def __map_species_to_types(self, data, name, spec_name, deterministic, concentration, points):
+        types = {}
+        for i, val in enumerate(data['type']):
+            if (deterministic or not concentration):
+                spec_data = data[spec_name][i]
+            else:
+                spec_data = data[spec_name][i] / (data['mass'][i] / data['rho'][i])
+
+            if name in types.keys():
+                types[name]['points'].append(points[i])
+                types[name]['data'].append(spec_data)
+            else:
+                types[name] = {"points":[points[i]], "data":[spec_data]}
+        return types
+
+    def __map_property_to_type(self, property_name, data, included_types_list, points, p_ndx):
+        types = {}
+        if property_name == 'type':
+            for i, val in enumerate(data['type']):
+                name = "type {}".format(val)
+
+                if included_types_list is None or val in included_types_list:
+                    if name in types.keys():
+                        types[name]['points'].append(points[i])
+                        types[name]['data'].append(data[property_name][i])
+                    else:
+                        types[name] = {"points":[points[i]], "data":[data[property_name][i]]}
+        elif property_name == 'v':
+            types[property_name] = {
+                "points": points,
+                "data" : [data[property_name][i][p_ndx] for i in range(0,len(data[property_name]))]
+            }
+        else:
+            types[property_name] = {
+                "points": points,
+                "data" : data[property_name]
+            }
+        return types
+
     def read_step(self, step_num, debug=False):
         """ Read the data for simulation step 'step_num'. Returns a tuple containing a numpy.ndarray \
             of point coordinates [0] along with a dictionary of property and species data [1]
@@ -423,22 +519,8 @@ class Result():
             height = 500
 
         # map data to types
-        types = {}
-        for i, val in enumerate(data['type']):
-            name = species
-            if (deterministic or not concentration):
-                spec_data = data[spec_name][i]
-            else:
-                spec_data = data[spec_name][i] / (data['mass'][i] / data['rho'][i])
-
-            if name in types.keys():
-                types[name]['points'].append(points[i])
-                types[name]['data'].append(spec_data)
-            else:
-                types[name] = {"points":[points[i]], "data":[spec_data]}
-
+        types = self.__map_species_to_types(data, species, spec_name, deterministic, concentration, points)
         is_2d = self.model.domain.dimensions == 2
-
         trace_list = _plotly_iterate(types, size=size, colormap=colormap, is_2d=is_2d)
 
         scene = {
@@ -454,46 +536,8 @@ class Result():
 
         # function for 3D animations
         if animated and len(t_ndx_list) > 1:
-            fig["layout"]["updatemenus"] = [
-                {"buttons": [
-                    {"args": [None, {"frame": {"duration": f_duration, "redraw": False},
-                                     "fromcurrent": True,
-                                     "transition": {"duration": t_duration, "easing": "quadratic-in-out"}}],
-                     "label": "Play",
-                     "method": "animate"
-                    },
-                    {"args": [[None], {"frame": {"duration": 0, "redraw": False},
-                                       "mode": "immediate",
-                                       "transition": {"duration": 0}}],
-                     "label": "Pause",
-                     "method": "animate"
-                    }],
-                 "direction": "left",
-                 "pad": {"r": 10, "t": 87},
-                 "showactive": False,
-                 "type": "buttons",
-                 "x": 0.1,
-                 "xanchor": "right",
-                 "y": 0,
-                 "yanchor": "top"
-                }]
-
-            sliders_dict = {
-                "active": 0,
-                "yanchor": "top",
-                "xanchor": "left",
-                "currentvalue": {
-                    "font": {"size": 20},
-                    "prefix": "Time:",
-                    "visible": True,
-                    "xanchor": "right"
-                },
-                "transition": {"duration": t_duration, "easing": "cubic-in-out"},
-                "pad": {"b": 10, "t": 50},
-                "len": 0.9,
-                "x": 0.1,
-                "y": 0,
-                "steps": []}
+            fig["layout"]["updatemenus"] = [self.__setup_updatemenues(f_duration, t_duration)]
+            sliders_dict = self.__setup_sliders(t_duration)
 
             _data = data[spec_name] if (deterministic or not concentration) else data[spec_name] / (data['mass'] / data['rho'])
             cmin = min(_data)
@@ -511,33 +555,13 @@ class Result():
                 points, data = self.read_step(index)
 
                 # map data to types
-                types = {}
-                for i, val in enumerate(data['type']):
-                    name = species
-                    if (deterministic or not concentration):
-                        spec_data = data[spec_name][i]
-                    else:
-                        spec_data = data[spec_name][i] / (data['mass'][i] / data['rho'][i])
-
-                    if name in types.keys():
-                        types[name]['points'].append(points[i])
-                        types[name]['data'].append(spec_data)
-                    else:
-                        types[name] = {"points":[points[i]], "data":[spec_data]}
-
+                types = self.__map_species_to_types(data, species, spec_name, deterministic, concentration, points)
                 trace_list = _plotly_iterate(types, size=size, colormap=colormap, cmin=cmin, cmax=cmax, is_2d=is_2d)
 
                 frame = {"data":trace_list, "name":str(t_ndx_list[index])}
                 frames.append(frame)
 
-                slider_step = {"args": [[str(t_ndx_list[index])],
-                                        {"frame": {"duration": f_duration, "redraw": True},
-                                         "mode": "immediate",
-                                         "transition": {"duration": t_duration}
-                                        }],
-                               "label": str(t_ndx_list[index]),
-                               "method": "animate"}
-
+                slider_step = self.__get_slider_step(t_ndx_list, index, f_duration, t_duration)
                 sliders_dict['steps'].append(slider_step)
 
             fig["layout"]["sliders"] = [sliders_dict]
@@ -704,30 +728,8 @@ class Result():
 
         from plotly.offline import init_notebook_mode, iplot
 
-        types = {}
-        if property_name == 'type':
-            for i, val in enumerate(data['type']):
-                name = "type {}".format(val)
-
-                if included_types_list is None or val in included_types_list:
-                    if name in types.keys():
-                        types[name]['points'].append(points[i])
-                        types[name]['data'].append(data[property_name][i])
-                    else:
-                        types[name] = {"points":[points[i]], "data":[data[property_name][i]]}
-        elif property_name == 'v':
-            types[property_name] = {
-                "points": points,
-                "data" : [data[property_name][i][p_ndx] for i in range(0,len(data[property_name]))]
-            }
-        else:
-            types[property_name] = {
-                "points": points,
-                "data" : data[property_name]
-            }
-
+        types = self.__map_property_to_type(property_name, data, included_types_list, points, p_ndx)
         is_2d = self.model.domain.dimensions == 2
-
         trace_list = _plotly_iterate(types, size=size, property_name=property_name,
                                      colormap=colormap, is_2d=is_2d)
 
@@ -745,46 +747,8 @@ class Result():
 
         # function for 3D animations
         if animated and len(t_ndx_list) > 1:
-            fig["layout"]["updatemenus"] = [
-                {"buttons": [
-                    {"args": [None, {"frame": {"duration": f_duration, "redraw": False},
-                                     "fromcurrent": True,
-                                     "transition": {"duration": t_duration, "easing": "quadratic-in-out"}}],
-                     "label": "Play",
-                     "method": "animate"
-                    },
-                    {"args": [[None], {"frame": {"duration": 0, "redraw": False},
-                                       "mode": "immediate",
-                                       "transition": {"duration": 0}}],
-                     "label": "Pause",
-                     "method": "animate"
-                    }],
-                 "direction": "left",
-                 "pad": {"r": 10, "t": 87},
-                 "showactive": False,
-                 "type": "buttons",
-                 "x": 0.1,
-                 "xanchor": "right",
-                 "y": 0,
-                 "yanchor": "top"
-                }]
-
-            sliders_dict = {
-                "active": 0,
-                "yanchor": "top",
-                "xanchor": "left",
-                "currentvalue": {
-                    "font": {"size": 20},
-                    "prefix": "Time:",
-                    "visible": True,
-                    "xanchor": "right"
-                },
-                "transition": {"duration": t_duration, "easing": "cubic-in-out"},
-                "pad": {"b": 10, "t": 50},
-                "len": 0.9,
-                "x": 0.1,
-                "y": 0,
-                "steps": []}
+            fig["layout"]["updatemenus"] = [self.__setup_updatemenues(f_duration, t_duration)]
+            sliders_dict = self.__setup_sliders(t_duration)
 
             cmin = min(data[property_name]) if property_name != "v" else min(data[property_name], key=lambda val: val[p_ndx])[p_ndx]
             cmax = max(data[property_name]) if property_name != "v" else max(data[property_name], key=lambda val: val[p_ndx])[p_ndx]
@@ -802,42 +766,14 @@ class Result():
                 points, data = self.read_step(index)
 
                 # map data to types
-                types = {}
-                if property_name == 'type':
-                    for i, val in enumerate(data['type']):
-                        name = "type {}".format(val)
-
-                        if included_types_list is None or val in included_types_list:
-                            if name in types.keys():
-                                types[name]['points'].append(points[i])
-                                types[name]['data'].append(data[property_name][i])
-                            else:
-                                types[name] = {"points":[points[i]], "data":[data[property_name][i]]}
-                elif property_name == 'v':
-                    types[property_name] = {
-                        "points": points,
-                        "data" : [data[property_name][i][p_ndx] for i in range(0,len(data[property_name]))]
-                    }
-                else:
-                    types[property_name] = {
-                        "points": points,
-                        "data" : data[property_name]
-                    }
-
+                types = self.__map_property_to_type(property_name, data, included_types_list, points, p_ndx)
                 trace_list = _plotly_iterate(types, size=size, property_name=property_name,
                                      colormap=colormap, cmin=cmin, cmax=cmax, is_2d=is_2d)
 
                 frame = {"data":trace_list, "name":str(t_ndx_list[index])}
                 frames.append(frame)
 
-                slider_step = {"args": [[str(t_ndx_list[index])],
-                                        {"frame": {"duration": f_duration, "redraw": False},
-                                         "mode": "immediate",
-                                         "transition": {"duration": t_duration}
-                                        }],
-                               "label": str(t_ndx_list[index]),
-                               "method": "animate"}
-
+                slider_step = self.__get_slider_step(t_ndx_list, index, f_duration, t_duration)
                 sliders_dict['steps'].append(slider_step)
 
             fig["layout"]["sliders"] = [sliders_dict]
