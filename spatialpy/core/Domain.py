@@ -21,7 +21,7 @@ import json
 import numpy
 from scipy.spatial import KDTree
 
-from spatialpy.Result import _plotly_iterate
+from spatialpy import _plotly_iterate
 
 
 class Domain():
