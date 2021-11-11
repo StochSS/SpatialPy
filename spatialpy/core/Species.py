@@ -31,8 +31,15 @@ class Species():
         # A species has a name (string) and an initial value (positive integer)
         if name is None:
             raise SpeciesError("Species must have a name")
+        if not isinstance(name, str):
+            raise SpeciesError("Species name must be a string")
+
         if  diffusion_coefficient is None:
             raise SpeciesError("Species must have a diffusion_coefficient")
+        if not isinstance(diffusion_coefficient, (float, int)):
+            raise SpeciesError("Diffusion coefficient must be a float or int.")
+        if diffusion_coefficient < 0:
+            raise SpeciesError("Diffusion coefficient must be non-negative.")
 
         self.name = name
         self.diffusion_coefficient = diffusion_coefficient
