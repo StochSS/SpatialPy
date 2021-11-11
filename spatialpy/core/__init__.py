@@ -24,8 +24,11 @@ from .Domain import *
 from .Geometry import *
 from .InitialCondition import *
 from .Model import *
+from .Parameter import *
+from .Reaction import *
 from .Result import *
 from .spatialpyError import *
+from .Species import *
 from .VTKReader import *
 from spatialpy.__version__ import __version__
 

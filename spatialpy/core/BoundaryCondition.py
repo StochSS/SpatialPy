@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy
 
-from spatialpy.core.spatialpyError import ModelError
+from spatialpy.core.spatialpyError import BoundaryConditionError
 
 
 class BoundaryCondition():
@@ -103,9 +103,9 @@ class BoundaryCondition():
             :rtype: str
     """
         if( self.species is not None and self.property is not None):
-            raise ModelError("Can not set both species and property")
+            raise BoundaryConditionError("Can not set both species and property")
         if self.value is None:
-            raise ModelError("Must set value")
+            raise BoundaryConditionError("Must set value")
         cond=[]
         if(self.xmin is not None): cond.append("(me->x[0] >= {0})".format(self.xmin))
         if(self.xmax is not None): cond.append("(me->x[0] <= {0})".format(self.xmax))
@@ -114,7 +114,7 @@ class BoundaryCondition():
         if(self.zmin is not None): cond.append("(me->x[2] >= {0})".format(self.zmin))
         if(self.zmax is not None): cond.append("(me->x[2] <= {0})".format(self.zmax))
         if(self.type_id is not None): cond.append("(me->type == {0})".format(int(self.type_id)))
-        if(len(cond)==0): raise ModelError('need at least one condition on the BoundaryCondition')
+        if(len(cond)==0): raise BoundaryConditionError('need at least one condition on the BoundaryCondition')
         bcstr = "if(" + '&&'.join(cond) + "){"
         if self.species is not None:
             if self.deterministic:
@@ -131,6 +131,6 @@ class BoundaryCondition():
             elif(self.property == 'rho'):
                 bcstr+= "me->rho={0};".format(self.value)
             else:
-                raise Exception("Unable handle boundary condition for property '{0}'".format(self.property))
+                raise BoundaryConditionError("Unable handle boundary condition for property '{0}'".format(self.property))
         bcstr+= "}"
         return bcstr

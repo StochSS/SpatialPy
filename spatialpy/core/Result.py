@@ -28,7 +28,7 @@ import numpy
 
 from spatialpy.core.Model import *
 from spatialpy.core.VTKReader import VTKReader
-from spatialpy.core.spatialpyError import *
+from spatialpy.core.spatialpyError import ResultError
 
 try:
     import vtk
@@ -893,7 +893,4 @@ class Result():
             The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension.
             Not currently implemented."""
             # TODO
-        raise Exception("Not implemented.")
-
-class ResultError(Exception):
-    pass
+        raise ResultError("Not implemented.")

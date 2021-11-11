@@ -21,12 +21,53 @@ class ModelError(Exception):
     pass
 
 
-# Model Component Exceptions
-class SpeciesError(ModelError):
+class ResultError(Exception):
     pass
+
+
+class VTKReaderError(Exception):
+    """Base class for exceptions in VTKReader module."""
+    pass
+
+
+# Model Component Exceptions
+class BoundaryConditionError(ModelError):
+    pass
+
+
+class DataFunctionError(ModelError):
+    pass
+
+
+class DomainError(ModelError):
+    pass
+
+
+class GeometryError(ModelError):
+    pass
+
+
+class InitialConditionError(ModelError):
+    pass
+
+
+class ParameterError(ModelError):
+    pass
+
 
 class ReactionError(ModelError):
     pass
 
-class ParameterError(ModelError):
+
+class SpeciesError(ModelError):
     pass
+
+
+# Result Exceptions
+
+
+# VTKReader Exceptions
+class VTKReaderIOError(VTKReaderError):
+    """Exception raised for I/O errors."""
+    def __init__(self, message):
+        self.message = message

@@ -21,6 +21,8 @@ import json
 import numpy
 from scipy.spatial import KDTree
 
+from spatialpy.core.spatialpyError import DomainError
+
 class Domain():
     """ Domain class for SpatialPy.  A domain defines points and attributes of a regional space for simulation.
 
@@ -565,7 +567,7 @@ class Domain():
                     (ndx,type_id) = line.rstrip().split(',')
                     self.type[int(ndx)] = int(type_id)
                 except ValueError as e:
-                    raise ModelError(f"Could not read in subdomain file, error on line {ln}: {line}")
+                    raise DomainError(f"Could not read in subdomain file, error on line {ln}: {line}")
 
 
     @classmethod
@@ -759,8 +761,3 @@ class Domain():
 
         # return model ref
         return obj
-
-
-
-class DomainError(Exception):
-    pass
