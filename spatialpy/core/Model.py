@@ -18,16 +18,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #This module defines a model that simulates a discrete, stoachastic, mixed biochemical reaction network in python.
 
-import uuid
-from collections import OrderedDict
-from spatialpy.Solver import Solver
-from spatialpy.DataFunction import DataFunction
-from spatialpy.Domain import Domain
-from spatialpy.expression import Expression
 import numpy
 import scipy
 import warnings
 import math
+import uuid
+from collections import OrderedDict
+
+from spatialpy.Solver import Solver
+from spatialpy.DataFunction import DataFunction
+from spatialpy.Domain import Domain
+from spatialpy.expression import Expression
+
+from spatialpy.core.spatialpyError import *
 
 
 def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
@@ -994,17 +997,3 @@ class Reaction():
 
         """
         self.annotation = annotation
-
-
-# Module exceptions
-class ModelError(Exception):
-    pass
-
-class SpeciesError(ModelError):
-    pass
-
-class ReactionError(ModelError):
-    pass
-
-class ParameterError(ModelError):
-    pass

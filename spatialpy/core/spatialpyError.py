@@ -16,25 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import logging
-from .BoundaryCondition import *
-from .cleanup import *
-from .DataFunction import *
-from .Domain import *
-from .Geometry import *
-from .InitialCondition import *
-from .Model import *
-from .Result import *
-from .spatialpyError import *
-from .VTKReader import *
-from spatialpy.__version__ import __version__
+# Base Module Expections
+class ModelError(Exception):
+    pass
 
-_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-_handler = logging.StreamHandler()
-_handler.setFormatter(_formatter)
-version = __version__
-log = logging.getLogger()
-log.setLevel(logging.WARNING)
-log.addHandler(_handler)
 
-__all__ = [s for s in dir() if not s.startswith('_')]
+# Model Component Exceptions
+class SpeciesError(ModelError):
+    pass
+
+class ReactionError(ModelError):
+    pass
+
+class ParameterError(ModelError):
+    pass
