@@ -26,8 +26,9 @@ import sys
 
 import numpy
 
-from spatialpy.Model import *
-from spatialpy.VTKReader import VTKReader
+from spatialpy.core.Model import *
+from spatialpy.core.VTKReader import VTKReader
+from spatialpy.core.spatialpyError import *
 
 try:
     import vtk

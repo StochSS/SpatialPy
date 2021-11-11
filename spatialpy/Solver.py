@@ -29,8 +29,8 @@ import getpass
 import re
 
 
-from spatialpy.Model import *
-from spatialpy.Result import *
+from spatialpy.core.Model import *
+from spatialpy.core.Result import *
 
 def _read_from_stdout(stdout,verbose=True):
     ''' Used with subprocess.Popen and threading to capture all output and print

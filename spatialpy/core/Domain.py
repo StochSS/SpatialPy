@@ -21,9 +21,6 @@ import json
 import numpy
 from scipy.spatial import KDTree
 
-from spatialpy import _plotly_iterate
-
-
 class Domain():
     """ Domain class for SpatialPy.  A domain defines points and attributes of a regional space for simulation.
 
@@ -370,6 +367,7 @@ class Domain():
         :param use_matplotlib: Whether or not to plot the proprties results using matplotlib.
         :type use_matplotlib: bool
         '''
+        from spatialpy.core.Result import _plotly_iterate
 
         if use_matplotlib:
             width = 6.4 if width in (None, "auto") else width

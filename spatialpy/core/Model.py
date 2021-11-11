@@ -26,8 +26,8 @@ import uuid
 from collections import OrderedDict
 
 from spatialpy.Solver import Solver
-from spatialpy.DataFunction import DataFunction
-from spatialpy.Domain import Domain
+from spatialpy.core.DataFunction import DataFunction
+from spatialpy.core.Domain import Domain
 from spatialpy.expression import Expression
 
 from spatialpy.core.spatialpyError import *
