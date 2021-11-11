@@ -30,8 +30,8 @@ from spatialpy.core.Parameter import Parameter
 from spatialpy.core.Reaction import Reaction
 from spatialpy.core.DataFunction import DataFunction
 from spatialpy.core.Domain import Domain
-from spatialpy.Solver import Solver
-from spatialpy.expression import Expression
+from spatialpy.solvers.Solver import Solver
+from spatialpy.solvers.build.expression import Expression
 
 from spatialpy.core.spatialpyError import *
 

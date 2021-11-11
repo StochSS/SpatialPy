@@ -30,6 +30,10 @@ class VTKReaderError(Exception):
     pass
 
 
+class SimulationError(Exception):
+    pass
+
+
 # Model Component Exceptions
 class BoundaryConditionError(ModelError):
     pass
@@ -71,3 +75,8 @@ class VTKReaderIOError(VTKReaderError):
     """Exception raised for I/O errors."""
     def __init__(self, message):
         self.message = message
+
+
+# Simulation Exceptions
+class SimulationTimeout(SimulationError):
+    pass

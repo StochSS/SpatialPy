@@ -121,7 +121,7 @@ class BoundaryCondition():
                 s_ndx = self.model.species_map[self.model.listOfSpecies[self.species]]
                 bcstr += "me->C[{0}] = {1};".format(s_ndx,self.value)
             else:
-                raise Exception("BoundaryConditions don't work for stochastic species yet")
+                raise BoundaryConditionError("BoundaryConditions don't work for stochastic species yet")
         elif self.property is not None:
             if(self.property == 'v'):
                 for i in range(3):

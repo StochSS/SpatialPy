@@ -31,6 +31,7 @@ import re
 
 from spatialpy.core.Model import *
 from spatialpy.core.Result import *
+from spatialpy.core.spatialpyError import *
 
 def _read_from_stdout(stdout,verbose=True):
     ''' Used with subprocess.Popen and threading to capture all output and print
@@ -76,7 +77,7 @@ class Solver:
         self.h = None  # basis function width
 
         self.SpatialPy_ROOT = os.path.dirname(
-            os.path.abspath(__file__))+"/ssa_sdpd-c-simulation-engine"
+            os.path.abspath(__file__))+"/c_base/ssa_sdpd-c-simulation-engine"
         self.SpatialPy_ROOTDIR =  self.SpatialPy_ROOT.replace(" ","\\ ");
         self.SpatialPy_ROOTINC =  self.SpatialPy_ROOT.replace(" ","\\\\ ");
         self.SpatialPy_ROOTPARAM =  self.SpatialPy_ROOT.replace(" ","?");
@@ -314,7 +315,7 @@ class Solver:
 
 
         template = open(os.path.abspath(os.path.dirname(
-            __file__)) + '/ssa_sdpd-c-simulation-engine/propensity_file_template.cpp', 'r')
+            __file__)) + '/c_base/ssa_sdpd-c-simulation-engine/propensity_file_template.cpp', 'r')
         propfile = open(file_name, "w")
         propfilestr = template.read()
 
@@ -641,11 +642,3 @@ class Solver:
         #### Write the data to the file ####
         propfile.write(propfilestr)
         propfile.close()
-
-
-class SimulationError(Exception):
-    pass
-
-
-class SimulationTimeout(SimulationError):
-    pass

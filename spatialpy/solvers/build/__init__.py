@@ -15,16 +15,3 @@ GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-
-#__all__=['model','spatialpy']
-#from .spatialpy import *
-
-import sys
-if (sys.version_info < (3,0)):
-    raise Exception("SpatialPy only works in Python 3.0 and higher")
-from .__version__ import __version__, __title__, __description__, __url__
-from .__version__ import __author__, __email__
-from .__version__ import __license__, __copyright__
-
-from spatialpy.core import *
-from spatialpy.solvers import *
