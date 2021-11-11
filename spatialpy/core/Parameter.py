@@ -32,7 +32,7 @@ class Parameter():
 
     """
 
-    def __init__(self,name=None,expression=None):
+    def __init__(self, name=None, expression=None):
 
         if name is None:
             raise ParameterError("name is required for a Parameter.")
@@ -50,7 +50,7 @@ class Parameter():
         print_string = f"{self.name}: {str(self.expression)}"
         return print_string
 
-    def _evaluate(self,namespace={}):
+    def _evaluate(self, namespace={}):
         """ Evaluate the expression and return the (scalar) value """
         try:
             self.value = (float(eval(self.expression, namespace)))

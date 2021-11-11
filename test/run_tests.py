@@ -31,12 +31,14 @@ if __name__ == '__main__':
         sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
     import test_species
+    import test_parameter
     import test_model
     import test_solver
     #import test_mincde
 
     modules = [
         test_species,
+        test_parameter,
         test_model,
         test_solver,
         #test_mincde,
