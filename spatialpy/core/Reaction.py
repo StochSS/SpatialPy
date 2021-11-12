@@ -44,7 +44,8 @@ class Reaction():
     :type rate: spatialpy.model.Parameter
     """
 
-    def __init__(self, name = "", reactants = {}, products = {}, propensity_function=None, massaction=None, rate=None, annotation=None,restrict_to=None):
+    def __init__(self, name="", reactants={}, products={}, propensity_function=None,
+                 massaction=None, rate=None, annotation=None, restrict_to=None):
 
         # Metadata
         self.name = name
