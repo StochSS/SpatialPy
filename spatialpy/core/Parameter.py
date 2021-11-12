@@ -19,17 +19,16 @@ from spatialpy.core.spatialpyError import ParameterError
 
 class Parameter():
     """
-        Model of a rate paramter.
-        A parameter can be given as a String expression (function) or directly as a scalar value.
-        If given a String expression, it should be evaluable in the namespace of a parent Model.
+    Model of a rate paramter.
+    A parameter can be given as a String expression (function) or directly as a scalar value.
+    If given a String expression, it should be evaluable in the namespace of a parent Model.
 
-            :param name: Name of the Parameter
-            :type name: str
-            :param expression: Mathematical expression of Parameter
-            :type expression: str
-            :param value: Parameter as value rather than expression.
-            :type value: float
-
+    :param name: Name of the Parameter
+    :type name: str
+    :param expression: Mathematical expression of Parameter
+    :type expression: str
+    :param value: Parameter as value rather than expression.
+    :type value: float
     """
 
     def __init__(self, name=None, expression=None):

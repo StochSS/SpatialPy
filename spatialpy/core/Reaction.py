@@ -19,31 +19,29 @@ from spatialpy.core.spatialpyError import ReactionError
 
 class Reaction():
     """
-        Models a biochemical reaction. A reaction conatains dictionaries of species (reactants and products) \
-        and parameters. The reaction's propensity function needs to be evaluable and result in a \
-        non-negative scalar value in the namespace defined by the union of its Reactant, Product and \
-        Parameter dictionaries. If massaction is set to true, propensity_function is not a valid argument. \
-        Instead, the propensity function is constructed automatically. For mass-action, zeroth, first \
-        and second order reactions are supported, attempting to used higher orders will result in an error.
+    Models a biochemical reaction. A reaction conatains dictionaries of species (reactants and products) \
+    and parameters. The reaction's propensity function needs to be evaluable and result in a \
+    non-negative scalar value in the namespace defined by the union of its Reactant, Product and \
+    Parameter dictionaries. If massaction is set to true, propensity_function is not a valid argument. \
+    Instead, the propensity function is constructed automatically. For mass-action, zeroth, first \
+    and second order reactions are supported, attempting to used higher orders will result in an error.
 
-            :param name: String that the model is referenced by
-            :type name: str
-            :param parameters: A list of parameter instances
-            :type parameters: list(spatialpy.Model.Parameter)
-            :param propensity_function: String with the expression for the reaction's propensity
-            :type propensity_function: str
-            :param reactants: Dictionary of {species:stoichiometry} of reaction reactants
-            :type reactants: dict
-            :param products: Dictionary of {species:stoichiometry} of reaction products
-            :type products: dict
-            :param annotation: Description of the reaction (meta)
-            :type annotation: str
-            :param massaction: Is the reaction of mass action type or not?
-            :type massaction: bool
-            :param rate: if mass action, rate is a reference to a parameter instance.
-            :type rate: spatialpy.model.Parameter
-
-
+    :param name: String that the model is referenced by
+    :type name: str
+    :param parameters: A list of parameter instances
+    :type parameters: list(spatialpy.Model.Parameter)
+    :param propensity_function: String with the expression for the reaction's propensity
+    :type propensity_function: str
+    :param reactants: Dictionary of {species:stoichiometry} of reaction reactants
+    :type reactants: dict
+    :param products: Dictionary of {species:stoichiometry} of reaction products
+    :type products: dict
+    :param annotation: Description of the reaction (meta)
+    :type annotation: str
+    :param massaction: Is the reaction of mass action type or not?
+    :type massaction: bool
+    :param rate: if mass action, rate is a reference to a parameter instance.
+    :type rate: spatialpy.model.Parameter
     """
 
     def __init__(self, name = "", reactants = {}, products = {}, propensity_function=None, massaction=None, rate=None, annotation=None,restrict_to=None):

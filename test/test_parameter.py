@@ -81,14 +81,14 @@ class TestSpecies(unittest.TestCase):
         """ Test Parameter._evaluate method with parameter in namespace. """
         parameter = Parameter(name="test_parameter", expression="k1 + 0.5")
         parameter._evaluate(namespace={"k1": 3})
-        assertEqual(parameter.value, 1.5)
+        self.assertEqual(parameter.value, 1.5)
 
 
     def test__evaluate__species_in_namespace(self):
         """ Test Parameter._evaluate method with species in namespace. """
         parameter = Parameter(name="test_parameter", expression="S0 + 0.5")
         parameter._evaluate(namespace={"S0": 100})
-        assertEqual(parameter.value, 50)
+        self.assertEqual(parameter.value, 50)
 
 
     def test__evaluate__improper_expression(self):
