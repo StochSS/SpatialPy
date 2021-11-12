@@ -22,8 +22,7 @@ class Reaction():
     Models a biochemical reaction. A reaction conatains dictionaries of species (reactants and products) \
     and parameters. The reaction's propensity function needs to be evaluable and result in a \
     non-negative scalar value in the namespace defined by the union of its Reactant, Product and \
-    Parameter dictionaries. If massaction is set to true, propensity_function is not a valid argument. \
-    Instead, the propensity function is constructed automatically. For mass-action, zeroth, first \
+    Parameter dictionaries.  For mass-action, zeroth, first \
     and second order reactions are supported, attempting to used higher orders will result in an error.
 
     :param name: String that the model is referenced by
@@ -38,23 +37,38 @@ class Reaction():
     :type products: dict
     :param annotation: Description of the reaction (meta)
     :type annotation: str
-    :param massaction: Is the reaction of mass action type or not?
-    :type massaction: bool
     :param rate: if mass action, rate is a reference to a parameter instance.
     :type rate: spatialpy.model.Parameter
     """
 
-    def __init__(self, name="", reactants={}, products={}, propensity_function=None,
-                 massaction=None, rate=None, annotation=None, restrict_to=None):
+    def __init__(self, name="", reactants={}, products={}, propensity_function=None, rate=None, annotation=None, restrict_to=None):
 
-        # Metadata
+        if not isinstance(name, str):
+            raise ReactionError("Reaction name must be of type str.")
         self.name = name
+        
+        if not isinstance(reactants, dict):
+            raise ReactionError("Reaction reactants must be of type dict.")
         self.reactants = reactants
+        
+        if not isinstance(products, dict):
+            raise ReactionError("Reaction products must be of type dict.")
         self.products = products
-        self.propensity_function = propensity_function
-        self.massaction = massaction
-        self.rate = rate
-        self.annotation = annotation
+
+        if not isinstance(propensity_function, (str, int, float, None)):
+            raise ReactionError("Reaction propensity_function must be one of the following types: str, int, float, or None.")
+        if isinstance(propensity_function, (int, float)):
+            self.propensity_function = str(propensity_function)
+        else:
+            self.propensity_function = propensity_function
+
+        if not isinstance(rate, (Parameter, str, int, float, None)):
+            raise ReactionError("Reaction rate must be one of the following types: spatialpy.Parameter, str, int, float, or None.")
+        if isinstance(rate, (int, float)):
+            self.rate = str(rate)
+        else:
+            self.rate = rate
+
         if isinstance(restrict_to, int):
             self.restrict_to = [restrict_to]
         elif isinstance(restrict_to, list) or restrict_to is None:
@@ -62,6 +76,9 @@ class Reaction():
         else:
             errmsg = f"Reaction {name}: restrict_to must be an integer or list of integers."
             raise ReactionError(errmsg)
+
+        self.annotation = annotation
+        
 
     def initialize(self, model):
         """ Defered object initialization, called by model.add_reaction(). """

@@ -46,7 +46,10 @@ class Parameter():
         # We allow expression to be passed in as a non-string type. Invalid strings
         # will be caught below. It is perfectly fine to give a scalar value as the expression.
         # This can then be evaluated in an empty namespace to the scalar value.
-        self.expression = str(expression)
+        if isinstance(expression, (int, float)):
+            self.expression = str(expression)
+        else:
+            self.expression = expression
 
     def __str__(self):
         print_string = f"{self.name}: {str(self.expression)}"

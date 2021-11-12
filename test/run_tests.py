@@ -32,6 +32,7 @@ if __name__ == '__main__':
 
     import test_species
     import test_parameter
+    import test_reaction
     import test_model
     import test_solver
     #import test_mincde
@@ -39,6 +40,7 @@ if __name__ == '__main__':
     modules = [
         test_species,
         test_parameter,
+        test_reaction,
         test_model,
         test_solver,
         #test_mincde,
