@@ -56,15 +56,15 @@ class Reaction():
             raise ReactionError("Reaction products must be of type dict.")
         self.products = products
 
-        if not isinstance(propensity_function, (str, int, float)) and propensity_function is not None:
+        if not (isinstance(propensity_function, (str, int, float)) or propensity_function is None):
             raise ReactionError("Reaction propensity_function must be one of the following types: str, int, float, or None.")
         if isinstance(propensity_function, (int, float)):
             self.propensity_function = str(propensity_function)
         else:
             self.propensity_function = propensity_function
 
-        if not isinstance(rate, (str, int, float)) and rate is not None and\
-                        not isinstance(rate, Parameter) or type(rate).__name__ == 'Parameter':
+        if not (isinstance(rate, (str, int, float)) or rate is None or \
+                                isinstance(rate, Parameter) or type(rate).__name__ == 'Parameter'):
             raise ReactionError("Reaction rate must be one of the following types: spatialpy.Parameter, str, int, float, or None.")
         if isinstance(rate, (int, float)):
             self.rate = str(rate)
