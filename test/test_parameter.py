@@ -75,3 +75,31 @@ class TestSpecies(unittest.TestCase):
         parameter = Parameter(name="test_parameter", expression="0.5")
         parameter._evaluate()
         self.assertEqual(parameter.value, 0.5)
+
+
+    def test__evaluate__parameter_in_namespace(self):
+        """ Test Parameter._evaluate method with parameter in namespace. """
+        parameter = Parameter(name="test_parameter", expression="k1 + 0.5")
+        parameter._evaluate(namespace={"k1": 3})
+        assertEqual(parameter.value, 1.5)
+
+
+    def test__evaluate__species_in_namespace(self):
+        """ Test Parameter._evaluate method with species in namespace. """
+        parameter = Parameter(name="test_parameter", expression="S0 + 0.5")
+        parameter._evaluate(namespace={"S0": 100})
+        assertEqual(parameter.value, 50)
+
+
+    def test__evaluate__improper_expression(self):
+        """ Test Parameter._evaluate method with invalid expression. """
+        parameter = Parameter(name="test_parameter", expression="[0.5]")
+        with self.assertRaises(ParameterError):
+            parameter._evaluate()
+
+
+    def test__evaluate__param_not_in_namespace(self):
+        """ Test Parameter._evaluate method with arg missing from namespace. """
+        parameter = Parameter(name="test_parameter", expression="k1 + 0.5")
+        with self.assertRaises(ParameterError):
+            parameter._evaluate()

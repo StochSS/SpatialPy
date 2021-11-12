@@ -36,6 +36,9 @@ class Parameter():
 
         if name is None:
             raise ParameterError("name is required for a Parameter.")
+        if not isinstance(name, str):
+            raise ParameterError("Parameter name must be a string.")
+
         if expression is None:
             raise ParameterError("expression is required for a Parameter.")
         
