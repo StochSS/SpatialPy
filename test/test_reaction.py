@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
 
 import spatialpy
-from spatialpy import Parameter, Reaction
+from spatialpy import Reaction
 from spatialpy import ReactionError
 
 class TestReaction(unittest.TestCase):
