@@ -21,7 +21,7 @@ import spatialpy
 from spatialpy import Parameter
 from spatialpy import ParameterError
 
-class TestSpecies(unittest.TestCase):
+class TestParameter(unittest.TestCase):
     '''
     ################################################################################################
     Unit tests for spatialpy.Parameter.
@@ -81,7 +81,7 @@ class TestSpecies(unittest.TestCase):
         """ Test Parameter._evaluate method with parameter in namespace. """
         parameter = Parameter(name="test_parameter", expression="k1 + 0.5")
         parameter._evaluate(namespace={"k1": 3})
-        self.assertEqual(parameter.value, 1.5)
+        self.assertEqual(parameter.value, 3.5)
 
 
     def test__evaluate__species_in_namespace(self):
