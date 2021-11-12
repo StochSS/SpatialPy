@@ -64,7 +64,7 @@ class TestParameter(unittest.TestCase):
         self.assertEqual(parameter.expression, "0.5")
 
 
-    def test___str___(self):
+    def test___str__(self):
         """ Test Parameter.__str__ method. """
         parameter = Parameter(name="test_parameter", expression="0.5")
         self.assertIsInstance(str(parameter), str)

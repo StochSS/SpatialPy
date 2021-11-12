@@ -15,6 +15,7 @@ GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from spatialpy.core.Parameter import Parameter
 from spatialpy.core.spatialpyError import SpeciesError
 
 class Species():
@@ -36,8 +37,9 @@ class Species():
 
         if  diffusion_coefficient is None:
             raise SpeciesError("Species must have a diffusion_coefficient")
-        if not isinstance(diffusion_coefficient, (float, int)):
-            raise SpeciesError("Diffusion coefficient must be a float or int.")
+        if not (isinstance(diffusion_coefficient, (float, int)) or \
+                    isinstance(diffusion_coefficient, Parameter) or type(diffusion_coefficient).__name__ == 'Parameter'):
+            raise SpeciesError("Diffusion coefficient must be a spatialpy.Parameter, float, or int.")
         if diffusion_coefficient < 0:
             raise SpeciesError("Diffusion coefficient must be non-negative.")
 

@@ -82,63 +82,6 @@ class Reaction():
         self.annotation = annotation
         
 
-    def initialize(self, model):
-        """ Defered object initialization, called by model.add_reaction(). """
-
-        self.ode_propensity_function = self.propensity_function
-
-        if self.propensity_function is None:
-            if self.rate is None:
-                errmsg = f"Reaction {name}: You must either set the reaction to be mass-action or specifiy a propensity function."
-                raise ReactionError(errmsg)
-            self.massaction = True
-        else:
-            if self.rate is not None:
-                errmsg = f"Reaction {name}: You cannot set the propensity type to mass-action and simultaneously set a propensity function."
-                raise ReactionError(errmsg)
-            # If they don't give us a propensity function and do give a rate, assume mass-action.
-            self.massaction = False
-            self.marate = None
-
-
-        reactants = self.reactants
-        self.reactants = {}
-        if reactants is not None:
-            for r in reactants:
-                rtype = type(r).__name__
-                if rtype=='Species':
-                    self.reactants[r]=reactants[r]
-                elif rtype=='str':
-                    if r not in model.listOfSpecies:
-                        raise ReactionError(f"Could not find species '{r}' in model.")
-                    self.reactants[model.listOfSpecies[r]] = reactants[r]
-
-        products = self.products
-        self.products = {}
-        if products is not None:
-            for p in products:
-                rtype = type(p).__name__
-                if rtype=='Species':
-                    self.products[p]=products[p]
-                else:
-                    if p not in model.listOfSpecies:
-                        raise ReactionError(f"Could not find species '{p}' in model.")
-                    self.products[model.listOfSpecies[p]] = products[p]
-
-        if self.massaction:
-            self.type = "mass-action"
-            rtype = type(self.rate).__name__
-            if rtype == 'Parameter':
-                self.marate = self.rate.name
-            elif rtype == 'int' or rtype == 'float':
-                self.marate = str(self.rate)
-            else:
-                self.marate = self.rate
-            self.__create_mass_action()
-        else:
-            self.type = "customized"
-
-
     def __str__(self):
         print_string = f"{self.name}, Active in: {str(self.restrict_to)}"
         if len(self.reactants):
@@ -202,6 +145,63 @@ class Reaction():
 
         self.propensity_function = propensity_function
         self.ode_propensity_function = ode_propensity_function
+
+
+    def initialize(self, model):
+        """ Defered object initialization, called by model.add_reaction(). """
+
+        self.ode_propensity_function = self.propensity_function
+
+        if self.propensity_function is None:
+            if self.rate is None:
+                errmsg = f"Reaction {name}: You must either set the reaction to be mass-action or specifiy a propensity function."
+                raise ReactionError(errmsg)
+            self.massaction = True
+        else:
+            if self.rate is not None:
+                errmsg = f"Reaction {name}: You cannot set the propensity type to mass-action and simultaneously set a propensity function."
+                raise ReactionError(errmsg)
+            # If they don't give us a propensity function and do give a rate, assume mass-action.
+            self.massaction = False
+            self.marate = None
+
+
+        reactants = self.reactants
+        self.reactants = {}
+        if reactants is not None:
+            for r in reactants:
+                rtype = type(r).__name__
+                if rtype=='Species':
+                    self.reactants[r]=reactants[r]
+                elif rtype=='str':
+                    if r not in model.listOfSpecies:
+                        raise ReactionError(f"Could not find species '{r}' in model.")
+                    self.reactants[model.listOfSpecies[r]] = reactants[r]
+
+        products = self.products
+        self.products = {}
+        if products is not None:
+            for p in products:
+                rtype = type(p).__name__
+                if rtype=='Species':
+                    self.products[p]=products[p]
+                else:
+                    if p not in model.listOfSpecies:
+                        raise ReactionError(f"Could not find species '{p}' in model.")
+                    self.products[model.listOfSpecies[p]] = products[p]
+
+        if self.massaction:
+            self.type = "mass-action"
+            rtype = type(self.rate).__name__
+            if rtype == 'Parameter':
+                self.marate = self.rate.name
+            elif rtype == 'int' or rtype == 'float':
+                self.marate = str(self.rate)
+            else:
+                self.marate = self.rate
+            self.__create_mass_action()
+        else:
+            self.type = "customized"
 
 
     def add_reactant(self,S,stoichiometry):
