@@ -133,11 +133,20 @@ class Model():
             print_string += decorate("Reactions")
             for _, reaction in self.listOfReactions.items():
                 print_string += f"\n{str(reaction)}"
-        if self.domain is not None:
-            print_string += decorate("Domain")
-            print_string += f"\n{str(self.domain)}"
+        print(print_string)
 
-        return print_string
+        if self.domain is not None:
+            print(decorate("Domain"))
+            print(f"\n{str(self.domain)}")
+
+        return ""
+
+
+    def _ipython_display_(self, use_matplotlib=False):
+        if self.domain is None:
+            print(self)
+        else:
+            self.domain.plot_types(width="auto", height="auto", use_matplotlib=use_matplotlib)
 
 
     def get_expression_utility(self):
