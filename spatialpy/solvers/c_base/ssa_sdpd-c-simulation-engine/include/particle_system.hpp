@@ -82,7 +82,6 @@ namespace Spatialpy{
         char boundary_conditions[3];
         bool static_domain;
         size_t num_types;
-        size_t num_data_fn;
 
         ChemRxnFun* chem_rxn_rhs_functions;
         size_t num_chem_species;
@@ -91,6 +90,7 @@ namespace Spatialpy{
         PropensityFun* stoch_rxn_propensity_functions;
         size_t num_stoch_species;
         size_t num_stoch_rxns;
+        size_t num_data_fn;
 
         const char * const* species_names;
 

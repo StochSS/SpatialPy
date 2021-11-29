@@ -41,8 +41,8 @@ namespace Spatialpy{
     struct EventNode;
 
     struct Particle{
-        Particle(ParticleSystem *sys, unsigned int id=0, double x=0, double y=0, double z=0,
-                    int type=0, double nu=0.01, double mass=1, double c=0,
+        Particle(ParticleSystem *sys, unsigned int id=0, double xl=0, double yl=0,
+                    double zl=0, int type=0, double nu=0.01, double mass=1, double c=0,
                     double rho=1, int solidTag=0);
         ParticleSystem *sys;
         unsigned int id;
@@ -53,10 +53,10 @@ namespace Spatialpy{
         double x[3];
         double v[3];
         double vt[3];
-        double mass;
-        double rho;
         double nu;
+        double mass;
         double c;
+        double rho;
         int solidTag;
         double bvf_phi;
         double normal[3];
@@ -68,10 +68,8 @@ namespace Spatialpy{
         //std::shared_ptr<double[]> data_fn;
         // chem_rxn_system
         unsigned int*xx; // populaion of discrete/stochastic species
-        double *C;
-        double *Q;
-        //std::shared_ptr<double[]> C;  // concentration of chem species
-        //std::shared_ptr<double[]> Q;  // flux of chem species
+        double *C; // concentration of chem species
+        double *Q; // flux of chem species
         // below here for simulation
         std::vector<NeighborNode> neighbors;
 

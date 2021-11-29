@@ -501,22 +501,22 @@ class Solver:
                 outstr += "};"
                 input_constants += outstr + "\n"
 
-                outstr = "static double input_data_fn[{0}] = ".format(len(self.model.listOfDataFunctions)*ncells)
-                outstr += "{"
-                for ndf, df in enumerate(self.model.listOfDataFunctions):
-                    for i in range(ncells):
-                        if i > 0 and ndf==0:
-                            outstr += ','
-                        c = self.model.domain.coordinates()
-                        outstr += str(df.map( [c[i,0],c[i,1],c[i,2]] ))
-                outstr += "};"
-                input_constants += outstr + "\n"
+                if len(self.model.listOfDataFunctions)>0:
+                    outstr = "static double input_data_fn[{0}] = ".format(len(self.model.listOfDataFunctions)*ncells)
+                    outstr += "{"
+                    for ndf, df in enumerate(self.model.listOfDataFunctions):
+                        for i in range(ncells):
+                            if i > 0 and ndf==0:
+                                outstr += ','
+                            c = self.model.domain.coordinates()
+                            outstr += str(df.map( [c[i,0],c[i,1],c[i,2]] ))
+                    outstr += "};"
+                    input_constants += outstr + "\n"
             else:
                 input_constants += "static int input_N_dense[0] = {};\n"
                 input_constants += "static size_t input_irN[0] = {};\n"
                 input_constants += "static size_t input_jcN[0] = {};\n"
                 input_constants += "static int input_prN[0] = {};\n"
-                input_constants += "static double input_data_fn[0] = {};\n"
 
             G = self.model._create_dependency_graph()
             outstr = "static size_t input_irG[{0}] = ".format(len(G.indices))

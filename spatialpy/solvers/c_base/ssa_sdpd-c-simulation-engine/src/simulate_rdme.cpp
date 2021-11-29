@@ -221,7 +221,6 @@ namespace Spatialpy{
         double rand1,rand2,cum2,old;
         double vol,diff_const;
         Particle *dest_subvol = NULL;
-        NeighborNode *nn = NULL;
 
         if(debug_flag>1){
             printf("take_step() tt=%e end_time=%e\n",tt,end_time);
@@ -229,23 +228,15 @@ namespace Spatialpy{
         }
 
         std::pair<double,int> timeRxnPair;
-        int reactionIndex, subvol_index;
+        int subvol_index;
         /* Main loop. */
         while(tt <= end_time){
             /* Get the subvolume in which the next event occurred.
              This subvolume is on top of the heap. */
 
-            if(debug_flag>1){
-                printf("selectReaction()\n");
-                fflush(stdout);
-            }
             timeRxnPair = system->rdme_event_q.selectReaction();
             tt = timeRxnPair.first;
             subvol_index = timeRxnPair.second;
-            if(debug_flag>1){
-                printf("selectReaction: subvol_index=%d tt=%e\n",subvol_index,tt);
-                fflush(stdout);
-            }
             if(subvol_index == -1){ // catch special case of an empty heap
                 //printf("ending take_step, subvol_index=%d tt=%e\n",subvol_index,tt);
                 //fflush(stdout);
@@ -254,7 +245,7 @@ namespace Spatialpy{
             }
             subvol = &system->particles[subvol_index];
             vol = (subvol->mass / subvol->rho);
-            if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}
+            //if(debug_flag){printf("nsm: tt=%e subvol=%i\n",tt,subvol->id);}
             /* First check if it is a reaction or a diffusion event. */
             totrate = subvol->srrate + subvol->sdrate;
 
@@ -412,14 +403,21 @@ namespace Spatialpy{
 
 
                 if(debug_flag){printf("nsm: tt=%e subvol=%i type=%i ",tt,subvol->id,subvol->type);}
-                if(debug_flag){printf("Diff %i->%i\n",subvol->id,dest_subvol->id);}
+                if(debug_flag){printf("Diff %i->%i",subvol->id,dest_subvol->id);}
+                if(debug_flag){
+                    printf("    xx[%i]=[",subvol->id);
+                    for(i=0;i<system->num_stoch_species;i++){
+                        printf("%u ",subvol->xx[i]);
+                    }
+                    printf("]\n");
+                }
+
 
                 /* Save reaction and diffusion rates. */
                 /* Recalculate the reaction rates using dependency graph G. */
                 if (system->num_stoch_rxns > 0){
                     for (i = system->jcG[spec], rdelta = 0.0, rrdelta = 0.0; i < system->jcG[spec+1]; i++) {
 
-    // herehere
                         j = system->irG[i];
                         // update this voxel's reactions
                         old = subvol->rrate[j];
