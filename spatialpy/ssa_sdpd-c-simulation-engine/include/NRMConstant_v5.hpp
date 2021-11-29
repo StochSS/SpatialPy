@@ -58,8 +58,6 @@ namespace Spatialpy{
         double previousFiringTime; //keep the time of the last reaction that fired (from last call of selectReaction)
 
         //these two could be combined
-        //std::vector<firingTimeT> nextFiringTime;//for each reaction channel
-        //std::vector<std::pair<int,int> > binIndexAndPositionInBin;//for each reaction channel
         std::unordered_map<reactionIndexT,firingTimeT> nextFiringTime;
         std::unordered_map<reactionIndexT,std::pair<int,int> > binIndexAndPositionInBin; //for each reaction channel
 

@@ -68,7 +68,7 @@ namespace Spatialpy{
                         double xl, double yl, double zl, int type, double nu, 
                         double mass, double c, double rho, int solidTag) : 
                         sys(sys), id(id), type(type), nu(nu),
-                        c(c), mass(mass), rho(rho), solidTag(solidTag)
+                        mass(mass), c(c), rho(rho), solidTag(solidTag)
     {
     	x[0] = xl ;
         x[1] = yl ;
@@ -77,9 +77,6 @@ namespace Spatialpy{
     	Q = (double*) calloc(sys->num_chem_species, sizeof(double));
     	C = (double*) calloc(sys->num_chem_species, sizeof(double));
     	data_fn = (double*) calloc(sys->num_data_fn, sizeof(double));
-        //Q = std::make_shared<double[]>(sys.num_chem_species) ;
-        //C = std::make_shared<double[]>(sys.num_chem_species) ;
-        //data_fn = std::make_shared<double[]>(sys.num_data_fn) ;
     }
 
     NeighborNode::NeighborNode(Particle *data, double dist, double dWdr, double D_i_j):data(data), dist(dist), dWdr(dWdr), D_i_j(D_i_j){}
@@ -165,7 +162,7 @@ namespace Spatialpy{
     	double h = system->h;
     	double R = r / h;
         // Alpha varies between 1D, 2D, and 3D Simulations, values from Drawert et. al. Eq 14
-        double alpha ;
+        double alpha = 0.0; //intitialized to some value to avoid warning
         if (system->dimension == 3){
             alpha = 105 / (16 * M_PI * h * h * h) ; // 3D
         }else if (system->dimension == 2){ 
