@@ -15,7 +15,7 @@ GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-
+from spatialpy.core.spatialpyError import DataFunctionError
 
 class DataFunction():
     """ Abstract class used to constuct the data function. """
@@ -24,7 +24,7 @@ class DataFunction():
         if name is not None:
             self.name = name
         if self.name is None:
-            raise Exception("DataFunction must have a 'name'")
+            raise DataFunctionError("DataFunction must have a 'name'")
 
     def map(self, x):
         """
@@ -39,6 +39,6 @@ class DataFunction():
         :returns: value of function at this spatial location.
         :rtype: float
         """
-        raise Exception("DataFunction.map() must be implemented.")
+        raise DataFunctionError("DataFunction.map() must be implemented.")
 
 

@@ -15,6 +15,7 @@ GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from spatialpy.core.spatialpyError import GeometryError
 
 class Geometry:
     """ Geometry class provides a method for tagging parts of the spatial domain as separate parts"""
@@ -23,7 +24,7 @@ class Geometry:
         pass
 
     def inside(self, x, on_boundary):
-        raise Exception("Subclasses of spatialpy.Geometry must implement the inside() method")
+        raise GeometryError("Subclasses of spatialpy.Geometry must implement the inside() method")
 
 
 class GeometryAll(Geometry):

@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import numpy
 import math
 
+from spatialpy.core.spatialpyError import VTKReaderIOError
+
 
 class VTKReader:
     """VTKReader.py: SpatialPy minimal VTK legacy file reader."""
@@ -218,16 +220,3 @@ class VTKReader:
 
             self.arrays = self.readarrays(fd)
             #if self.debug: print("self.arrays.keys = {0}".format(self.arrays.keys()))
-
-
-class VTKReaderError(Exception):
-    """Base class for exceptions in VTKReader module."""
-
-    pass
-
-
-class VTKReaderIOError(VTKReaderError):
-    """Exception raised for I/O errors."""
-
-    def __init__(self, message):
-        self.message = message

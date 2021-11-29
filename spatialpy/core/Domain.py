@@ -22,8 +22,7 @@ import time
 import numpy
 from scipy.spatial import KDTree
 
-from spatialpy.Result import _plotly_iterate
-
+from spatialpy.core.spatialpyError import DomainError
 
 class Domain():
     """ Domain class for SpatialPy.  A domain defines points and attributes of a regional space for simulation.
@@ -360,6 +359,7 @@ class Domain():
         :param use_matplotlib: Whether or not to plot the proprties results using matplotlib.
         :type use_matplotlib: bool
         '''
+        from spatialpy.core.Result import _plotly_iterate
 
         if use_matplotlib:
             width = 6.4 if width in (None, "auto") else width
@@ -557,7 +557,7 @@ class Domain():
                     (ndx,type_id) = line.rstrip().split(',')
                     self.type[int(ndx)] = int(type_id)
                 except ValueError as e:
-                    raise ModelError(f"Could not read in subdomain file, error on line {ln}: {line}")
+                    raise DomainError(f"Could not read in subdomain file, error on line {ln}: {line}")
 
 
     @classmethod
@@ -751,8 +751,3 @@ class Domain():
 
         # return model ref
         return obj
-
-
-
-class DomainError(Exception):
-    pass

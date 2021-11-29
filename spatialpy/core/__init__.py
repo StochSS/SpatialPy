@@ -16,15 +16,28 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-#__all__=['model','spatialpy']
-#from .spatialpy import *
+import logging
+from .BoundaryCondition import *
+from .cleanup import *
+from .DataFunction import *
+from .Domain import *
+from .Geometry import *
+from .InitialCondition import *
+from .Model import *
+from .Parameter import *
+from .Reaction import *
+from .Result import *
+from .spatialpyError import *
+from .Species import *
+from .VTKReader import *
+from spatialpy.__version__ import __version__
 
-import sys
-if (sys.version_info < (3,0)):
-    raise Exception("SpatialPy only works in Python 3.0 and higher")
-from .__version__ import __version__, __title__, __description__, __url__
-from .__version__ import __author__, __email__
-from .__version__ import __license__, __copyright__
+_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+_handler = logging.StreamHandler()
+_handler.setFormatter(_formatter)
+version = __version__
+log = logging.getLogger()
+log.setLevel(logging.WARNING)
+log.addHandler(_handler)
 
-from spatialpy.core import *
-from spatialpy.solvers import *
+__all__ = [s for s in dir() if not s.startswith('_')]

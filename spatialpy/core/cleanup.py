@@ -24,6 +24,8 @@ def cleanup_tempfiles():
 	'''
 	Cleanup all tempfiles in spatialpy core, build, and results.
 	'''
+	from spatialpy.core import log
+
 	cleanup_core_files()
 	tempdir = tempfile.gettempdir()
 	for file_obj in os.listdir(tempdir):
@@ -36,11 +38,13 @@ def cleanup_core_files():
 	'''
 	Cleanup all tempfiles in spatialpy core.
 	'''
+	from spatialpy.core import log
+
 	tempdir = tempfile.gettempdir()
 	core_dir = os.path.join(tempdir, "spatialpy_core")
 	if os.path.isdir(core_dir):
 		shutil.rmtree(core_dir)
-	print(f"Spatialpy core directory was removed")
+	log.info(f"Spatialpy core directory was removed")
 
 def cleanup_build_files(build_dir=None):
 	'''
@@ -49,10 +53,11 @@ def cleanup_build_files(build_dir=None):
 	:param build_dir: Path to the build directory to be removed. (optional)
 	:type build_dir: string
 	'''
+	from spatialpy.core import log
 
 	if build_dir is not None:
 		shutil.rmtree(build_dir)
-		print(f"Build directory'{build_dir}' was removed")
+		log.info(f"Build directory'{build_dir}' was removed")
 	else:
 		count = 0
 		tempdir = tempfile.gettempdir()
@@ -61,7 +66,7 @@ def cleanup_build_files(build_dir=None):
 				build_dir = os.path.join(tempdir, file_obj)
 				shutil.rmtree(build_dir)
 				count += 1
-		print(f"{count} build directories were removed")
+		log.info(f"{count} build directories were removed")
 
 def cleanup_result_files(result_dir=None):
 	'''
@@ -70,9 +75,11 @@ def cleanup_result_files(result_dir=None):
 	:param result_dir: Path to the result directory to be removed. (optional)
 	:type result_dir: string
 	'''
+	from spatialpy.core import log
+
 	if result_dir is not None:
 		shutil.rmtree(result_dir)
-		print(f"Result directory '{result_dir}' was removed")
+		log.info(f"Result directory '{result_dir}' was removed")
 	else:
 		count = 0
 		tempdir = tempfile.gettempdir()
@@ -81,4 +88,4 @@ def cleanup_result_files(result_dir=None):
 				result_dir = os.path.join(tempdir, file_obj)
 				shutil.rmtree(result_dir)
 				count += 1
-		print(f"{count} result directories were removed")
+		log.info(f"{count} result directories were removed")
