@@ -62,7 +62,7 @@ class TestSpecies(unittest.TestCase):
         """ Test the Species constructor with a parameter for diffusion_coefficient. """
         test_parameter = Parameter(name="test_parameter", expression=0.5)
         species = Species(name="test_species", diffusion_coefficient=test_parameter)
-        self.assertEqual(species.diffusion_coefficient, test_parameter.expression)
+        self.assertEqual(species.diffusion_coefficient, (float(eval(test_parameter.expression))))
 
 
     def test_constructor__diffusion_coefficient_not_int_or_float(self):
