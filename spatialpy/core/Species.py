@@ -44,7 +44,10 @@ class Species():
             raise SpeciesError("Diffusion coefficient must be non-negative.")
 
         self.name = name
-        self.diffusion_coefficient = diffusion_coefficient
+        if isinstance(diffusion_coefficient, Parameter) or type(diffusion_coefficient).__name__ == 'Parameter':
+            self.diffusion_coefficient = (float(eval(diffusion_coefficient.expression)))
+        else:
+            self.diffusion_coefficient = diffusion_coefficient
 
 
     def __str__(self):
