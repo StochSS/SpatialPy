@@ -40,14 +40,14 @@ class Species():
         if not (isinstance(diffusion_coefficient, (float, int)) or \
                     isinstance(diffusion_coefficient, Parameter) or type(diffusion_coefficient).__name__ == 'Parameter'):
             raise SpeciesError("Diffusion coefficient must be a spatialpy.Parameter, float, or int.")
+        elif isinstance(diffusion_coefficient, Parameter) or type(diffusion_coefficient).__name__ == 'Parameter':
+            diffusion_coefficient = (float(eval(diffusion_coefficient.expression)))
+
         if diffusion_coefficient < 0:
             raise SpeciesError("Diffusion coefficient must be non-negative.")
 
         self.name = name
-        if isinstance(diffusion_coefficient, Parameter) or type(diffusion_coefficient).__name__ == 'Parameter':
-            self.diffusion_coefficient = (float(eval(diffusion_coefficient.expression)))
-        else:
-            self.diffusion_coefficient = diffusion_coefficient
+        self.diffusion_coefficient = diffusion_coefficient
 
 
     def __str__(self):
