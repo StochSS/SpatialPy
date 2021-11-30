@@ -189,4 +189,4 @@ class TestReaction(unittest.TestCase):
             name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
         )
         with self.assertRaises(ReactionError):
-            test_reaction.__create_mass_action()
+            test_reaction._create_mass_action()
