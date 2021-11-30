@@ -166,3 +166,11 @@ class TestReaction(unittest.TestCase):
         )
         self.assertIsInstance(reaction.restrict_to, list)
         self.assertEqual(reaction.restrict_to, [1])
+
+
+    def test___str__(self):
+        """ Test Reaction.__str__ method. """
+        reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products,rate=test_rate, restrict_to=test_restrict_to
+        )
+        self.assertIsInstance(str(reaction), str)
