@@ -98,7 +98,7 @@ class Reaction():
         return print_string
 
 
-    def __create_mass_action(self):
+    def _create_mass_action(self):
         """ Create a mass action propensity function given self.reactants and a single parameter value.
 
          We support zeroth, first and second order propensities only.
@@ -129,19 +129,19 @@ class Reaction():
         for r in self.reactants:
             # Case 1: 2X -> Y
             if self.reactants[r] == 2:
-                propensity_function = ("0.5*" + propensity_function +
-                                       "*" + r.name + "*(" + r.name + "-1)/vol")
+                propensity_function = "0.5 * {0} * {1} * ({1} - 1) / vol".format(propensity_function, r.name)
+                ode_propensity_function += " * {0} * {0}".format(r.name)
             else:
                 # Case 3: X1, X2 -> Y;
-                propensity_function += "*" + r.name
-            ode_propensity_function += "*" + r.name
+                propensity_function += f" * {r.name}"
+                ode_propensity_function += f" * {r.name}"
 
         # Set the volume dependency based on order.
         order = len(self.reactants)
         if order == 2:
-            propensity_function += "/vol"
+            propensity_function += " / vol"
         elif order == 0:
-            propensity_function += "*vol"
+            propensity_function += " * vol"
 
         self.propensity_function = propensity_function
         self.ode_propensity_function = ode_propensity_function
@@ -199,7 +199,7 @@ class Reaction():
                 self.marate = str(self.rate)
             else:
                 self.marate = self.rate
-            self.__create_mass_action()
+            self._create_mass_action()
         else:
             self.type = "customized"
 
