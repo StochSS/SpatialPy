@@ -151,7 +151,7 @@ class TestReaction(unittest.TestCase):
         test_restrict_to = "1"
         with self.assertRaises(ReactionError):
             reaction = Reaction(
-                name="test_reaction", reactants=test_reactants, products=test_products,rate=test_rate, restrict_to=test_restrict_to
+                name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate, restrict_to=test_restrict_to
             )
 
 
@@ -162,7 +162,7 @@ class TestReaction(unittest.TestCase):
         test_rate = "k1"
         test_restrict_to = 1
         reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products,rate=test_rate, restrict_to=test_restrict_to
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate, restrict_to=test_restrict_to
         )
         self.assertIsInstance(reaction.restrict_to, list)
         self.assertEqual(reaction.restrict_to, [1])
@@ -170,7 +170,23 @@ class TestReaction(unittest.TestCase):
 
     def test___str__(self):
         """ Test Reaction.__str__ method. """
+        test_reactants = {"A": 1, "B": 1}
+        test_products = {"C": 1}
+        test_rate = "k1"
+        test_restrict_to = 1
         reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products,rate=test_rate, restrict_to=test_restrict_to
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate, restrict_to=test_restrict_to
         )
         self.assertIsInstance(str(reaction), str)
+
+
+    def test___create_mass_action__total_stoch_3(self):
+        """ Test Reaction.__create_mass_action total stochiometry > 2. """
+        test_reactants = {"A": 1, "B": 2}
+        test_products = {"C": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        with self.assertRaises(ReactionError):
+            test_reaction.__create_mass_action()
