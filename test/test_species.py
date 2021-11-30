@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
 
 import spatialpy
-from spatialpy import Species
+from spatialpy import Species, Parameter
 from spatialpy import SpeciesError
 
 class TestSpecies(unittest.TestCase):
