@@ -15,6 +15,8 @@ GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+import uuid
+
 from spatialpy.core.Parameter import Parameter
 from spatialpy.core.spatialpyError import ReactionError
 
@@ -46,7 +48,10 @@ class Reaction():
 
         if not isinstance(name, str):
             raise ReactionError("Reaction name must be of type str.")
-        self.name = name
+        if name is None or name == "":
+            self.name = f'rxn{uuid.uuid4()}'.replace('-', '_')
+        else:
+            self.name = name
         
         if not isinstance(reactants, dict):
             raise ReactionError("Reaction reactants must be of type dict.")

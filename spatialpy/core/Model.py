@@ -563,10 +563,7 @@ class Model():
         """
         if isinstance(reacs, list):
             for r in reacs:
-                r.initialize(self)
-                if r.name is None or r.name == "":
-                    r.name = 'rxn' + str(uuid.uuid4()).replace('-', '_')
-                self.listOfReactions[r.name] = r
+                self.add_reaction(r)
         elif isinstance(reacs, Reaction) or type(reacs).__name__ == "Reaction":
                 reacs.initialize(self)
                 if reacs.name is None or reacs.name == "":
