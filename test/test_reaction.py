@@ -53,6 +53,28 @@ class TestReaction(unittest.TestCase):
         self.assertEqual(reaction.propensity_function, test_propensity)
 
 
+    def test_constructor__no_name(self):
+        """ Test the Reaction constructor with no name provided. """
+        test_reactants = {"A": 1, "B": 1}
+        test_products = {"C": 1}
+        test_propensity = "k1 * A * B"
+        reaction = Reaction(
+            reactants=test_reactants, products=test_products, propensity_function=test_propensity
+        )
+        self.assertIsNotNone(re.search("rxn.*", reaction.name))
+
+
+    def test_constructor__name_is_none(self):
+        """ Test the Reaction constructor with None as name. """
+        test_reactants = {"A": 1, "B": 1}
+        test_products = {"C": 1}
+        test_propensity = "k1 * A * B"
+        reaction = Reaction(
+            name=None, reactants=test_reactants, products=test_products, propensity_function=test_propensity
+        )
+        self.assertIsNotNone(re.search("rxn.*", reaction.name))
+
+
     def test_constructor__name_not_str(self):
         """ Test the Reaction constructor with non-str name. """
         test_reactants = {"A": 1, "B": 1}
@@ -181,7 +203,7 @@ class TestReaction(unittest.TestCase):
 
 
     def test___create_mass_action__total_stoch_3(self):
-        """ Test Reaction.__create_mass_action total stochiometry > 2. """
+        """ Test Reaction._create_mass_action total stochiometry > 2. """
         test_reactants = {"A": 1, "B": 2}
         test_products = {"C": 1}
         test_rate = "k1"
@@ -190,3 +212,15 @@ class TestReaction(unittest.TestCase):
         )
         with self.assertRaises(ReactionError):
             test_reaction._create_mass_action()
+
+
+    def test__create_mass_action__marate_type(self):
+        """ Test Reaction._create_mass_action marate as string. """
+        test_reactants = {}
+        test_products = {"C": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        self.assertEqual(test_reaction.propensity_function, "k1 * vol")
+        self.assertEqual(test_reaction.ode_propensity_function, "k1")
