@@ -203,7 +203,7 @@ class TestReaction(unittest.TestCase):
         self.assertIsInstance(str(reaction), str)
 
 
-    def test___create_mass_action__total_stoch_3(self):
+    def test__create_mass_action__total_stoch_3(self):
         """ Test Reaction._create_mass_action total stochiometry > 2. """
         test_reactants = {"A": 1, "B": 2}
         test_products = {"C": 1}
@@ -266,3 +266,42 @@ class TestReaction(unittest.TestCase):
         test_reaction._create_mass_action()
         self.assertEqual(test_reaction.propensity_function, "k1 * vol")
         self.assertEqual(test_reaction.ode_propensity_function, "k1")
+
+
+    def test__create_mass_action__X_to_Y(self):
+        """ Test Reaction._create_mass_action X -> Y. """
+        test_reactants = {"X": 1}
+        test_products = {"Y": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        test_reaction._create_mass_action()
+        self.assertEqual(test_reaction.propensity_function, "k1 * X")
+        self.assertEqual(test_reaction.ode_propensity_function, "k1 * X")
+
+
+    def test__create_mass_action__X_plus_Y_to_Z(self):
+        """ Test Reaction._create_mass_action X + Y -> Z. """
+        test_reactants = {"X": 1, "Y": 1}
+        test_products = {"Z": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        test_reaction._create_mass_action()
+        self.assertEqual(test_reaction.propensity_function, "k1 * X * Y / vol")
+        self.assertEqual(test_reaction.ode_propensity_function, "k1 * X * Y")
+
+
+    def test__create_mass_action__2X_to_Y(self):
+        """ Test Reaction._create_mass_action 2X -> Y. """
+        test_reactants = {"X": 2}
+        test_products = {"Y": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        test_reaction._create_mass_action()
+        self.assertEqual(test_reaction.propensity_function, "0.5 * k1 * X * (X - 1) / vol")
+        self.assertEqual(test_reaction.ode_propensity_function, "k1 * X * X")
