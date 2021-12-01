@@ -145,6 +145,46 @@ class Model():
 
         return print_string
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __eq__(self, other):
+        return (self.listOfParameters == other.listOfParameters and \
+            self.listOfSpecies == other.listOfSpecies and \
+            self.listOfReactions == other.listOfReactions and \
+            self.name == other.name)
+
+    def __check_if_complete(self):
+        """ Check if the model is complete, otherwise raise an approprate exception.
+        Raises:
+            ModelError
+        """
+        if self.timestep_size is None or self.num_timesteps is None:
+            raise ModelError("The model's timespan is not set.  Use 'timespan()' or 'set_timesteps()'.")
+        if self.domain is None:
+            raise ModelError("The model's domain is not set.  Use 'add_domain()'.")
+            
+    def __problem_with_name(self, name):
+        if name in Model.reserved_names:
+            return ModelError(f'Name "{name}" is unavailable. It is reserved for internal SpatialPy use. Reserved Names: ({Model.reserved_names}).')
+        if name in self.listOfSpecies:
+            return ModelError(f'Name "{name}" is unavailable. A species with that name exists.')
+        if name in self.listOfParameters:
+            return ModelError(f'Name "{name}" is unavailable. A parameter with that name exists.')
+        if name.isdigit():
+            return ModelError(f'Name "{name}" is unavailable. Names must not be numeric strings.')
+        for special_character in Model.special_characters:
+            if special_character in name:
+                return ModelError(f'Name "{name}" is unavailable. Names must not contain special characters: {Model.special_characters}.')
+
+    def _resolve_parameters(self):
+        """
+        Attempt to resolve all parameter expressions to scalar floating point values.
+        Must be called prior to exporting the model.
+        """
+        self.update_namespace()
+        for param in self.listOfParameters:
+            self.listOfParameters[param]._evaluate(self.namespace)
 
     def get_expression_utility(self):
         """
@@ -159,6 +199,214 @@ class Model():
         }
         self.expr = Expression(namespace=base_namespace, blacklist=["="], sanitize=True)
 
+    def add_species(self, obj):
+        """
+        Adds a species, or list of species to the model. Will return the added object upon success.
+
+        :param obj: The species or list of species to be added to the model object.
+        :type obj: spatialpy.Model.Species | list(spatialpy.Model.Species
+
+        :rtype: spatialpy.Model.Species | list(spatialpy.Model.Species
+        """
+        if isinstance(obj, list):
+            for S in obj:
+                self.add_species(S)
+        elif isinstance(obj, Species) or type(obj).__name__ == 'Species':
+            problem = self.__problem_with_name(obj.name)
+            if problem is not None:
+                raise problem
+            self.species_map[obj] = len(self.listOfSpecies)
+            self.listOfSpecies[obj.name] = obj
+        else:
+            raise ModelError("Unexpected parameter for add_species. Parameter must be Species or list of Species.")
+        return obj
+
+    def delete_all_species(self):
+        """
+        Remove all species from model.listOfSpecies.
+        """
+        self.listOfSpecies.clear()
+
+    def delete_species(self, obj):
+        """
+        Remove a Species from model.listOfSpecies. 
+
+        :param obj: Species object to be removed
+        :type obj: spatialpy.Model.Species
+        """
+        self.listOfSpecies.pop(obj) # raises key error if param is missing
+
+    def get_all_species(self):
+        """
+        Returns a dictionary of all species in the model using names as keys.
+
+        :rtype: dict
+        """
+        return self.listOfSpecies
+
+    def get_num_species(self):
+        """
+        Returns total number of species contained in the model.
+
+        :rtype: int
+        """
+        return len(self.listOfSpecies)
+
+    def get_species(self, sname):
+        """
+        Returns target species from model as object.
+
+        :param sname: name of species to be returned.
+        :type sname: str
+
+        :rtype: spatialpy.Model.Species
+        """
+        return self.listOfSpecies[sname]
+
+    def sanitized_species_names(self):
+        """
+        Generate a dictionary mapping user chosen species names to simplified formats which will be used
+        later on by SpatialPySolvers evaluating reaction propensity functions.
+
+        :returns: the dictionary mapping user species names to their internal SpatialPy notation.
+        """
+        species_name_mapping = OrderedDict([])
+        for i, name in enumerate(self.listOfSpecies.keys()):
+            species_name_mapping[name] = 'x[{}]'.format(i)
+        return species_name_mapping
+
+    def add_parameter(self,params):
+        """
+        Add Parameter(s) to model.listOfParameters. Input can be either a single
+        Parameter object or a list of Parameter objects.
+
+        :param params: Parameter object or list of Parameters to be added.
+        :type params: spatialpy.Model.Parameter | list(spatialpy.Model.Parameter)
+        """
+        if isinstance(params,list):
+            for p in params:
+                self.add_parameter(p)
+        else:
+            if isinstance(params, Parameter) or  type(params).__name__ == 'Parameter':
+                problem = self.__problem_with_name(params.name)
+                if problem is not None:
+                    raise problem
+                self.update_namespace()
+                params._evaluate(self.namespace)
+                self.listOfParameters[params.name] = params
+            else:
+                raise ParameterError("Parameter '{0}' needs to be of type '{2}', it is of type '{1}'".format(params.name,str(params),str(type(Parameter))))
+        return params
+
+    def delete_all_parameters(self):
+        """
+        Remove all parameters from model.listOfParameters.
+        """
+        self.listOfParameters.clear()
+
+    def delete_parameter(self, obj):
+        """
+        Remove a Parameter from model.listOfParameters. 
+
+        :param obj: Parameter object to be removed
+        :type obj: spatialpy.Model.Parameter
+        """
+        self.listOfParameters.pop(obj)
+
+    def get_all_parameters(self):
+        """
+        Return a dictionary of all model parameters, indexed by name.
+
+        :rtype: dict
+        """
+        return self.listOfParameters
+
+    def get_parameter(self, pname):
+        """
+        Remove a Parameter from model.listOfParameters. 
+
+        :param pname: Name of parameter to be removed
+        :type pname: spatialpy.Model.Parameter
+        """
+        try:
+            return self.listOfParameters[pname]
+        except:
+            raise ModelError("No parameter named "+pname)
+
+    def sanitized_parameter_names(self):
+        """
+        Generate a dictionary mapping user chosen parameter names to simplified formats which will be used
+        later on by SpatialPySolvers evaluating reaction propensity functions.
+
+        :returns: the dictionary mapping user parameter names to their internal SpatialPy notation.
+        """
+        parameter_name_mapping = OrderedDict()
+        for i, name in enumerate(self.listOfParameters.keys()):
+            if name not in parameter_name_mapping:
+                parameter_name_mapping[name] = 'P{}'.format(i)
+        return parameter_name_mapping
+
+    def add_reaction(self,reacs):
+        """
+        Add Reaction(s) to the model. Input can be single instance, a list of instances
+        or a dict with name, instance pairs. 
+
+        :param reacs: Reaction or list of Reactions to be added.
+        :type reacs: spatialpy.Model.Reaction | list(spatialpy.Model.Reaction)
+        """
+        if isinstance(reacs, list):
+            for r in reacs:
+                self.add_reaction(r)
+        elif isinstance(reacs, Reaction) or type(reacs).__name__ == "Reaction":
+            problem = self.__problem_with_name(reacs.name)
+                if problem is not None:
+                    raise problem
+            reacs.initialize(self)
+            self.listOfReactions[reacs.name] = reacs
+        else:
+            raise ModelError("add_reaction() takes a spatialpy.Reaction object or list of objects")
+
+    def delete_all_reactions(self):
+        """
+        Remove all reactions from model.listOfReactions.
+        """
+        self.listOfReactions.clear()
+
+    def delete_reaction(self, obj):
+        """
+        Remove reaction from model.listOfReactions
+
+        :param obj: Reaction to be removed.
+        :type obj: spatialpy.Model.Reaction
+        """
+        self.listOfReactions.pop(obj)
+
+    def get_all_reactions(self):
+        """
+        Returns a dictionary of all model reactions using names as keys.
+
+        :rtype: dict
+        """
+        return self.listOfReactions
+
+    def get_num_reactions(self):
+        """
+        Returns the number of reactions in this model.
+
+        :rtype: int
+        """
+        return len(self.listOfReactions)
+
+    def get_reaction(self, rname):
+        """
+        Retrieve a reaction object from the model by name
+
+        :param rname: name of Reaction to retrieve
+        :type rname: str
+
+        :rtype: spatialpy.Model.Reaction
+        """
+        return self.listOfReactions[rname]
 
     def run(self, number_of_trajectories=1, seed=None, timeout=None, number_of_threads=None, debug_level=0, debug=False, profile=False):
         """ Simulate the model. Returns a result object containing simulation results.
@@ -183,16 +431,6 @@ class Model():
 
 
 
-    def __check_if_complete(self):
-        """ Check if the model is complete, otherwise raise an approprate exception.
-        Raises:
-            ModelError
-        """
-        if self.timestep_size is None or self.num_timesteps is None:
-            raise ModelError("The model's timespan is not set.  Use 'timespan()' or 'set_timesteps()'.")
-        if self.domain is None:
-            raise ModelError("The model's domain is not set.  Use 'add_domain()'.")
-            
     def set_timesteps(self, output_interval, num_steps, timestep_size=None):
         """" Set the simlation time span parameters
         :param output_interval: size of each output timestep in seconds
@@ -375,18 +613,6 @@ class Model():
         for param in self.listOfParameters:
             self.namespace[param]=self.listOfParameters[param].value
 
-    def sanitized_species_names(self):
-        """
-        Generate a dictionary mapping user chosen species names to simplified formats which will be used
-        later on by SpatialPySolvers evaluating reaction propensity functions.
-
-        :returns: the dictionary mapping user species names to their internal SpatialPy notation.
-        """
-        species_name_mapping = OrderedDict([])
-        for i, name in enumerate(self.listOfSpecies.keys()):
-            species_name_mapping[name] = 'x[{}]'.format(i)
-        return species_name_mapping
-
     def sanitized_data_function_names(self):
         """
         Generate a dictionary mapping user chosen data function names to simplified formats which will be used
@@ -398,228 +624,6 @@ class Model():
         for i, data_fn in enumerate(self.listOfDataFunctions):
             data_fn_name_mapping[data_fn.name] = 'data_fn[{}]'.format(i)
         return data_fn_name_mapping
-
-    def sanitized_parameter_names(self):
-        """
-        Generate a dictionary mapping user chosen parameter names to simplified formats which will be used
-        later on by SpatialPySolvers evaluating reaction propensity functions.
-
-        :returns: the dictionary mapping user parameter names to their internal SpatialPy notation.
-        """
-        parameter_name_mapping = OrderedDict()
-        for i, name in enumerate(self.listOfParameters.keys()):
-            if name not in parameter_name_mapping:
-                parameter_name_mapping[name] = 'P{}'.format(i)
-        return parameter_name_mapping
-
-    def get_species(self, sname):
-        """ Returns target species from model as object.
-
-                :param sname: name of species to be returned
-                :type sname: str
-
-                :rtype: spatialpy.Model.Species
-
-        """
-        return self.listOfSpecies[sname]
-
-    def get_num_species(self):
-        """ Returns total number of species contained in the model.
-
-                :rtype: int
-
-        """
-        return len(self.listOfSpecies)
-
-    def get_all_species(self):
-        """ Returns a dictionary of all species in the model using names as keys.
-
-                :rtype: dict
-
-        """
-        return self.listOfSpecies
-
-    def add_species(self, obj):
-        """
-        Adds a species, or list of species to the model. Will return the added object upon success.
-
-        :param obj: The species or list of species to be added to the model object.
-        :type obj: spatialpy.Model.Species | list(spatialpy.Model.Species
-
-        :rtype: spatialpy.Model.Species | list(spatialpy.Model.Species
-        """
-
-
-        if isinstance(obj, list):
-            for S in obj:
-                self.add_species(S)
-        elif isinstance(obj, Species) or type(obj).__name__ == 'Species':
-            problem = self.__problem_with_name(obj.name)
-            if problem is not None:
-                raise problem
-            self.species_map[obj] = len(self.listOfSpecies)
-            self.listOfSpecies[obj.name] = obj
-        else:
-            raise ModelError("Unexpected parameter for add_species. Parameter must be Species or list of Species.")
-        return obj
-
-
-    def delete_species(self, obj):
-        """ Remove a Species from model.listOfSpecies. 
-
-                :param obj: Species object to be removed
-                :type obj: spatialpy.Model.Species
-
-        """
-        self.listOfSpecies.pop(obj)
-
-    def delete_all_species(self):
-        """ Remove all species from model.listOfSpecies.
-        """
-
-        self.listOfSpecies.clear()
-
-    def get_parameter(self,pname):
-        """ Remove a Parameter from model.listOfParameters. 
-
-                :param pname: Name of parameter to be removed
-                :type pname: spatialpy.Model.Parameter
-
-        """
-        try:
-            return self.listOfParameters[pname]
-        except:
-            raise ModelError("No parameter named "+pname)
-
-    def get_all_parameters(self):
-        """ Return a dictionary of all model parameters, indexed by name.
-
-            :rtype: dict
-
-        """
-
-        return self.listOfParameters
-
-    def __problem_with_name(self, name):
-        if name in Model.reserved_names:
-            return ModelError('Name "{}" is unavailable. It is reserved for internal SpatialPy use. Reserved Names: ({}).'.format(name, Model.reserved_names))
-        if name in self.listOfSpecies:
-            return ModelError('Name "{}" is unavailable. A species with that name exists.'.format(name))
-        if name in self.listOfParameters:
-            return ModelError('Name "{}" is unavailable. A parameter with that name exists.'.format(name))
-        if name.isdigit():
-            return ModelError('Name "{}" is unavailable. Names must not be numeric strings.'.format(name))
-        for special_character in Model.special_characters:
-            if special_character in name:
-                return ModelError('Name "{}" is unavailable. Names must not contain special characters: {}.'.format(name, Model.special_characters))
-
-
-
-    def add_parameter(self,params):
-        """ Add Parameter(s) to model.listOfParameters. Input can be either a single
-            Parameter object or a list of Parameter objects.
-
-                :param params: Parameter object or list of Parameters to be added.
-                :type params: spatialpy.Model.Parameter | list(spatialpy.Model.Parameter)
-        """
-        if isinstance(params,list):
-            for p in params:
-                self.add_parameter(p)
-        else:
-            if isinstance(params, Parameter) or  type(params).__name__ == 'Parameter':
-                problem = self.__problem_with_name(params.name)
-                if problem is not None:
-                    raise problem
-                self.update_namespace()
-                params._evaluate(self.namespace)
-                self.listOfParameters[params.name] = params
-            else:
-                raise ParameterError("Parameter '{0}' needs to be of type '{2}', it is of type '{1}'".format(params.name,str(params),str(type(Parameter))))
-        return params
-
-    def delete_parameter(self, obj):
-        self.listOfParameters.pop(obj)
-
-    def _resolve_parameters(self):
-        """ Attempt to resolve all parameter expressions to scalar floating point values.
-            Must be called prior to exporting the model.  """
-        self.update_namespace()
-        for param in self.listOfParameters:
-            self.listOfParameters[param]._evaluate(self.namespace)
-
-    def delete_all_parameters(self):
-        """ Remove all parameters from model.listOfParameters
-        """
-
-        self.listOfParameters.clear()
-
-    def add_reaction(self,reacs):
-        """ Add Reaction(s) to the model. Input can be single instance, a list of instances
-            or a dict with name, instance pairs. 
-
-            :param reacs: Reaction or list of Reactions to be added.
-            :type reacs: spatialpy.Model.Reaction | list(spatialpy.Model.Reaction)
-
-        """
-        if isinstance(reacs, list):
-            for r in reacs:
-                self.add_reaction(r)
-        elif isinstance(reacs, Reaction) or type(reacs).__name__ == "Reaction":
-                reacs.initialize(self)
-                if reacs.name is None or reacs.name == "":
-                    reacs.name = 'rxn' + str(uuid.uuid4()).replace('-', '_')
-                self.listOfReactions[reacs.name] = reacs
-        else:
-            raise ModelError("add_reaction() takes a spatialpy.Reaction object or list of objects")
-
-    def get_reaction(self, rname):
-        """ Retrieve a reaction object from the model by name
-
-                :param rname: name of Reaction to retrieve
-                :type rname: str
-
-                :rtype: spatialpy.Model.Reaction
-
-        """
-        return self.listOfReactions[rname]
-
-    def get_num_reactions(self):
-        """ Returns the number of reactions in this model.
-
-                :rtype: int
-        """
-        return len(self.listOfReactions)
-
-    def get_all_reactions(self):
-        """ Returns a dictionary of all model reactions using names as keys.
-
-            :rtype: dict
-        """
-
-        return self.listOfReactions
-
-    def delete_reaction(self, obj):
-        """ Remove reaction from model.listOfReactions
-
-            :param obj: Reaction to be removed.
-            :type obj: spatialpy.Model.Reaction
-
-        """
-        self.listOfReactions.pop(obj)
-
-    def delete_all_reactions(self):
-        """ Remove all reactions from model.listOfReactions
-        """
-        self.listOfReactions.clear()
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def __eq__(self, other):
-        return (self.listOfParameters == other.listOfParameters and \
-            self.listOfSpecies == other.listOfSpecies and \
-            self.listOfReactions == other.listOfReactions and \
-            self.name == other.name)
 
     def _create_stoichiometric_matrix(self):
         """ Generate a stoichiometric matrix in sparse CSC format. """
