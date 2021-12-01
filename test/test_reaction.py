@@ -312,8 +312,8 @@ class TestReaction(unittest.TestCase):
 
 
     def test_add_product__species_object(self):
-        """ Test Reaction.add_product. """
-        test_species = species(name="X", diffusion_coefficient=0.1)
+        """ Test Reaction.add_product species is SpatialPy.Species. """
+        test_species = Species(name="X", diffusion_coefficient=0.1)
         test_reactants = {}
         test_products = {"C": 1}
         test_rate = "k1"
@@ -326,7 +326,7 @@ class TestReaction(unittest.TestCase):
 
 
     def test_add_product__species_string(self):
-        """ Test Reaction.add_product. """
+        """ Test Reaction.add_product species is string. """
         test_reactants = {}
         test_products = {"C": 1}
         test_rate = "k1"
@@ -339,7 +339,7 @@ class TestReaction(unittest.TestCase):
 
 
     def test_add_product__species_not_accepted_type(self):
-        """ Test Reaction.add_product. """
+        """ Test Reaction.add_product species not string or SpatialPy.Species. """
         test_reactants = {}
         test_products = {"C": 1}
         test_rate = "k1"
@@ -351,7 +351,7 @@ class TestReaction(unittest.TestCase):
 
 
     def test_add_product__stochiometry_not_int(self):
-        """ Test Reaction.add_product. """
+        """ Test Reaction.add_product stochiometry not integer. """
         test_reactants = {}
         test_products = {"C": 1}
         test_rate = "k1"
@@ -363,7 +363,7 @@ class TestReaction(unittest.TestCase):
 
 
     def test_add_product__stochiometry_less_than_zero(self):
-        """ Test Reaction.add_product. """
+        """ Test Reaction.add_product stochiometry <= 0. """
         test_reactants = {}
         test_products = {"C": 1}
         test_rate = "k1"
@@ -375,8 +375,8 @@ class TestReaction(unittest.TestCase):
 
 
     def test_add_reactant__species_object(self):
-        """ Test Reaction.add_reactant. """
-        test_species = species(name="X", diffusion_coefficient=0.1)
+        """ Test Reaction.add_reactant species is SpatialPy.Species. """
+        test_species = Species(name="X", diffusion_coefficient=0.1)
         test_reactants = {}
         test_products = {"C": 1}
         test_rate = "k1"
@@ -389,7 +389,7 @@ class TestReaction(unittest.TestCase):
 
 
     def test_add_reactant__species_string(self):
-        """ Test Reaction.add_reactant. """
+        """ Test Reaction.add_reactant species is string. """
         test_reactants = {}
         test_products = {"C": 1}
         test_rate = "k1"
@@ -402,7 +402,7 @@ class TestReaction(unittest.TestCase):
 
 
     def test_add_reactant__species_not_accepted_type(self):
-        """ Test Reaction.add_reactant. """
+        """ Test Reaction.add_reactant species not string or SpatialPy.Species. """
         test_reactants = {}
         test_products = {"C": 1}
         test_rate = "k1"
@@ -414,7 +414,7 @@ class TestReaction(unittest.TestCase):
 
 
     def test_add_reactant__stochiometry_not_int(self):
-        """ Test Reaction.add_reactant. """
+        """ Test Reaction.add_reactant stochiometry not integer. """
         test_reactants = {}
         test_products = {"C": 1}
         test_rate = "k1"
@@ -426,7 +426,7 @@ class TestReaction(unittest.TestCase):
 
 
     def test_add_reactant__stochiometry_less_than_zero(self):
-        """ Test Reaction.add_reactant. """
+        """ Test Reaction.add_reactant stochiometry <= 0. """
         test_reactants = {}
         test_products = {"C": 1}
         test_rate = "k1"
@@ -435,3 +435,28 @@ class TestReaction(unittest.TestCase):
         )
         with self.assertRaises(ReactionError):
             test_reaction.add_reactant("X", 0)
+
+
+    def test_annotation(self):
+        """ Test Reaction.annotation. """
+        test_reactants = {}
+        test_products = {"C": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        test_annotation = "Testing the reaction annotation message."
+        test_reaction.annotation(test_annotation)
+        self.assertEqual(test_reaction.annotation, test_annotation)
+
+
+    def test_annotation__annotation_is_None(self):
+        """ Test Reaction.annotation annotation is None. """
+        test_reactants = {}
+        test_products = {"C": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        with self.assertRaises(ReactionError):
+            test_reaction.annotation(None)
