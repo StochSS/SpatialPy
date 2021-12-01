@@ -385,7 +385,7 @@ class TestReaction(unittest.TestCase):
         )
         test_reaction.add_reactant(test_species, 1)
         self.assertIn(test_species.name, test_reaction.products)
-        self.assertEqual(test_reaction.products[test_species.name], 1)
+        self.assertEqual(test_reaction.reactant[test_species.name], 1)
 
 
     def test_add_reactant__species_string(self):
@@ -398,7 +398,7 @@ class TestReaction(unittest.TestCase):
         )
         test_reaction.add_reactant("X", 1)
         self.assertIn("X", test_reaction.products)
-        self.assertEqual(test_reaction.products["X"], 1)
+        self.assertEqual(test_reaction.reactant["X"], 1)
 
 
     def test_add_reactant__species_not_accepted_type(self):
