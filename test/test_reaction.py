@@ -75,7 +75,7 @@ class TestReaction(unittest.TestCase):
         self.assertIsNotNone(re.search("rxn.*", reaction.name))
 
 
-    def test_constructor__name_not_str(self):
+    def test_constructor__name_not_str_or_None(self):
         """ Test the Reaction constructor with non-str name. """
         test_reactants = {"A": 1, "B": 1}
         test_products = {"C": 1}

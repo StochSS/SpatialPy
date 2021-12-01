@@ -46,7 +46,7 @@ class Reaction():
 
     def __init__(self, name="", reactants={}, products={}, propensity_function=None, rate=None, annotation=None, restrict_to=None):
 
-        if not isinstance(name, str):
+        if not isinstance(name, str) and name is not None:
             raise ReactionError("Reaction name must be of type str.")
         if name is None or name == "":
             self.name = f'rxn{uuid.uuid4()}'.replace('-', '_')
