@@ -228,6 +228,32 @@ class TestReaction(unittest.TestCase):
         self.assertEqual(test_reaction.ode_propensity_function, "k1")
 
 
+    def test__create_mass_action__marate_type_as_int(self):
+        """ Test Reaction._create_mass_action marate as int. """
+        test_reactants = {}
+        test_products = {"C": 1}
+        test_rate = 1
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        test_reaction._create_mass_action()
+        self.assertEqual(test_reaction.propensity_function, "1 * vol")
+        self.assertEqual(test_reaction.ode_propensity_function, "1")
+
+
+    def test__create_mass_action__marate_type_as_float(self):
+        """ Test Reaction._create_mass_action marate as float. """
+        test_reactants = {}
+        test_products = {"C": 1}
+        test_rate = 0.5
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        test_reaction._create_mass_action()
+        self.assertEqual(test_reaction.propensity_function, "0.5 * vol")
+        self.assertEqual(test_reaction.ode_propensity_function, "0.5")
+
+
     def test__create_mass_action__marate_type_as_parameter(self):
         """ Test Reaction._create_mass_action marate as parameter. """
         test_parameter = Parameter("k1", expression=0.1)
