@@ -197,6 +197,8 @@ class Reaction():
         :param annotation: Annotation note to be added to reaction
         :type annotation: str
         """
+        if annotation is None:
+            raise ReactionError("Annotation cannot be None.")
         self.annotation = annotation
     
     def initialize(self, model):
