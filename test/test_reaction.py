@@ -437,8 +437,8 @@ class TestReaction(unittest.TestCase):
             test_reaction.add_reactant("X", 0)
 
 
-    def test_annotation(self):
-        """ Test Reaction.annotation. """
+    def test_annotate(self):
+        """ Test Reaction.annotate. """
         test_reactants = {}
         test_products = {"C": 1}
         test_rate = "k1"
@@ -446,12 +446,12 @@ class TestReaction(unittest.TestCase):
             name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
         )
         test_annotation = "Testing the reaction annotation message."
-        test_reaction.annotation(test_annotation)
+        test_reaction.annotate(test_annotation)
         self.assertEqual(test_reaction.annotation, test_annotation)
 
 
-    def test_annotation__annotation_is_None(self):
-        """ Test Reaction.annotation annotation is None. """
+    def test_annotate__annotation_is_None(self):
+        """ Test Reaction.annotate annotation is None. """
         test_reactants = {}
         test_products = {"C": 1}
         test_rate = "k1"
@@ -459,4 +459,4 @@ class TestReaction(unittest.TestCase):
             name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
         )
         with self.assertRaises(ReactionError):
-            test_reaction.annotation(None)
+            test_reaction.annotate(None)
