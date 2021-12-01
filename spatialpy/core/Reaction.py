@@ -104,12 +104,13 @@ class Reaction():
 
 
     def _create_mass_action(self):
-        """ Create a mass action propensity function given self.reactants and a single parameter value.
+        """
+        Create a mass action propensity function given self.reactants and a single parameter value.
 
-         We support zeroth, first and second order propensities only.
-         There is no theoretical justification for higher order propensities.
-         Users can still create such propensities if they really want to,
-         but should then use a custom propensity.
+        We support zeroth, first and second order propensities only.
+        There is no theoretical justification for higher order propensities.
+        Users can still create such propensities if they really want to,
+        but should then use a custom propensity.
         """
         total_stoch = 0
         for r in self.reactants:
@@ -156,10 +157,45 @@ class Reaction():
         self.propensity_function = propensity_function
         self.ode_propensity_function = ode_propensity_function
 
+    def add_product(self, S, stoichiometry):
+        """
+        Add a product to this reaction
 
+        :param s: Species object to be produced by the reaction
+        :type s: spatialpy.Model.Species
+        :param stoichiometry: Stoichiometry of this product.
+        :type stoichiometry: int
+        """
+        if stoichiometry <= 0:
+            raise ReactionError(f"Product {S.name} Stoichiometry must be a positive integer.")
+        self.products[S.name] = stoichiometry
+
+    def add_reactant(self, S, stoichiometry):
+        """
+        Add a reactant to this reaction
+            
+        :param s: reactant Species object
+        :type s: spatialpy.Model.Species
+        :param stoichiometry: Stoichiometry of this participant reactant
+        :type stoichiometry: int
+        """
+        if stoichiometry <= 0:
+            raise ReactionError(f"Reactant {S.name} Stoichiometry must be a positive integer.")
+        self.reactants[S.name] = stoichiometry
+
+    def annotate(self, annotation):
+        """
+        Add an annotation to this reaction.
+
+        :param annotation: Annotation note to be added to reaction
+        :type annotation: str
+        """
+        self.annotation = annotation
+    
     def initialize(self, model):
-        """ Defered object initialization, called by model.add_reaction(). """
-
+        """
+        Defered object initialization, called by model.add_reaction().
+        """
         self.ode_propensity_function = self.propensity_function
 
         if self.propensity_function is None:
@@ -206,35 +242,4 @@ class Reaction():
             self.type = "customized"
 
 
-    def add_reactant(self,S,stoichiometry):
-        """ Add a reactant to this reaction
-            
-            :param s: reactant Species object
-            :type s: spatialpy.Model.Species
-            :param stoichiometry: Stoichiometry of this participant reactant
-            :type stoichiometry: int
-
-        """
-        if stoichiometry <= 0:
-            raise ReactionError("Reaction "+self.name+"Stoichiometry must be a positive integer.")
-        self.reactants[S.name]=stoichiometry
-
-    def add_product(self,S,stoichiometry):
-        """ Add a product to this reaction
-
-            :param s: Species object to be produced by the reaction
-            :type s: spatialpy.Model.Species
-            :param stoichiometry: Stoichiometry of this product.
-            :type stoichiometry: int
-
-        """
-        self.products[S.name]=stoichiometry
-
-    def annotate(self,annotation):
-        """ Add an annotation to this reaction.
-
-                :param annotation: Annotation note to be added to reaction
-                :type annotation: str
-
-        """
-        self.annotation = annotation
+    

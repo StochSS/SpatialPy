@@ -19,7 +19,7 @@ import re
 import unittest
 
 import spatialpy
-from spatialpy import Reaction, Parameter
+from spatialpy import Reaction, Parameter, Species
 from spatialpy import ReactionError
 
 class TestReaction(unittest.TestCase):
@@ -270,7 +270,8 @@ class TestReaction(unittest.TestCase):
 
     def test__create_mass_action__X_to_Y(self):
         """ Test Reaction._create_mass_action X -> Y. """
-        test_reactants = {"X": 1}
+        test_species_x = Species(name="X", diffusion_coefficient=0.1)
+        test_reactants = {test_species_x: 1}
         test_products = {"Y": 1}
         test_rate = "k1"
         test_reaction = Reaction(
@@ -283,7 +284,9 @@ class TestReaction(unittest.TestCase):
 
     def test__create_mass_action__X_plus_Y_to_Z(self):
         """ Test Reaction._create_mass_action X + Y -> Z. """
-        test_reactants = {"X": 1, "Y": 1}
+        test_species_x = Species(name="X", diffusion_coefficient=0.1)
+        test_species_y = Species(name="Y", diffusion_coefficient=0.1)
+        test_reactants = {test_species_x: 1, test_species_y: 1}
         test_products = {"Z": 1}
         test_rate = "k1"
         test_reaction = Reaction(
@@ -296,7 +299,8 @@ class TestReaction(unittest.TestCase):
 
     def test__create_mass_action__2X_to_Y(self):
         """ Test Reaction._create_mass_action 2X -> Y. """
-        test_reactants = {"X": 2}
+        test_species_x = Species(name="X", diffusion_coefficient=0.1)
+        test_reactants = {test_species_x: 2}
         test_products = {"Y": 1}
         test_rate = "k1"
         test_reaction = Reaction(
