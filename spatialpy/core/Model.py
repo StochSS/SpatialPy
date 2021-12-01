@@ -49,8 +49,8 @@ def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
     """
     try:
         from spatialpy.stochss.StochSSexport import export
-    except ImportError:
-        raise ImportError('StochSS export conversion not imported successfully')
+    except ImportError as err:
+        raise ImportError('StochSS export conversion not imported successfully') from err
 
     return export(spatialpy_model, path=filename, return_stochss_model=return_stochss_model)
 
@@ -149,10 +149,10 @@ class Model():
         return not self.__eq__(other)
 
     def __eq__(self, other):
-        return (self.listOfParameters == other.listOfParameters and \
+        return self.listOfParameters == other.listOfParameters and \
             self.listOfSpecies == other.listOfSpecies and \
             self.listOfReactions == other.listOfReactions and \
-            self.name == other.name)
+            self.name == other.name
 
     def __check_if_complete(self):
         """ Check if the model is complete, otherwise raise an approprate exception.
@@ -163,7 +163,7 @@ class Model():
             raise ModelError("The model's timespan is not set.  Use 'timespan()' or 'set_timesteps()'.")
         if self.domain is None:
             raise ModelError("The model's domain is not set.  Use 'add_domain()'.")
-            
+
     def __problem_with_name(self, name):
         if name in Model.reserved_names:
             return ModelError(f'Name "{name}" is unavailable. It is reserved for internal SpatialPy use. Reserved Names: ({Model.reserved_names}).')
@@ -229,7 +229,7 @@ class Model():
 
     def delete_species(self, obj):
         """
-        Remove a Species from model.listOfSpecies. 
+        Remove a Species from model.listOfSpecies.
 
         :param obj: Species object to be removed
         :type obj: spatialpy.Model.Species
@@ -306,7 +306,7 @@ class Model():
 
     def delete_parameter(self, obj):
         """
-        Remove a Parameter from model.listOfParameters. 
+        Remove a Parameter from model.listOfParameters.
 
         :param obj: Parameter object to be removed
         :type obj: spatialpy.Model.Parameter
@@ -323,7 +323,7 @@ class Model():
 
     def get_parameter(self, pname):
         """
-        Remove a Parameter from model.listOfParameters. 
+        Remove a Parameter from model.listOfParameters.
 
         :param pname: Name of parameter to be removed
         :type pname: spatialpy.Model.Parameter
@@ -349,7 +349,7 @@ class Model():
     def add_reaction(self,reacs):
         """
         Add Reaction(s) to the model. Input can be single instance, a list of instances
-        or a dict with name, instance pairs. 
+        or a dict with name, instance pairs.
 
         :param reacs: Reaction or list of Reactions to be added.
         :type reacs: spatialpy.Model.Reaction | list(spatialpy.Model.Reaction)
@@ -359,8 +359,8 @@ class Model():
                 self.add_reaction(r)
         elif isinstance(reacs, Reaction) or type(reacs).__name__ == "Reaction":
             problem = self.__problem_with_name(reacs.name)
-                if problem is not None:
-                    raise problem
+            if problem is not None:
+                raise problem
             reacs.initialize(self)
             self.listOfReactions[reacs.name] = reacs
         else:
@@ -445,7 +445,7 @@ class Model():
             self.timestep_size = timestep_size
         if self.timestep_size is None:
             self.timestep_size = output_interval
-        
+
         self.output_freq = output_interval/self.timestep_size
         if self.output_freq < self.timestep_size:
             raise ModelError("Timestep size exceeds output frequency.")
@@ -459,7 +459,7 @@ class Model():
         self.tspan = numpy.zeros((self.output_steps.size), dtype=float)
         for i, step in enumerate(self.output_steps):
             self.tspan[i] = sim_steps[step]
-    
+
     def timespan(self, time_span, timestep_size=None):
         """
         Set the time span of simulation. The SSA-SDPD engine does not support
@@ -508,7 +508,7 @@ class Model():
         """
 
         if self.domain is None:
-            raise Exception("SpatialPy models must have a domain before types can be attached");
+            raise Exception("SpatialPy models must have a domain before types can be attached")
         if type_id not in self.listOfTypeIDs:
             # index is the "particle type", value is the "type ID"
             self.listOfTypeIDs.append(type_id)
