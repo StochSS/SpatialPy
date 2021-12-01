@@ -161,27 +161,33 @@ class Reaction():
         """
         Add a product to this reaction
 
-        :param s: Species object to be produced by the reaction
-        :type s: spatialpy.Model.Species
+        :param S: Species object to be produced by the reaction
+        :type S: spatialpy.Model.Species
         :param stoichiometry: Stoichiometry of this product.
         :type stoichiometry: int
         """
-        if stoichiometry <= 0:
-            raise ReactionError(f"Product {S.name} Stoichiometry must be a positive integer.")
-        self.products[S.name] = stoichiometry
+        if not (isinstance(S, (str, Species)) or type(S).__name__ == 'Species'):
+            raise ReactionError("S must be of type string or SpatialPy.Species. ")
+        if not isinstance(stoichiometry, int) or stoichiometry <= 0:
+            raise ReactionError("Stoichiometry must be a positive integer.")
+        name = S if isinstance(S, str) else S.name
+        self.products[name] = stoichiometry
 
     def add_reactant(self, S, stoichiometry):
         """
         Add a reactant to this reaction
             
-        :param s: reactant Species object
-        :type s: spatialpy.Model.Species
+        :param S: reactant Species object
+        :type S: spatialpy.Model.Species
         :param stoichiometry: Stoichiometry of this participant reactant
         :type stoichiometry: int
         """
-        if stoichiometry <= 0:
-            raise ReactionError(f"Reactant {S.name} Stoichiometry must be a positive integer.")
-        self.reactants[S.name] = stoichiometry
+        if not (isinstance(S, (str, Species)) or type(S).__name__ == 'Species'):
+            raise ReactionError(f"S must be of type string or SpatialPy.Species. ")
+        if not isinstance(stoichiometry, int) or stoichiometry <= 0:
+            raise ReactionError(f"stoichiometry must be a positive integer.")
+        name = S if isinstance(S, str) else S.name
+        self.reactants[name] = stoichiometry
 
     def annotate(self, annotation):
         """

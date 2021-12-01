@@ -309,3 +309,129 @@ class TestReaction(unittest.TestCase):
         test_reaction._create_mass_action()
         self.assertEqual(test_reaction.propensity_function, "0.5 * k1 * X * (X - 1) / vol")
         self.assertEqual(test_reaction.ode_propensity_function, "k1 * X * X")
+
+
+    def test_add_product__species_object(self):
+        """ Test Reaction.add_product. """
+        test_species = species(name="X", diffusion_coefficient=0.1)
+        test_reactants = {}
+        test_products = {"C": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        test_reaction.add_product(test_species, 1)
+        self.assertIn(test_species.name, test_reaction.products)
+        self.assertEqual(test_reaction.products[test_species.name], 1)
+
+
+    def test_add_product__species_string(self):
+        """ Test Reaction.add_product. """
+        test_reactants = {}
+        test_products = {"C": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        test_reaction.add_product("X", 1)
+        self.assertIn("X", test_reaction.products)
+        self.assertEqual(test_reaction.products["X"], 1)
+
+
+    def test_add_product__species_not_accepted_type(self):
+        """ Test Reaction.add_product. """
+        test_reactants = {}
+        test_products = {"C": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        with self.assertRaises(ReactionError):
+            test_reaction.add_product(["X"], 1)
+
+
+    def test_add_product__stochiometry_not_int(self):
+        """ Test Reaction.add_product. """
+        test_reactants = {}
+        test_products = {"C": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        with self.assertRaises(ReactionError):
+            test_reaction.add_product("X", 0.1)
+
+
+    def test_add_product__stochiometry_less_than_zero(self):
+        """ Test Reaction.add_product. """
+        test_reactants = {}
+        test_products = {"C": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        with self.assertRaises(ReactionError):
+            test_reaction.add_product("X", 0)
+
+
+    def test_add_reactant__species_object(self):
+        """ Test Reaction.add_reactant. """
+        test_species = species(name="X", diffusion_coefficient=0.1)
+        test_reactants = {}
+        test_products = {"C": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        test_reaction.add_reactant(test_species, 1)
+        self.assertIn(test_species.name, test_reaction.products)
+        self.assertEqual(test_reaction.products[test_species.name], 1)
+
+
+    def test_add_reactant__species_string(self):
+        """ Test Reaction.add_reactant. """
+        test_reactants = {}
+        test_products = {"C": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        test_reaction.add_reactant("X", 1)
+        self.assertIn("X", test_reaction.products)
+        self.assertEqual(test_reaction.products["X"], 1)
+
+
+    def test_add_reactant__species_not_accepted_type(self):
+        """ Test Reaction.add_reactant. """
+        test_reactants = {}
+        test_products = {"C": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        with self.assertRaises(ReactionError):
+            test_reaction.add_reactant(["X"], 1)
+
+
+    def test_add_reactant__stochiometry_not_int(self):
+        """ Test Reaction.add_reactant. """
+        test_reactants = {}
+        test_products = {"C": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        with self.assertRaises(ReactionError):
+            test_reaction.add_reactant("X", 0.1)
+
+
+    def test_add_reactant__stochiometry_less_than_zero(self):
+        """ Test Reaction.add_reactant. """
+        test_reactants = {}
+        test_products = {"C": 1}
+        test_rate = "k1"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        with self.assertRaises(ReactionError):
+            test_reaction.add_reactant("X", 0)
