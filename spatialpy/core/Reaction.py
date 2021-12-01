@@ -123,12 +123,17 @@ class Reaction():
                          Users can still create such propensities using a 'custom propensity'.""")
         # Case EmptySet -> Y
 
-        if isinstance(self.marate, str):
-            propensity_function = self.marate
-            ode_propensity_function = self.marate
+        self.type = "mass-action"
+        rtype = type(self.rate).__name__
+        if rtype == 'Parameter':
+            self.marate = self.rate.name
+        elif rtype == 'int' or rtype == 'float':
+            self.marate = str(self.rate)
         else:
-            propensity_function = self.marate.name
-            ode_propensity_function = self.marate.name
+            self.marate = self.rate
+
+        propensity_function = self.marate
+        ode_propensity_function = self.marate
 
         # There are only three ways to get 'total_stoch==2':
         for r in self.reactants:
@@ -196,14 +201,6 @@ class Reaction():
                     self.products[model.listOfSpecies[p]] = products[p]
 
         if self.massaction:
-            self.type = "mass-action"
-            rtype = type(self.rate).__name__
-            if rtype == 'Parameter':
-                self.marate = self.rate.name
-            elif rtype == 'int' or rtype == 'float':
-                self.marate = str(self.rate)
-            else:
-                self.marate = self.rate
             self._create_mass_action()
         else:
             self.type = "customized"
