@@ -222,7 +222,7 @@ class TestReaction(unittest.TestCase):
         test_reaction = Reaction(
             name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
         )
-
+        test_reaction._create_mass_action()
         self.assertEqual(test_reaction.propensity_function, "k1 * vol")
         self.assertEqual(test_reaction.ode_propensity_function, "k1")
 

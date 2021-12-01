@@ -81,7 +81,7 @@ class Reaction():
         elif isinstance(restrict_to, list) or restrict_to is None:
             self.restrict_to = restrict_to
         else:
-            errmsg = f"Reaction {name}: restrict_to must be an integer or list of integers."
+            errmsg = f"Reaction {self.name}: restrict_to must be an integer or list of integers."
             raise ReactionError(errmsg)
 
         self.annotation = annotation
@@ -164,12 +164,12 @@ class Reaction():
 
         if self.propensity_function is None:
             if self.rate is None:
-                errmsg = f"Reaction {name}: You must either set the reaction to be mass-action or specifiy a propensity function."
+                errmsg = f"Reaction {self.name}: You must either set the reaction to be mass-action or specifiy a propensity function."
                 raise ReactionError(errmsg)
             self.massaction = True
         else:
             if self.rate is not None:
-                errmsg = f"Reaction {name}: You cannot set the propensity type to mass-action and simultaneously set a propensity function."
+                errmsg = f"Reaction {self.name}: You cannot set the propensity type to mass-action and simultaneously set a propensity function."
                 raise ReactionError(errmsg)
             # If they don't give us a propensity function and do give a rate, assume mass-action.
             self.massaction = False
