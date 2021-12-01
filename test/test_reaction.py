@@ -384,7 +384,7 @@ class TestReaction(unittest.TestCase):
             name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
         )
         test_reaction.add_reactant(test_species, 1)
-        self.assertIn(test_species.name, test_reaction.reactant)
+        self.assertIn(test_species.name, test_reaction.reactants)
         self.assertEqual(test_reaction.reactant[test_species.name], 1)
 
 
@@ -397,7 +397,7 @@ class TestReaction(unittest.TestCase):
             name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
         )
         test_reaction.add_reactant("X", 1)
-        self.assertIn("X", test_reaction.reactant)
+        self.assertIn("X", test_reaction.reactants)
         self.assertEqual(test_reaction.reactant["X"], 1)
 
 
