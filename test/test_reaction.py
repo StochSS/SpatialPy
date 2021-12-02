@@ -19,7 +19,7 @@ import re
 import unittest
 
 import spatialpy
-from spatialpy import Reaction, Parameter, Species
+from spatialpy import Model, Species, Parameter, Reaction
 from spatialpy import ReactionError
 
 class TestReaction(unittest.TestCase):
@@ -460,3 +460,23 @@ class TestReaction(unittest.TestCase):
         )
         with self.assertRaises(ReactionError):
             test_reaction.annotate(None)
+
+
+    def test_initialize__propensity_function(self):
+        test_model = Model(name="test_model")
+        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
+        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
+        test_model.add_species([test_species_x, test_species_y])
+        test_parameter = Parameter(name="test_parameter", expression=0.1)
+        test_model.add_parameter(test_parameter)
+        test_reactants = {"test_species_x": 1}
+        test_products = {"test_species_y": 1}
+        test_propensity = "test_parameter * test_species_x"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, propensity_function=test_propensity
+        )
+        test_reaction.initialize(model=test_model)
+        self.assertFalse(test_reaction.massaction)
+        self.assertEqual(test_reaction.type, "customized")
+        self.assertIsNone(test_reaction.marate)
+        self.assertEqual(test_reaction.ode_propensity_function, test_propensity)
