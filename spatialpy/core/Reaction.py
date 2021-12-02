@@ -227,7 +227,9 @@ class Reaction():
             for r in reactants:
                 rtype = type(r).__name__
                 if rtype=='Species':
-                    self.reactants[r]=reactants[r]
+                    if r.name not in model.listOfSpecies:
+                        raise ReactionError(f"Could not find species '{r.name}' in model.")
+                    self.reactants[r] = reactants[r]
                 elif rtype=='str':
                     if r not in model.listOfSpecies:
                         raise ReactionError(f"Could not find species '{r}' in model.")
@@ -239,7 +241,9 @@ class Reaction():
             for p in products:
                 rtype = type(p).__name__
                 if rtype=='Species':
-                    self.products[p]=products[p]
+                    if p.name not in model.listOfSpecies:
+                        raise ReactionError(f"Could not find species '{p.name}' in model.")
+                    self.products[p] = products[p]
                 else:
                     if p not in model.listOfSpecies:
                         raise ReactionError(f"Could not find species '{p}' in model.")
