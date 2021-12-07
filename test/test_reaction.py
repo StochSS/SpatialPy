@@ -463,6 +463,7 @@ class TestReaction(unittest.TestCase):
 
 
     def test_initialize__propensity_function(self):
+        """ Test Reaction.initialize with propensity function only. """
         test_model = Model(name="test_model")
         test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
         test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
@@ -483,6 +484,7 @@ class TestReaction(unittest.TestCase):
 
 
     def test_initialize__propensity_function(self):
+        """ Test Reaction.initialize with rate parameter only. """
         test_model = Model(name="test_model")
         test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
         test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
@@ -500,3 +502,39 @@ class TestReaction(unittest.TestCase):
         self.assertEqual(test_reaction.type, "mass-action")
         self.assertEqual(test_reaction.marate, "test_parameter")
         self.assertEqual(test_reaction.ode_propensity_function, "test_parameter * test_species_x")
+
+
+    def test_initialize__no_propensity_or_rate(self):
+        """ Test Reaction.initialize without providing a propensity function or rate parameter. """
+        test_model = Model(name="test_model")
+        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
+        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
+        test_model.add_species([test_species_x, test_species_y])
+        test_parameter = Parameter(name="test_parameter", expression=0.1)
+        test_model.add_parameter(test_parameter)
+        test_reactants = {"test_species_x": 1}
+        test_products = {"test_species_y": 1}
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products
+        )
+        with self.assertRaises(ReactionError):
+            test_reaction.initialize(model=test_model)
+
+
+    def test_initialize__no_propensity_or_rate(self):
+        """ Test Reaction.initialize without providing a propensity function or rate parameter. """
+        test_model = Model(name="test_model")
+        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
+        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
+        test_model.add_species([test_species_x, test_species_y])
+        test_parameter = Parameter(name="test_parameter", expression=0.1)
+        test_model.add_parameter(test_parameter)
+        test_reactants = {"test_species_x": 1}
+        test_products = {"test_species_y": 1}
+        test_rate = "test_parameter"
+        test_propensity = "test_parameter * test_species_x"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate, propensity_function=test_propensity
+        )
+        with self.assertRaises(ReactionError):
+            test_reaction.initialize(model=test_model)
