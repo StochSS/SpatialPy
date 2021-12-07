@@ -628,3 +628,63 @@ class TestReaction(unittest.TestCase):
         for reactant in test_reaction.reactants:
             with self.subTest(reactant=str(reactant)):
                 self.assertIsInstance(reactant, Species)
+
+
+    def test_initialize__reactant_string_as_object(self):
+        """ Test that all species strings in Reaction.reactants are stored correctly after Reaction.initialize call. """
+        test_model = Model(name="test_model")
+        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
+        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
+        test_model.add_species([test_species_x, test_species_y])
+        test_parameter = Parameter(name="test_parameter", expression=0.1)
+        test_model.add_parameter(test_parameter)
+        test_reactants = {"test_species_x": 1, "test_species_y": 1}
+        test_products = {}
+        test_rate = "test_parameter"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        test_reaction.initialize(model=test_model)
+        for reactant in test_reaction.reactants:
+            with self.subTest(reactant=str(reactant)):
+                self.assertIsInstance(reactant, Species)
+
+
+    def test_initialize__product_object_as_object(self):
+        """ Test that all species objects in Reaction.products are stored correctly after Reaction.initialize call. """
+        test_model = Model(name="test_model")
+        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
+        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
+        test_model.add_species([test_species_x, test_species_y])
+        test_parameter = Parameter(name="test_parameter", expression=0.1)
+        test_model.add_parameter(test_parameter)
+        test_reactants = {}
+        test_products = {test_species_x: 1, test_species_y: 1}
+        test_rate = "test_parameter"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        test_reaction.initialize(model=test_model)
+        for product in test_reaction.products:
+            with self.subTest(product=str(product)):
+                self.assertIsInstance(product, Species)
+
+
+    def test_initialize__reactant_object_as_object(self):
+        """ Test that all species string in Reaction.products are stored correctly after Reaction.initialize call. """
+        test_model = Model(name="test_model")
+        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
+        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
+        test_model.add_species([test_species_x, test_species_y])
+        test_parameter = Parameter(name="test_parameter", expression=0.1)
+        test_model.add_parameter(test_parameter)
+        test_reactants = {}
+        test_products = {"test_species_x": 1, "test_species_y": 1}
+        test_rate = "test_parameter"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        test_reaction.initialize(model=test_model)
+        for product in test_reaction.products:
+            with self.subTest(product=str(product)):
+                self.assertIsInstance(product, Species)
