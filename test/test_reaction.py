@@ -538,3 +538,73 @@ class TestReaction(unittest.TestCase):
         )
         with self.assertRaises(ReactionError):
             test_reaction.initialize(model=test_model)
+
+
+    def test_initialize__reactant_species_object_not_in_model(self):
+        """ Test Reaction.initialize with reactant species object not in the Model. """
+        test_model = Model(name="test_model")
+        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
+        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
+        test_model.add_species(test_species_y)
+        test_parameter = Parameter(name="test_parameter", expression=0.1)
+        test_model.add_parameter(test_parameter)
+        test_reactants = {test_species_x: 1}
+        test_products = {"test_species_y": 1}
+        test_rate = "test_parameter"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        with self.assertRaises(ReactionError):
+            test_reaction.initialize(model=test_model)
+
+
+    def test_initialize__reactant_species_str_not_in_model(self):
+        """ Test Reaction.initialize with reactant species string not in the Model. """
+        test_model = Model(name="test_model")
+        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
+        test_model.add_species(test_species_y)
+        test_parameter = Parameter(name="test_parameter", expression=0.1)
+        test_model.add_parameter(test_parameter)
+        test_reactants = {"test_species_x": 1}
+        test_products = {"test_species_y": 1}
+        test_rate = "test_parameter"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        with self.assertRaises(ReactionError):
+            test_reaction.initialize(model=test_model)
+
+
+    def test_initialize__product_species_object_not_in_model(self):
+        """ Test Reaction.initialize with product species object not in the Model. """
+        test_model = Model(name="test_model")
+        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
+        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
+        test_model.add_species(test_species_x)
+        test_parameter = Parameter(name="test_parameter", expression=0.1)
+        test_model.add_parameter(test_parameter)
+        test_reactants = {"test_species_x": 1}
+        test_products = {test_species_y: 1}
+        test_rate = "test_parameter"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        with self.assertRaises(ReactionError):
+            test_reaction.initialize(model=test_model)
+
+
+    def test_initialize__product_species_str_not_in_model(self):
+        """ Test Reaction.initialize with product species string not in the Model. """
+        test_model = Model(name="test_model")
+        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
+        test_model.add_species(test_species_x)
+        test_parameter = Parameter(name="test_parameter", expression=0.1)
+        test_model.add_parameter(test_parameter)
+        test_reactants = {"test_species_x": 1}
+        test_products = {"test_species_y": 1}
+        test_rate = "test_parameter"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        with self.assertRaises(ReactionError):
+            test_reaction.initialize(model=test_model)
