@@ -608,3 +608,23 @@ class TestReaction(unittest.TestCase):
         )
         with self.assertRaises(ReactionError):
             test_reaction.initialize(model=test_model)
+
+
+    def test_initialize__reactant_object_as_object(self):
+        """ Test that all species objects in Reaction.reactants are stored correctly after Reaction.initialize call. """
+        test_model = Model(name="test_model")
+        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
+        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
+        test_model.add_species([test_species_x, test_species_y])
+        test_parameter = Parameter(name="test_parameter", expression=0.1)
+        test_model.add_parameter(test_parameter)
+        test_reactants = {test_species_x: 1, test_species_y: 1}
+        test_products = {}
+        test_rate = "test_parameter"
+        test_reaction = Reaction(
+            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+        )
+        test_reaction.initialize(model=test_model)
+        for reactant in test_reaction.reactants:
+            with self.subTest(reactant=str(reactant)):
+                self.assertIsInstance(reactant, Species)
