@@ -60,11 +60,11 @@ class cylinderDemo3D(spatialpy.Model):
 
 
         # Define Reactions
-        R1 = spatialpy.Reaction(reactants=None, products={A:1},
+        R1 = spatialpy.Reaction(reactants={}, products={A:1},
                                 rate=k_creat1, restrict_to=2)
-        R2 = spatialpy.Reaction(reactants=None, products={B:1},
+        R2 = spatialpy.Reaction(reactants={}, products={B:1},
                               rate=k_creat2, restrict_to=3)
-        R3 = spatialpy.Reaction(reactants={A:1, B:1}, products=None,
+        R3 = spatialpy.Reaction(reactants={A:1, B:1}, products={},
                               rate=k_react)
         self.add_reaction([R1, R2, R3])
 
