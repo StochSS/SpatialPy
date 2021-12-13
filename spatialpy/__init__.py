@@ -22,13 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 if (sys.version_info < (3,0)):
     raise Exception("SpatialPy only works in Python 3.0 and higher")
+from .__version__ import __version__, __title__, __description__, __url__
+from .__version__ import __author__, __email__
+from .__version__ import __license__, __copyright__
 
-from spatialpy.Model import *
-from spatialpy.Solver import *
-from spatialpy.Geometry import *
-from spatialpy.Domain import *
-from spatialpy.DataFunction import DataFunction
-from spatialpy.InitialCondition import *
-from spatialpy.BoundaryCondition import BoundaryCondition
-from spatialpy.VTKReader import *
-from spatialpy.cleanup import *
+from spatialpy.core import *
+from spatialpy.solvers import *

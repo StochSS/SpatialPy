@@ -25,7 +25,7 @@ import pickle
 import unittest
 import numpy
 import spatialpy
-from spatialpy.expression import Expression, ExpressionConverter
+from spatialpy.solvers.build.expression import Expression, ExpressionConverter
 
 
 class diffusion_debug(spatialpy.Model):
