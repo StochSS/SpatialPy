@@ -169,7 +169,7 @@ namespace Spatialpy{
             //fflush(stdout);
         }
         //printf("pairwiseForce(id=%i) num_chem_rxns=%i\n",me->id,system->num_chem_rxns);
-        printf("pairwiseForce(id=%i) F=[%e %e %e] Fbp=[%e %e %e]\n",me->id,me->F[0],me->F[1],me->F[2],me->Fbp[0],me->Fbp[1],me->Fbp[2]);
+        //printf("pairwiseForce(id=%i) F=[%e %e %e] Fbp=[%e %e %e]\n",me->id,me->F[0],me->F[1],me->F[2],me->Fbp[0],me->Fbp[1],me->Fbp[2]);
         //fflush(stdout);
 
         // after processing all neighbors

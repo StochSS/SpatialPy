@@ -156,7 +156,7 @@ namespace Spatialpy{
         // Step 3.3: Apply BVF
         if (me->solidTag == 0 && system->static_domain == 0) {
             computeBoundaryVolumeFraction(me,system);
-            //applyBoundaryVolumeFraction(me, system);
+            applyBoundaryVolumeFraction(me, system);
         }
 
         //  Solve deterministic/stochastic reaction-diffusion system
