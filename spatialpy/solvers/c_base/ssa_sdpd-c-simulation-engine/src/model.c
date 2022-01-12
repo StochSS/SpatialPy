@@ -178,9 +178,6 @@ namespace Spatialpy{
         double vol = (me->mass / me->rho);
         double cur_time = system->current_step * system->dt;
         for(rxn=0; rxn < system->num_chem_rxns; rxn++){
-            //TODO: t (2nd arg) set to zero, fix
-            //TODO, vol (3rd arg) set to zero, fix
-            //TODO: data (4th arg) set to NULL, fix
             double flux = (*system->chem_rxn_rhs_functions[rxn])(me->C, cur_time, vol , me->data_fn, me->type);
             for(s=0; s< system->num_chem_species; s++){
                 int k = system->num_chem_rxns * rxn + s;
