@@ -221,7 +221,7 @@ namespace Spatialpy{
           Wij = alpha*( (1+3*R) * pow( 1-R,3));
 
           //Compute numerator of Shepard filter
-          num += pt_j->rho * Wij;
+          num += pt_j->old_rho * Wij;
 
           // Compute denominator of Shepard filter
           den += Wij;
