@@ -16,8 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import numpy
-
 from spatialpy.core.spatialpyError import BoundaryConditionError
 
 
@@ -37,26 +35,27 @@ class BoundaryCondition():
 
         :param xmin: x-axis coordinate lower bound of **condition**
         :type xmin: float
-        
+
         :param xmax: x-axis coordinate upper bound of **condition**
         :type xmax: float
 
         :param ymin: y-axis coordinate lower bound of **condition**
         :type ymin: float
-        
+
         :param ymax: y-axis coordinate upper bound of **condition**
         :type ymax: float
 
         :param zmin: z-axis coordinate lower bound of **condition**
         :type zmin: float
-        
+
         :param zmax: z-axis coordinate upper bound of **condition**
         :type zmax: float
 
         :param typeid: Set **condition** to particle type id
         :type typeid: int
 
-        :param species: Set **target** of boundary condition to target Species.  If set, determinstic must also be set to True/False.
+        :param species: Set **target** of boundary condition to target Species. \
+        If set, determinstic must also be set to True/False.
         :type species: str
 
         :param deterministic: **Must be set if target is Species.** Set True if boundary condition target is species \
@@ -72,16 +71,8 @@ class BoundaryCondition():
         :param model: Target model of boundary condition
         :type model: spatialpy.Model.Model
     """
-    def __init__(self,
-                 xmin=None, xmax=None,
-                 ymin=None, ymax=None,
-                 zmin=None, zmax=None,
-                 type_id=None,
-                 species=None,
-                 deterministic=True,
-                 property=None,
-                 value=None,
-                 model=None):
+    def __init__(self, xmin=None, xmax=None, ymin=None, ymax=None, zmin=None, zmax=None, type_id=None,
+                 species=None, deterministic=True, property=None, value=None, model=None):
 
         self.xmin = xmin
         self.xmax = xmax
@@ -98,39 +89,50 @@ class BoundaryCondition():
 
 
     def expression(self):
-        """ Creates evaluable string expression of boundary condition.
+        """
+        Creates evaluable string expression of boundary condition.
 
-            :rtype: str
-    """
-        if( self.species is not None and self.property is not None):
+        :rtype: str
+        """
+        if self.species is not None and self.property is not None:
             raise BoundaryConditionError("Can not set both species and property")
         if self.value is None:
             raise BoundaryConditionError("Must set value")
         cond=[]
-        if(self.xmin is not None): cond.append("(me->x[0] >= {0})".format(self.xmin))
-        if(self.xmax is not None): cond.append("(me->x[0] <= {0})".format(self.xmax))
-        if(self.ymin is not None): cond.append("(me->x[1] >= {0})".format(self.ymin))
-        if(self.ymax is not None): cond.append("(me->x[1] <= {0})".format(self.ymax))
-        if(self.zmin is not None): cond.append("(me->x[2] >= {0})".format(self.zmin))
-        if(self.zmax is not None): cond.append("(me->x[2] <= {0})".format(self.zmax))
-        if(self.type_id is not None): cond.append("(me->type == {0})".format(int(self.type_id)))
-        if(len(cond)==0): raise BoundaryConditionError('need at least one condition on the BoundaryCondition')
+        if self.xmin is not None:
+            cond.append(f"(me->x[0] >= {self.xmin})")
+        if self.xmax is not None:
+            cond.append(f"(me->x[0] <= {self.xmax})")
+        if self.ymin is not None:
+            cond.append(f"(me->x[1] >= {self.ymin})")
+        if self.ymax is not None:
+            cond.append(f"(me->x[1] <= {self.ymax})")
+        if self.zmin is not None:
+            cond.append(f"(me->x[2] >= {self.zmin})")
+        if self.zmax is not None:
+            cond.append(f"(me->x[2] <= {self.zmax})")
+        if self.type_id is not None:
+            cond.append(f"(me->type == {int(self.type_id)})")
+        if len(cond)==0:
+            raise BoundaryConditionError('need at least one condition on the BoundaryCondition')
         bcstr = "if(" + '&&'.join(cond) + "){"
         if self.species is not None:
             if self.deterministic:
                 s_ndx = self.model.species_map[self.model.listOfSpecies[self.species]]
-                bcstr += "me->C[{0}] = {1};".format(s_ndx,self.value)
+                bcstr += f"me->C[{s_ndx}] = {self.value};"
             else:
-                raise BoundaryConditionError("BoundaryConditions don't work for stochastic species yet")
+                raise BoundaryConditionError(
+                    "BoundaryConditions don't work for stochastic species yet."
+                )
         elif self.property is not None:
-            if(self.property == 'v'):
+            if self.property == 'v':
                 for i in range(3):
-                    bcstr+= "me->v[{0}]={1};".format(i,self.value[i])
-            elif(self.property == 'nu'):
-                bcstr+= "me->nu={0};".format(self.value)
-            elif(self.property == 'rho'):
-                bcstr+= "me->rho={0};".format(self.value)
+                    bcstr+= f"me->v[{i}]={self.value[i]};"
+            elif self.property == 'nu':
+                bcstr += f"me->nu={self.value};"
+            elif self.property == 'rho':
+                bcstr += f"me->rho={self.value};"
             else:
-                raise BoundaryConditionError("Unable handle boundary condition for property '{0}'".format(self.property))
+                raise BoundaryConditionError(f"Unable handle boundary condition for property '{self.property}'")
         bcstr+= "}"
         return bcstr
