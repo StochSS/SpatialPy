@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import logging
+from spatialpy.__version__ import __version__
 from .BoundaryCondition import *
 from .cleanup import *
 from .DataFunction import *
@@ -30,7 +31,6 @@ from .Result import *
 from .spatialpyError import *
 from .Species import *
 from .VTKReader import *
-from spatialpy.__version__ import __version__
 
 _formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 _handler = logging.StreamHandler()
