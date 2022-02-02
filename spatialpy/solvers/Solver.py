@@ -24,7 +24,6 @@ import sys
 import tempfile
 import threading
 import time
-import tempfile
 import getpass
 import re
 
@@ -97,7 +96,7 @@ class Solver:
         try:
             if self.build_dir is not None:
                 try:
-                    shutil.rmtree(self.build_dir)
+                    shutil.rmtree(self.build_dir, ignore_errors=True)
                 except OSError as e:
                     print("Could not delete '{0}'".format(
                         self.solver_base_dir))
