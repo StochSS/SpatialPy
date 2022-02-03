@@ -102,6 +102,9 @@ namespace Spatialpy{
             me->Q[i] = 0.0;
         }
 
+        // save the current per-particle rho for the Shepard filter
+        me->old_rho = me->rho;
+
 
     }
 
@@ -138,17 +141,17 @@ namespace Spatialpy{
             }
 
             // Update density using continuity equation and Shepard filter
-            //if (step % 20 == 0) {
-            //    filterDensity(me, system);
-            //}
+            if (step % 20 == 0) {
+                filterDensity(me, system);
+            }
             me->rho = me->rho + 0.5 * system->dt * me->Frho;
 
           // Solid (wall) particles should change density
         }else if (me->solidTag == 1 && system->static_domain == 0) {
             // Filter density field (for fixed solid particles)
-            //if (step % 20 == 0) {
-            //    filterDensity(me, system);
-            //}
+            if (step % 20 == 0) {
+                filterDensity(me, system);
+            }
         }
 
 

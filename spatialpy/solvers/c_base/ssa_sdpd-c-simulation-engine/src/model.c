@@ -169,6 +169,7 @@ namespace Spatialpy{
             //fflush(stdout);
         }
         //printf("pairwiseForce(id=%i) num_chem_rxns=%i\n",me->id,system->num_chem_rxns);
+        //printf("pairwiseForce(id=%i) F=[%e %e %e] Fbp=[%e %e %e]\n",me->id,me->F[0],me->F[1],me->F[2],me->Fbp[0],me->Fbp[1],me->Fbp[2]);
         //fflush(stdout);
 
         // after processing all neighbors
@@ -177,9 +178,6 @@ namespace Spatialpy{
         double vol = (me->mass / me->rho);
         double cur_time = system->current_step * system->dt;
         for(rxn=0; rxn < system->num_chem_rxns; rxn++){
-            //TODO: t (2nd arg) set to zero, fix
-            //TODO, vol (3rd arg) set to zero, fix
-            //TODO: data (4th arg) set to NULL, fix
             double flux = (*system->chem_rxn_rhs_functions[rxn])(me->C, cur_time, vol , me->data_fn, me->type);
             for(s=0; s< system->num_chem_species; s++){
                 int k = system->num_chem_rxns * rxn + s;
@@ -220,7 +218,7 @@ namespace Spatialpy{
           Wij = alpha*( (1+3*R) * pow( 1-R,3));
 
           //Compute numerator of Shepard filter
-          num += pt_j->rho * Wij;
+          num += pt_j->old_rho * Wij;
 
           // Compute denominator of Shepard filter
           den += Wij;
