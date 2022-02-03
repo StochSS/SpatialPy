@@ -91,8 +91,15 @@ class BoundaryCondition():
         if target is None or not (isinstance(target, (str, Species)) or
                 type(target).__name__ == 'Species' or property in ('nu', 'rho', 'v')):
             raise BoundaryConditionError("Target must be of type string or SpatialPy.Species")
-        if not (value is None or isinstance(value, float) or (isinstance(value, list) and len(value) == 3)):
+        if not (value is None or isinstance(value, (int, float)) or (isinstance(value, list) and len(value) == 3)):
             raise BoundaryConditionError("Value must be of type float or float[3].")
+        try:
+            if isinstance(value, int):
+                value = float(value)
+            if isinstance(value, list):
+                value = [float(val) for val in value]
+        except Exception as err:
+            raise BoundaryConditionError("Value must be of type float or float[3].") from err
         if not (model is None or isinstance(model, Model) or type(model).__name__ == 'Model'):
             raise BoundaryConditionError("Model must be of type SpatialPy.Model.")
 
