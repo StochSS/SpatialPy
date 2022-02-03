@@ -1,7 +1,7 @@
 '''
 SpatialPy is a Python 3 package for simulation of
 spatial deterministic/stochastic reaction-diffusion-advection problems
-Copyright (C) 2021 SpatialPy developers.
+Copyright (C) 2019 - 2022 SpatialPy developers.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy
 
+from spatialpy.core.Model import Model
+from spatialpy.core.Species import Species
 from spatialpy.core.spatialpyError import BoundaryConditionError
 
 
@@ -72,16 +74,32 @@ class BoundaryCondition():
         :param model: Target model of boundary condition
         :type model: spatialpy.Model.Model
     """
-    def __init__(self,
-                 xmin=None, xmax=None,
-                 ymin=None, ymax=None,
-                 zmin=None, zmax=None,
-                 type_id=None,
-                 species=None,
-                 deterministic=True,
-                 property=None,
-                 value=None,
-                 model=None):
+    def __init__(self, xmin=None, xmax=None, ymin=None, ymax=None, zmin=None, zmax=None, type_id=None,
+                 species=None, deterministic=True, property=None, value=None, model=None):
+
+        if xmin is not None and not isinstance(xmin, (int, float)):
+            raise BoundaryConditionError("X-min must be of type int or float.")
+        if xmax is not None and not isinstance(xmax, (int, float)):
+            raise BoundaryConditionError("X-max must be of type int or float.")
+        if ymin is not None and not isinstance(ymin, (int, float)):
+            raise BoundaryConditionError("Y-min must be of type int or float.")
+        if ymax is not None and not isinstance(ymax, (int, float)):
+            raise BoundaryConditionError("Y-max must be of type int or float.")
+        if zmin is not None and not isinstance(zmin, (int, float)):
+            raise BoundaryConditionError("Z-min must be of type int or float.")
+        if zmax is not None and not isinstance(zmax, (int, float)):
+            raise BoundaryConditionError("Z-max must be of type int or float.")
+        if type_id is not None and not isinstance(type_id, int):
+            raise BoundaryConditionError("Type-ID must be of type int.")
+        if not (species is None or isinstance(species, (str, Species)) or type(species).__name__ == 'Species'):
+            raise BoundaryConditionError("Species must be of type string or SpatialPy.Species")
+        if property is not None and not (isinstance(property, str) and property in ('nu', 'rho', 'v')):
+            raise BoundaryConditionError("Property must be 'nu' 'rho' or 'v'")
+        if not (value is None or isinstance(value, float) or (isinstance(value, list) and len(value) == 3)):
+            raise BoundaryConditionError("Value must be of type float or float[3].")
+        if not (model is None or isinstance(model, Model) or type(model).__name__ == 'Model'):
+            raise BoundaryConditionError("Model must be of type SpatialPy.Model.")
+
 
         self.xmin = xmin
         self.xmax = xmax
