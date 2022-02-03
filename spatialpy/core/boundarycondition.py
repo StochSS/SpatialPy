@@ -54,19 +54,16 @@ class BoundaryCondition():
     :param zmax: z-axis coordinate upper bound of **condition**
     :type zmax: float
 
-    :param typeid: Set **condition** to particle type id
-    :type typeid: int
-
-    :param species: Set **target** of boundary condition to target Species. \
-    If set, determinstic must also be set to True/False.
-    :type species: str
+    :param type_id: Set **condition** to particle type id
+    :type type_id: int
 
     :param deterministic: **Must be set if target is Species.** Set True if boundary condition target is species \
     and applies to deterministic simulation. **BoundaryCondition not yet implemeneted for Stochastic Species**.
     :type deterministic: bool
 
-    :param property: Set **target** to properties, can be 'nu' 'rho' or 'v'
-    :type property: str
+    :param target: Set **target** to properties, can be 'nu' 'rho' or 'v' or species name
+    If species name, determinstic must also be set to True/False.
+    :type target: str
 
     :param value: Value property will take in region defined by the conditions
     :type value: float or float[3]
@@ -76,7 +73,7 @@ class BoundaryCondition():
     """
 
     def __init__(self, xmin=None, xmax=None, ymin=None, ymax=None, zmin=None, zmax=None, type_id=None,
-                 species=None, deterministic=True, property=None, value=None, model=None):
+                 deterministic=True, target=None, value=None, model=None):
         if xmin is not None and not isinstance(xmin, (int, float)):
             raise BoundaryConditionError("X-min must be of type int or float.")
         if xmax is not None and not isinstance(xmax, (int, float)):
@@ -91,10 +88,9 @@ class BoundaryCondition():
             raise BoundaryConditionError("Z-max must be of type int or float.")
         if type_id is not None and not isinstance(type_id, int):
             raise BoundaryConditionError("Type-ID must be of type int.")
-        if not (species is None or isinstance(species, (str, Species)) or type(species).__name__ == 'Species'):
-            raise BoundaryConditionError("Species must be of type string or SpatialPy.Species")
-        if property is not None and not (isinstance(property, str) and property in ('nu', 'rho', 'v')):
-            raise BoundaryConditionError("Property must be 'nu' 'rho' or 'v'")
+        if target is None or not (isinstance(target, (str, Species)) or
+                type(target).__name__ == 'Species' or property in ('nu', 'rho', 'v')):
+            raise BoundaryConditionError("Target must be of type string or SpatialPy.Species")
         if not (value is None or isinstance(value, float) or (isinstance(value, list) and len(value) == 3)):
             raise BoundaryConditionError("Value must be of type float or float[3].")
         if not (model is None or isinstance(model, Model) or type(model).__name__ == 'Model'):
@@ -107,8 +103,7 @@ class BoundaryCondition():
         self.zmin = zmin
         self.zmax = zmax
         self.type_id = type_id
-        self.species = species
-        self.property = property
+        self.target = target
         self.deterministic = deterministic
         self.value = value
         self.model = model
@@ -121,8 +116,6 @@ class BoundaryCondition():
         :returns: A string representation of the boundary condition.
         :rtype: str
         """
-        if self.species is not None and self.property is not None:
-            raise BoundaryConditionError("Can not set both species and property")
         if self.value is None:
             raise BoundaryConditionError("Must set value")
         cond=[]
@@ -143,23 +136,23 @@ class BoundaryCondition():
         if len(cond)==0:
             raise BoundaryConditionError('need at least one condition on the BoundaryCondition')
         bcstr = "if(" + '&&'.join(cond) + "){"
-        if self.species is not None:
+        if self.target in self.model.listOfSpecies:
             if self.deterministic:
-                s_ndx = self.model.species_map[self.model.listOfSpecies[self.species]]
+                s_ndx = self.model.species_map[self.model.listOfSpecies[self.target]]
                 bcstr += f"me->C[{s_ndx}] = {self.value};"
             else:
                 raise BoundaryConditionError(
                     "BoundaryConditions don't work for stochastic species yet."
                 )
-        elif self.property is not None:
-            if self.property == 'v':
+        elif self.target is not None:
+            if self.target == 'v':
                 for i in range(3):
                     bcstr+= f"me->v[{i}]={self.value[i]};"
-            elif self.property == 'nu':
+            elif self.target == 'nu':
                 bcstr += f"me->nu={self.value};"
-            elif self.property == 'rho':
+            elif self.target == 'rho':
                 bcstr += f"me->rho={self.value};"
             else:
-                raise BoundaryConditionError(f"Unable handle boundary condition for property '{self.property}'")
+                raise BoundaryConditionError(f"Unable handle boundary condition for property '{self.target}'")
         bcstr+= "}"
         return bcstr
