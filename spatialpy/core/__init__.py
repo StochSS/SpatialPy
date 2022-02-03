@@ -20,8 +20,8 @@ import logging
 from spatialpy.__version__ import __version__
 from .boundarycondition import *
 from .cleanup import *
-from .DataFunction import *
-from .Domain import *
+from .datafunction import *
+from .domain import *
 from .Geometry import *
 from .InitialCondition import *
 from .Model import *
