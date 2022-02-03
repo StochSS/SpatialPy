@@ -18,7 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from spatialpy.core.spatialpyError import DataFunctionError
 
 class DataFunction():
-    """ Abstract class used to constuct the data function. """
+    """
+    Abstract class used to constuct the data function.
+
+    :param name: Name of the Data Function.
+    :type name: str
+    """
 
     def __init__(self, name=None):
         if name is not None:
@@ -26,19 +31,17 @@ class DataFunction():
         if self.name is None:
             raise DataFunctionError("DataFunction must have a 'name'")
 
-    def map(self, x):
+    def map(self, point):
         """
         This method must be overridden by the DataFunction subclass.
 
-        NOTE: The spatial location is evaulated at t=0 and is not 
+        NOTE: The spatial location is evaulated at t=0 and is not
               reevaluated as the fluid domain moves over time.
 
-        :param x: The x,y,z position
-        :type x: vector of 3 doubles
+        :param point: The x,y,z position
+        :type point: vector of 3 doubles
 
-        :returns: value of function at this spatial location.
+        :returns: Value of function at this spatial location.
         :rtype: float
         """
-        raise DataFunctionError("DataFunction.map() must be implemented.")
-
-
+        raise DataFunctionError(f"{self.name}: DataFunction.map() must be implemented.")

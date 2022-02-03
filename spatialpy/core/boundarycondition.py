@@ -20,57 +20,59 @@ from spatialpy.core.spatialpyError import BoundaryConditionError
 
 
 class BoundaryCondition():
-    """ Set spatial regions of the domain where a property of
-        particles are held constant (updated each simulation step)
-
-        Conditions (one or more of the following must be set):
-             - xmin, xmax: (float) min or max value in the x dimension
-             - ymin, ymax: (float) min or max value in the y dimension
-             - zmin, zmax: (float) min or max value in the z dimension
-             - type_id: type (subdomain) of the partciles
-        Targets (one of the following must be set):
-            property: (str), 'nu', 'rho','v'
-            species: (str) name of a chemical species.
-                       Must also set deterministic=True/False flag.
-
-        :param xmin: x-axis coordinate lower bound of **condition**
-        :type xmin: float
-
-        :param xmax: x-axis coordinate upper bound of **condition**
-        :type xmax: float
-
-        :param ymin: y-axis coordinate lower bound of **condition**
-        :type ymin: float
-
-        :param ymax: y-axis coordinate upper bound of **condition**
-        :type ymax: float
-
-        :param zmin: z-axis coordinate lower bound of **condition**
-        :type zmin: float
-
-        :param zmax: z-axis coordinate upper bound of **condition**
-        :type zmax: float
-
-        :param typeid: Set **condition** to particle type id
-        :type typeid: int
-
-        :param species: Set **target** of boundary condition to target Species. \
-        If set, determinstic must also be set to True/False.
-        :type species: str
-
-        :param deterministic: **Must be set if target is Species.** Set True if boundary condition target is species \
-        and applies to deterministic simulation. **BoundaryCondition not yet implemeneted for Stochastic Species**.
-        :type deterministic: bool
-
-        :param property: Set **target** to properties, can be 'nu' 'rho' or 'v'
-        :type property: str
-
-        :param value: Value property will take in region defined by the conditions
-        :type value: float or float[3]
-
-        :param model: Target model of boundary condition
-        :type model: spatialpy.Model.Model
     """
+    Set spatial regions of the domain where a property of
+    particles are held constant (updated each simulation step)
+
+    Conditions (one or more of the following must be set):
+         - xmin, xmax: (float) min or max value in the x dimension
+         - ymin, ymax: (float) min or max value in the y dimension
+         - zmin, zmax: (float) min or max value in the z dimension
+         - type_id: type (subdomain) of the partciles
+    Targets (one of the following must be set):
+        property: (str), 'nu', 'rho','v'
+        species: (str) name of a chemical species.
+                   Must also set deterministic=True/False flag.
+
+    :param xmin: x-axis coordinate lower bound of **condition**
+    :type xmin: float
+
+    :param xmax: x-axis coordinate upper bound of **condition**
+    :type xmax: float
+
+    :param ymin: y-axis coordinate lower bound of **condition**
+    :type ymin: float
+
+    :param ymax: y-axis coordinate upper bound of **condition**
+    :type ymax: float
+
+    :param zmin: z-axis coordinate lower bound of **condition**
+    :type zmin: float
+
+    :param zmax: z-axis coordinate upper bound of **condition**
+    :type zmax: float
+
+    :param typeid: Set **condition** to particle type id
+    :type typeid: int
+
+    :param species: Set **target** of boundary condition to target Species. \
+    If set, determinstic must also be set to True/False.
+    :type species: str
+
+    :param deterministic: **Must be set if target is Species.** Set True if boundary condition target is species \
+    and applies to deterministic simulation. **BoundaryCondition not yet implemeneted for Stochastic Species**.
+    :type deterministic: bool
+
+    :param property: Set **target** to properties, can be 'nu' 'rho' or 'v'
+    :type property: str
+
+    :param value: Value property will take in region defined by the conditions
+    :type value: float or float[3]
+
+    :param model: Target model of boundary condition
+    :type model: spatialpy.Model.Model
+    """
+
     def __init__(self, xmin=None, xmax=None, ymin=None, ymax=None, zmin=None, zmax=None, type_id=None,
                  species=None, deterministic=True, property=None, value=None, model=None):
 
@@ -92,6 +94,7 @@ class BoundaryCondition():
         """
         Creates evaluable string expression of boundary condition.
 
+        :returns: TODO
         :rtype: str
         """
         if self.species is not None and self.property is not None:
