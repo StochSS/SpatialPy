@@ -237,14 +237,14 @@ def export(model, path=None, return_stochss_model=False):
 
     __add_domain(model=s_model, domain=model.domain)
     s_model['domain']['static'] = model.staticDomain
-    __add_types(model=s_model, types=model.listOfTypeIDs)
+    __add_types(model=s_model, types=model.domain.listOfTypeIDs)
     __add_boundary_conditions(model=s_model, boundary_conditions=model.listOfBoundaryConditions)
-    __add_species(model=s_model, species=model.get_all_species(), types=model.listOfTypeIDs,
+    __add_species(model=s_model, species=model.get_all_species(), types=model.domain.listOfTypeIDs,
                   diffusion_restrictions=model.listOfDiffusionRestrictions)
-    __add_initial_conditions(model=s_model, types=model.listOfTypeIDs,
+    __add_initial_conditions(model=s_model, types=model.domain.listOfTypeIDs,
                              initial_conditions=model.listOfInitialConditions)
     __add_parameters(model=s_model, parameters=model.get_all_parameters())
-    __add_reactions(model=s_model, reactions=model.get_all_reactions(), types=model.listOfTypeIDs)
+    __add_reactions(model=s_model, reactions=model.get_all_reactions(), types=model.domain.listOfTypeIDs)
 
     if return_stochss_model:
         return s_model

@@ -18,6 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #This module defines a model that simulates a discrete, stoachastic, mixed biochemical reaction network in python.
 
+# TODO
+# add '_' to get_expression_utility
+
 import numpy
 import scipy
 import warnings
@@ -88,7 +91,6 @@ class Model():
 
         ######################
         self.domain = None
-        self.listOfTypeIDs = [1] # starts with type '1'
         self.listOfDiffusionRestrictions = {}
         self.listOfDataFunctions = []
         self.listOfInitialConditions = []
@@ -492,58 +494,6 @@ class Model():
 
 
 
-    def set_type(self, geometry_ivar, type_id, vol=None, mass=None, nu=None, rho=None, c=None, fixed=False):
-        """ Add a type definition to the model.  By default, all regions are set to
-        type 0. Returns the number of domain points that were tagged with this type_id
-
-            :param geometry_ivar: an instance of a 'spatialpy.Geometry' subclass.  The 'inside()' method
-                       of this object will be used to assign type_id to points.
-            :type geometry_ivar: spatialpy.Geometry.Geometry
-            :param type_id: (usually an int) the identifier for this type
-            :type type_id: int
-            :param vol: The volume of each particle in the type
-            :type vol: float
-            :param mass: The mass of each particle in the type
-            :type mass: float
-            :param rho: The density of each particle in the type
-            :type rho: float
-            :param nu: The viscosity of each particle in the type
-            :type nu: float
-            :param c: The artificial speed of sound of each particle in the type
-            :type c: float
-            :param fixed: Are the particles in this type immobile
-            :type fixed: bool
-
-            :rtype: int
-        """
-
-        if self.domain is None:
-            raise Exception("SpatialPy models must have a domain before types can be attached")
-        if type_id not in self.listOfTypeIDs:
-            # index is the "particle type", value is the "type ID"
-            self.listOfTypeIDs.append(type_id)
-        # apply the type to all points, set type for any points that match
-        count = 0
-        on_boundary = self.domain.find_boundary_points()
-        for v_ndx in range(self.domain.get_num_voxels()):
-            if geometry_ivar.inside( self.domain.coordinates()[v_ndx,:], on_boundary[v_ndx]):
-                self.domain.type[v_ndx] = type_id
-                if vol is not None:
-                    self.domain.vol[v_ndx] = vol
-                if mass is not None:
-                    self.domain.mass[v_ndx] = mass
-                if rho is not None:
-                    self.domain.rho[v_ndx] = rho
-                if nu is not None:
-                    self.domain.nu[v_ndx] = nu
-                if c is not None:
-                    self.domain.c[v_ndx] = c
-                self.domain.fixed[v_ndx] = fixed
-                count +=1
-        if count == 0:
-            warnings.warn("Type with type_id={0} has zero particles in it".format(type_id))
-        return count
-
     def restrict(self, species, listOfTypes):
         """ Set the diffusion coefficient to zero for 'species' in all types not in
             'listOfTypes'. This effectively restricts the movement of 'species' to
@@ -574,7 +524,6 @@ class Model():
             raise ModelError("Unexpected parameter for add_domain. Parameter must be a Domain.")
 
         self.domain = domain
-        self.listOfTypeIDs = list(set(domain.type))
 
     def add_data_function(self, data_function):
         """ Add a scalar spatial function to the simulation. This is useful if you have a

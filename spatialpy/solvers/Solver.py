@@ -297,7 +297,7 @@ class Solver:
         """ Generate the C propensity file that is used to compile the solvers.
         """
 
-        num_types = len(self.model.listOfTypeIDs)
+        num_types = len(self.model.domain.listOfTypeIDs)
         if self.model.enable_pde:
             num_chem_species = len(self.model.listOfSpecies)
             num_chem_rxns = len(self.model.listOfReactions)
@@ -543,7 +543,7 @@ class Solver:
                 outstr += '"'+s+'"'
             outstr += ", 0};"
             input_constants += outstr + "\n"
-        num_types = len(self.model.listOfTypeIDs)
+        num_types = len(self.model.domain.listOfTypeIDs)
         outstr = "const int input_num_subdomain = {0};".format(num_types)
         input_constants += outstr + "\n"
         outstr = "const double input_subdomain_diffusion_matrix[{0}] = ".format(
@@ -551,7 +551,7 @@ class Solver:
         outstr += "{"
         for i, sname in enumerate(self.model.listOfSpecies.keys()):
             s = self.model.listOfSpecies[sname]
-            for j, sd_id in enumerate(self.model.listOfTypeIDs):
+            for j, sd_id in enumerate(self.model.domain.listOfTypeIDs):
                 if i+j > 0:
                     outstr += ','
                 try:
