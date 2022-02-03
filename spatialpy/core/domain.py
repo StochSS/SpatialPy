@@ -25,6 +25,7 @@ import numpy
 from plotly.offline import init_notebook_mode, iplot
 from scipy.spatial import KDTree
 
+from spatialpy.core import log
 from spatialpy.core.spatialpyError import DomainError
 
 class Domain():
@@ -35,22 +36,22 @@ class Domain():
     :type numpoints: int
 
     :param xlim: Range of domain along x-axis
-    :type xmax: tuple(float)
+    :type xlim: tuple(float)
 
     :param ylim: Range of domain along y-axis
-    :type ymin: tuple(float)
+    :type ylim: tuple(float)
 
     :param zlim: Range of domain along z-axis
-    :type ymax: tuple(float)
+    :type zlim: tuple(float)
 
     :param rho: Background density for the system
-    :type zmin: float
+    :type rho: float
 
     :param c0: Speed of sound for the system
-    :type zmax: float
+    :type c0: float
 
     :param P0: Background pressure for the system
-    :type typeid: float
+    :type P0: float
 
     :param gravity: Acceleration of gravity for the system.
     :type species: float
@@ -72,10 +73,11 @@ class Domain():
         self.c = numpy.zeros((numpoints), dtype=float)
         self.rho = numpy.zeros((numpoints), dtype=float)
         self.fixed = numpy.zeros((numpoints), dtype=bool)
+        self.listOfTypeIDs = [1] # starts with type '1'
 
         self.rho0 = rho0
         self.c0 = c0
-        if P0 != None:
+        if P0 is not None:
             self.P0 = P0
         else:
             self.P0 = rho0 * c0**2 # assume gamma of 1, full equation is rho0*c0**2/gamma
@@ -101,7 +103,7 @@ class Domain():
     def _ipython_display_(self, use_matplotlib=False):
         self.plot_types(width="auto", height="auto", use_matplotlib=use_matplotlib)
 
-    def add_point(self, point, vol, mass, type_id, nu, fixed, rho=None, c=0):
+    def add_point(self, point, vol=0, mass=0, type_id=0, nu=0, fixed=False, rho=None, c=0):
         """
         Add a single point particle to the domain space.
 
@@ -133,6 +135,10 @@ class Domain():
         if vol < 0:
             raise DomainError("Volume must be a positive value.")
 
+        if type_id not in self.listOfTypeIDs:
+            # index is the "particle type", value is the "type ID"
+            self.listOfTypeIDs.append(type_id)
+
         if rho is None:
             rho = mass / vol
 
@@ -145,6 +151,116 @@ class Domain():
         self.fixed = numpy.append(self.fixed, fixed)
 
         self.vertices = numpy.append(self.vertices, [point], axis=0)
+
+    def set_properties(self, geometry_ivar, type_id, vol=None, mass=None, nu=None, rho=None, c=None, fixed=False):
+        """
+        Add a type definition to the domain. By default, all regions are set to type 0.
+
+        :param geometry_ivar: an instance of a 'spatialpy.Geometry' subclass.  The 'inside()' method
+                   of this object will be used to assign properties to points.
+        :type geometry_ivar: spatialpy.Geometry.Geometry
+
+        :param type_id: The identifier for this type.
+        :type type_id: int
+
+        :param vol: The volume of each particle in the type.
+        :type vol: float
+
+        :param mass: The mass of each particle in the type.
+        :type mass: float
+
+        :param rho: The density of each particle in the type.
+        :type rho: float
+
+        :param nu: The viscosity of each particle in the type.
+        :type nu: float
+
+        :param c: The artificial speed of sound of each particle in the type.
+        :type c: float
+
+        :param fixed: Are the particles in this type immobile.
+        :type fixed: bool
+
+        :returns: The number of particles that were tagged with this type_id.
+        :rtype: int
+        """
+
+        if type_id not in self.listOfTypeIDs:
+            # index is the "particle type", value is the "type ID"
+            self.listOfTypeIDs.append(type_id)
+        # apply the type to all points, set type for any points that match
+        count = 0
+        on_boundary = self.find_boundary_points()
+        for v_ndx in range(self.get_num_voxels()):
+            if geometry_ivar.inside(self.coordinates()[v_ndx, :], on_boundary[v_ndx]):
+                self.type[v_ndx] = type_id
+                if vol is not None:
+                    self.vol[v_ndx] = vol
+                if mass is not None:
+                    self.mass[v_ndx] = mass
+                if rho is not None:
+                    self.rho[v_ndx] = rho
+                if nu is not None:
+                    self.nu[v_ndx] = nu
+                if c is not None:
+                    self.c[v_ndx] = c
+                self.fixed[v_ndx] = fixed
+                count +=1
+        if count == 0:
+            log.warning("Type with type_id={} has zero particles in it", type_id)
+        return count
+
+    def fill_with_particles(self, geometry_ivar, deltax, deltay=None, xmin=None,
+                            xmax=None, ymin=None, ymax=None, **kwargs):
+        """
+        Fill a geometric shape with particles.
+
+        :param geometry_ivar: an instance of a 'spatialpy.Geometry' subclass.  The 'inside()' method
+                   of this object will be used to create add the particles.
+        :type geometry_ivar: spatialpy.geometry.Geometry
+
+        :param deltax: Distance between particles on the x-axis.
+        :type deltax: float
+
+        :param deltay: Distance between particles on the y-axis (defaults to deltax).
+        :type deltay: float
+
+        :param xmin: Minimum x value of the bounding box (defaults to Domain.xlim[0]).
+        :type xmin: float
+
+        :param xmax: Maximum x value of the bounding box (defaults to Domain.xlim[1]).
+        :type xmax: float
+
+        :param ymin: Minimum y value of the bounding box (defaults to Domain.ylim[0]).
+        :type ymin: float
+
+        :param ymax: Maximum y value of the bounding box (defaults to Domain.ylim[1]).
+        :type ymax: float
+
+        :param kwargs: Key word arguments for Domain.add_point.
+        :type kwargs: dict
+
+        :returns: The number of particles that were created within this geometry.
+        :rtype: int
+        """
+        if xmin is None:
+            xmin = self.xlim[0]
+        if xmax is None:
+            xmax = self.xlim[1]
+        if ymin is None:
+            ymin = self.ylim[0]
+        if ymax is None:
+            ymax = self.ylim[1]
+        if deltay is None:
+            deltay = deltax
+
+        count = 0
+        for x in numpy.arange(xmin, xmax + deltax, deltax):
+            for y in numpy.arange(ymin, ymax + deltay, deltay):
+                if geometry_ivar.inside((x, y), False):
+                    self.add_point([x, y, 0], **kwargs)
+                    count += 1
+        return count
 
     def find_boundary_points(self):
         """
@@ -578,6 +694,11 @@ class Domain():
                 try:
                     (ndx, type_id) = line.rstrip().split(',')
                     self.type[int(ndx)] = int(type_id)
+
+                    if type_id not in self.listOfTypeIDs:
+                        # index is the "particle type", value is the "type ID"
+                        self.listOfTypeIDs.append(type_id)
+
                 except ValueError as err:
                     raise DomainError(f"Could not read in subdomain file, error on line {lnum}: {line}") from err
 
@@ -608,6 +729,10 @@ class Domain():
                 c = 0 if "c" not in particle.keys() else particle['c']
                 obj.add_point(particle['point'], particle['volume'], particle['mass'],
                               particle['type'], particle['nu'], particle['fixed'], rho=rho, c=c)
+
+                if particle['type'] not in obj.listOfTypeIDs:
+                    # index is the "particle type", value is the "type ID"
+                    obj.listOfTypeIDs.append(particle['type'])
 
             return obj
         except KeyError as err:
@@ -670,6 +795,9 @@ class Domain():
         # Create domain object
         numberparticles = nx * ny * nz
         obj = Domain(numberparticles, xlim, ylim, zlim, **kwargs)
+        if type_id not in obj.listOfTypeIDs:
+            # index is the "particle type", value is the "type ID"
+            obj.listOfTypeIDs.append(type_id)
         # Vertices
         obj.vertices = numpy.zeros((numberparticles, 3), dtype=float)
         x_list = numpy.linspace(xlim[0], xlim[1], nx)
@@ -749,6 +877,9 @@ class Domain():
         # Create domain object
         numberparticles = nx * ny
         obj = Domain(numberparticles, xlim, ylim, (0, 0), **kwargs)
+        if type_id not in obj.listOfTypeIDs:
+            # index is the "particle type", value is the "type ID"
+            obj.listOfTypeIDs.append(type_id)
         # Vertices
         obj.vertices = numpy.zeros((int(nx) * int(ny), 3), dtype=float)
         x_list = numpy.linspace(xlim[0], xlim[1], nx)
