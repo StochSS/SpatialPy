@@ -464,10 +464,11 @@ class Model():
         # array of step numbers corresponding to the simulation times in the timespan
         output_steps = numpy.arange(0, self.num_timesteps + self.timestep_size, self.output_freq)
         self.output_steps = numpy.unique(numpy.round(output_steps).astype(int))
-        sim_steps = numpy.arange(0, self.num_timesteps + self.timestep_size, self.timestep_size)
         self.tspan = numpy.zeros((self.output_steps.size), dtype=float)
         for i, step in enumerate(self.output_steps):
-            self.tspan[i] = sim_steps[step]
+            #TODO: review conflict resolution here
+            self.tspan[i] = step*self.timestep_size  # changed in this branch
+            #self.tspan[i] = sim_steps[step]         # changed in other branch
 
     def timespan(self, time_span, timestep_size=None):
         """

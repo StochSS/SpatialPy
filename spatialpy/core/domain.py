@@ -55,7 +55,7 @@ class Domain():
     :param gravity: Acceleration of gravity for the system.
     :type species: float
     """
-    def __init__(self, numpoints, xlim, ylim, zlim, rho0=1.0, c0=10, P0=10, gravity=None):
+    def __init__(self, numpoints, xlim, ylim, zlim, rho0=1.0, c0=10, P0=None, gravity=None):
         self.vertices = numpy.zeros((numpoints, 3), dtype=float)
         self.triangles = None
         self.tetrahedrons = None
@@ -75,7 +75,10 @@ class Domain():
 
         self.rho0 = rho0
         self.c0 = c0
-        self.P0 = P0
+        if P0 != None:
+            self.P0 = P0
+        else:
+            self.P0 = rho0 * c0**2 # assume gamma of 1, full equation is rho0*c0**2/gamma
         self.gravity = gravity
 
         self.xlim = xlim
