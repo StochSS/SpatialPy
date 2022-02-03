@@ -28,8 +28,8 @@ from collections import OrderedDict
 from spatialpy.core.Species import Species
 from spatialpy.core.Parameter import Parameter
 from spatialpy.core.Reaction import Reaction
-from spatialpy.core.DataFunction import DataFunction
-from spatialpy.core.Domain import Domain
+from spatialpy.core.datafunction import DataFunction
+from spatialpy.core.domain import Domain
 from spatialpy.solvers.Solver import Solver
 from spatialpy.solvers.build.expression import Expression
 
