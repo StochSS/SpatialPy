@@ -55,7 +55,6 @@ class Domain():
     :param gravity: Acceleration of gravity for the system.
     :type species: float
     """
-
     def __init__(self, numpoints, xlim, ylim, zlim, rho0=1.0, c0=10, P0=10, gravity=None):
         self.vertices = numpy.zeros((numpoints, 3), dtype=float)
         self.triangles = None
@@ -176,7 +175,6 @@ class Domain():
             for vertex in boundary_points:
                 self.on_boundary[vertex] = True
         return self.on_boundary
-
 
     def get_domain_size(self):
         """
@@ -508,7 +506,6 @@ class Domain():
         # return model ref
         return obj
 
-
     @classmethod
     def import_meshio_object(cls, mesh_obj):
         """
@@ -612,7 +609,6 @@ class Domain():
             return obj
         except KeyError as err:
             raise DomainError("The file is not a StochSS Domain (.domn) or a StochSS Spatial Model (.smdl).") from err
-
 
     @classmethod
     def create_3D_domain(cls, xlim, ylim, zlim, nx, ny, nz, type_id=1, mass=1.0,
