@@ -22,7 +22,6 @@ import xml.etree.ElementTree as ET
 from itertools import combinations
 
 import numpy
-import matplotlib.pyplot as plt
 from plotly.offline import init_notebook_mode, iplot
 from scipy.spatial import KDTree
 
@@ -395,6 +394,8 @@ class Domain():
             self.dimensions = 3
 
         if use_matplotlib:
+            import matplotlib.pyplot as plt # pylint: disable=import-outside-toplevel
+
             if included_types_list is None:
                 coords = self.vertices
                 type_list = self.type
