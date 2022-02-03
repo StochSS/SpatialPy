@@ -146,7 +146,10 @@ class Domain():
 
     def find_boundary_points(self):
         """
-        TODO: Need documentation
+        Find all vertices that exist on boundary.
+
+        :returns: A numpy array indexed by vertices, True for boundary points, else false.
+        :rtype: np.ndarray(dtype=bool)
         """
         if self.on_boundary is None:
             self.on_boundary = numpy.zeros((self.get_num_voxels()), dtype=bool)
@@ -181,7 +184,7 @@ class Domain():
         diameters of the circumradius of the tetrahedrons that vertex
         is a part of.
 
-        :returns: TODO
+        :returns: a numpy array containing the mean for each vertex based on all incident cells
         :rtype: numpy.array
         """
         if self.domain_size is None:
@@ -223,7 +226,7 @@ class Domain():
         :param end: Ending point
         :type end: tuple(float, float, float) or tuple(float, float)
 
-        :returns: TODO
+        :returns: a distance measurement between start and end point
         :rtype: float
         """
         return numpy.linalg.norm(self.vertices[start, :] - self.vertices[end, :])
@@ -235,7 +238,7 @@ class Domain():
         :param point: Target source point
         :type point: tuple(float, float, float) or tuple(float, float)
 
-        :returns: TODO
+        :returns: The coordinates of the nearest vertex to the source point.
         :rtype: tuple(float, float, float) or tuple(float, float)
         """
         min_dist = None

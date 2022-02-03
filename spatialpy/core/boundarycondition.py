@@ -94,7 +94,7 @@ class BoundaryCondition():
         """
         Creates evaluable string expression of boundary condition.
 
-        :returns: TODO
+        :returns: A string representation of the boundary condition.
         :rtype: str
         """
         if self.species is not None and self.property is not None:
