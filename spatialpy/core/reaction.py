@@ -29,23 +29,29 @@ class Reaction():
     Parameter dictionaries.  For mass-action, zeroth, first \
     and second order reactions are supported, attempting to used higher orders will result in an error.
 
-    :param name: String that the model is referenced by
+    :param name: String that the model is referenced by.
     :type name: str
-    :param parameters: A list of parameter instances
-    :type parameters: list(spatialpy.Model.Parameter)
-    :param propensity_function: String with the expression for the reaction's propensity
-    :type propensity_function: str
+
     :param reactants: Dictionary of {species:stoichiometry} of reaction reactants
     :type reactants: dict
+
     :param products: Dictionary of {species:stoichiometry} of reaction products
     :type products: dict
-    :param annotation: Description of the reaction (meta)
-    :type annotation: str
+
+    :param propensity_function: String with the expression for the reaction's propensity
+    :type propensity_function: str
+
     :param rate: if mass action, rate is a reference to a parameter instance.
     :type rate: spatialpy.model.Parameter
-    """
 
-    def __init__(self, name="", reactants={}, products={}, propensity_function=None, rate=None, annotation=None, restrict_to=None):
+    :param annotation: Description of the reaction (meta)
+    :type annotation: str
+
+    :param restrict_to: TODO
+    :type restrict_to: int or list of ints
+    """
+    def __init__(self, name="", reactants=None, products=None, propensity_function=None,
+                 rate=None, annotation=None, restrict_to=None):
 
         if not isinstance(name, str) and name is not None:
             raise ReactionError("Reaction name must be of type str.")
@@ -53,25 +59,26 @@ class Reaction():
             self.name = f'rxn{uuid.uuid4()}'.replace('-', '_')
         else:
             self.name = name
-        
-        if not isinstance(reactants, dict):
+
+        if not (reactants is None or isinstance(reactants, dict)):
             raise ReactionError("Reaction reactants must be of type dict.")
-        self.reactants = reactants
-        
-        if not isinstance(products, dict):
+        self.reactants = {} if reactants is None else reactants
+
+        if not (products is None or isinstance(products, dict)):
             raise ReactionError("Reaction products must be of type dict.")
-        self.products = products
+        self.products = {} if products is None else products
 
         if not (isinstance(propensity_function, (str, int, float)) or propensity_function is None):
-            raise ReactionError("Reaction propensity_function must be one of the following types: str, int, float, or None.")
+            message = "Reaction propensity_function must be one of the following types: str, int, float, or None."
+            raise ReactionError(message)
         if isinstance(propensity_function, (int, float)):
             self.propensity_function = str(propensity_function)
         else:
             self.propensity_function = propensity_function
 
-        if not (isinstance(rate, (str, int, float)) or rate is None or \
-                                isinstance(rate, Parameter) or type(rate).__name__ == 'Parameter'):
-            raise ReactionError("Reaction rate must be one of the following types: spatialpy.Parameter, str, int, float, or None.")
+        if not (isinstance(rate, (Parameter, str, int, float)) or rate is None or type(rate).__name__ == 'Parameter'):
+            message = "Reaction rate must be one of the following types: spatialpy.Parameter, str, int, float, or None."
+            raise ReactionError(message)
         if isinstance(rate, (int, float)):
             self.rate = str(rate)
         else:
@@ -85,18 +92,21 @@ class Reaction():
             errmsg = f"Reaction {self.name}: restrict_to must be an integer or list of integers."
             raise ReactionError(errmsg)
 
+        self.type = None
+        self.marate = None
+        self.massaction = None
+        self.ode_propensity_function = None
         self.annotation = annotation
-        
 
     def __str__(self):
         print_string = f"{self.name}, Active in: {str(self.restrict_to)}"
         if len(self.reactants):
-            print_string += f"\n\tReactants"
+            print_string += "\n\tReactants"
             for species, stoichiometry in self.reactants.items():
                 name = species if isinstance(species, str) else species.name
                 print_string += f"\n\t\t{name}: {stoichiometry}"
         if len(self.products):
-            print_string += f"\n\tProducts"
+            print_string += "\n\tProducts"
             for species, stoichiometry in self.products.items():
                 name = species if isinstance(species, str) else species.name
                 print_string += f"\n\t\t{name}: {stoichiometry}"
@@ -114,8 +124,8 @@ class Reaction():
         but should then use a custom propensity.
         """
         total_stoch = 0
-        for r in self.reactants:
-            total_stoch += self.reactants[r]
+        for reactant in self.reactants:
+            total_stoch += self.reactants[reactant]
         if total_stoch > 2:
             raise ReactionError(
                       """Reaction: A mass-action reaction cannot involve more than two of one species or one "
@@ -129,7 +139,7 @@ class Reaction():
         rtype = type(self.rate).__name__
         if rtype == 'Parameter':
             self.marate = self.rate.name
-        elif rtype == 'int' or rtype == 'float':
+        elif rtype in ('int', 'float'):
             self.marate = str(self.rate)
         else:
             self.marate = self.rate
@@ -138,15 +148,15 @@ class Reaction():
         ode_propensity_function = self.marate
 
         # There are only three ways to get 'total_stoch==2':
-        for r in self.reactants:
+        for reactant in self.reactants:
             # Case 1: 2X -> Y
-            if self.reactants[r] == 2:
-                propensity_function = "0.5 * {0} * {1} * ({1} - 1) / vol".format(propensity_function, r.name)
-                ode_propensity_function += " * {0} * {0}".format(r.name)
+            if self.reactants[reactant] == 2:
+                propensity_function = f"0.5 * {propensity_function} * {reactant.name} * ({reactant.name} - 1) / vol"
+                ode_propensity_function += f" * {reactant.name} * {reactant.name}"
             else:
                 # Case 3: X1, X2 -> Y;
-                propensity_function += f" * {r.name}"
-                ode_propensity_function += f" * {r.name}"
+                propensity_function += f" * {reactant.name}"
+                ode_propensity_function += f" * {reactant.name}"
 
         # Set the volume dependency based on order.
         order = len(self.reactants)
@@ -158,36 +168,38 @@ class Reaction():
         self.propensity_function = propensity_function
         self.ode_propensity_function = ode_propensity_function
 
-    def add_product(self, S, stoichiometry):
+    def add_product(self, species, stoichiometry):
         """
         Add a product to this reaction
 
         :param S: Species object to be produced by the reaction
         :type S: spatialpy.Model.Species
+
         :param stoichiometry: Stoichiometry of this product.
         :type stoichiometry: int
         """
-        if not (isinstance(S, (str, Species)) or type(S).__name__ == 'Species'):
-            raise ReactionError("S must be of type string or SpatialPy.Species. ")
+        if not (isinstance(species, (str, Species)) or type(species).__name__ == 'Species'):
+            raise ReactionError("species must be of type string or SpatialPy.Species. ")
         if not isinstance(stoichiometry, int) or stoichiometry <= 0:
             raise ReactionError("Stoichiometry must be a positive integer.")
-        name = S if isinstance(S, str) else S.name
+        name = species if isinstance(species, str) else species.name
         self.products[name] = stoichiometry
 
-    def add_reactant(self, S, stoichiometry):
+    def add_reactant(self, species, stoichiometry):
         """
         Add a reactant to this reaction
-            
-        :param S: reactant Species object
-        :type S: spatialpy.Model.Species
+
+        :param species: reactant Species object
+        :type species: spatialpy.Model.Species
+
         :param stoichiometry: Stoichiometry of this participant reactant
         :type stoichiometry: int
         """
-        if not (isinstance(S, (str, Species)) or type(S).__name__ == 'Species'):
-            raise ReactionError(f"S must be of type string or SpatialPy.Species. ")
+        if not (isinstance(species, (str, Species)) or type(species).__name__ == 'Species'):
+            raise ReactionError("Species must be of type string or spatialpy.Species. ")
         if not isinstance(stoichiometry, int) or stoichiometry <= 0:
-            raise ReactionError(f"stoichiometry must be a positive integer.")
-        name = S if isinstance(S, str) else S.name
+            raise ReactionError("Stoichiometry must be a positive integer.")
+        name = species if isinstance(species, str) else species.name
         self.reactants[name] = stoichiometry
 
     def annotate(self, annotation):
@@ -200,59 +212,60 @@ class Reaction():
         if annotation is None:
             raise ReactionError("Annotation cannot be None.")
         self.annotation = annotation
-    
+
     def initialize(self, model):
         """
         Defered object initialization, called by model.add_reaction().
+
+        :param model: TODO
+        :type model: spatialpy.Model
         """
         self.ode_propensity_function = self.propensity_function
 
         if self.propensity_function is None:
             if self.rate is None:
-                errmsg = f"Reaction {self.name}: You must either set the reaction to be mass-action or specifiy a propensity function."
+                errmsg = f"Reaction {self.name}: You must either set the reaction to be "
+                errmsg += "mass-action or specifiy a propensity function."
                 raise ReactionError(errmsg)
             self.massaction = True
         else:
             if self.rate is not None:
-                errmsg = f"Reaction {self.name}: You cannot set the propensity type to mass-action and simultaneously set a propensity function."
+                errmsg = f"Reaction {self.name}: You cannot set the propensity type to mass-action "
+                errmsg += "and simultaneously set a propensity function."
                 raise ReactionError(errmsg)
             # If they don't give us a propensity function and do give a rate, assume mass-action.
             self.massaction = False
             self.marate = None
 
-
         reactants = self.reactants
         self.reactants = {}
         if reactants is not None:
-            for r in reactants:
-                rtype = type(r).__name__
+            for reactant in reactants:
+                rtype = type(reactant).__name__
                 if rtype=='Species':
-                    if r.name not in model.listOfSpecies:
-                        raise ReactionError(f"Could not find species '{r.name}' in model.")
-                    self.reactants[r] = reactants[r]
+                    if reactant.name not in model.listOfSpecies:
+                        raise ReactionError(f"Could not find species '{reactant.name}' in model.")
+                    self.reactants[reactant] = reactants[reactant]
                 elif rtype=='str':
-                    if r not in model.listOfSpecies:
-                        raise ReactionError(f"Could not find species '{r}' in model.")
-                    self.reactants[model.listOfSpecies[r]] = reactants[r]
+                    if reactant not in model.listOfSpecies:
+                        raise ReactionError(f"Could not find species '{reactant}' in model.")
+                    self.reactants[model.listOfSpecies[reactant]] = reactants[reactant]
 
         products = self.products
         self.products = {}
         if products is not None:
-            for p in products:
-                rtype = type(p).__name__
+            for product in products:
+                rtype = type(product).__name__
                 if rtype=='Species':
-                    if p.name not in model.listOfSpecies:
-                        raise ReactionError(f"Could not find species '{p.name}' in model.")
-                    self.products[p] = products[p]
+                    if product.name not in model.listOfSpecies:
+                        raise ReactionError(f"Could not find species '{product.name}' in model.")
+                    self.products[product] = products[product]
                 else:
-                    if p not in model.listOfSpecies:
-                        raise ReactionError(f"Could not find species '{p}' in model.")
-                    self.products[model.listOfSpecies[p]] = products[p]
+                    if product not in model.listOfSpecies:
+                        raise ReactionError(f"Could not find species '{product}' in model.")
+                    self.products[model.listOfSpecies[product]] = products[product]
 
         if self.massaction:
             self._create_mass_action()
         else:
             self.type = "customized"
-
-
-    
