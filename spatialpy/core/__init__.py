@@ -22,8 +22,8 @@ from .boundarycondition import *
 from .cleanup import *
 from .datafunction import *
 from .domain import *
-from .Geometry import *
-from .InitialCondition import *
+from .geometry import *
+from .initialcondition import *
 from .Model import *
 from .Parameter import *
 from .Reaction import *
