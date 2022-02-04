@@ -17,8 +17,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 import uuid
 
-from spatialpy.core.Species import Species
-from spatialpy.core.Parameter import Parameter
+from spatialpy.core.species import Species
+from spatialpy.core.parameter import Parameter
 from spatialpy.core.spatialpyError import ReactionError
 
 class Reaction():

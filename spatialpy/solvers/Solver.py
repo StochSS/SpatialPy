@@ -124,8 +124,14 @@ class Solver:
         if self.model.output_freq < self.model.timestep_size:
             raise ModelError("Timestep size exceeds output frequency.")
 
+        # Make sure all paramters are evaluated to scalars before we write them to the file.
+        self.model._resolve_parameters()
+        
+        # Update the models diffusion restrictions
+        self.model._update_diffusion_restrictions()
+
         # Create the models expression utility
-        self.model.get_expression_utility()
+        self.model._get_expression_utility()
 
         # Create a unique directory each time call to compile.
         self.build_dir = tempfile.mkdtemp(
@@ -325,8 +331,6 @@ class Solver:
         propfilestr = propfilestr.replace(
             "__NUMBER_OF_VOXELS__", str(self.model.domain.get_num_voxels()))
 
-        # Make sure all paramters are evaluated to scalars before we write them to the file.
-        self.model._resolve_parameters()
         sanitized_parameters = self.model.sanitized_parameter_names()
         parameters = ""
         for pname in self.model.listOfParameters:

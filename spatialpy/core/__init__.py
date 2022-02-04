@@ -26,7 +26,7 @@ from .geometry import *
 from .initialcondition import *
 from .Model import *
 from .parameter import *
-from .Reaction import *
+from .reaction import *
 from .Result import *
 from .spatialpyError import *
 from .species import *

@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from spatialpy.core.Model import Model
-from spatialpy.core.Species import Species
+from spatialpy.core.species import Species
 from spatialpy.core.spatialpyError import BoundaryConditionError
 
 

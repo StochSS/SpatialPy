@@ -18,9 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #This module defines a model that simulates a discrete, stoachastic, mixed biochemical reaction network in python.
 
-# TODO
-# add '_' to get_expression_utility
-
 import numpy
 import scipy
 import warnings
@@ -28,9 +25,9 @@ import math
 import uuid
 from collections import OrderedDict
 
-from spatialpy.core.Species import Species
-from spatialpy.core.Parameter import Parameter
-from spatialpy.core.Reaction import Reaction
+from spatialpy.core.species import Species
+from spatialpy.core.parameter import Parameter
+from spatialpy.core.reaction import Reaction
 from spatialpy.core.datafunction import DataFunction
 from spatialpy.core.domain import Domain
 from spatialpy.solvers.Solver import Solver
@@ -188,16 +185,7 @@ class Model():
             if special_character in name:
                 return ModelError(f'Name "{name}" is unavailable. Names must not contain special characters: {Model.special_characters}.')
 
-    def _resolve_parameters(self):
-        """
-        Attempt to resolve all parameter expressions to scalar floating point values.
-        Must be called prior to exporting the model.
-        """
-        self.update_namespace()
-        for param in self.listOfParameters:
-            self.listOfParameters[param]._evaluate(self.namespace)
-
-    def get_expression_utility(self):
+    def _get_expression_utility(self):
         """
         Create a new expression.
         """
@@ -209,6 +197,27 @@ class Model():
             **{name: name for name in self.reserved_names}
         }
         self.expr = Expression(namespace=base_namespace, blacklist=["="], sanitize=True)
+
+    def _resolve_parameters(self):
+        """
+        Attempt to resolve all parameter expressions to scalar floating point values.
+        Must be called prior to exporting the model.
+        """
+        self.update_namespace()
+        for param in self.listOfParameters:
+            self.listOfParameters[param]._evaluate(self.namespace)
+
+    def _update_diffusion_restrictions(self):
+        """
+        Attempt to update the list of diffusion restrictions.
+        Must be called prior to exporting the model.
+        """
+        for species in self.listOfSpecies.values():
+            if species not in self.listOfDiffusionRestrictions:
+                if isinstance(species.restrict_to, list):
+                    self.listOfDiffusionRestrictions[species] = species.restrict_to
+                elif isinstance(species.restrict_to, int):
+                    self.listOfDiffusionRestrictions[species] = [species.restrict_to]
 
     def add_species(self, obj):
         """
@@ -228,6 +237,10 @@ class Model():
                 raise problem
             self.species_map[obj] = len(self.listOfSpecies)
             self.listOfSpecies[obj.name] = obj
+            if isinstance(obj.restrict_to, list):
+                self.listOfDiffusionRestrictions[obj] = obj.restrict_to
+            elif isinstance(obj.restrict_to, int):
+                self.listOfDiffusionRestrictions[obj] = [obj.restrict_to]
         else:
             raise ModelError("Unexpected parameter for add_species. Parameter must be Species or list of Species.")
         return obj
@@ -491,27 +504,6 @@ class Model():
             self.set_timesteps(items_diff[0], len(items_diff), timestep_size=timestep_size)
         else:
             raise ModelError("Only uniform timespans are supported")
-
-
-
-    def restrict(self, species, listOfTypes):
-        """ Set the diffusion coefficient to zero for 'species' in all types not in
-            'listOfTypes'. This effectively restricts the movement of 'species' to
-            the types specified in 'listOfTypes'.
-
-            :param species: Target species to restrict
-            :type species: spatialpy.Model.Species
-            :param listOfTypes: a list, each object in the list should be a 'type_id'
-            :type listOfTypes: list(int)
-        """
-        #x = Species()
-        #if not isinstance(species, Species):
-        #if str(type(species)) != 'Species':
-        #    raise ModelError("First argument to restrict() must be a Species object, not {0}".format(str(type(species))))
-        if not isinstance(listOfTypes,list):
-            self.listOfDiffusionRestrictions[species] = [listOfTypes]
-        else:
-            self.listOfDiffusionRestrictions[species] = listOfTypes
 
     def add_domain(self, domain):
         '''
