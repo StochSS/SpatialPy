@@ -206,7 +206,7 @@ class Domain():
                 self.fixed[v_ndx] = fixed
                 count +=1
         if count == 0:
-            from spatialpy.core import log # pylint disable=import-outside-loplevel
+            from spatialpy.core import log # pylint: disable=import-outside-toplevel
             log.warning("Type with type_id={} has zero particles in it", type_id)
         return count
 
