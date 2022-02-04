@@ -29,7 +29,7 @@ from .Parameter import *
 from .Reaction import *
 from .Result import *
 from .spatialpyError import *
-from .Species import *
+from .species import *
 from .VTKReader import *
 
 _formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
