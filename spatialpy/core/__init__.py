@@ -25,7 +25,7 @@ from .domain import *
 from .geometry import *
 from .initialcondition import *
 from .Model import *
-from .Parameter import *
+from .parameter import *
 from .Reaction import *
 from .Result import *
 from .spatialpyError import *

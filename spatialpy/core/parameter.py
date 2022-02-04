@@ -23,16 +23,16 @@ class Parameter():
     A parameter can be given as a String expression (function) or directly as a scalar value.
     If given a String expression, it should be evaluable in the namespace of a parent Model.
 
-    :param name: Name of the Parameter
+    :param name: Name of the Parameter.
     :type name: str
-    :param expression: Mathematical expression of Parameter
+
+    :param expression: Mathematical expression of Parameter.
     :type expression: str
+
     :param value: Parameter as value rather than expression.
     :type value: float
     """
-
     def __init__(self, name=None, expression=None):
-
         if name is None:
             raise ParameterError("name is required for a Parameter.")
         if not isinstance(name, str):
@@ -40,7 +40,7 @@ class Parameter():
 
         if expression is None:
             raise ParameterError("expression is required for a Parameter.")
-        
+
         self.name = name
         self.value = None
         # We allow expression to be passed in as a non-string type. Invalid strings
@@ -55,8 +55,15 @@ class Parameter():
         print_string = f"{self.name}: {str(self.expression)}"
         return print_string
 
-    def _evaluate(self, namespace={}):
-        """ Evaluate the expression and return the (scalar) value """
+    def _evaluate(self, namespace=None):
+        """
+        Evaluate the expression and return the (scalar) value.
+
+        :param namespace: TODO
+        :type namespace: dict
+        """
+        if namespace is None:
+            namespace = {}
         try:
             self.value = (float(eval(self.expression, namespace)))
         except Exception as err:
