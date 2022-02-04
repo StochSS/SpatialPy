@@ -15,24 +15,35 @@ GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-
 import numpy
 
 from spatialpy.core.spatialpyError import InitialConditionError
 
-
 class InitialCondition():
-    """ Class used to defined initial conditions in SpatialPy.
-        SubClasses must implement the 'apply(model)' method, which
-        direction modifies the model.u0[species,voxel] matrix.
     """
-
+    Class used to defined initial conditions in SpatialPy.
+    SubClasses must implement the 'apply(model)' method, which
+    direction modifies the model.u0[species,voxel] matrix.
+    """
     def apply(self, model):
+        """
+        Set the initial condition of the species to the count.
+        """
         raise InitialConditionError("spatialpy.InitialCondition subclasses must implement apply()")
 
-#TODO: implement InitialConditionFromResult()
-
 class PlaceInitialCondition(InitialCondition):
+    """
+    Class used to defined the place initial condition in SpatialPy.
+
+    :param species: The species to set the initial condition.
+    :type species: spayialpy.species.Species
+
+    :param count: The initial condition for the target species.
+    :type count: int
+
+    :param location: X, Y, Z coordinates to place the initial condition.
+    :type location: float[3]
+    """
     def __init__(self, species, count, location):
         self.species = species
         self.count = count
@@ -43,13 +54,34 @@ class PlaceInitialCondition(InitialCondition):
         return print_string
 
     def apply(self, model):
+        """
+        Set the initial condition of the species to the count at the location.
+
+        :param model: Model contianing the target species.
+        :type model: spatialpy.model.Model
+        """
         spec_name = self.species.name
-        for spec_ndx, spec_name in enumerate(model.listOfSpecies.keys()):
-            if model.listOfSpecies[spec_name] == self.species: break
+        spec_ndx = None
+        for index, spec_name in enumerate(model.listOfSpecies.keys()):
+            if model.listOfSpecies[spec_name] == self.species:
+                spec_ndx = index
+                break
         vtx = model.domain.closest_vertex(self.location)
         model.u0[spec_ndx, vtx] += self.count
 
 class UniformInitialCondition(InitialCondition):
+    """
+    Class used to defined the uniform initial condition in SpatialPy.
+
+    :param species: The species to set the initial condition.
+    :type species: spayialpy.species.Species
+
+    :param count: The initial condition for the target species.
+    :type count: int
+
+    :param types: Types of the particles to place the initial condition.
+    :type types: list
+    """
     def __init__(self, species, count, types=None):
         self.species = species
         self.count = count
@@ -60,9 +92,18 @@ class UniformInitialCondition(InitialCondition):
         return print_string
 
     def apply(self, model):
+        """
+        Set 'count' of 'species' in over the list of types (all types if None).
+
+        :param model: Model contianing the target species.
+        :type model: spatialpy.model.Model
+        """
         spec_name = self.species.name
-        for spec_ndx, spec_name in enumerate(model.listOfSpecies.keys()):
-            if model.listOfSpecies[spec_name] == self.species: break
+        spec_ndx = None
+        for index, spec_name in enumerate(model.listOfSpecies.keys()):
+            if model.listOfSpecies[spec_name] == self.species:
+                spec_ndx = index
+                break
 
         if self.types is None:
             nvox = model.domain.get_num_voxels()
@@ -75,10 +116,19 @@ class UniformInitialCondition(InitialCondition):
 
 
 class ScatterInitialCondition(InitialCondition):
+    """
+    Class used to defined the scatter initial condition in SpatialPy.
 
+    :param species: The species to set the initial condition.
+    :type species: spayialpy.species.Species
+
+    :param count: The initial condition for the target species.
+    :type count: int
+
+    :param types: Types of the particles to place the initial condition.
+    :type types: list
+    """
     def __init__(self, species, count, types=None):
-        """ Scatter 'count' of 'species' randomly over the list of types
-            (all types if None)."""
         self.species = species
         self.count = count
         self.types = types
@@ -88,13 +138,22 @@ class ScatterInitialCondition(InitialCondition):
         return print_string
 
     def apply(self, model):
+        """
+        Scatter 'count' of 'species' randomly over the list of types (all types if None).
+
+        :param model: Model contianing the target species.
+        :type model: spatialpy.model.Model
+        """
         spec_name = self.species.name
-        for spec_ndx, spec_name in enumerate(model.listOfSpecies.keys()):
-            if model.listOfSpecies[spec_name] == self.species: break
+        spec_ndx = None
+        for index, spec_name in enumerate(model.listOfSpecies.keys()):
+            if model.listOfSpecies[spec_name] == self.species:
+                spec_ndx = index
+                break
 
         if self.types is None:
             nvox = model.domain.get_num_voxels()
-            for mol in range(self.count):
+            for _ in range(self.count):
                 vtx = numpy.random.randint(0, nvox)
                 model.u0[spec_ndx, vtx] += 1
         else:
@@ -103,8 +162,11 @@ class ScatterInitialCondition(InitialCondition):
                 if model.domain.type[i] in self.types:
                     allowed_voxels.append(i)
             nvox = len(allowed_voxels)
-            if nvox==0: raise InitialConditionError("ScatterInitialCondition has zero voxels to scatter in. Species={0} count={1} types={2}".format(self.species.name, self.count, self.types))
-            for mol in range(self.count):
+            if nvox==0:
+                message = "ScatterInitialCondition has zero voxels to scatter in. "
+                message += f"Species={self.species.name} count={self.count} types={self.types}"
+                raise InitialConditionError(message)
+            for _ in range(self.count):
                 v_ndx = numpy.random.randint(0, nvox)
                 vtx = allowed_voxels[v_ndx]
                 model.u0[spec_ndx, vtx] += 1
