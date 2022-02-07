@@ -27,7 +27,7 @@ from .initialcondition import *
 from .model import *
 from .parameter import *
 from .reaction import *
-from .Result import *
+from .result import *
 from .spatialpyError import *
 from .species import *
 from .VTKReader import *
