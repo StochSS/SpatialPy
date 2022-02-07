@@ -28,7 +28,7 @@ import getpass
 import re
 
 
-from spatialpy.core.Model import *
+from spatialpy.core.model import *
 from spatialpy.core.Result import *
 from spatialpy.core.spatialpyError import *
 

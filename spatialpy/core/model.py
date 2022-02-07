@@ -18,12 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #This module defines a model that simulates a discrete, stoachastic, mixed biochemical reaction network in python.
 
+import math
+from collections import OrderedDict
+
 import numpy
 import scipy
-import warnings
-import math
-import uuid
-from collections import OrderedDict
 
 from spatialpy.core.species import Species
 from spatialpy.core.parameter import Parameter
@@ -33,43 +32,42 @@ from spatialpy.core.domain import Domain
 from spatialpy.solvers.Solver import Solver
 from spatialpy.solvers.build.expression import Expression
 
-from spatialpy.core.spatialpyError import *
-
+from spatialpy.core.spatialpyError import ModelError
 
 def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
     """
     SpatialPy model to StochSS converter
 
-        :param spatailpy_model: SpatialPy model to be converted to StochSS
-        :type spatialpy_model: spatialpy.Model
-        :param filename: Path to the exported stochss model
-        :type filename: str
-        :param return_stochss_model: Whether or not to return the model
-        :type return_stochss_model: bool
+    :param spatailpy_model: SpatialPy model to be converted to StochSS
+    :type spatialpy_model: spatialpy.Model
+
+    :param filename: Path to the exported stochss model
+    :type filename: str
+
+    :param return_stochss_model: Whether or not to return the model
+    :type return_stochss_model: bool
+
+    :returns: TODO
+    :rtype: TODO
     """
     try:
-        from spatialpy.stochss.StochSSexport import export
+        from spatialpy.stochss.StochSSexport import export # pylint: disable=import-outside-toplevel
     except ImportError as err:
         raise ImportError('StochSS export conversion not imported successfully') from err
 
     return export(spatialpy_model, path=filename, return_stochss_model=return_stochss_model)
 
-
 class Model():
-    """ Representation of a spatial biochemical model.
+    """
+    Representation of a spatial biochemical model.
 
-            :param name: Name of the model
-            :type name: str
-
+    :param name: Name of the model
+    :type name: str
     """
     reserved_names = ['vol', 't']
     special_characters = ['[', ']', '+', '-', '*', '/', '.', '^']
 
-
-
     def __init__(self, name="spatialpy"):
-        """ Create an empty SpatialPy model. """
-
         # The name that the model is referenced by (should be a String)
         self.name = name
 
@@ -96,19 +94,20 @@ class Model():
         ######################
         self.staticDomain = True
         self.enable_rdme = True
-        self.enable_pde = True #TODO
+        self.enable_pde = True
 
         ######################
         self.tspan = None
         self.timestep_size = None
         self.num_timesteps = None
         self.output_freq = None
+        self.output_steps = None
 
         ######################
         # Expression utility used by the solver
         # Should be None until the solver is compiled
         self.expr = None
-
+        self.u0 = None
 
     def __str__(self):
         self._resolve_parameters()
@@ -122,7 +121,7 @@ class Model():
             print_string += decorate("Species")
             for _, species in self.listOfSpecies.items():
                 print_string += f"\n{str(species)}"
-        if len(self.listOfInitialConditions):
+        if self.listOfInitialConditions:
             print_string += decorate("Initial Conditions")
             for initial_condition in self.listOfInitialConditions:
                 print_string += f"\n{str(initial_condition)}"
@@ -146,13 +145,6 @@ class Model():
 
         return ""
 
-
-    def _ipython_display_(self, use_matplotlib=False):
-        if self.domain is None:
-            print(self)
-        else:
-            self.domain.plot_types(width="auto", height="auto", use_matplotlib=use_matplotlib)
-
     def __ne__(self, other):
         return not self.__eq__(other)
 
@@ -163,10 +155,6 @@ class Model():
             self.name == other.name
 
     def __check_if_complete(self):
-        """ Check if the model is complete, otherwise raise an approprate exception.
-        Raises:
-            ModelError
-        """
         if self.timestep_size is None or self.num_timesteps is None:
             raise ModelError("The model's timespan is not set.  Use 'timespan()' or 'set_timesteps()'.")
         if self.domain is None:
@@ -174,23 +162,116 @@ class Model():
 
     def __problem_with_name(self, name):
         if name in Model.reserved_names:
-            return ModelError(f'Name "{name}" is unavailable. It is reserved for internal SpatialPy use. Reserved Names: ({Model.reserved_names}).')
+            errmsg = f'Name "{name}" is unavailable. It is reserved for internal SpatialPy use. '
+            errmsg += f'Reserved Names: ({Model.reserved_names}).'
+            raise ModelError(errmsg)
         if name in self.listOfSpecies:
-            return ModelError(f'Name "{name}" is unavailable. A species with that name exists.')
+            raise ModelError(f'Name "{name}" is unavailable. A species with that name exists.')
         if name in self.listOfParameters:
-            return ModelError(f'Name "{name}" is unavailable. A parameter with that name exists.')
+            raise ModelError(f'Name "{name}" is unavailable. A parameter with that name exists.')
         if name.isdigit():
-            return ModelError(f'Name "{name}" is unavailable. Names must not be numeric strings.')
+            raise ModelError(f'Name "{name}" is unavailable. Names must not be numeric strings.')
         for special_character in Model.special_characters:
             if special_character in name:
-                return ModelError(f'Name "{name}" is unavailable. Names must not contain special characters: {Model.special_characters}.')
+                errmsg = f'Name "{name}" is unavailable. '
+                errmsg += f'Names must not contain special characters: {Model.special_characters}.'
+                raise ModelError(errmsg)
+
+    def _apply_initial_conditions(self):
+        # initalize
+        num_spec = self.get_num_species()
+        num_vox = self.domain.get_num_voxels()
+        self.u0 = numpy.zeros((num_spec, num_vox))
+        # apply initial condition functions
+        for init_cond in self.listOfInitialConditions:
+            init_cond.apply(self)
+
+    def _create_dependency_graph(self):
+        # We cannot safely generate a dependency graph (without attempting to analyze the
+        # propensity string itself) if the model contains custom propensities.
+        mass_action_model = True
+        for reaction in self.listOfReactions.values():
+            if not reaction.massaction:
+                raw_graph = numpy.ones((self.get_num_reactions(),
+                    self.get_num_reactions() + self.get_num_species()))
+                mass_action_model = False
+
+        if mass_action_model:
+            raw_graph = numpy.zeros((self.get_num_reactions(),
+                self.get_num_reactions() + self.get_num_species()))
+            species_map = self.species_map
+
+            involved_species = []
+            reactants = []
+            for reaction in self.listOfReactions.values():
+                temp = []
+                temp2 = []
+                for species in reaction.reactants:
+                    temp.append(species_map[species])
+                    temp2.append(species_map[species])
+                for species in reaction.products:
+                    temp.append(species_map[species])
+                involved_species.append(temp)
+                reactants.append(temp2)
+
+            species_to_reactions = []
+            for species in self.listOfSpecies.values():
+                temp = []
+                for j, x in enumerate(reactants):
+                    if species_map[species] in x:
+                        temp.append(j)
+                species_to_reactions.append(temp)
+
+            reaction_to_reaction = []
+            for reaction in self.listOfReactions.values():
+                temp = []
+                for species in reaction.reactants:
+                    if species_to_reactions[species_map[species]] not in temp:
+                        temp = temp + species_to_reactions[species_map[species]]
+
+                for species in reaction.products:
+                    if species_to_reactions[species_map[species]] not in temp:
+                        temp = temp + species_to_reactions[species_map[species]]
+
+                temp = list(set(temp))
+                reaction_to_reaction.append(temp)
+
+            # Populate raw_graph
+            for j, spec in enumerate(species_to_reactions):
+                for species in spec:
+                    raw_graph[species, j] = 1
+
+            for i, reac in enumerate(reaction_to_reaction):
+                for reaction in reac:
+                    raw_graph[reaction, self.get_num_species() + i] = 1
+        try:
+            dep_graph = scipy.sparse.csc_matrix(raw_graph)
+        except Exception:
+            dep_graph = raw_graph
+
+        return dep_graph
+
+    def _create_stoichiometric_matrix(self):
+        if self.get_num_reactions() > 0:
+            raw_matrix = numpy.zeros((self.get_num_species(), self.get_num_reactions()))
+            for i, reaction in enumerate(self.listOfReactions.values()):
+                reactants = reaction.reactants
+                products  = reaction.products
+
+                for species in reactants:
+                    raw_matrix[self.species_map[species], i] -= reactants[species]
+                for species in products:
+                    raw_matrix[self.species_map[species], i] += products[species]
+
+            matrix = scipy.sparse.csc_matrix(raw_matrix)
+        else:
+            matrix = numpy.zeros((self.get_num_species(), self.get_num_reactions()))
+
+        return matrix
 
     def _get_expression_utility(self):
-        """
-        Create a new expression.
-        """
         base_namespace = {
-            **{name: name for name in math.__dict__.keys()},
+            **{name: name for name in math.__dict__},
             **self.sanitized_species_names(),
             **self.sanitized_parameter_names(),
             **self.sanitized_data_function_names(),
@@ -198,20 +279,18 @@ class Model():
         }
         self.expr = Expression(namespace=base_namespace, blacklist=["="], sanitize=True)
 
+    def _ipython_display_(self, use_matplotlib=False):
+        if self.domain is None:
+            print(self)
+        else:
+            self.domain.plot_types(width="auto", height="auto", use_matplotlib=use_matplotlib)
+
     def _resolve_parameters(self):
-        """
-        Attempt to resolve all parameter expressions to scalar floating point values.
-        Must be called prior to exporting the model.
-        """
         self.update_namespace()
         for param in self.listOfParameters:
-            self.listOfParameters[param]._evaluate(self.namespace)
+            self.listOfParameters[param]._evaluate(self.namespace) # pylint: disable=protected-access
 
     def _update_diffusion_restrictions(self):
-        """
-        Attempt to update the list of diffusion restrictions.
-        Must be called prior to exporting the model.
-        """
         for species in self.listOfSpecies.values():
             if species not in self.listOfDiffusionRestrictions:
                 if isinstance(species.restrict_to, list):
@@ -226,15 +305,16 @@ class Model():
         :param obj: The species or list of species to be added to the model object.
         :type obj: spatialpy.Model.Species | list(spatialpy.Model.Species
 
-        :rtype: spatialpy.Model.Species | list(spatialpy.Model.Species
+        :returns: TODO
+        :rtype: spatialpy.Species | list(spatialpy.Species)
+
+        :raises ModelError: If obj is not a spatialpy.Species
         """
         if isinstance(obj, list):
-            for S in obj:
-                self.add_species(S)
+            for species in obj:
+                self.add_species(species)
         elif isinstance(obj, Species) or type(obj).__name__ == 'Species':
-            problem = self.__problem_with_name(obj.name)
-            if problem is not None:
-                raise problem
+            self.__problem_with_name(obj.name)
             self.species_map[obj] = len(self.listOfSpecies)
             self.listOfSpecies[obj.name] = obj
             if isinstance(obj.restrict_to, list):
@@ -264,6 +344,7 @@ class Model():
         """
         Returns a dictionary of all species in the model using names as keys.
 
+        :returns: TODO
         :rtype: dict
         """
         return self.listOfSpecies
@@ -272,6 +353,7 @@ class Model():
         """
         Returns total number of species contained in the model.
 
+        :returns: TODO
         :rtype: int
         """
         return len(self.listOfSpecies)
@@ -283,9 +365,15 @@ class Model():
         :param sname: name of species to be returned.
         :type sname: str
 
+        :returns: TODO
         :rtype: spatialpy.Model.Species
+
+        :raises ModelError: if the model does not contain the requested species
         """
-        return self.listOfSpecies[sname]
+        try:
+            return self.listOfSpecies[sname]
+        except KeyError as err:
+            raise ModelError(f"No species named {sname}") from err
 
     def sanitized_species_names(self):
         """
@@ -293,10 +381,11 @@ class Model():
         later on by SpatialPySolvers evaluating reaction propensity functions.
 
         :returns: the dictionary mapping user species names to their internal SpatialPy notation.
+        :rtype: TODO
         """
         species_name_mapping = OrderedDict([])
         for i, name in enumerate(self.listOfSpecies.keys()):
-            species_name_mapping[name] = 'x[{}]'.format(i)
+            species_name_mapping[name] = f'x[{i}]'
         return species_name_mapping
 
     def add_parameter(self,params):
@@ -306,20 +395,23 @@ class Model():
 
         :param params: Parameter object or list of Parameters to be added.
         :type params: spatialpy.Model.Parameter | list(spatialpy.Model.Parameter)
+
+        :returns: TODO
+        :rtype: spatialpy.Parameter | list(spatialpy.Parameter)
+
+        :raises ModelError: if obj is not a spatialpy.Parameter
         """
         if isinstance(params,list):
-            for p in params:
-                self.add_parameter(p)
+            for param in params:
+                self.add_parameter(param)
+        elif isinstance(params, Parameter) or  type(params).__name__ == 'Parameter':
+            self.__problem_with_name(params.name)
+            self.update_namespace()
+            params._evaluate(self.namespace) # pylint: disable=protected-access
+            self.listOfParameters[params.name] = params
         else:
-            if isinstance(params, Parameter) or  type(params).__name__ == 'Parameter':
-                problem = self.__problem_with_name(params.name)
-                if problem is not None:
-                    raise problem
-                self.update_namespace()
-                params._evaluate(self.namespace)
-                self.listOfParameters[params.name] = params
-            else:
-                raise ParameterError("Parameter '{0}' needs to be of type '{2}', it is of type '{1}'".format(params.name,str(params),str(type(Parameter))))
+            errmsg = f"Parameter '{params.name}' needs to be of type '{Parameter}', it is of type '{params}'"
+            raise ModelError(errmsg)
         return params
 
     def delete_all_parameters(self):
@@ -341,6 +433,7 @@ class Model():
         """
         Return a dictionary of all model parameters, indexed by name.
 
+        :returns: TODO
         :rtype: dict
         """
         return self.listOfParameters
@@ -351,11 +444,16 @@ class Model():
 
         :param pname: Name of parameter to be removed
         :type pname: spatialpy.Model.Parameter
+
+        :returns: TODO
+        :rtype: TODO
+
+        :raises ModelError: TODO
         """
         try:
             return self.listOfParameters[pname]
-        except:
-            raise ModelError("No parameter named "+pname)
+        except KeyError as err:
+            raise ModelError(f"No parameter named {pname}") from err
 
     def sanitized_parameter_names(self):
         """
@@ -363,32 +461,37 @@ class Model():
         later on by SpatialPySolvers evaluating reaction propensity functions.
 
         :returns: the dictionary mapping user parameter names to their internal SpatialPy notation.
+        :rtype: TODO
         """
         parameter_name_mapping = OrderedDict()
         for i, name in enumerate(self.listOfParameters.keys()):
             if name not in parameter_name_mapping:
-                parameter_name_mapping[name] = 'P{}'.format(i)
+                parameter_name_mapping[name] = f'P{i}'
         return parameter_name_mapping
 
-    def add_reaction(self,reacs):
+    def add_reaction(self, reacs):
         """
         Add Reaction(s) to the model. Input can be single instance, a list of instances
         or a dict with name, instance pairs.
 
         :param reacs: Reaction or list of Reactions to be added.
         :type reacs: spatialpy.Model.Reaction | list(spatialpy.Model.Reaction)
+
+        :returns: TODO
+        :rtype: TODO
+
+        :raises ModelError: TODO
         """
         if isinstance(reacs, list):
-            for r in reacs:
-                self.add_reaction(r)
+            for reaction in reacs:
+                self.add_reaction(reaction)
         elif isinstance(reacs, Reaction) or type(reacs).__name__ == "Reaction":
-            problem = self.__problem_with_name(reacs.name)
-            if problem is not None:
-                raise problem
+            self.__problem_with_name(reacs.name)
             reacs.initialize(self)
             self.listOfReactions[reacs.name] = reacs
         else:
             raise ModelError("add_reaction() takes a spatialpy.Reaction object or list of objects")
+        return reacs
 
     def delete_all_reactions(self):
         """
@@ -409,6 +512,7 @@ class Model():
         """
         Returns a dictionary of all model reactions using names as keys.
 
+        :returns: TODO
         :rtype: dict
         """
         return self.listOfReactions
@@ -417,6 +521,7 @@ class Model():
         """
         Returns the number of reactions in this model.
 
+        :returns: TODO
         :rtype: int
         """
         return len(self.listOfReactions)
@@ -428,23 +533,44 @@ class Model():
         :param rname: name of Reaction to retrieve
         :type rname: str
 
+        :returns: TODO
         :rtype: spatialpy.Model.Reaction
+
+        :raises ModelError: TODO
         """
-        return self.listOfReactions[rname]
+        try:
+            return self.listOfReactions[rname]
+        except KeyError as err:
+            raise ModelError(f"No reaction named {rname}") from err
 
-    def run(self, number_of_trajectories=1, seed=None, timeout=None, number_of_threads=None, debug_level=0, debug=False, profile=False):
-        """ Simulate the model. Returns a result object containing simulation results.
+    def run(self, number_of_trajectories=1, seed=None, timeout=None,
+            number_of_threads=None, debug_level=0, debug=False, profile=False):
+        """
+        Simulate the model. Returns a result object containing simulation results.
 
-            :param number_of_trajectories: How many trajectories should be run.
-            :type number_of_trajectories: int
-            :param seed: The random seed given to the solver.
-            :type seed: int
-            :param number_of_threads: The number threads the solver will use.
-            :type number_of_threads: int
-            :param debug_level: Level of output from the solver: 0, 1, or 2. Default: 0.
-            :type debug_level: int
+        :param number_of_trajectories: How many trajectories should be run.
+        :type number_of_trajectories: int
 
-            :rtype: spatialpy.Result.Result
+        :param seed: The random seed given to the solver.
+        :type seed: int
+
+        :param timeout: TODO
+        :type timeout: int
+
+        :param number_of_threads: The number threads the solver will use.
+        :type number_of_threads: int
+
+        :param debug_level: Level of output from the solver: 0, 1, or 2. Default: 0.
+        :type debug_level: int
+
+        :param debug: TODO
+        :type debug: bool
+
+        :param profile: TODO
+        :type profile: bool
+
+        :returns: TODO
+        :rtype: spatialpy.Result.Result
         """
         self.__check_if_complete()
 
@@ -456,14 +582,20 @@ class Model():
 
 
     def set_timesteps(self, output_interval, num_steps, timestep_size=None):
-        """" Set the simlation time span parameters
+        """"
+        Set the simlation time span parameters.
+
         :param output_interval: size of each output timestep in seconds
         :type output_interval:  float
-        :param num_steps: total number of steps to take. Note: the number of output times will be num_steps+1 as the first
-          output will be at time zero.
+
+        :param num_steps: total number of steps to take. Note: the number of output times will be num_steps+1 \
+        as the first output will be at time zero.
         :type num_steps: int
+
         :param timestep_size: Size of each timestep in seconds
         :type timestep_size: float
+
+        :raises ModelError: TODO
         """
         if timestep_size is not None:
             self.timestep_size = timestep_size
@@ -481,9 +613,7 @@ class Model():
         self.output_steps = numpy.unique(numpy.round(output_steps).astype(int))
         self.tspan = numpy.zeros((self.output_steps.size), dtype=float)
         for i, step in enumerate(self.output_steps):
-            #TODO: review conflict resolution here
-            self.tspan[i] = step*self.timestep_size  # changed in this branch
-            #self.tspan[i] = sim_steps[step]         # changed in other branch
+            self.tspan[i] = step*self.timestep_size
 
     def timespan(self, time_span, timestep_size=None):
         """
@@ -492,10 +622,12 @@ class Model():
 
         :param tspan: Evenly-spaced list of times at which to sample the species populations during the simulation.
         :type tspan: numpy.ndarray
+
         :param timestep_size: Size of each timestep in seconds
         :type timestep_size: float
-        """
 
+        :raises ModelError: TODO
+        """
         items_diff = numpy.diff(time_span)
         items = map(lambda x: round(x, 10), items_diff)
         isuniform = (len(set(items)) == 1)
@@ -506,61 +638,69 @@ class Model():
             raise ModelError("Only uniform timespans are supported")
 
     def add_domain(self, domain):
-        '''
+        """
         Add a spatial domain to the model
 
         :param domain: The Domain object to be added to the model
         :type domain: spatialpy.Domain.Domain
-        '''
+
+        :raises ModelError: TODO
+        """
         if not isinstance(domain,Domain) and type(domain).__name__ != 'Domain':
             raise ModelError("Unexpected parameter for add_domain. Parameter must be a Domain.")
 
         self.domain = domain
 
     def add_data_function(self, data_function):
-        """ Add a scalar spatial function to the simulation. This is useful if you have a
-            spatially varying in put to your model. Argument is a instances of subclass of the
-            spatialpy.DataFunction class. It must implement a function 'map(x)' which takes a
-            the spatial positon 'x' as an array, and it returns a float value.
-
-            :param data_function: Data function to be added.
-            :type data_function: spatialpy.DataFunction
         """
+        Add a scalar spatial function to the simulation. This is useful if you have a
+        spatially varying in put to your model. Argument is a instances of subclass of the
+        spatialpy.DataFunction class. It must implement a function 'map(x)' which takes a
+        the spatial positon 'x' as an array, and it returns a float value.
 
+        :param data_function: Data function to be added.
+        :type data_function: spatialpy.DataFunction
+
+        :returns: TODO
+        :rtype: spatialpy.DataFunctin | list(spatialpy.DataFunction)
+
+        :raises ModelError: TODO
+        """
         if isinstance(data_function, list):
-            for S in data_function:
-                self.add_data_function(S)
+            for data_fn in data_function:
+                self.add_data_function(data_fn)
         elif isinstance(data_function, DataFunction) or type(data_function).__name__ == 'DataFunction':
-            problem = self.__problem_with_name(data_function.name)
-            if problem is not None:
-                raise problem
+            self.__problem_with_name(data_function.name)
             self.listOfDataFunctions.append(data_function)
         else:
-            raise ModelError("Unexpected parameter for add_data_function. Parameter must be DataFunction or list of DataFunctions.")
+            errmsg = "Unexpected parameter for add_data_function. "
+            errmsg += "Parameter must be DataFunction or list of DataFunctions."
+            raise ModelError(errmsg)
         return data_function
 
-    def add_initial_condition(self, ic):
-        """ Add an initial condition object to the initialization of the model.
-
-                :param ic: Initial condition to be added
-                :type ic: spatialpy.InitialCondition.InitialCondition
-
+    def add_initial_condition(self, init_cond):
         """
-        self.listOfInitialConditions.append(ic)
+        Add an initial condition object to the initialization of the model.
 
-    def add_boundary_condition(self, bc):
-        """ Add an BoundaryCondition object to the model.
-
-            :param bc: Boundary condition to be added
-            :type bc: spatialpy.BoundaryCondition.BoundaryCondition
-
+        :param init_cond: Initial condition to be added
+        :type init_cond: spatialpy.InitialCondition.InitialCondition
         """
-        bc.model = self
-        self.listOfBoundaryConditions.append(bc)
+        self.listOfInitialConditions.append(init_cond)
+
+    def add_boundary_condition(self, bound_cond):
+        """
+        Add an BoundaryCondition object to the model.
+
+        :param bound_cond: Boundary condition to be added
+        :type bound_cond: spatialpy.BoundaryCondition
+        """
+        bound_cond.model = self
+        self.listOfBoundaryConditions.append(bound_cond)
 
     def update_namespace(self):
-        """ Create a dict with flattened parameter and species objects. """
-
+        """
+        Create a dict with flattened parameter and species objects.
+        """
         for param in self.listOfParameters:
             self.namespace[param]=self.listOfParameters[param].value
 
@@ -570,108 +710,9 @@ class Model():
         later on by SpatialPySolvers evaluating reaction propensity functions.
 
         :returns: the dictionary mapping user data function names to their internal SpatialPy notation.
+        :rtype: dict
         """
         data_fn_name_mapping = OrderedDict([])
         for i, data_fn in enumerate(self.listOfDataFunctions):
-            data_fn_name_mapping[data_fn.name] = 'data_fn[{}]'.format(i)
+            data_fn_name_mapping[data_fn.name] = f'data_fn[{i}]'
         return data_fn_name_mapping
-
-    def _create_stoichiometric_matrix(self):
-        """ Generate a stoichiometric matrix in sparse CSC format. """
-
-        if self.get_num_reactions() > 0:
-            ND = numpy.zeros((self.get_num_species(), self.get_num_reactions()))
-            for i, r in enumerate(self.listOfReactions):
-                R = self.listOfReactions[r]
-                reactants = R.reactants
-                products  = R.products
-
-                for s in reactants:
-                    ND[self.species_map[s], i] -= reactants[s]
-                for s in products:
-                    ND[self.species_map[s], i] += products[s]
-
-            N = scipy.sparse.csc_matrix(ND)
-        else:
-            N = numpy.zeros((self.get_num_species(), self.get_num_reactions()))
-
-        return N
-
-
-    def _create_dependency_graph(self):
-        """ Construct the sparse dependency graph. """
-        # We cannot safely generate a dependency graph (without attempting to analyze the
-        # propensity string itself) if the model contains custom propensities.
-        mass_action_model = True
-        for name, reaction in self.listOfReactions.items():
-            if not reaction.massaction:
-                GF = numpy.ones((self.get_num_reactions(),
-                    self.get_num_reactions() + self.get_num_species()))
-                mass_action_model = False
-
-        if mass_action_model:
-            GF = numpy.zeros((self.get_num_reactions(),
-                self.get_num_reactions() + self.get_num_species()))
-            species_map = self.species_map
-
-            involved_species = []
-            reactants = []
-            for name, reaction in self.listOfReactions.items():
-                temp = []
-                temp2 = []
-                for s in reaction.reactants:
-                    temp.append(species_map[s])
-                    temp2.append(species_map[s])
-                for s in reaction.products:
-                    temp.append(species_map[s])
-                involved_species.append(temp)
-                reactants.append(temp2)
-
-            species_to_reactions = []
-            for sname,species in self.listOfSpecies.items():
-                temp = []
-                for j, x in enumerate(reactants):
-                    if species_map[species] in x:
-                        temp.append(j)
-                species_to_reactions.append(temp)
-
-            reaction_to_reaction = []
-            for name, reaction in self.listOfReactions.items():
-                temp = []
-                for s in reaction.reactants:
-                    if species_to_reactions[species_map[s]] not in temp:
-                        temp = temp+species_to_reactions[species_map[s]]
-
-                for s in reaction.products:
-                    if species_to_reactions[species_map[s]] not in temp:
-                        temp = temp+ species_to_reactions[species_map[s]]
-
-                temp = list(set(temp))
-                reaction_to_reaction.append(temp)
-
-            # Populate G
-            for j, spec in enumerate(species_to_reactions):
-                for s in spec:
-                    GF[s, j] = 1
-
-            for i,reac in enumerate(reaction_to_reaction):
-                for r in reac:
-                    GF[r, self.get_num_species()+i] = 1
-
-
-        try:
-            G = scipy.sparse.csc_matrix(GF)
-        except Exception as e:
-            G = GF
-
-        return G
-
-    def _apply_initial_conditions(self):
-        """ Initalize the u0 matrix (zeros) and then apply each initial condition"""
-        # initalize
-        ns = self.get_num_species()
-        nv = self.domain.get_num_voxels()
-        self.u0 = numpy.zeros((ns, nv))
-        # apply initial condition functions
-        for ic in self.listOfInitialConditions:
-            ic.apply(self)
