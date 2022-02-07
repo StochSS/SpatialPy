@@ -29,7 +29,7 @@ import re
 
 
 from spatialpy.core.model import *
-from spatialpy.core.Result import *
+from spatialpy.core.result import *
 from spatialpy.core.spatialpyError import *
 
 def _read_from_stdout(stdout,verbose=True):
