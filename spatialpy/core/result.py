@@ -27,7 +27,6 @@ from collections import OrderedDict
 import numpy
 import plotly.graph_objs as go
 from plotly.offline import init_notebook_mode, iplot
-import matplotlib.pyplot as plt
 
 # from spatialpy.core.model import *
 from spatialpy.core.VTKReader import VTKReader
@@ -491,6 +490,8 @@ class Result():
                 height = None if height == "auto" else 500
 
         if use_matplotlib:
+            import matplotlib.pyplot as plt # pylint: disable=import-outside-toplevel
+
             if deterministic or not concentration:
                 p_data = data[spec_name]
             else:
@@ -718,6 +719,8 @@ class Result():
                 height = None if height == "auto" else 500
 
         if use_matplotlib:
+            import matplotlib.pyplot as plt # pylint: disable=import-outside-toplevel
+
             if property_name == "type" and included_types_list is not None:
                 coords = []
                 p_data = []
