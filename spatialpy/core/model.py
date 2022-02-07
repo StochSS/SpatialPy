@@ -292,11 +292,10 @@ class Model():
 
     def _update_diffusion_restrictions(self):
         for species in self.listOfSpecies.values():
-            if species not in self.listOfDiffusionRestrictions:
-                if isinstance(species.restrict_to, list):
-                    self.listOfDiffusionRestrictions[species] = species.restrict_to
-                elif isinstance(species.restrict_to, int):
-                    self.listOfDiffusionRestrictions[species] = [species.restrict_to]
+            if isinstance(species.restrict_to, list):
+                self.listOfDiffusionRestrictions[species] = species.restrict_to
+            elif isinstance(species.restrict_to, int):
+                self.listOfDiffusionRestrictions[species] = [species.restrict_to]
 
     def add_species(self, obj):
         """
@@ -317,10 +316,6 @@ class Model():
             self.__problem_with_name(obj.name)
             self.species_map[obj] = len(self.listOfSpecies)
             self.listOfSpecies[obj.name] = obj
-            if isinstance(obj.restrict_to, list):
-                self.listOfDiffusionRestrictions[obj] = obj.restrict_to
-            elif isinstance(obj.restrict_to, int):
-                self.listOfDiffusionRestrictions[obj] = [obj.restrict_to]
         else:
             raise ModelError("Unexpected parameter for add_species. Parameter must be Species or list of Species.")
         return obj

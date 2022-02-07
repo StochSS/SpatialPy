@@ -495,7 +495,7 @@ class Domain():
         :returns: Plotly figure of domain types if, use_matplotlib=False and return_plotly_figure=True
         :rtype: None or dict
         '''
-        from spatialpy.core.Result import _plotly_iterate # pylint: disable=import-outside-toplevel
+        from spatialpy.core.result import _plotly_iterate # pylint: disable=import-outside-toplevel
 
         if use_matplotlib:
             width = 6.4 if width in (None, "auto") else width
