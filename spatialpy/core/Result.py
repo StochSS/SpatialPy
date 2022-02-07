@@ -26,7 +26,7 @@ import sys
 
 import numpy
 
-from spatialpy.core.Model import *
+from spatialpy.core.model import *
 from spatialpy.core.VTKReader import VTKReader
 from spatialpy.core.spatialpyError import ResultError
 
