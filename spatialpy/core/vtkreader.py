@@ -163,7 +163,7 @@ class VTKReader:
         """
         return self.points
 
-    def readfile(self):
+    def read_file(self):
         """
         Read VTK file.
 
