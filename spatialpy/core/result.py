@@ -30,7 +30,7 @@ from plotly.offline import init_notebook_mode, iplot
 
 # from spatialpy.core.model import *
 from spatialpy.core.vtkreader import VTKReader
-from spatialpy.core.spatialpyError import ResultError
+from spatialpy.core.spatialpyerror import ResultError
 
 try:
     import vtk

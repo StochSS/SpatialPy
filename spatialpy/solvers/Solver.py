@@ -30,7 +30,7 @@ import re
 
 from spatialpy.core.model import *
 from spatialpy.core.result import *
-from spatialpy.core.spatialpyError import *
+from spatialpy.core.spatialpyerror import *
 
 def _read_from_stdout(stdout,verbose=True):
     ''' Used with subprocess.Popen and threading to capture all output and print

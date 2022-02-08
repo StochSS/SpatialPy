@@ -19,7 +19,7 @@ import uuid
 
 from spatialpy.core.species import Species
 from spatialpy.core.parameter import Parameter
-from spatialpy.core.spatialpyError import ReactionError
+from spatialpy.core.spatialpyerror import ReactionError
 
 class Reaction():
     """

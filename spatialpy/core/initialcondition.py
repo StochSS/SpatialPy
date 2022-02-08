@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 import numpy
 
-from spatialpy.core.spatialpyError import InitialConditionError
+from spatialpy.core.spatialpyerror import InitialConditionError
 
 class InitialCondition():
     """

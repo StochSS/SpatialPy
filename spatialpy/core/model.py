@@ -32,7 +32,7 @@ from spatialpy.core.domain import Domain
 from spatialpy.solvers.Solver import Solver
 from spatialpy.solvers.build.expression import Expression
 
-from spatialpy.core.spatialpyError import ModelError
+from spatialpy.core.spatialpyerror import ModelError
 
 def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
     """

@@ -15,7 +15,7 @@ GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from spatialpy.core.spatialpyError import GeometryError
+from spatialpy.core.spatialpyerror import GeometryError
 
 class Geometry:
     """

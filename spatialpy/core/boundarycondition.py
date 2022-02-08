@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from spatialpy.core.model import Model
 from spatialpy.core.species import Species
-from spatialpy.core.spatialpyError import BoundaryConditionError
+from spatialpy.core.spatialpyerror import BoundaryConditionError
 
 
 class BoundaryCondition():

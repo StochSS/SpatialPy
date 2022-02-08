@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from spatialpy.core.parameter import Parameter
-from spatialpy.core.spatialpyError import SpeciesError
+from spatialpy.core.spatialpyerror import SpeciesError
 
 class Species():
     """

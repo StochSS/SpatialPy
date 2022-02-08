@@ -28,7 +28,7 @@ from .model import *
 from .parameter import *
 from .reaction import *
 from .result import *
-from .spatialpyError import *
+from .spatialpyerror import *
 from .species import *
 from .vtkreader import *
 

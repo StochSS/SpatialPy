@@ -18,65 +18,80 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Base Module Expections
 class ModelError(Exception):
-    pass
-
+    """
+    Class for exceptions in the model module.
+    """
 
 class ResultError(Exception):
-    pass
-
+    """
+    Class for exceptions in the results module.
+    """
 
 class VTKReaderError(Exception):
-    """Base class for exceptions in VTKReader module."""
-    pass
-
+    """
+    Bass class for exceptions in the vtkreader module.
+    """
 
 class SimulationError(Exception):
-    pass
-
+    """
+    Class for exceptions in the simulation module.
+    """
 
 # Model Component Exceptions
 class BoundaryConditionError(ModelError):
-    pass
-
+    """
+    Base class for exceptions in the boundarycondition module.
+    """
 
 class DataFunctionError(ModelError):
-    pass
-
+    """
+    Class for exceptions in the datafunction module.
+    """
 
 class DomainError(ModelError):
-    pass
-
+    """
+    Class for exceptions in the domain module.
+    """
 
 class GeometryError(ModelError):
-    pass
-
+    """
+    Class for exceptions in the geometry module.
+    """
 
 class InitialConditionError(ModelError):
-    pass
-
+    """
+    Class for exceptions in initailcondition module.
+    """
 
 class ParameterError(ModelError):
-    pass
-
+    """
+    Class for exceptions in parameter module.
+    """
 
 class ReactionError(ModelError):
-    pass
-
+    """
+    Class for exceptions in reaction module.
+    """
 
 class SpeciesError(ModelError):
-    pass
-
+    """
+    Class for exceptions in the species module.
+    """
 
 # Result Exceptions
 
 
 # VTKReader Exceptions
 class VTKReaderIOError(VTKReaderError):
-    """Exception raised for I/O errors."""
+    """
+    Exception raised for I/O errors.
+    """
     def __init__(self, message):
+        super().__init__(message)
         self.message = message
-
 
 # Simulation Exceptions
 class SimulationTimeout(SimulationError):
-    pass
+    """
+    Exception raised for timeout errors.
+    """

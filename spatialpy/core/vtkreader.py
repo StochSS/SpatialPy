@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy
 
-from spatialpy.core.spatialpyError import VTKReaderIOError
+from spatialpy.core.spatialpyerror import VTKReaderIOError
 
 def __is_valid_num(numstr):
     try:

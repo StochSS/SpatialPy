@@ -25,7 +25,7 @@ import numpy
 from plotly.offline import init_notebook_mode, iplot
 from scipy.spatial import KDTree
 
-from spatialpy.core.spatialpyError import DomainError
+from spatialpy.core.spatialpyerror import DomainError
 
 class Domain():
     """
