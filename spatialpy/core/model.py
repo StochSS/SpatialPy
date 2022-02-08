@@ -47,8 +47,8 @@ def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
     :param return_stochss_model: Whether or not to return the model
     :type return_stochss_model: bool
 
-    :returns: TODO
-    :rtype: TODO
+    :returns: Filename for JSON-formatted .smdl file for use with StochSS platform.
+    :rtype: string
     """
     try:
         from spatialpy.stochss.StochSSexport import export # pylint: disable=import-outside-toplevel
@@ -304,7 +304,7 @@ class Model():
         :param obj: The species or list of species to be added to the model object.
         :type obj: spatialpy.Model.Species | list(spatialpy.Model.Species
 
-        :returns: TODO
+        :returns: Species object which was added to the model.
         :rtype: spatialpy.Species | list(spatialpy.Species)
 
         :raises ModelError: If obj is not a spatialpy.Species
@@ -339,16 +339,16 @@ class Model():
         """
         Returns a dictionary of all species in the model using names as keys.
 
-        :returns: TODO
+        :returns: A dictionary of all species in the form of {"species_name":Species_object}
         :rtype: dict
         """
         return self.listOfSpecies
 
     def get_num_species(self):
         """
-        Returns total number of species contained in the model.
+        Returns total number of different species contained in the model.
 
-        :returns: TODO
+        :returns: Number of different species in the model.
         :rtype: int
         """
         return len(self.listOfSpecies)
@@ -360,7 +360,7 @@ class Model():
         :param sname: name of species to be returned.
         :type sname: str
 
-        :returns: TODO
+        :returns: The Species objected represented by given 'sname'
         :rtype: spatialpy.Model.Species
 
         :raises ModelError: if the model does not contain the requested species
@@ -376,7 +376,7 @@ class Model():
         later on by SpatialPySolvers evaluating reaction propensity functions.
 
         :returns: the dictionary mapping user species names to their internal SpatialPy notation.
-        :rtype: TODO
+        :rtype: dict
         """
         species_name_mapping = OrderedDict([])
         for i, name in enumerate(self.listOfSpecies.keys()):
@@ -391,7 +391,7 @@ class Model():
         :param params: Parameter object or list of Parameters to be added.
         :type params: spatialpy.Model.Parameter | list(spatialpy.Model.Parameter)
 
-        :returns: TODO
+        :returns: Parameter object which has been added to the model.
         :rtype: spatialpy.Parameter | list(spatialpy.Parameter)
 
         :raises ModelError: if obj is not a spatialpy.Parameter
@@ -428,22 +428,22 @@ class Model():
         """
         Return a dictionary of all model parameters, indexed by name.
 
-        :returns: TODO
+        :returns: A dictionary of all model parameters in the form {'param_name':param_obj}
         :rtype: dict
         """
         return self.listOfParameters
 
     def get_parameter(self, pname):
         """
-        Remove a Parameter from model.listOfParameters.
+        Return the Parameter object from model associated with 'pname'
 
         :param pname: Name of parameter to be removed
         :type pname: spatialpy.Model.Parameter
 
-        :returns: TODO
-        :rtype: TODO
+        :returns: The Parameter object represented in the model by 'pname'
+        :rtype: Spatialpy.Model.Parameter
 
-        :raises ModelError: TODO
+        :raises ModelError: No parameter named {pname}
         """
         try:
             return self.listOfParameters[pname]
@@ -456,7 +456,7 @@ class Model():
         later on by SpatialPySolvers evaluating reaction propensity functions.
 
         :returns: the dictionary mapping user parameter names to their internal SpatialPy notation.
-        :rtype: TODO
+        :rtype: dict
         """
         parameter_name_mapping = OrderedDict()
         for i, name in enumerate(self.listOfParameters.keys()):
@@ -472,10 +472,10 @@ class Model():
         :param reacs: Reaction or list of Reactions to be added.
         :type reacs: spatialpy.Model.Reaction | list(spatialpy.Model.Reaction)
 
-        :returns: TODO
-        :rtype: TODO
+        :returns: The Reaction object(s) added to the model
+        :rtype: spatialpy.Model.Reaction
 
-        :raises ModelError: TODO
+        :raises ModelError: Invalid input/reaction to add_reaction()
         """
         if isinstance(reacs, list):
             for reaction in reacs:
@@ -507,7 +507,7 @@ class Model():
         """
         Returns a dictionary of all model reactions using names as keys.
 
-        :returns: TODO
+        :returns: A dictionary of reactions in the form of {'react_name':react_obj}
         :rtype: dict
         """
         return self.listOfReactions
@@ -516,7 +516,7 @@ class Model():
         """
         Returns the number of reactions in this model.
 
-        :returns: TODO
+        :returns: The total number of different reactions in the model.
         :rtype: int
         """
         return len(self.listOfReactions)
@@ -528,10 +528,10 @@ class Model():
         :param rname: name of Reaction to retrieve
         :type rname: str
 
-        :returns: TODO
+        :returns: The Reaction Object in the model represented by 'rname'
         :rtype: spatialpy.Model.Reaction
 
-        :raises ModelError: TODO
+        :raises ModelError: Could not find reaction
         """
         try:
             return self.listOfReactions[rname]
@@ -549,7 +549,8 @@ class Model():
         :param seed: The random seed given to the solver.
         :type seed: int
 
-        :param timeout: TODO
+        :param timeout: Number of seconds for simulation to run.  Simulation will be
+                        killed upon reaching timeout.
         :type timeout: int
 
         :param number_of_threads: The number threads the solver will use.
@@ -558,13 +559,13 @@ class Model():
         :param debug_level: Level of output from the solver: 0, 1, or 2. Default: 0.
         :type debug_level: int
 
-        :param debug: TODO
+        :param debug: Optional flag to print out additional debug info during simulation.
         :type debug: bool
 
-        :param profile: TODO
+        :param profile: Optional flag to print out addtional performance profiling for simulation.
         :type profile: bool
 
-        :returns: TODO
+        :returns: A SpatialPy Result object containing simulation data.
         :rtype: spatialpy.Result.Result
         """
         self.__check_if_complete()
@@ -590,7 +591,7 @@ class Model():
         :param timestep_size: Size of each timestep in seconds
         :type timestep_size: float
 
-        :raises ModelError: TODO
+        :raises ModelError: Incompatible combination of timestep_size and output_interval
         """
         if timestep_size is not None:
             self.timestep_size = timestep_size
@@ -621,7 +622,7 @@ class Model():
         :param timestep_size: Size of each timestep in seconds
         :type timestep_size: float
 
-        :raises ModelError: TODO
+        :raises ModelError: non-uniform timespan not supported
         """
         items_diff = numpy.diff(time_span)
         items = map(lambda x: round(x, 10), items_diff)
@@ -639,7 +640,7 @@ class Model():
         :param domain: The Domain object to be added to the model
         :type domain: spatialpy.Domain.Domain
 
-        :raises ModelError: TODO
+        :raises ModelError: Invalid Domain object
         """
         if not isinstance(domain,Domain) and type(domain).__name__ != 'Domain':
             raise ModelError("Unexpected parameter for add_domain. Parameter must be a Domain.")
@@ -656,10 +657,10 @@ class Model():
         :param data_function: Data function to be added.
         :type data_function: spatialpy.DataFunction
 
-        :returns: TODO
-        :rtype: spatialpy.DataFunctin | list(spatialpy.DataFunction)
+        :returns: DataFunction object(s) added tothe model.
+        :rtype: spatialpy.DataFunction | list(spatialpy.DataFunction)
 
-        :raises ModelError: TODO
+        :raises ModelError: Invalid DataFunction
         """
         if isinstance(data_function, list):
             for data_fn in data_function:

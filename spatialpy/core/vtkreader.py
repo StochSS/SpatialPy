@@ -84,10 +84,10 @@ class VTKReader:
     VTKReader.py: SpatialPy minimal VTK legacy file reader.
     Reference: https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf
 
-    :param filename: TODO
+    :param filename: name of SpatialPy VTK file
     :type filename: str
 
-    :param debug: TODO
+    :param debug: If true, will print debugging information.
     :type debug: bool
     """
     def __init__(self, filename=None, debug=False):
@@ -127,7 +127,7 @@ class VTKReader:
         :param index: index
         :type index: int
 
-        :returns: TODO
+        :returns: Name/Key for arraid id
         :rtype: int | None
         """
         arrayids = list(self.arrays.keys())
@@ -140,7 +140,7 @@ class VTKReader:
         """
         Get the dictionary of arrays.
 
-        :returns: TODO
+        :returns: dictionary of data arrays
         :rtype: dict
         """
         return self.arrays
@@ -167,7 +167,7 @@ class VTKReader:
         """
         Read VTK file.
 
-        :raises VTKReaderIOError: TODO
+        :raises VTKReaderIOError: Invalid ASCII VTK file
         """
         with open(self.filename, encoding="utf-8") as data_file:
             if self.debug:

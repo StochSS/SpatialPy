@@ -253,10 +253,10 @@ class Result():
         :param debug: Whether or not debug information should be printed
         :type debug: bool (default False)
 
-        :returns: TODO
-        :rtype: tuble
+        :returns: A tuple containing ([points], [arrays]) from an output step of the simulation.
+        :rtype: tuple
 
-        :raises ResultError: TODO
+        :raises ResultError: Could not get result data for given step_num.
         """
         if debug:
             print(f"read_step({step_num}) ", end='')
@@ -299,7 +299,7 @@ class Result():
         """
         Get the model time span. Returns a numpy array containing the time span of the model.
 
-        :returns: TODO
+        :returns: A numpy array of the timespan containing all output time points.
         :rtype: numpy.ndarray
         """
 
@@ -332,10 +332,11 @@ class Result():
         :param debug: Whether or not debug information should be printed
         :type debug: bool (default False)
 
-        :returns: TODO
+        :returns: A numpy array containing population/concentration values for target species across specified
+                    timepoints.  Defaults to all timepoints.
         :rtype: numpy.ndarray
 
-        :raises ResultError: TODO
+        :raises ResultError: Unable to retrieve species data for given timepoints.
         """
         num_voxel = self.model.domain.get_num_voxels()
 
@@ -446,10 +447,10 @@ class Result():
         :param debug: output debugging info
         :type debug: bool
 
-        :returns: TODO
+        :returns: A dictionary containing data for a plotly figure of species output trajectory
         :rtype: dict
 
-        :raises ResultsError:
+        :raises ResultsError: unable to plot species for given time
         """
         time_index_list = self.get_timespan()
 
@@ -583,10 +584,10 @@ class Result():
         :param timepoints: timespan index to be returned.  Default is None
         :type timepoints: int
 
-        :returns: TODO
+        :returns: a numpy array of target property values across timepoints, defaults to all timepoints.
         :rtype: numpy.ndarray
 
-        :raises ResultsError: TODO
+        :raises ResultsError: Could not get data for given timepoints.
         """
 
         l_time = len(self.get_timespan()) - 1
@@ -677,10 +678,11 @@ class Result():
         :param debug: output debugging info
         :type debug: bool
 
-        :returns: TODO
+        :returns: A dictionary representation of a plotly figure containing property data over given timepoints.
+                    Defaults to all timepoints.
         :rtype: dict
 
-        :raises ResultError: TODO
+        :raises ResultError: Could not get property data for given timepoints.
         """
         time_index_list = self.get_timespan()
 

@@ -47,7 +47,7 @@ class Reaction():
     :param annotation: Description of the reaction (meta)
     :type annotation: str
 
-    :param restrict_to: TODO
+    :param restrict_to: Restrict reaction execution to a type or list of types within the domain.
     :type restrict_to: int or list of ints
     """
     def __init__(self, name="", reactants=None, products=None, propensity_function=None,
@@ -215,9 +215,9 @@ class Reaction():
 
     def initialize(self, model):
         """
-        Defered object initialization, called by model.add_reaction().
+        Deferred object initialization, called by model.add_reaction().
 
-        :param model: TODO
+        :param model: Target SpatialPy Model for annotation.
         :type model: spatialpy.Model
         """
         self.ode_propensity_function = self.propensity_function
