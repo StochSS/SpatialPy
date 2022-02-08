@@ -29,7 +29,7 @@ import plotly.graph_objs as go
 from plotly.offline import init_notebook_mode, iplot
 
 # from spatialpy.core.model import *
-from spatialpy.core.VTKReader import VTKReader
+from spatialpy.core.vtkreader import VTKReader
 from spatialpy.core.spatialpyError import ResultError
 
 try:
@@ -286,9 +286,9 @@ class Result():
                     vtk_data[p_data.GetArrayName(i)] = numpy.array(p_data.GetArray(i))
         else:
             reader = VTKReader(filename=filename, debug=debug)
-            reader.readfile()
-            points = reader.getpoints()
-            vtk_data = reader.getarrays()
+            reader.read_file()
+            points = reader.get_points()
+            vtk_data = reader.get_arrays()
 
         if points is None or vtk_data is None:
             raise ResultError(f"read_step(step_num={step_num}): got data = None")

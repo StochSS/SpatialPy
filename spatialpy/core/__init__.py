@@ -30,7 +30,7 @@ from .reaction import *
 from .result import *
 from .spatialpyError import *
 from .species import *
-from .VTKReader import *
+from .vtkreader import *
 
 _formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 _handler = logging.StreamHandler()
