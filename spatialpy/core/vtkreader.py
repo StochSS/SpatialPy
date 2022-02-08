@@ -20,7 +20,7 @@ import numpy
 
 from spatialpy.core.spatialpyerror import VTKReaderIOError
 
-def __is_valid_num(numstr):
+def _is_valid_num(numstr):
     try:
         float(numstr)
     except ValueError:
@@ -28,7 +28,7 @@ def __is_valid_num(numstr):
 
     return True
 
-def __read_arrays(data_file):
+def _read_arrays(data_file):
     vtkdata = {}
     arraydata = []
 
@@ -53,18 +53,18 @@ def __read_arrays(data_file):
             line = data_file.readline()
             arraydata.extend(line.strip().split())
 
-        __populate_arrays(vtkdata, arraydata, col, row, name, datatype)
+        _populate_arrays(vtkdata, arraydata, col, row, name, datatype)
 
     return vtkdata
 
-def __read_numeric(data_file):
+def _read_numeric(data_file):
     numericlist = []
 
     for line in data_file:
         parts = line.strip().split()
         if len(parts) == 0:
             break
-        if __is_valid_num(parts[0]):
+        if _is_valid_num(parts[0]):
             numericlist.extend(parts)
         else:
             break
@@ -73,7 +73,7 @@ def __read_numeric(data_file):
 
 # This should be refactored at some point and probably eliminated
 # In factor of __read_numeric()
-def __populate_arrays(vtkdata, arraydata, col, row, name, datatype):
+def _populate_arrays(vtkdata, arraydata, col, row, name, datatype):
     array = numpy.array(arraydata, dtype=datatype)
     if col > 1:
         array = array.reshape(row, col)
@@ -105,7 +105,7 @@ class VTKReader:
         }
 
     def __read_points(self, data_file, row, col, datatype):
-        pointlist = numpy.array(__read_numeric(data_file), dtype=self.datatypes[datatype])
+        pointlist = numpy.array(_read_numeric(data_file), dtype=self.datatypes[datatype])
         if col > 1:
             pointlist = pointlist.reshape(row, col)
 
@@ -193,4 +193,4 @@ class VTKReader:
                     continue
                 break
 
-            self.arrays = __read_arrays(data_file)
+            self.arrays = _read_arrays(data_file)
