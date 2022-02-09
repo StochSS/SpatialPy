@@ -81,7 +81,7 @@ def __add_parameters(model, parameters):
     for name, parameter in parameters.items():
         try:
             expression = ast.literal_eval(parameter.expression)
-        except:
+        except ValueError:
             expression = parameter.expression
         s_parameter = {"compID":model['defaultID'],
                        "name":name,
@@ -108,7 +108,7 @@ def __add_reactions(model, reactions, types):
 
         for key in ['reactants', 'products']:
             __add_stoich_species(s_reaction=s_reaction, reaction=reaction,
-                                                key=key, species=model['species'])
+                                 key=key, species=model['species'])
         __add_summary(reaction=s_reaction)
 
         model['reactions'].append(s_reaction)
@@ -221,18 +221,18 @@ def export(model, path=None, return_stochss_model=False):
                "annotation": "",
                "volume": 1,
                "modelSettings": {
-                    "endSim": end_sim,
-                    "timeStep": time_step,
-                    "timestepSize": model.timestep_size
-                },
-                "species": [],
-                "initialConditions": [],
-                "parameters": [],
-                "reactions": [],
-                "rules": [],
-                "eventsCollection": [],
-                "functionDefinitions": [],
-                "boundaryConditions": []
+                   "endSim": end_sim,
+                   "timeStep": time_step,
+                   "timestepSize": model.timestep_size
+               },
+               "species": [],
+               "initialConditions": [],
+               "parameters": [],
+               "reactions": [],
+               "rules": [],
+               "eventsCollection": [],
+               "functionDefinitions": [],
+               "boundaryConditions": []
               }
 
     __add_domain(model=s_model, domain=model.domain)

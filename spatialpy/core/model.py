@@ -51,7 +51,7 @@ def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
     :rtype: TODO
     """
     try:
-        from spatialpy.stochss.StochSSexport import export # pylint: disable=import-outside-toplevel
+        from spatialpy.stochss.stochss_export import export # pylint: disable=import-outside-toplevel
     except ImportError as err:
         raise ImportError('StochSS export conversion not imported successfully') from err
 
