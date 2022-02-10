@@ -29,7 +29,7 @@ from spatialpy.core.parameter import Parameter
 from spatialpy.core.reaction import Reaction
 from spatialpy.core.datafunction import DataFunction
 from spatialpy.core.domain import Domain
-from spatialpy.solvers.Solver import Solver
+from spatialpy.solvers.solver import Solver
 from spatialpy.solvers.build.expression import Expression
 
 from spatialpy.core.spatialpyerror import ModelError
