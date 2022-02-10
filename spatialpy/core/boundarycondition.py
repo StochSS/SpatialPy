@@ -16,8 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from spatialpy.core.model import Model
-from spatialpy.core.species import Species
 from spatialpy.core.spatialpyerror import BoundaryConditionError
 
 
@@ -74,6 +72,8 @@ class BoundaryCondition():
 
     def __init__(self, xmin=None, xmax=None, ymin=None, ymax=None, zmin=None, zmax=None, type_id=None,
                  deterministic=True, target=None, value=None, model=None):
+        from spatialpy.core.model import Model # pylint: disable=import-outside-toplevel
+        from spatialpy.core.species import Species # pylint: disable=import-outside-toplevel
         if xmin is not None and not isinstance(xmin, (int, float)):
             raise BoundaryConditionError("X-min must be of type int or float.")
         if xmax is not None and not isinstance(xmax, (int, float)):
