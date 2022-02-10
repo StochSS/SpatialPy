@@ -18,19 +18,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
 from spatialpy.__version__ import __version__
-from .boundarycondition import *
-from .cleanup import *
-from .datafunction import *
-from .domain import *
-from .geometry import *
-from .initialcondition import *
-from .model import *
-from .parameter import *
-from .reaction import *
-from .result import *
+from .boundarycondition import BoundaryCondition
+from .cleanup import cleanup_tempfiles, cleanup_core_files, cleanup_build_files, cleanup_result_files
+from .datafunction import DataFunction
+from .domain import Domain
+from .geometry import Geometry, GeometryAll, GeometryExterior, GeometryInterior
+from .initialcondition import InitialCondition, PlaceInitialCondition, UniformInitialCondition, ScatterInitialCondition
+from .model import Model, export_StochSS
+from .parameter import Parameter
+from .reaction import Reaction
+from .result import Result
 from .spatialpyerror import *
-from .species import *
-from .vtkreader import *
+from .species import Species
+from .vtkreader import VTKReader
 
 _formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 _handler = logging.StreamHandler()
