@@ -28,8 +28,6 @@ import re
 
 import numpy
 
-from spatialpy.core.model import Model
-from spatialpy.core.result import Result
 from spatialpy.core.spatialpyerror import ModelError, SimulationError, SimulationTimeout
 
 def _read_from_stdout(stdout ,verbose=True):
@@ -57,6 +55,7 @@ class Solver:
     :type debug_level: int
     """
     def __init__(self, model, debug_level=0):
+        from spatialpy.core.model import Model # pylint: disable=import-outside-toplevel
         if not (isinstance(model, Model) or type(model).__name__ == 'Model'):
             raise SimulationError("Model must be of type spatialpy.Model.")
         if not issubclass(self.__class__, Solver):
@@ -560,6 +559,7 @@ class Solver:
         :raises SimulationTimeout: TODO
         :raises SimulationError: TODO
         """
+        from spatialpy.core.result import Result # pylint: disable=import-outside-toplevel
         if number_of_trajectories > 1:
             result_list = []
         # Check if compiled, call compile() if not.
