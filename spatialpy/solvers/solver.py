@@ -66,6 +66,8 @@ class Solver:
         self.debug_level = debug_level
         self.model_name = self.model.name
         self.build_dir = None
+        self.propfilename = None
+        self.prop_file_name = None
         self.executable_name = 'ssa_sdpd'
         self.h = None  # basis function width
 
@@ -77,12 +79,6 @@ class Solver:
 
         tmpdir = tempfile.gettempdir()
         self.core_dir = os.path.join(os.path.join(tmpdir, 'spatialpy_core'), getpass.getuser())
-
-        # Write the propensity file
-        # Match except word characters \w = ([a-zA-Z0-9_]) and \_ = _ replace with ''
-        propfilename = re.sub(r'[^\w\_]', '', self.model_name)
-        self.propfilename = f"{propfilename}_generated_model"
-        self.prop_file_name = os.path.join(self.build_dir, f'{self.propfilename}.c')
 
         if not os.path.isdir(os.path.join(tmpdir, 'spatialpy_core')):
             os.mkdir(os.path.join(tmpdir, 'spatialpy_core'))
@@ -480,6 +476,11 @@ class Solver:
         # Create a unique directory each time call to compile.
         self.build_dir = tempfile.mkdtemp(
             prefix='spatialpy_build_', dir=os.environ.get('SPATIALPY_TMPDIR'))
+        # Write the propensity file
+        # Match except word characters \w = ([a-zA-Z0-9_]) and \_ = _ replace with ''
+        propfilename = re.sub(r'[^\w\_]', '', self.model_name)
+        self.propfilename = f"{propfilename}_generated_model"
+        self.prop_file_name = os.path.join(self.build_dir, f'{self.propfilename}.c')
 
         if self.debug_level >= 1:
             print(f"Compiling Solver.  Build dir: {self.build_dir}")
