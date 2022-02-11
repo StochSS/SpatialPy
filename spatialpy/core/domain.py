@@ -210,8 +210,8 @@ class Domain():
             log.warning("Type with type_id={} has zero particles in it", type_id)
         return count
 
-    def fill_with_particles(self, geometry_ivar, deltax, deltay=None, xmin=None,
-                            xmax=None, ymin=None, ymax=None, **kwargs):
+    def fill_with_particles(self, geometry_ivar, deltax, deltay=None, deltaz=None, xmin=None,
+                            xmax=None, ymin=None, ymax=None, zmin=None, zmax=None, **kwargs):
         """
         Fill a geometric shape with particles.
 
@@ -225,6 +225,9 @@ class Domain():
         :param deltay: Distance between particles on the y-axis (defaults to deltax).
         :type deltay: float
 
+        :param deltaz: Distance between particles on the z-axis (defaults to deltax).
+        :type deltaz: float
+
         :param xmin: Minimum x value of the bounding box (defaults to Domain.xlim[0]).
         :type xmin: float
 
@@ -237,12 +240,29 @@ class Domain():
         :param ymax: Maximum y value of the bounding box (defaults to Domain.ylim[1]).
         :type ymax: float
 
+        :param zmin: Minimum z value of the bounding box (defaults to Domain.zlim[0]).
+        :type zmin: float
+
+        :param zmax: Maximum z value of the bounding box (defaults to Domain.zlim[1]).
+        :type zmax: float
+
         :param kwargs: Key word arguments for Domain.add_point.
         :type kwargs: dict
 
         :returns: The number of particles that were created within this geometry.
         :rtype: int
         """
+        if deltax <= 0:
+            raise DomainError("Deltax must be greater than 0.")
+        if deltay is None:
+            deltay = deltax
+        elif deltay <= 0:
+            raise DomainError("Deltay must be greater than 0.")
+        if deltaz is None:
+            deltaz = deltax
+        elif deltaz <= 0:
+            raise DomainError("Deltaz must be greater than 0.")
+
         if xmin is None:
             xmin = self.xlim[0]
         if xmax is None:
@@ -251,15 +271,18 @@ class Domain():
             ymin = self.ylim[0]
         if ymax is None:
             ymax = self.ylim[1]
-        if deltay is None:
-            deltay = deltax
+        if zmin is None:
+            zmin = self.zlim[0]
+        if zmax is None:
+            zmax = self.zlim[1]
 
         count = 0
         for x in numpy.arange(xmin, xmax + deltax, deltax):
             for y in numpy.arange(ymin, ymax + deltay, deltay):
-                if geometry_ivar.inside((x, y), False):
-                    self.add_point([x, y, 0], **kwargs)
-                    count += 1
+                for z in numpy.arange(zmin, zmax + deltaz, deltaz):
+                    if geometry_ivar.inside((x, y), False):
+                        self.add_point([x, y, 0], **kwargs)
+                        count += 1
         return count
 
     def find_boundary_points(self):
