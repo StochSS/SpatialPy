@@ -49,7 +49,7 @@ common_color_scales = ["Plotly3","Jet","Blues","YlOrRd","PuRd","BuGn","YlOrBr","
                        "PuBu","GnBu","YlGn","Greens","Reds","Greys","RdPu","OrRd","Purples","Oranges"]
 
 
-def __configure_buttons(f_duration, t_duration):
+def _configure_buttons(f_duration, t_duration):
     play_btn = {"args": [None, {"frame": {"duration": f_duration, "redraw": False},
                                  "fromcurrent": True,
                                  "transition": {"duration": t_duration, "easing": "quadratic-in-out"}}],
@@ -64,7 +64,7 @@ def __configure_buttons(f_duration, t_duration):
                 }
     return [play_btn, pause_btn]
 
-def __get_slider_step(t_ndx_list, index, f_duration, t_duration):
+def _get_slider_step(t_ndx_list, index, f_duration, t_duration):
     return {"args": [[str(t_ndx_list[index])],
                      {"frame": {"duration": f_duration, "redraw": True},
                       "mode": "immediate",
@@ -73,7 +73,7 @@ def __get_slider_step(t_ndx_list, index, f_duration, t_duration):
             "label": str(t_ndx_list[index]),
             "method": "animate"}
 
-def __map_property_to_type(property_name, data, included_types_list, points, p_ndx):
+def _map_property_to_type(property_name, data, included_types_list, points, p_ndx):
     types = {}
     if property_name == 'type':
         for i, val in enumerate(data['type']):
@@ -97,7 +97,7 @@ def __map_property_to_type(property_name, data, included_types_list, points, p_n
         }
     return types
 
-def __map_species_to_types(data, name, spec_name, deterministic, concentration, points):
+def _map_species_to_types(data, name, spec_name, deterministic, concentration, points):
     types = {}
     for i, _ in enumerate(data['type']):
         if deterministic or not concentration:
@@ -112,7 +112,7 @@ def __map_species_to_types(data, name, spec_name, deterministic, concentration, 
             types[name] = {"points":[points[i]], "data":[spec_data]}
     return types
 
-def __setup_sliders(t_duration):
+def _setup_sliders(t_duration):
     return {"active": 0,
             "yanchor": "top",
             "xanchor": "left",
@@ -130,8 +130,8 @@ def __setup_sliders(t_duration):
             "steps": []
                }
 
-def __setup_updatemenues(f_duration, t_duration):
-    return {"buttons": __configure_buttons(f_duration, t_duration),
+def _setup_updatemenues(f_duration, t_duration):
+    return {"buttons": _configure_buttons(f_duration, t_duration),
             "direction": "left",
             "pad": {"r": 10, "t": 87},
             "showactive": False,
@@ -510,7 +510,7 @@ class Result():
             return
 
         # map data to types
-        types = __map_species_to_types(data, species, spec_name, deterministic, concentration, points)
+        types = _map_species_to_types(data, species, spec_name, deterministic, concentration, points)
         is_2d = self.model.domain.dimensions == 2
         trace_list = _plotly_iterate(types, size=size, colormap=colormap, is_2d=is_2d)
 
@@ -527,8 +527,8 @@ class Result():
 
         # function for 3D animations
         if animated and len(t_ndx_list) > 1:
-            fig["layout"]["updatemenus"] = [__setup_updatemenues(f_duration, t_duration)]
-            sliders_dict = __setup_sliders(t_duration)
+            fig["layout"]["updatemenus"] = [_setup_updatemenues(f_duration, t_duration)]
+            sliders_dict = _setup_sliders(t_duration)
 
             if deterministic or not concentration:
                 _data = data[spec_name]
@@ -552,13 +552,13 @@ class Result():
                 points, data = self.read_step(index)
 
                 # map data to types
-                types = __map_species_to_types(data, species, spec_name, deterministic, concentration, points)
+                types = _map_species_to_types(data, species, spec_name, deterministic, concentration, points)
                 trace_list = _plotly_iterate(types, size=size, colormap=colormap, cmin=cmin, cmax=cmax, is_2d=is_2d)
 
                 frame = {"data":trace_list, "name":str(t_ndx_list[index])}
                 frames.append(frame)
 
-                slider_step = __get_slider_step(t_ndx_list, index, f_duration, t_duration)
+                slider_step = _get_slider_step(t_ndx_list, index, f_duration, t_duration)
                 sliders_dict['steps'].append(slider_step)
 
             fig["layout"]["sliders"] = [sliders_dict]
@@ -747,7 +747,7 @@ class Result():
             plt.plot()
             return
 
-        types = __map_property_to_type(property_name, data, included_types_list, points, p_ndx)
+        types = _map_property_to_type(property_name, data, included_types_list, points, p_ndx)
         is_2d = self.model.domain.dimensions == 2
         trace_list = _plotly_iterate(types, size=size, property_name=property_name,
                                      colormap=colormap, is_2d=is_2d)
@@ -766,8 +766,8 @@ class Result():
 
         # function for 3D animations
         if animated and len(t_ndx_list) > 1:
-            fig["layout"]["updatemenus"] = [__setup_updatemenues(f_duration, t_duration)]
-            sliders_dict = __setup_sliders(t_duration)
+            fig["layout"]["updatemenus"] = [_setup_updatemenues(f_duration, t_duration)]
+            sliders_dict = _setup_sliders(t_duration)
 
             if property_name != "v":
                 cmin = min(data[property_name])
@@ -797,14 +797,14 @@ class Result():
                 points, data = self.read_step(index)
 
                 # map data to types
-                types = __map_property_to_type(property_name, data, included_types_list, points, p_ndx)
+                types = _map_property_to_type(property_name, data, included_types_list, points, p_ndx)
                 trace_list = _plotly_iterate(types, size=size, property_name=property_name,
                                              colormap=colormap, cmin=cmin, cmax=cmax, is_2d=is_2d)
 
                 frame = {"data":trace_list, "name":str(t_ndx_list[index])}
                 frames.append(frame)
 
-                slider_step = __get_slider_step(t_ndx_list, index, f_duration, t_duration)
+                slider_step = _get_slider_step(t_ndx_list, index, f_duration, t_duration)
                 sliders_dict['steps'].append(slider_step)
 
             fig["layout"]["sliders"] = [sliders_dict]
