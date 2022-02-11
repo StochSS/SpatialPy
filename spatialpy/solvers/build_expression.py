@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import ast
 
-class Expression:
+class BuildExpression:
     """
     Accepts an expression string to validate and convert.
     Allows for pre-flight syntax and namespace validations,
@@ -31,7 +31,7 @@ class Expression:
     :param blacklist: List of operators which are not allowed in the following expressions.
     Note that this will be "forwarded" to all following expressions.
     Ideally, one should define the "universal" blacklist in the constructor,
-    using the `Expression#with_blacklist` method for more granular validations.
+    using the `BuildExpression#with_blacklist` method for more granular validations.
     :type blacklist: list[str]
 
     :param namespace: Dictionary mapping allowed bare identifiers to their sanitized equivalents.
@@ -47,7 +47,7 @@ class Expression:
         if blacklist is None:
             blacklist = dict({})
         elif not isinstance(blacklist, dict):
-            blacklist = {ast_op: op for op, ast_op in Expression.map_operator(blacklist)}
+            blacklist = {ast_op: op for op, ast_op in BuildExpression.map_operator(blacklist)}
         if namespace is None:
             namespace = {}
         self.blacklist = blacklist
@@ -206,7 +206,7 @@ class Expression:
     }
 
     def __get_expr(self, converter):
-        validator = Expression.ValidationVisitor(self.namespace, self.blacklist, self.sanitize)
+        validator = BuildExpression.ValidationVisitor(self.namespace, self.blacklist, self.sanitize)
         validator.visit(converter.tree)
 
         if validator.invalid_operators:
@@ -227,12 +227,12 @@ class Expression:
         """
         if isinstance(operator, list):
             for oper in operator:
-                yield from Expression.map_operator(oper)
+                yield from BuildExpression.map_operator(oper)
         else:
             # Base case: operator is a single string.
-            if operator in Expression.operator_map:
-                yield operator, Expression.operator_map.get(operator)
-            elif operator in Expression.operator_map.values():
+            if operator in BuildExpression.operator_map:
+                yield operator, BuildExpression.operator_map.get(operator)
+            elif operator in BuildExpression.operator_map.values():
                 # Yield the operator directly if there is no need to map it.
                 yield operator
 
@@ -246,11 +246,11 @@ class Expression:
 
         :returns: New expression containing the given blacklist.
         The returned expression is a *copy* of the current expression.
-        :rtype: Expression
+        :rtype: BuildExpression
         """
         if blacklist is None:
             blacklist = self.blacklist.copy()
-        return Expression(blacklist=blacklist, namespace=self.namespace)
+        return BuildExpression(blacklist=blacklist, namespace=self.namespace)
 
     def with_namespace(self, namespace=None):
         """
@@ -265,11 +265,11 @@ class Expression:
 
         :returns: New expression containing the given namespace.
         The returned expression is a *copy* of the current expression.
-        :rtype: Expression
+        :rtype: BuildExpression
         """
         if namespace is None:
             namespace = self.namespace.copy()
-        return Expression(blacklist=self.blacklist.copy(), namespace=namespace)
+        return BuildExpression(blacklist=self.blacklist.copy(), namespace=namespace)
 
     def validate(self, statement):
         """
@@ -287,7 +287,7 @@ class Expression:
         :raises SyntaxError: The statement is not a valid Python expression.
         """
         expr = ast.parse(statement)
-        validator = Expression.ValidationVisitor(self.namespace, self.blacklist, self.sanitize)
+        validator = BuildExpression.ValidationVisitor(self.namespace, self.blacklist, self.sanitize)
         validator.visit(expr)
 
         return ExpressionResults(invalid_names=validator.invalid_names, invalid_operators=validator.invalid_operators)
@@ -369,7 +369,7 @@ class ExpressionConverter(ast.NodeVisitor):
         """
         Convert '^' to python pow operator.
 
-        :param expression: Expression to be converted.
+        :param expression: BuildExpression to be converted.
         :type expression: str
         """
         return expression.replace("^", "**")

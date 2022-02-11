@@ -24,7 +24,7 @@ from collections import OrderedDict
 import numpy
 import scipy
 
-from spatialpy.solvers.build.expression import Expression
+from spatialpy.solvers.build_expression import BuildExpression
 
 from spatialpy.core.spatialpyerror import ModelError
 
@@ -271,7 +271,7 @@ class Model():
             **self.sanitized_data_function_names(),
             **{name: name for name in self.reserved_names}
         }
-        self.expr = Expression(namespace=base_namespace, blacklist=["="], sanitize=True)
+        self.expr = BuildExpression(namespace=base_namespace, blacklist=["="], sanitize=True)
 
     def _ipython_display_(self, use_matplotlib=False):
         if self.domain is None:
