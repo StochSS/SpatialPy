@@ -398,7 +398,7 @@ good-names-rgxs=nu, c, c0, P0, x, y, z,
                 listOfParameters, listOfSpecies,
                 listOfReactions, listOfDiffusionRestrictions,
                 listOfDataFunctions, listOfInitialConditions,
-                listOfBoundaryConditions, staticDomain, u0
+                listOfBoundaryConditions, staticDomain, u0, h
 
 # Include a hint for the correct naming format with invalid-name.
 include-naming-hint=no

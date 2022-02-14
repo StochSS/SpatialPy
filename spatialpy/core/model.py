@@ -24,13 +24,7 @@ from collections import OrderedDict
 import numpy
 import scipy
 
-from spatialpy.core.species import Species
-from spatialpy.core.parameter import Parameter
-from spatialpy.core.reaction import Reaction
-from spatialpy.core.datafunction import DataFunction
-from spatialpy.core.domain import Domain
-from spatialpy.solvers.Solver import Solver
-from spatialpy.solvers.build.expression import Expression
+from spatialpy.solvers.build_expression import BuildExpression
 
 from spatialpy.core.spatialpyerror import ModelError
 
@@ -51,7 +45,7 @@ def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
     :rtype: string
     """
     try:
-        from spatialpy.stochss.StochSSexport import export # pylint: disable=import-outside-toplevel
+        from spatialpy.stochss.stochss_export import export # pylint: disable=import-outside-toplevel
     except ImportError as err:
         raise ImportError('StochSS export conversion not imported successfully') from err
 
@@ -277,7 +271,7 @@ class Model():
             **self.sanitized_data_function_names(),
             **{name: name for name in self.reserved_names}
         }
-        self.expr = Expression(namespace=base_namespace, blacklist=["="], sanitize=True)
+        self.expr = BuildExpression(namespace=base_namespace, blacklist=["="], sanitize=True)
 
     def _ipython_display_(self, use_matplotlib=False):
         if self.domain is None:
@@ -309,6 +303,7 @@ class Model():
 
         :raises ModelError: If obj is not a spatialpy.Species
         """
+        from spatialpy.core.species import Species # pylint: disable=import-outside-toplevel
         if isinstance(obj, list):
             for species in obj:
                 self.add_species(species)
@@ -396,6 +391,7 @@ class Model():
 
         :raises ModelError: if obj is not a spatialpy.Parameter
         """
+        from spatialpy.core.parameter import Parameter # pylint: disable=import-outside-toplevel
         if isinstance(params,list):
             for param in params:
                 self.add_parameter(param)
@@ -477,6 +473,7 @@ class Model():
 
         :raises ModelError: Invalid input/reaction to add_reaction()
         """
+        from spatialpy.core.reaction import Reaction # pylint: disable=import-outside-toplevel
         if isinstance(reacs, list):
             for reaction in reacs:
                 self.add_reaction(reaction)
@@ -568,6 +565,8 @@ class Model():
         :returns: A SpatialPy Result object containing simulation data.
         :rtype: spatialpy.Result.Result
         """
+        from spatialpy.solvers.solver import Solver # pylint: disable=import-outside-toplevel
+
         self.__check_if_complete()
 
         sol = Solver(self, debug_level=debug_level)
@@ -642,6 +641,7 @@ class Model():
 
         :raises ModelError: Invalid Domain object
         """
+        from spatialpy.core.domain import Domain # pylint: disable=import-outside-toplevel
         if not isinstance(domain,Domain) and type(domain).__name__ != 'Domain':
             raise ModelError("Unexpected parameter for add_domain. Parameter must be a Domain.")
 
@@ -662,6 +662,7 @@ class Model():
 
         :raises ModelError: Invalid DataFunction
         """
+        from spatialpy.core.datafunction import DataFunction # pylint: disable=import-outside-toplevel
         if isinstance(data_function, list):
             for data_fn in data_function:
                 self.add_data_function(data_fn)

@@ -24,7 +24,7 @@ from .datafunction import *
 from .domain import *
 from .geometry import *
 from .initialcondition import *
-from .model import *
+from .model import Model
 from .parameter import *
 from .reaction import *
 from .result import *
