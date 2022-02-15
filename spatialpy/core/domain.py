@@ -280,8 +280,8 @@ class Domain():
         for x in numpy.arange(xmin, xmax + deltax, deltax):
             for y in numpy.arange(ymin, ymax + deltay, deltay):
                 for z in numpy.arange(zmin, zmax + deltaz, deltaz):
-                    if geometry_ivar.inside((x, y), False):
-                        self.add_point([x, y, 0], **kwargs)
+                    if geometry_ivar.inside((x, y, z), False):
+                        self.add_point([x, y, z], **kwargs)
                         count += 1
         return count
 
