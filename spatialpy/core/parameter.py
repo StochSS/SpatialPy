@@ -59,7 +59,7 @@ class Parameter():
         """
         Evaluate the expression and return the (scalar) value.
 
-        :param namespace: TODO
+        :param namespace: A dictionary containing key,value pairings of expressions and evaluable executions.
         :type namespace: dict
         """
         if namespace is None:
