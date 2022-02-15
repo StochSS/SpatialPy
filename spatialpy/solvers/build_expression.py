@@ -74,12 +74,12 @@ class BuildExpression:
             self.invalid_names = []
             self.invalid_operators = []
 
-        def check_blacklist(self, operator):
+        def _check_blacklist(self, operator):
             """
-            TODO
+            Helper function to check literal expression operators against blacklisted operators
 
-            :param operator: TODO
-            :type operator: TODO
+            :param operator: operator to check
+            :type operator: ast.BinOp.Op | ast.UnaryOp.Op
             """
             operator = type(operator)
             if operator in self.blacklist:
@@ -129,7 +129,7 @@ class BuildExpression:
             :returns: The original node.
             :rtype: ast.BinOp
             """
-            self.check_blacklist(node.op)
+            self._check_blacklist(node.op)
             self.generic_visit(node)
             return node
 
@@ -143,7 +143,7 @@ class BuildExpression:
             :returns: The original node.
             :rtype: ast.UnaryOp
             """
-            self.check_blacklist(node.op)
+            self._check_blacklist(node.op)
             self.generic_visit(node)
             return node
 
@@ -157,7 +157,7 @@ class BuildExpression:
             :returns: The original node.
             :rtype: ast.BinBoolOpOp
             """
-            self.check_blacklist(node.op)
+            self._check_blacklist(node.op)
             self.generic_visit(node)
             return node
 
@@ -172,7 +172,7 @@ class BuildExpression:
             :rtype: ast.Compare
             """
             for operator in node.ops:
-                self.check_blacklist(operator)
+                self._check_blacklist(operator)
             self.generic_visit(node)
             return node
 
@@ -186,7 +186,7 @@ class BuildExpression:
             :returns: The original node.
             :rtype: ast.Assign
             """
-            self.check_blacklist(ast.Assign())
+            self._check_blacklist(ast.Assign())
             self.generic_visit(node)
             return node
 
@@ -220,9 +220,9 @@ class BuildExpression:
     @classmethod
     def map_operator(cls, operator):
         """
-        TODO
+        Map operator strings with built expressions.
 
-        :param operator: TODO
+        :param operator: Operator to be mapped
         :type operator: str | list[str]
         """
         if isinstance(operator, list):

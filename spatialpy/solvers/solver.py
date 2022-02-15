@@ -457,7 +457,7 @@ class Solver:
         :param profile: If True, will print additional profiling information
         :type profile: bool
 
-        :raises SimulationError: TODO
+        :raises SimulationError: Failed to compile
         """
         if self.model.timestep_size is None:
             self.model.timestep_size = 1e-5
@@ -551,14 +551,14 @@ class Solver:
         :param profile: Output gprof profiling data if available
         :type profile: bool
 
-        :param verbose: TODO
+        :param verbose: If true, prints addtional data to console
         :type verbose: bool
 
-        :returns: TODO
+        :returns: A SpatialPy Result object containing spatial and time series data from simulation.
         :rtype: spatialpy.Result.Result | list(spatialpy.Result.Result)
 
-        :raises SimulationTimeout: TODO
-        :raises SimulationError: TODO
+        :raises SimulationTimeout: Simulation exceeded timeout.
+        :raises SimulationError: Simulation execution failed.
         """
         from spatialpy.core.result import Result # pylint: disable=import-outside-toplevel
         if number_of_trajectories > 1:
