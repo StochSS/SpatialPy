@@ -180,7 +180,7 @@ def __get_particles(domain):
                       "nu":domain.nu[i],
                       "particle_id":i,
                       "point":list(point),
-                      "type":int(domain.type[i]),
+                      "type":int(domain.type_id[i]),
                       "volume":domain.vol[i]}
 
         s_particles.append(s_particle)

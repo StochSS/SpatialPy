@@ -111,7 +111,7 @@ class UniformInitialCondition(InitialCondition):
                 model.u0[spec_ndx, vtx] += self.count
         else:
             for i in range(model.domain.get_num_voxels()):
-                if model.domain.type[i] in self.types:
+                if model.domain.type_id[i] in self.types:
                     model.u0[spec_ndx, i] += self.count
 
 
@@ -159,7 +159,7 @@ class ScatterInitialCondition(InitialCondition):
         else:
             allowed_voxels = []
             for i in range(model.domain.get_num_voxels()):
-                if model.domain.type[i] in self.types:
+                if model.domain.type_id[i] in self.types:
                     allowed_voxels.append(i)
             nvox = len(allowed_voxels)
             if nvox==0:

@@ -839,7 +839,7 @@ class Result():
             writer = csv.writer(csvfile, delimiter=',')
             writer.writerow(['Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity'])
             for ndx in range(len(mesh.vertices)):
-                writer.writerow([ndx] + mesh.coordinates()[ndx,:].tolist() + [mesh.type[ndx]] \
+                writer.writerow([ndx] + mesh.coordinates()[ndx,:].tolist() + [mesh.type_id[ndx]] \
                     + [mesh.vol[ndx]] + [mesh.mass[ndx]] + [mesh.nu[ndx]])
 
         for species in self.model.listOfSpecies:

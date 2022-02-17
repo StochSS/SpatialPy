@@ -67,7 +67,7 @@ class Domain():
 
         self.vol = numpy.zeros((numpoints), dtype=float)
         self.mass = numpy.zeros((numpoints), dtype=float)
-        self.type = numpy.zeros((numpoints), dtype=int)
+        self.type_id = numpy.zeros((numpoints), dtype=int)
         self.nu = numpy.zeros((numpoints), dtype=float)
         self.c = numpy.zeros((numpoints), dtype=float)
         self.rho = numpy.zeros((numpoints), dtype=float)
@@ -143,7 +143,7 @@ class Domain():
 
         self.vol = numpy.append(self.vol, vol)
         self.mass = numpy.append(self.mass, mass)
-        self.type = numpy.append(self.type, type_id)
+        self.type_id = numpy.append(self.type_id, type_id)
         self.nu = numpy.append(self.nu, nu)
         self.c = numpy.append(self.c, c)
         self.rho = numpy.append(self.rho, rho)
@@ -192,7 +192,7 @@ class Domain():
         on_boundary = self.find_boundary_points()
         for v_ndx in range(self.get_num_voxels()):
             if geometry_ivar.inside(self.coordinates()[v_ndx, :], on_boundary[v_ndx]):
-                self.type[v_ndx] = type_id
+                self.type_id[v_ndx] = type_id
                 if vol is not None:
                     self.vol[v_ndx] = vol
                 if mass is not None:
@@ -541,11 +541,11 @@ class Domain():
 
             if included_types_list is None:
                 coords = self.vertices
-                type_list = self.type
+                type_list = self.type_id
             else:
                 coords = []
                 type_list = []
-                for i, val in enumerate(self.type):
+                for i, val in enumerate(self.type_id):
                     if val in included_types_list:
                         coords.append(self.vertices[i])
                         type_list.append(val)
@@ -562,15 +562,15 @@ class Domain():
             return
 
         types = {}
-        for i, val in enumerate(self.type):
+        for i, val in enumerate(self.type_id):
             name = f"type {val}"
 
             if included_types_list is None or val in included_types_list:
                 if name in types:
                     types[name]['points'].append(self.vertices[i])
-                    types[name]['data'].append(self.type[i])
+                    types[name]['data'].append(self.type_id[i])
                 else:
-                    types[name] = {"points":[self.vertices[i]], "data":[self.type[i]]}
+                    types[name] = {"points":[self.vertices[i]], "data":[self.type_id[i]]}
 
         is_2d = self.dimensions == 2
 
@@ -716,7 +716,7 @@ class Domain():
             for lnum, line in enumerate(file_obj):
                 try:
                     (ndx, type_id) = line.rstrip().split(',')
-                    self.type[int(ndx)] = int(type_id)
+                    self.type_id[int(ndx)] = int(type_id)
 
                     if type_id not in self.listOfTypeIDs:
                         # index is the "particle type", value is the "type ID"
@@ -840,7 +840,7 @@ class Domain():
                     obj.vertices[ndx,0] = x
                     obj.vertices[ndx,1] = y
                     obj.vertices[ndx,2] = z
-                    obj.type[ndx] = type_id
+                    obj.type_id[ndx] = type_id
                     obj.mass[ndx] = mass
                     obj.nu[ndx] = nu
                     obj.c[ndx] = c
@@ -920,7 +920,7 @@ class Domain():
                 obj.vertices[ndx,0] = x
                 obj.vertices[ndx,1] = y
                 obj.vertices[ndx,2] = 0.0
-                obj.type[ndx] = type_id
+                obj.type_id[ndx] = type_id
                 obj.mass[ndx] = mass
                 obj.nu[ndx] = nu
                 obj.c[ndx] = c
