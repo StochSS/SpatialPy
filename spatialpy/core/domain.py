@@ -562,9 +562,10 @@ class Domain():
                 coords = []
                 type_list = []
                 for i, val in enumerate(self.type_id):
-                    if val in included_types_list:
+                    type_id = self.typeNameMapping[val]
+                    if type_id in included_types_list:
                         coords.append(self.vertices[i])
-                        type_list.append(self.typeNameMapping[val])
+                        type_list.append(type_id)
                 coords = numpy.array(coords)
 
             plt.figure(figsize=(width, height))

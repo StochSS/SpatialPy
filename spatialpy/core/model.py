@@ -317,6 +317,7 @@ class Model():
         dep_graph = self.__create_dependency_graph()
 
         self.domain.listOfTypeIDs = list(self.domain.typeNdxMapping.values())
+        self.domain._get_type_name_mapping()
         return stoich_matrix, dep_graph
 
     def add_species(self, obj):
