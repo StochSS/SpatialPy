@@ -720,37 +720,40 @@ class Result():
             if height is None:
                 height = None if height == "auto" else 500
 
+        types = self.__map_property_to_type(property_name, data, included_types_list, points, p_ndx)
+
         if use_matplotlib:
             import matplotlib.pyplot as plt # pylint: disable=import-outside-toplevel
 
-            if property_name == "type" and included_types_list is not None:
-                coords = []
-                p_data = []
-                for i, val in enumerate(data[property_name]):
-                    type_id = self.model.domain.typeNameMapping[val]
-                    if type_id in included_types_list:
-                        coords.append(points[i])
-                        p_data.append(type_id)
-                points = numpy.array(coords)
-            elif property_name == 'v':
-                p_data = data[property_name]
-                p_data = [p_data[i][p_ndx] for i in range(0, len(p_data))]
-            else:
-                p_data = [self.model.domain.typeNameMapping[val] for val in data[property_name]]
-            if colormap is None:
-                colormap = "viridis"
+            if property_name == "type":
+                fig, ax = plt.subplots(figsize=(width, height))
+                for name, data in types.items():
+                    x_coords = list(map(lambda point: point[0], data["points"]))
+                    y_coords = list(map(lambda point: point[1], data["points"]))
 
-            plt.figure(figsize=(width, height))
-            plt.scatter(points[:, 0], points[:, 1], c=p_data, cmap=colormap)
+                    ax.scatter(x_coords, y_coords, label=name)
+                    ax.grid(linestyle='--', linewidth=1)
+                    ax.legend()
+                    if title is not None:
+                        ax.set_.title(title)
+            else:
+                if property_name == 'v':
+                    p_data = data[property_name]
+                    p_data = [p_data[i][p_ndx] for i in range(0, len(p_data))]
+                else:
+                    p_data = data[property_name]
+                if colormap is None:
+                    colormap = "viridis"
+
+                plt.figure(figsize=(width, height))
+                plt.scatter(points[:, 0], points[:, 1], c=p_data, cmap=colormap)
+                plt.colorbar()
+                if title is not None:
+                    plt.title(title)
+                plt.grid(linestyle='--', linewidth=1)
             plt.axis('scaled')
-            plt.colorbar()
-            if title is not None:
-                plt.title(title)
-            plt.grid(linestyle='--', linewidth=1)
-            plt.plot()
             return
 
-        types = self.__map_property_to_type(property_name, data, included_types_list, points, p_ndx)
         is_2d = self.model.domain.dimensions == 2
         trace_list = _plotly_iterate(types, size=size, property_name=property_name,
                                      colormap=colormap, is_2d=is_2d)

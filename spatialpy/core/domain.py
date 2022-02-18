@@ -552,32 +552,6 @@ class Domain():
 
         self._get_type_name_mapping()
 
-        if use_matplotlib:
-            import matplotlib.pyplot as plt # pylint: disable=import-outside-toplevel
-
-            if included_types_list is None:
-                coords = self.vertices
-                type_list = [self.typeNameMapping[ndx] for ndx in self.type_id]
-            else:
-                coords = []
-                type_list = []
-                for i, val in enumerate(self.type_id):
-                    type_id = self.typeNameMapping[val]
-                    if type_id in included_types_list:
-                        coords.append(self.vertices[i])
-                        type_list.append(type_id)
-                coords = numpy.array(coords)
-
-            plt.figure(figsize=(width, height))
-            plt.scatter(coords[:, 0], coords[:, 1], c=type_list, cmap=colormap)
-            plt.axis('scaled')
-            plt.colorbar()
-            if title is not None:
-                plt.title(title)
-            plt.grid(linestyle='--', linewidth=1)
-            plt.plot()
-            return
-
         types = {}
         for i, val in enumerate(self.type_id):
             name = self.typeNameMapping[val]
@@ -588,6 +562,23 @@ class Domain():
                     types[name]['data'].append(self.type_id[i])
                 else:
                     types[name] = {"points":[self.vertices[i]], "data":[self.type_id[i]]}
+
+        if use_matplotlib:
+            import matplotlib.pyplot as plt # pylint: disable=import-outside-toplevel
+
+            fig, ax = plt.subplots(figsize=(width, height))
+            for name, data in types.items():
+                x_coords = list(map(lambda point: point[0], data["points"]))
+                y_coords = list(map(lambda point: point[1], data["points"]))
+
+                ax.scatter(x_coords, y_coords, label=name)
+                ax.grid(linestyle='--', linewidth=1)
+                ax.legend()
+                if title is not None:
+                    ax.set_.title(title)
+
+            plt.axis('scaled')
+            return
 
         is_2d = self.dimensions == 2
 
