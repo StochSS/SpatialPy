@@ -20,6 +20,7 @@ import json
 
 import xml.etree.ElementTree as ET
 from itertools import combinations
+from collections import OrderedDict
 
 import numpy
 from plotly.offline import init_notebook_mode, iplot
@@ -72,7 +73,9 @@ class Domain():
         self.c = numpy.zeros((numpoints), dtype=float)
         self.rho = numpy.zeros((numpoints), dtype=float)
         self.fixed = numpy.zeros((numpoints), dtype=bool)
-        self.listOfTypeIDs = [1] # starts with type '1'
+        self.listOfTypeIDs = []
+        self.typeNdxMapping = OrderedDict()
+        self.typeNameMapping = None
 
         self.rho0 = rho0
         self.c0 = c0
@@ -102,6 +105,11 @@ class Domain():
     def _ipython_display_(self, use_matplotlib=False):
         self.plot_types(width="auto", height="auto", use_matplotlib=use_matplotlib)
 
+    def _get_type_name_mapping(self):
+        self.typeNameMapping = OrderedDict()
+        for name, ndx in self.typeNdxMapping.items():
+            self.typeNameMapping[ndx] = name
+
     def add_point(self, point, vol=0, mass=0, type_id=0, nu=0, fixed=False, rho=None, c=0):
         """
         Add a single point particle to the domain space.
@@ -116,7 +124,7 @@ class Domain():
         :type mass: float
 
         :param type_id: Particle type ID of particle to be created
-        :type type_id: int
+        :type type_id: str | int
 
         :param nu: Default viscosity of particle to be created
         :type nu: float
@@ -134,16 +142,20 @@ class Domain():
         if vol < 0:
             raise DomainError("Volume must be a positive value.")
 
-        if type_id not in self.listOfTypeIDs:
-            # index is the "particle type", value is the "type ID"
-            self.listOfTypeIDs.append(type_id)
+        if type_id == 0:
+            self.type_id = numpy.append(self.type_id, 0)
+        else:
+            if isinstance(type_id, int):
+                type_id = f"type {type_id}"
+            if type_id not in self.typeNdxMapping:
+                self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
+            self.type_id = numpy.append(self.type_id, self.typeNdxMapping[type_id])
 
         if rho is None:
             rho = mass / vol
 
         self.vol = numpy.append(self.vol, vol)
         self.mass = numpy.append(self.mass, mass)
-        self.type_id = numpy.append(self.type_id, type_id)
         self.nu = numpy.append(self.nu, nu)
         self.c = numpy.append(self.c, c)
         self.rho = numpy.append(self.rho, rho)
@@ -160,7 +172,7 @@ class Domain():
         :type geometry_ivar: spatialpy.Geometry.Geometry
 
         :param type_id: The identifier for this type.
-        :type type_id: int
+        :type type_id: str | int
 
         :param vol: The volume of each particle in the type.
         :type vol: float
@@ -183,16 +195,18 @@ class Domain():
         :returns: The number of particles that were tagged with this type_id.
         :rtype: int
         """
-
-        if type_id not in self.listOfTypeIDs:
-            # index is the "particle type", value is the "type ID"
-            self.listOfTypeIDs.append(type_id)
+        if isinstance(type_id, int):
+            if type_id <= 0:
+                raise DomainError("Type_id must be a non-zero positive integer or a string.")
+            type_id = f"type {type_id}"
+        if type_id not in self.typeNdxMapping:
+            self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
         # apply the type to all points, set type for any points that match
         count = 0
         on_boundary = self.find_boundary_points()
         for v_ndx in range(self.get_num_voxels()):
             if geometry_ivar.inside(self.coordinates()[v_ndx, :], on_boundary[v_ndx]):
-                self.type_id[v_ndx] = type_id
+                self.type_id[v_ndx] = self.typeNdxMapping[type_id]
                 if vol is not None:
                     self.vol[v_ndx] = vol
                 if mass is not None:
@@ -536,19 +550,21 @@ class Domain():
         else:
             self.dimensions = 3
 
+        self._get_type_name_mapping()
+
         if use_matplotlib:
             import matplotlib.pyplot as plt # pylint: disable=import-outside-toplevel
 
             if included_types_list is None:
                 coords = self.vertices
-                type_list = self.type_id
+                type_list = [self.typeNameMapping[ndx] for ndx in self.type_id]
             else:
                 coords = []
                 type_list = []
                 for i, val in enumerate(self.type_id):
                     if val in included_types_list:
                         coords.append(self.vertices[i])
-                        type_list.append(val)
+                        type_list.append(self.typeNameMapping[val])
                 coords = numpy.array(coords)
 
             plt.figure(figsize=(width, height))
@@ -563,7 +579,7 @@ class Domain():
 
         types = {}
         for i, val in enumerate(self.type_id):
-            name = f"type {val}"
+            name = self.typeNameMapping[val]
 
             if included_types_list is None or val in included_types_list:
                 if name in types:
@@ -705,22 +721,26 @@ class Domain():
 
         return cls.import_meshio_object(meshio.msh_io.read(filename))
 
-    def read_stochss_subdomain_file(self, filename):
+    def read_stochss_subdomain_file(self, filename, type_ids=None):
         """
         Read a .txt file that conains the StochSS v1.x spatial subdomain descriptions.
 
         :param filename: StochSS v1.x subdomain description filename.
         :type filename: str
+
+        :param type_ids: Mapping of type indecies to type names.
+        :type type_ids: dict{str:str}
         """
         with open(filename,'r', encoding="utf-8") as file_obj:
             for lnum, line in enumerate(file_obj):
                 try:
                     (ndx, type_id) = line.rstrip().split(',')
-                    self.type_id[int(ndx)] = int(type_id)
 
-                    if type_id not in self.listOfTypeIDs:
-                        # index is the "particle type", value is the "type ID"
-                        self.listOfTypeIDs.append(type_id)
+                    type_id = f"type {type_id}" if type_ids is None else type_ids[type_id]
+                    if type_id not in self.typeNdxMapping:
+                        self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
+
+                    self.type_id[int(ndx)] = self.typeNdxMapping[type_id]
 
                 except ValueError as err:
                     raise DomainError(f"Could not read in subdomain file, error on line {lnum}: {line}") from err
@@ -746,16 +766,18 @@ class Domain():
                         rho0=domain['rho_0'], c0=domain['c_0'], P0=domain['p_0'], gravity=domain['gravity'])
 
             for particle in domain['particles']:
+                try:
+                    type_id = list(filter(
+                        lambda d_type, t_ndx=particle['type']: d_type['typeID'] == t_ndx, domain['types']
+                    ))[0]['name']
+                except IndexError:
+                    type_id = particle['type']
                 # StochSS backward compatability check for rho
                 rho = None if "rho" not in particle.keys() else particle['rho']
                 # StochSS backward compatability check for c
                 c = 0 if "c" not in particle.keys() else particle['c']
-                obj.add_point(particle['point'], particle['volume'], particle['mass'],
-                              particle['type'], particle['nu'], particle['fixed'], rho=rho, c=c)
-
-                if particle['type'] not in obj.listOfTypeIDs:
-                    # index is the "particle type", value is the "type ID"
-                    obj.listOfTypeIDs.append(particle['type'])
+                obj.add_point(particle['point'], vol=particle['volume'], mass=particle['mass'],
+                              type_id=type_id, nu=particle['nu'], fixed=particle['fixed'], rho=rho, c=c)
 
             return obj
         except KeyError as err:
@@ -817,16 +839,11 @@ class Domain():
         """
         # Create domain object
         numberparticles = nx * ny * nz
-        obj = Domain(numberparticles, xlim, ylim, zlim, **kwargs)
-        if type_id not in obj.listOfTypeIDs:
-            # index is the "particle type", value is the "type ID"
-            obj.listOfTypeIDs.append(type_id)
+        obj = Domain(0, xlim, ylim, zlim, **kwargs)
         # Vertices
-        obj.vertices = numpy.zeros((numberparticles, 3), dtype=float)
         x_list = numpy.linspace(xlim[0], xlim[1], nx)
         y_list = numpy.linspace(ylim[0], ylim[1], ny)
         z_list = numpy.linspace(zlim[0], zlim[1], nz)
-        ndx = 0
         totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0]) * (zlim[1] - zlim[0])
         vol = totalvolume / numberparticles
         if vol < 0:
@@ -834,19 +851,8 @@ class Domain():
         for x in x_list:
             for y in y_list:
                 for z in z_list:
-                    if rho is None:
-                        rho = mass / vol
-                    obj.vol[ndx] = vol
-                    obj.vertices[ndx,0] = x
-                    obj.vertices[ndx,1] = y
-                    obj.vertices[ndx,2] = z
-                    obj.type_id[ndx] = type_id
-                    obj.mass[ndx] = mass
-                    obj.nu[ndx] = nu
-                    obj.c[ndx] = c
-                    obj.rho[ndx] = rho
-                    obj.fixed[ndx] = fixed
-                    ndx += 1
+                    obj.add_point([x, y, z], vol=vol, mass=mass, rho=rho,
+                                  type_id=type_id, nu=nu, c=c, fixed=fixed)
         return obj
 
     @classmethod
@@ -899,32 +905,16 @@ class Domain():
         """
         # Create domain object
         numberparticles = nx * ny
-        obj = Domain(numberparticles, xlim, ylim, (0, 0), **kwargs)
-        if type_id not in obj.listOfTypeIDs:
-            # index is the "particle type", value is the "type ID"
-            obj.listOfTypeIDs.append(type_id)
+        obj = Domain(0, xlim, ylim, (0, 0), **kwargs)
         # Vertices
-        obj.vertices = numpy.zeros((int(nx) * int(ny), 3), dtype=float)
         x_list = numpy.linspace(xlim[0], xlim[1], nx)
         y_list = numpy.linspace(ylim[0], ylim[1], ny)
-        ndx = 0
         totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0])
         vol = totalvolume / numberparticles
         if vol < 0:
             raise DomainError("Paritcles cannot have 0 volume")
         for x in x_list:
             for y in y_list:
-                if rho is None:
-                    rho = mass / vol
-                obj.vol[ndx] = vol
-                obj.vertices[ndx,0] = x
-                obj.vertices[ndx,1] = y
-                obj.vertices[ndx,2] = 0.0
-                obj.type_id[ndx] = type_id
-                obj.mass[ndx] = mass
-                obj.nu[ndx] = nu
-                obj.c[ndx] = c
-                obj.rho[ndx] = rho
-                obj.fixed[ndx] = fixed
-                ndx+=1
+                obj.add_point([x, y, 0], vol=vol, mass=mass, rho=rho,
+                              type_id=type_id, nu=nu, c=c, fixed=fixed)
         return obj

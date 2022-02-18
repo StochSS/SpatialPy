@@ -192,7 +192,7 @@ def __get_species(species, name):
 
 
 def __write_to_file(model, path):
-    with open(path, "w") as model_file:
+    with open(path, "w", encoding="utf-8") as model_file:
         json.dump(model, model_file, indent=4, sort_keys=True)
 
 
@@ -208,7 +208,7 @@ def export(model, path=None, return_stochss_model=False):
         return_stochss_model : bool
             Whether or not to return the model
     """
-
+    _ = model.compile_prep()
     if path is None:
         path = f"{model.name}.smdl"
 
