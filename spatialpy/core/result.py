@@ -73,30 +73,6 @@ def _get_slider_step(t_ndx_list, index, f_duration, t_duration):
             "label": str(t_ndx_list[index]),
             "method": "animate"}
 
-def _map_property_to_type(property_name, data, included_types_list, points, p_ndx):
-    types = {}
-    if property_name == 'type':
-        for i, val in enumerate(data['type']):
-            name = f"type {val}"
-
-            if included_types_list is None or val in included_types_list:
-                if name in types:
-                    types[name]['points'].append(points[i])
-                    types[name]['data'].append(data[property_name][i])
-                else:
-                    types[name] = {"points":[points[i]], "data":[data[property_name][i]]}
-    elif property_name == 'v':
-        types[property_name] = {
-            "points": points,
-            "data" : [data[property_name][i][p_ndx] for i in range(0,len(data[property_name]))]
-        }
-    else:
-        types[property_name] = {
-            "points": points,
-            "data" : data[property_name]
-        }
-    return types
-
 def _map_species_to_types(data, name, spec_name, deterministic, concentration, points):
     types = {}
     for i, _ in enumerate(data['type']):
@@ -241,6 +217,30 @@ class Result():
                     print(f"Could not delete '{self.result_dir}'")
         except Exception:
             pass
+
+    def __map_property_to_type(self, property_name, data, included_types_list, points, p_ndx):
+        types = {}
+        if property_name == 'type':
+            for i, val in enumerate(data['type']):
+                name = self.model.domain.typeNameMapping[val]
+
+                if included_types_list is None or val in included_types_list:
+                    if name in types:
+                        types[name]['points'].append(points[i])
+                        types[name]['data'].append(data[property_name][i])
+                    else:
+                        types[name] = {"points":[points[i]], "data":[data[property_name][i]]}
+        elif property_name == 'v':
+            types[property_name] = {
+                "points": points,
+                "data" : [data[property_name][i][p_ndx] for i in range(0,len(data[property_name]))]
+            }
+        else:
+            types[property_name] = {
+                "points": points,
+                "data" : data[property_name]
+            }
+        return types
 
     def read_step(self, step_num, debug=False):
         """
@@ -727,15 +727,16 @@ class Result():
                 coords = []
                 p_data = []
                 for i, val in enumerate(data[property_name]):
-                    if val in included_types_list:
+                    type_id = self.model.domain.typeNameMapping[val]
+                    if type_id in included_types_list:
                         coords.append(points[i])
-                        p_data.append(val)
+                        p_data.append(type_id)
                 points = numpy.array(coords)
             elif property_name == 'v':
                 p_data = data[property_name]
                 p_data = [p_data[i][p_ndx] for i in range(0, len(p_data))]
             else:
-                p_data = data[property_name]
+                p_data = [self.model.domain.typeNameMapping[val] for val in data[property_name]]
             if colormap is None:
                 colormap = "viridis"
 
@@ -749,7 +750,7 @@ class Result():
             plt.plot()
             return
 
-        types = _map_property_to_type(property_name, data, included_types_list, points, p_ndx)
+        types = self.__map_property_to_type(property_name, data, included_types_list, points, p_ndx)
         is_2d = self.model.domain.dimensions == 2
         trace_list = _plotly_iterate(types, size=size, property_name=property_name,
                                      colormap=colormap, is_2d=is_2d)
@@ -799,7 +800,7 @@ class Result():
                 points, data = self.read_step(index)
 
                 # map data to types
-                types = _map_property_to_type(property_name, data, included_types_list, points, p_ndx)
+                types = self.__map_property_to_type(property_name, data, included_types_list, points, p_ndx)
                 trace_list = _plotly_iterate(types, size=size, property_name=property_name,
                                              colormap=colormap, cmin=cmin, cmax=cmax, is_2d=is_2d)
 
@@ -839,7 +840,7 @@ class Result():
             writer = csv.writer(csvfile, delimiter=',')
             writer.writerow(['Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity'])
             for ndx in range(len(mesh.vertices)):
-                writer.writerow([ndx] + mesh.coordinates()[ndx,:].tolist() + [mesh.type[ndx]] \
+                writer.writerow([ndx] + mesh.coordinates()[ndx,:].tolist() + [mesh.type_id[ndx]] \
                     + [mesh.vol[ndx]] + [mesh.mass[ndx]] + [mesh.nu[ndx]])
 
         for species in self.model.listOfSpecies:

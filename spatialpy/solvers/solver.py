@@ -98,9 +98,8 @@ class Solver:
         except Exception:
             pass
 
-    def __create_propensity_file(self, file_name=None):
+    def __create_propensity_file(self, stoich_matrix, dep_graph, file_name=None):
         # process initial conditions here
-        self.model._apply_initial_conditions()
         nspecies = self.model.u0.shape[0]
         ncells = self.model.u0.shape[1]
 
@@ -145,7 +144,7 @@ class Solver:
             "__DEFINE_CHEM_FUN_INITS__": deterministic_chem_rxn_function_init,
             "__INIT_PARTICLES__": self.__get_particle_inits(num_chem_species),
             "__DATA_FUNCTION_ASSIGN__": self.__get_data_fn_assign(ncells),
-            "__INPUT_CONSTANTS__": self.__get_input_constants(nspecies, ncells),
+            "__INPUT_CONSTANTS__": self.__get_input_constants(nspecies, ncells, stoich_matrix, dep_graph),
             "__SYSTEM_CONFIG__": self.__get_system_config(num_types, num_chem_species, num_chem_rxns,
                                                           num_stoch_species, num_stoch_rxns, num_data_fn),
             "__INIT_RDME__": init_rdme,
@@ -209,7 +208,7 @@ class Solver:
 
         return outstr
 
-    def __get_input_constants(self, nspecies, ncells):
+    def __get_input_constants(self, nspecies, ncells, stoich_matrix, dep_graph):
         input_constants = ""
 
         outstr = f"unsigned int input_u0[{nspecies * ncells}] = "
@@ -224,7 +223,6 @@ class Solver:
         input_constants += outstr
 
         if len(self.model.listOfSpecies) > 0:
-            stoich_matrix = self.model._create_stoichiometric_matrix()
             if min(stoich_matrix.shape) > 0:
                 dense_matrix = stoich_matrix.todense() # this will not work if Nrxn or Nspecies is zero
                 outstr = f"static int input_N_dense[{dense_matrix.shape[0] * dense_matrix.shape[1]}] = "
@@ -258,7 +256,6 @@ class Solver:
                 input_constants += "static size_t input_jcN[0] = {};\n"
                 input_constants += "static int input_prN[0] = {};\n"
 
-            dep_graph = self.model._create_dependency_graph()
             input_constants += self.__get_input_constant("static size_t input_irG", dep_graph.indices)
             input_constants += self.__get_input_constant("static size_t input_jcG", dep_graph.indptr)
 
@@ -316,9 +313,9 @@ class Solver:
 
     def __get_particle_inits(self, num_chem_species):
         init_particles = ""
-        if self.model.domain.type is None:
-            self.model.domain.type = numpy.ones(self.model.domain.get_num_voxels())
-        for i, type_id in enumerate(self.model.domain.type):
+        if self.model.domain.type_id is None:
+            self.model.domain.type_id = numpy.ones(self.model.domain.get_num_voxels())
+        for i, type_id in enumerate(self.model.domain.type_id):
             if type_id == 0:
                 errmsg = "Not all particles have been defined in a type. Mass and other properties must be defined"
                 raise SimulationError(errmsg)
@@ -459,19 +456,7 @@ class Solver:
 
         :raises SimulationError: Failed to compile
         """
-        if self.model.timestep_size is None:
-            self.model.timestep_size = 1e-5
-        if self.model.output_freq < self.model.timestep_size:
-            raise ModelError("Timestep size exceeds output frequency.")
-
-        # Make sure all paramters are evaluated to scalars before we write them to the file.
-        self.model._resolve_parameters()
-
-        # Update the models diffusion restrictions
-        self.model._update_diffusion_restrictions()
-
-        # Create the models expression utility
-        self.model._get_expression_utility()
+        stoich_matrix, dep_graph = self.model.compile_prep()
 
         # Create a unique directory each time call to compile.
         self.build_dir = tempfile.mkdtemp(
@@ -487,7 +472,7 @@ class Solver:
 
         if self.debug_level >= 1:
             print(f"Creating propensity file {self.prop_file_name}")
-        self.__create_propensity_file(file_name=self.prop_file_name)
+        self.__create_propensity_file(stoich_matrix, dep_graph, file_name=self.prop_file_name)
 
         # Build the solver
         makefile = self.spatialpy_rootdir+'/build/Makefile'
