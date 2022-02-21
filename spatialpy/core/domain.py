@@ -573,9 +573,9 @@ class Domain():
 
                 ax.scatter(x_coords, y_coords, label=name)
                 ax.grid(linestyle='--', linewidth=1)
-                ax.legend()
+                ax.legend(loc='upper right', fontsize=12)
                 if title is not None:
-                    ax.set_.title(title)
+                    ax.set_title(title)
 
             plt.axis('scaled')
             return

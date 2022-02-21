@@ -104,6 +104,10 @@ class Model():
         self.u0 = None
 
     def __str__(self):
+        try:
+            self.__update_diffusion_restrictions()
+        except Exception:
+            pass
         self.__resolve_parameters()
         divider = f"\n{'*'*10}\n"
 
@@ -287,9 +291,10 @@ class Model():
     def __update_diffusion_restrictions(self):
         for species in self.listOfSpecies.values():
             if isinstance(species.restrict_to, list):
-                self.listOfDiffusionRestrictions[species] = species.restrict_to
-            elif isinstance(species.restrict_to, int):
-                self.listOfDiffusionRestrictions[species] = [species.restrict_to]
+                restrict_to = [self.domain.typeNdxMapping[type_id] for type_id in species.restrict_to]
+                self.listOfDiffusionRestrictions[species] = restrict_to
+            elif isinstance(species.restrict_to, str):
+                self.listOfDiffusionRestrictions[species] = [self.domain.typeNdxMapping[species.restrict_to]]
 
     def compile_prep(self):
         """
@@ -309,6 +314,9 @@ class Model():
 
         self.__check_if_complete()
 
+        self.domain.listOfTypeIDs = list(self.domain.typeNdxMapping.values())
+        self.domain._get_type_name_mapping()
+        
         self.__update_diffusion_restrictions()
         self.__apply_initial_conditions()
         self.__resolve_parameters()
@@ -316,8 +324,6 @@ class Model():
         stoich_matrix = self.__create_stoichiometric_matrix()
         dep_graph = self.__create_dependency_graph()
 
-        self.domain.listOfTypeIDs = list(self.domain.typeNdxMapping.values())
-        self.domain._get_type_name_mapping()
         return stoich_matrix, dep_graph
 
     def add_species(self, obj):

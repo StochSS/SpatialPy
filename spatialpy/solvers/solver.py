@@ -174,10 +174,10 @@ class Solver:
                 if isinstance(reac.restrict_to, list) and len(reac.restrict_to) > 0:
                     conds = []
                     for type_id in reac.restrict_to:
-                        conds.append(f"sd == {type_id}")
+                        conds.append(f"sd == {self.model.domain.typeNdxMapping[type_id]}")
                     func += "||".join(conds)
                 elif isinstance(reac.restrict_to, int):
-                    func += f"sd == {reac.restrict_to}"
+                    func += f"sd == {self.model.domain.typeNdxMapping[reac.restrict_to]}"
                 else:
                     errmsg = "When restricting reaction to types, you must specify either a list or an int"
                     raise SimulationError(errmsg)
@@ -359,10 +359,10 @@ class Solver:
                 if isinstance(reac.restrict_to, list) and len(reac.restrict_to) > 0:
                     conds = []
                     for type_id in reac.restrict_to:
-                        conds.append(f"sd == {type_id}")
+                        conds.append(f"sd == {self.model.domain.typeNdxMapping[type_id]}")
                     func += "||".join(conds)
                 elif isinstance(reac.restrict_to, int):
-                    func += f"sd == {reac.restrict_to}"
+                    func += f"sd == {self.model.domain.typeNdxMapping[reac.restrict_to]}"
                 else:
                     errmsg = "When restricting reaction to types, you must specify either a list or an int"
                     raise SimulationError(errmsg)

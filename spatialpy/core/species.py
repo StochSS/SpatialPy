@@ -30,7 +30,7 @@ class Species():
 
     :param restrict_to: Set the diffusion coefficient to zero for 'species' in all types not in 'listOfTypes'.
     This effectively restricts the movement of 'species' to the types specified in 'listOfTypes'.
-    :type restrict_to: int or list of ints
+    :type restrict_to: int, str, list of ints or list of strs
     """
     def __init__(self, name=None, diffusion_coefficient=None, restrict_to=None):
         if name is None:
@@ -46,13 +46,21 @@ class Species():
         if isinstance(diffusion_coefficient, (float, int)) and diffusion_coefficient < 0:
             raise SpeciesError("Diffusion coefficient must be non-negative.")
 
-        if not (restrict_to is None or isinstance(restrict_to, (int, list))):
-            raise SpeciesError("Restrict_to must be an int or list of ints.")
+        if not (restrict_to is None or isinstance(restrict_to, (str, int, list))):
+            raise SpeciesError("Restrict_to must be an int, str or list of ints or strs.")
         try:
             if isinstance(restrict_to, list):
-                restrict_to = [int(val) for val in restrict_to]
+                type_ids = []
+                for type_id in restrict_to:
+                    if isinstance(type_id, str):
+                        type_ids.append(type_id)
+                    else:
+                        type_ids.append(f"type {type_id}")
+                restrict_to = type_ids
+            elif isinstance(restrict_to, int):
+                restrict_to = f"type {restrict_to}"
         except Exception as err:
-            raise SpeciesError("Restrict_to must be an int or list of ints.") from err
+            raise SpeciesError("Restrict_to must be an int, str or list of ints or strs.") from err
 
         self.name = name
         self.diffusion_coefficient = diffusion_coefficient
