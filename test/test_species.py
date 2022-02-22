@@ -73,7 +73,7 @@ class TestSpecies(unittest.TestCase):
 
     def test_constructor__restrict_to_not_accepted_type(self):
         """ Test the Species constructor with a restrict_to that is not the proper type. """
-        with self.assertRaises(ReactionError):
+        with self.assertRaises(SpeciesError):
             species = Species(name="test_species", diffusion_coefficient="0", restrict_to=1.5)
 
 
