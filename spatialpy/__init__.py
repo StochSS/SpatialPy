@@ -20,11 +20,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #from .spatialpy import *
 
 import sys
-if (sys.version_info < (3,0)):
-    raise Exception("SpatialPy only works in Python 3.0 and higher")
+
+from spatialpy.core import *
+from spatialpy.solvers import *
+
 from .__version__ import __version__, __title__, __description__, __url__
 from .__version__ import __author__, __email__
 from .__version__ import __license__, __copyright__
 
-from spatialpy.core import *
-from spatialpy.solvers import *
+if sys.version_info < (3,0):
+    raise Exception("SpatialPy only works in Python 3.0 and higher")

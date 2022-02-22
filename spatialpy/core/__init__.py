@@ -17,20 +17,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import logging
-from .BoundaryCondition import *
-from .cleanup import *
-from .DataFunction import *
-from .Domain import *
-from .Geometry import *
-from .InitialCondition import *
-from .Model import *
-from .Parameter import *
-from .Reaction import *
-from .Result import *
-from .spatialpyError import *
-from .Species import *
-from .VTKReader import *
 from spatialpy.__version__ import __version__
+from .boundarycondition import *
+from .cleanup import *
+from .datafunction import *
+from .domain import *
+from .geometry import *
+from .initialcondition import *
+from .model import Model
+from .parameter import *
+from .reaction import *
+from .result import *
+from .spatialpyerror import *
+from .species import *
+from .vtkreader import *
 
 _formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 _handler = logging.StreamHandler()
