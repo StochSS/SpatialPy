@@ -79,14 +79,14 @@ class TestSpecies(unittest.TestCase):
 
     def test_constructor__int_restrict_to(self):
         """ Test the Species constructor with a int restrict_to. """
-        species = Species(name="test_species", diffusion_coefficient="0", restrict_to=1)
+        species = Species(name="test_species", diffusion_coefficient=0, restrict_to=1)
         self.assertIsInstance(species.restrict_to, list)
         self.assertEqual(species.restrict_to, ["type_1"])
 
 
     def test_constructor__str_restrict_to(self):
         """ Test the Species constructor with a string restrict_to. """
-        species = Species(name="test_species", diffusion_coefficient="0", restrict_to="Walls")
+        species = Species(name="test_species", diffusion_coefficient=0, restrict_to="Walls")
         self.assertIsInstance(species.restrict_to, list)
         self.assertEqual(species.restrict_to, ["type_Walls"])
 
