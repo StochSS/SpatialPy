@@ -291,10 +291,9 @@ class Model():
     def __update_diffusion_restrictions(self):
         for species in self.listOfSpecies.values():
             if isinstance(species.restrict_to, list):
-                restrict_to = [self.domain.typeNdxMapping[type_id] for type_id in species.restrict_to]
-                self.listOfDiffusionRestrictions[species] = restrict_to
+                self.listOfDiffusionRestrictions[species] = species.restrict_to
             elif isinstance(species.restrict_to, str):
-                self.listOfDiffusionRestrictions[species] = [self.domain.typeNdxMapping[species.restrict_to]]
+                self.listOfDiffusionRestrictions[species] = [species.restrict_to]
 
     def compile_prep(self):
         """
@@ -314,8 +313,7 @@ class Model():
 
         self.__check_if_complete()
 
-        self.domain.listOfTypeIDs = list(self.domain.typeNdxMapping.values())
-        self.domain._get_type_name_mapping()
+        self.domain.compile_prep()
         
         self.__update_diffusion_restrictions()
         self.__apply_initial_conditions()

@@ -48,23 +48,17 @@ class Species():
 
         if not (restrict_to is None or isinstance(restrict_to, (str, int, list))):
             raise SpeciesError("Restrict_to must be an int, str or list of ints or strs.")
-        try:
-            if isinstance(restrict_to, list):
-                type_ids = []
-                for type_id in restrict_to:
-                    if isinstance(type_id, str):
-                        type_ids.append(type_id)
-                    else:
-                        type_ids.append(f"type {type_id}")
-                restrict_to = type_ids
-            elif isinstance(restrict_to, int):
-                restrict_to = f"type {restrict_to}"
-        except Exception as err:
-            raise SpeciesError("Restrict_to must be an int, str or list of ints or strs.") from err
+        if restrict_to is not None and isinstance(restrict_to, (int, str)):
+            restrict_to = [restrict_to]
 
         self.name = name
         self.diffusion_coefficient = diffusion_coefficient
-        self.restrict_to = restrict_to
+        if restrict_to is None:
+            self.restrict_to = restrict_to
+        else:
+            self.restrict_to = []
+            for type_id in restrict_to:
+                self.restrict_to.append(f"type_{type_id}")
 
     def __str__(self):
         print_string = f"{self.name}: {str(self.diffusion_coefficient)}"

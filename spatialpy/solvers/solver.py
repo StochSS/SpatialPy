@@ -174,10 +174,8 @@ class Solver:
                 if isinstance(reac.restrict_to, list) and len(reac.restrict_to) > 0:
                     conds = []
                     for type_id in reac.restrict_to:
-                        conds.append(f"sd == {self.model.domain.typeNdxMapping[type_id]}")
+                        conds.append(f"sd == {type_id}")
                     func += "||".join(conds)
-                elif isinstance(reac.restrict_to, int):
-                    func += f"sd == {self.model.domain.typeNdxMapping[reac.restrict_to]}"
                 else:
                     errmsg = "When restricting reaction to types, you must specify either a list or an int"
                     raise SimulationError(errmsg)
@@ -272,7 +270,7 @@ class Solver:
         outstr = f"const double input_subdomain_diffusion_matrix[{len(self.model.listOfSpecies) * num_types}] = "
         outstr += "{"
         for i, species in enumerate(self.model.listOfSpecies.values()):
-            for j, type_id in enumerate(self.model.domain.listOfTypeIDs):
+            for j, type_id in enumerate(self.model.domain.typeNdxMapping.keys()):
                 if i + j > 0:
                     outstr += ','
                 try:
@@ -309,14 +307,16 @@ class Solver:
             param = sanitized_parameters[pname]
             parameters += f"const double {param} = {self.model.listOfParameters[pname].value};\n"
 
+        for name, ndx in self.model.domain.typeNdxMapping.items():
+            parameters += f"const size_t {name} = {ndx};\n"
         return parameters
 
     def __get_particle_inits(self, num_chem_species):
         init_particles = ""
         if self.model.domain.type_id is None:
-            self.model.domain.type_id = numpy.ones(self.model.domain.get_num_voxels())
+            self.model.domain.type_id = ["type 1"] * self.model.domain.get_num_voxels()
         for i, type_id in enumerate(self.model.domain.type_id):
-            if type_id == 0:
+            if type_id is None:
                 errmsg = "Not all particles have been defined in a type. Mass and other properties must be defined"
                 raise SimulationError(errmsg)
             x = self.model.domain.coordinates()[i, 0]
@@ -359,10 +359,8 @@ class Solver:
                 if isinstance(reac.restrict_to, list) and len(reac.restrict_to) > 0:
                     conds = []
                     for type_id in reac.restrict_to:
-                        conds.append(f"sd == {self.model.domain.typeNdxMapping[type_id]}")
+                        conds.append(f"sd == {type_id}")
                     func += "||".join(conds)
-                elif isinstance(reac.restrict_to, int):
-                    func += f"sd == {self.model.domain.typeNdxMapping[reac.restrict_to]}"
                 else:
                     errmsg = "When restricting reaction to types, you must specify either a list or an int"
                     raise SimulationError(errmsg)
