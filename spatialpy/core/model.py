@@ -104,7 +104,11 @@ class Model():
         self.u0 = None
 
     def __str__(self):
-        self._resolve_parameters()
+        try:
+            self.__update_diffusion_restrictions()
+        except Exception:
+            pass
+        self.__resolve_parameters()
         divider = f"\n{'*'*10}\n"
 
         def decorate(header):
@@ -171,7 +175,7 @@ class Model():
                 errmsg += f'Names must not contain special characters: {Model.special_characters}.'
                 raise ModelError(errmsg)
 
-    def _apply_initial_conditions(self):
+    def __apply_initial_conditions(self):
         # initalize
         num_spec = self.get_num_species()
         num_vox = self.domain.get_num_voxels()
@@ -180,7 +184,7 @@ class Model():
         for init_cond in self.listOfInitialConditions:
             init_cond.apply(self)
 
-    def _create_dependency_graph(self):
+    def __create_dependency_graph(self):
         # We cannot safely generate a dependency graph (without attempting to analyze the
         # propensity string itself) if the model contains custom propensities.
         mass_action_model = True
@@ -245,7 +249,7 @@ class Model():
 
         return dep_graph
 
-    def _create_stoichiometric_matrix(self):
+    def __create_stoichiometric_matrix(self):
         if self.get_num_reactions() > 0:
             raw_matrix = numpy.zeros((self.get_num_species(), self.get_num_reactions()))
             for i, reaction in enumerate(self.listOfReactions.values()):
@@ -263,7 +267,7 @@ class Model():
 
         return matrix
 
-    def _get_expression_utility(self):
+    def __get_expression_utility(self):
         base_namespace = {
             **{name: name for name in math.__dict__},
             **self.sanitized_species_names(),
@@ -279,17 +283,46 @@ class Model():
         else:
             self.domain.plot_types(width="auto", height="auto", use_matplotlib=use_matplotlib)
 
-    def _resolve_parameters(self):
+    def __resolve_parameters(self):
         self.update_namespace()
         for param in self.listOfParameters:
             self.listOfParameters[param]._evaluate(self.namespace) # pylint: disable=protected-access
 
-    def _update_diffusion_restrictions(self):
+    def __update_diffusion_restrictions(self):
         for species in self.listOfSpecies.values():
             if isinstance(species.restrict_to, list):
                 self.listOfDiffusionRestrictions[species] = species.restrict_to
-            elif isinstance(species.restrict_to, int):
+            elif isinstance(species.restrict_to, str):
                 self.listOfDiffusionRestrictions[species] = [species.restrict_to]
+
+    def compile_prep(self):
+        """
+        Make sure all paramters are evaluated to scalars, update the models diffusion restrictions,
+        create the models expression utility, and generate the domain list of type ids in preperation
+        of compiling the simulation files.
+
+        :returns: The stoichiometric and dependency_graph
+        :rtype: tuple
+
+        :raises ModelError: Timestep size exceeds output frequency or Model is missing a domain
+        """
+        if self.timestep_size is None:
+            self.timestep_size = 1e-5
+        if self.output_freq < self.timestep_size:
+            raise ModelError("Timestep size exceeds output frequency.")
+
+        self.__check_if_complete()
+
+        self.domain.compile_prep()
+        
+        self.__update_diffusion_restrictions()
+        self.__apply_initial_conditions()
+        self.__resolve_parameters()
+        self.__get_expression_utility()
+        stoich_matrix = self.__create_stoichiometric_matrix()
+        dep_graph = self.__create_dependency_graph()
+
+        return stoich_matrix, dep_graph
 
     def add_species(self, obj):
         """
@@ -566,8 +599,6 @@ class Model():
         :rtype: spatialpy.Result.Result
         """
         from spatialpy.solvers.solver import Solver # pylint: disable=import-outside-toplevel
-
-        self.__check_if_complete()
 
         sol = Solver(self, debug_level=debug_level)
 

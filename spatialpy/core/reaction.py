@@ -48,7 +48,7 @@ class Reaction():
     :type annotation: str
 
     :param restrict_to: Restrict reaction execution to a type or list of types within the domain.
-    :type restrict_to: int or list of ints
+    :type restrict_to: int, str, list of ints or list of strs
     """
     def __init__(self, name="", reactants=None, products=None, propensity_function=None,
                  rate=None, annotation=None, restrict_to=None):
@@ -84,13 +84,18 @@ class Reaction():
         else:
             self.rate = rate
 
-        if isinstance(restrict_to, int):
-            self.restrict_to = [restrict_to]
-        elif isinstance(restrict_to, list) or restrict_to is None:
+        if not (restrict_to is None or isinstance(restrict_to, (int, str, list))):
+            errmsg = f"Reaction {self.name}: restrict_to must be an int, str, list of ints or list of strs."
+            raise ReactionError(errmsg)
+        elif restrict_to is not None and isinstance(restrict_to, (int, str)):
+            restrict_to = [restrict_to]
+
+        if restrict_to is None:
             self.restrict_to = restrict_to
         else:
-            errmsg = f"Reaction {self.name}: restrict_to must be an integer or list of integers."
-            raise ReactionError(errmsg)
+            self.restrict_to = []
+            for type_id in restrict_to:
+                self.restrict_to.append(f"type_{type_id}")
 
         self.type = None
         self.marate = None

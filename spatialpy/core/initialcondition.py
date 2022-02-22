@@ -85,7 +85,12 @@ class UniformInitialCondition(InitialCondition):
     def __init__(self, species, count, types=None):
         self.species = species
         self.count = count
-        self.types = types
+        if types is None:
+            self.types = types
+        else:
+            self.types = []
+            for type_id in types:
+                self.types.append(f"type_{type_id}")
 
     def __str__(self):
         print_string = f"{self.species.name}: {str(self.count)}, Uniformly distrbuted in: {str(self.types)}"
@@ -111,7 +116,8 @@ class UniformInitialCondition(InitialCondition):
                 model.u0[spec_ndx, vtx] += self.count
         else:
             for i in range(model.domain.get_num_voxels()):
-                if model.domain.type[i] in self.types:
+                type_id = model.domain.type_id[i]
+                if type_id in self.types:
                     model.u0[spec_ndx, i] += self.count
 
 
@@ -131,7 +137,12 @@ class ScatterInitialCondition(InitialCondition):
     def __init__(self, species, count, types=None):
         self.species = species
         self.count = count
-        self.types = types
+        if types is None:
+            self.types = types
+        else:
+            self.types = []
+            for type_id in types:
+                self.types.append(f"type_{type_id}")
 
     def __str__(self):
         print_string = f"{self.species.name}: {str(self.count)}, Scatter over: {str(self.types)}"
@@ -159,7 +170,8 @@ class ScatterInitialCondition(InitialCondition):
         else:
             allowed_voxels = []
             for i in range(model.domain.get_num_voxels()):
-                if model.domain.type[i] in self.types:
+                type_id = model.domain.type_id[i]
+                if type_id in self.types:
                     allowed_voxels.append(i)
             nvox = len(allowed_voxels)
             if nvox==0:
