@@ -188,7 +188,7 @@ class TestReaction(unittest.TestCase):
             name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate, restrict_to=test_restrict_to
         )
         self.assertIsInstance(reaction.restrict_to, list)
-        self.assertEqual(reaction.restrict_to, ["type 1"])
+        self.assertEqual(reaction.restrict_to, ["type_1"])
 
 
     def test_constructor__str_restrict_to(self):
@@ -201,7 +201,7 @@ class TestReaction(unittest.TestCase):
             name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate, restrict_to=test_restrict_to
         )
         self.assertIsInstance(reaction.restrict_to, list)
-        self.assertEqual(reaction.restrict_to, ["Walls"])
+        self.assertEqual(reaction.restrict_to, ["type_Walls"])
 
 
     def test___str__(self):
