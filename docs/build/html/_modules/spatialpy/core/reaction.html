@@ -137,7 +137,7 @@
 <span class="sd">    :type annotation: str</span>
 
 <span class="sd">    :param restrict_to: Restrict reaction execution to a type or list of types within the domain.</span>
-<span class="sd">    :type restrict_to: int or list of ints</span>
+<span class="sd">    :type restrict_to: int, str, list of ints or list of strs</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">reactants</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">products</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">propensity_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">rate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -173,13 +173,18 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rate</span> <span class="o">=</span> <span class="n">rate</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">restrict_to</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">restrict_to</span> <span class="o">=</span> <span class="p">[</span><span class="n">restrict_to</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">restrict_to</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="n">restrict_to</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">restrict_to</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">restrict_to</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">))):</span>
+            <span class="n">errmsg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Reaction </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: restrict_to must be an int, str, list of ints or list of strs.&quot;</span>
+            <span class="k">raise</span> <span class="n">ReactionError</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">restrict_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">restrict_to</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="n">restrict_to</span> <span class="o">=</span> <span class="p">[</span><span class="n">restrict_to</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">restrict_to</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">restrict_to</span> <span class="o">=</span> <span class="n">restrict_to</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">errmsg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Reaction </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: restrict_to must be an integer or list of integers.&quot;</span>
-            <span class="k">raise</span> <span class="n">ReactionError</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">restrict_to</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">type_id</span> <span class="ow">in</span> <span class="n">restrict_to</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">restrict_to</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;type_</span><span class="si">{</span><span class="n">type_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">marate</span> <span class="o">=</span> <span class="kc">None</span>

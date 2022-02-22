@@ -133,7 +133,7 @@ species: (str) name of a chemical species.</p>
 <li><p><strong>ymax</strong> (<em>float</em>) – y-axis coordinate upper bound of <strong>condition</strong></p></li>
 <li><p><strong>zmin</strong> (<em>float</em>) – z-axis coordinate lower bound of <strong>condition</strong></p></li>
 <li><p><strong>zmax</strong> (<em>float</em>) – z-axis coordinate upper bound of <strong>condition</strong></p></li>
-<li><p><strong>type_id</strong> (<em>int</em>) – Set <strong>condition</strong> to particle type id</p></li>
+<li><p><strong>type_id</strong> (<em>int</em><em> | </em><em>str</em>) – Set <strong>condition</strong> to particle type id</p></li>
 <li><p><strong>deterministic</strong> (<em>bool</em>) – <strong>Must be set if target is Species.</strong> Set True if boundary condition target is species     and applies to deterministic simulation. <strong>BoundaryCondition not yet implemeneted for Stochastic Species</strong>.</p></li>
 <li><p><strong>target</strong> – Set <strong>target</strong> to properties, can be ‘nu’ ‘rho’ or ‘v’ or species name</p></li>
 </ul>
@@ -298,7 +298,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.domain.Domain.add_point">
-<span class="sig-name descname"><span class="pre">add_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.add_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.domain.Domain.add_point" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.add_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.domain.Domain.add_point" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a single point particle to the domain space.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -306,12 +306,15 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <li><p><strong>point</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>) or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – Spatial coordinate vertices of point to be added</p></li>
 <li><p><strong>vol</strong> (<em>float</em>) – Default volume of particle to be added</p></li>
 <li><p><strong>mass</strong> (<em>float</em>) – Default mass of particle to be added</p></li>
-<li><p><strong>type_id</strong> (<em>int</em>) – Particle type ID of particle to be created</p></li>
+<li><p><strong>type_id</strong> (<em>str</em><em> | </em><em>int</em>) – Particle type ID of particle to be created</p></li>
 <li><p><strong>nu</strong> (<em>float</em>) – Default viscosity of particle to be created</p></li>
 <li><p><strong>fixed</strong> (<em>bool</em>) – True if particle is spatially fixed, else False</p></li>
 <li><p><strong>c</strong> (<em>float</em>) – Default artificial speed of sound of particle to be created</p></li>
 <li><p><strong>rho</strong> (<em>float</em>) – Default density of particle to be created</p></li>
 </ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.DomainError" title="spatialpy.core.spatialpyerror.DomainError"><strong>DomainError</strong></a> – Type_id is 0 or type_id contains an invalid character.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -335,6 +338,18 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>tuple(float, float, float) or tuple(float, float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.core.domain.Domain.compile_prep">
+<span class="sig-name descname"><span class="pre">compile_prep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.compile_prep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.domain.Domain.compile_prep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the domain list of type ids and check for invalid type_ids and rho values
+in preperation of compiling the simulation files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.DomainError" title="spatialpy.core.spatialpyerror.DomainError"><strong>DomainError</strong></a> – If a type_id is not set or rh for a particle is 0.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -540,6 +555,26 @@ is a part of.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.core.domain.Domain.get_type_def">
+<span class="sig-name descname"><span class="pre">get_type_def</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.get_type_def"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.domain.Domain.get_type_def" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the C++ type definition for the given type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>type_id</strong> (<em>str</em>) – The type_id within the domain.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The C++ type definition for the type_id.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.DomainError" title="spatialpy.core.spatialpyerror.DomainError"><strong>DomainError</strong></a> – If the type is not defined within the domain.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.domain.Domain.get_vol">
 <span class="sig-name descname"><span class="pre">get_vol</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.get_vol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.domain.Domain.get_vol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the total volume of the domain.</p>
@@ -632,11 +667,17 @@ is a part of.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.domain.Domain.read_stochss_subdomain_file">
-<span class="sig-name descname"><span class="pre">read_stochss_subdomain_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.read_stochss_subdomain_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.domain.Domain.read_stochss_subdomain_file" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">read_stochss_subdomain_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.read_stochss_subdomain_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.domain.Domain.read_stochss_subdomain_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a .txt file that conains the StochSS v1.x spatial subdomain descriptions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – StochSS v1.x subdomain description filename.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – StochSS v1.x subdomain description filename.</p></li>
+<li><p><strong>type_ids</strong> (<em>dict{str:str}</em>) – Mapping of type indecies to type names.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.DomainError" title="spatialpy.core.spatialpyerror.DomainError"><strong>DomainError</strong></a> – Domain file could not be read or type_id contains an invalid character.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -667,7 +708,7 @@ is a part of.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>geometry_ivar</strong> (<em>spatialpy.Geometry.Geometry</em>) – an instance of a ‘spatialpy.Geometry’ subclass.  The ‘inside()’ method
 of this object will be used to assign properties to points.</p></li>
-<li><p><strong>type_id</strong> (<em>int</em>) – The identifier for this type.</p></li>
+<li><p><strong>type_id</strong> (<em>str</em><em> | </em><em>int</em>) – The identifier for this type.</p></li>
 <li><p><strong>vol</strong> (<em>float</em>) – The volume of each particle in the type.</p></li>
 <li><p><strong>mass</strong> (<em>float</em>) – The mass of each particle in the type.</p></li>
 <li><p><strong>rho</strong> (<em>float</em>) – The density of each particle in the type.</p></li>
@@ -681,6 +722,9 @@ of this object will be used to assign properties to points.</p></li>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.DomainError" title="spatialpy.core.spatialpyerror.DomainError"><strong>DomainError</strong></a> – Type_id is 0 or type_id contains an invalid character.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1061,6 +1105,25 @@ or a dict with name, instance pairs.</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – If obj is not a spatialpy.Species</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.core.model.Model.compile_prep">
+<span class="sig-name descname"><span class="pre">compile_prep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.compile_prep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.model.Model.compile_prep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make sure all paramters are evaluated to scalars, update the models diffusion restrictions,
+create the models expression utility, and generate the domain list of type ids in preperation
+of compiling the simulation files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The stoichiometric and dependency_graph</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – Timestep size exceeds output frequency or Model is missing a domain</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1455,7 +1518,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <li><p><strong>propensity_function</strong> (<em>str</em>) – String with the expression for the reaction’s propensity</p></li>
 <li><p><strong>rate</strong> (<em>spatialpy.model.Parameter</em>) – if mass action, rate is a reference to a parameter instance.</p></li>
 <li><p><strong>annotation</strong> (<em>str</em>) – Description of the reaction (meta)</p></li>
-<li><p><strong>restrict_to</strong> (<em>int</em><em> or </em><em>list of ints</em>) – Restrict reaction execution to a type or list of types within the domain.</p></li>
+<li><p><strong>restrict_to</strong> (<em>int</em><em>, </em><em>str</em><em>, </em><em>list of ints</em><em> or </em><em>list of strs</em>) – Restrict reaction execution to a type or list of types within the domain.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1882,7 +1945,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 </dd>
 </dl>
 <p>This effectively restricts the movement of ‘species’ to the types specified in ‘listOfTypes’.
-:type restrict_to: int or list of ints</p>
+:type restrict_to: int, str, list of ints or list of strs</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.species.Species.set_diffusion_coefficient">
 <span class="sig-name descname"><span class="pre">set_diffusion_coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diffusion_coefficient</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/species.html#Species.set_diffusion_coefficient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.species.Species.set_diffusion_coefficient" title="Permalink to this definition">¶</a></dt>
@@ -2056,7 +2119,7 @@ species: (str) name of a chemical species.</p>
 <li><p><strong>ymax</strong> (<em>float</em>) – y-axis coordinate upper bound of <strong>condition</strong></p></li>
 <li><p><strong>zmin</strong> (<em>float</em>) – z-axis coordinate lower bound of <strong>condition</strong></p></li>
 <li><p><strong>zmax</strong> (<em>float</em>) – z-axis coordinate upper bound of <strong>condition</strong></p></li>
-<li><p><strong>type_id</strong> (<em>int</em>) – Set <strong>condition</strong> to particle type id</p></li>
+<li><p><strong>type_id</strong> (<em>int</em><em> | </em><em>str</em>) – Set <strong>condition</strong> to particle type id</p></li>
 <li><p><strong>deterministic</strong> (<em>bool</em>) – <strong>Must be set if target is Species.</strong> Set True if boundary condition target is species     and applies to deterministic simulation. <strong>BoundaryCondition not yet implemeneted for Stochastic Species</strong>.</p></li>
 <li><p><strong>target</strong> – Set <strong>target</strong> to properties, can be ‘nu’ ‘rho’ or ‘v’ or species name</p></li>
 </ul>
@@ -2156,7 +2219,7 @@ species: (str) name of a chemical species.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Domain.add_point">
-<span class="sig-name descname"><span class="pre">add_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.add_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Domain.add_point" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.add_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Domain.add_point" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a single point particle to the domain space.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2164,12 +2227,15 @@ species: (str) name of a chemical species.</p>
 <li><p><strong>point</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>) or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – Spatial coordinate vertices of point to be added</p></li>
 <li><p><strong>vol</strong> (<em>float</em>) – Default volume of particle to be added</p></li>
 <li><p><strong>mass</strong> (<em>float</em>) – Default mass of particle to be added</p></li>
-<li><p><strong>type_id</strong> (<em>int</em>) – Particle type ID of particle to be created</p></li>
+<li><p><strong>type_id</strong> (<em>str</em><em> | </em><em>int</em>) – Particle type ID of particle to be created</p></li>
 <li><p><strong>nu</strong> (<em>float</em>) – Default viscosity of particle to be created</p></li>
 <li><p><strong>fixed</strong> (<em>bool</em>) – True if particle is spatially fixed, else False</p></li>
 <li><p><strong>c</strong> (<em>float</em>) – Default artificial speed of sound of particle to be created</p></li>
 <li><p><strong>rho</strong> (<em>float</em>) – Default density of particle to be created</p></li>
 </ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.DomainError" title="spatialpy.core.DomainError"><strong>DomainError</strong></a> – Type_id is 0 or type_id contains an invalid character.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2193,6 +2259,18 @@ species: (str) name of a chemical species.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>tuple(float, float, float) or tuple(float, float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.core.Domain.compile_prep">
+<span class="sig-name descname"><span class="pre">compile_prep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.compile_prep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Domain.compile_prep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the domain list of type ids and check for invalid type_ids and rho values
+in preperation of compiling the simulation files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.DomainError" title="spatialpy.core.DomainError"><strong>DomainError</strong></a> – If a type_id is not set or rh for a particle is 0.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2398,6 +2476,26 @@ is a part of.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.core.Domain.get_type_def">
+<span class="sig-name descname"><span class="pre">get_type_def</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.get_type_def"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Domain.get_type_def" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the C++ type definition for the given type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>type_id</strong> (<em>str</em>) – The type_id within the domain.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The C++ type definition for the type_id.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.DomainError" title="spatialpy.core.DomainError"><strong>DomainError</strong></a> – If the type is not defined within the domain.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Domain.get_vol">
 <span class="sig-name descname"><span class="pre">get_vol</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.get_vol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Domain.get_vol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the total volume of the domain.</p>
@@ -2490,11 +2588,17 @@ is a part of.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Domain.read_stochss_subdomain_file">
-<span class="sig-name descname"><span class="pre">read_stochss_subdomain_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.read_stochss_subdomain_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Domain.read_stochss_subdomain_file" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">read_stochss_subdomain_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.read_stochss_subdomain_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Domain.read_stochss_subdomain_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a .txt file that conains the StochSS v1.x spatial subdomain descriptions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – StochSS v1.x subdomain description filename.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – StochSS v1.x subdomain description filename.</p></li>
+<li><p><strong>type_ids</strong> (<em>dict{str:str}</em>) – Mapping of type indecies to type names.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.DomainError" title="spatialpy.core.DomainError"><strong>DomainError</strong></a> – Domain file could not be read or type_id contains an invalid character.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2525,7 +2629,7 @@ is a part of.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>geometry_ivar</strong> (<em>spatialpy.Geometry.Geometry</em>) – an instance of a ‘spatialpy.Geometry’ subclass.  The ‘inside()’ method
 of this object will be used to assign properties to points.</p></li>
-<li><p><strong>type_id</strong> (<em>int</em>) – The identifier for this type.</p></li>
+<li><p><strong>type_id</strong> (<em>str</em><em> | </em><em>int</em>) – The identifier for this type.</p></li>
 <li><p><strong>vol</strong> (<em>float</em>) – The volume of each particle in the type.</p></li>
 <li><p><strong>mass</strong> (<em>float</em>) – The mass of each particle in the type.</p></li>
 <li><p><strong>rho</strong> (<em>float</em>) – The density of each particle in the type.</p></li>
@@ -2539,6 +2643,9 @@ of this object will be used to assign properties to points.</p></li>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.DomainError" title="spatialpy.core.DomainError"><strong>DomainError</strong></a> – Type_id is 0 or type_id contains an invalid character.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3129,6 +3236,25 @@ or a dict with name, instance pairs.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="spatialpy.core.Model.compile_prep">
+<span class="sig-name descname"><span class="pre">compile_prep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.compile_prep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Model.compile_prep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make sure all paramters are evaluated to scalars, update the models diffusion restrictions,
+create the models expression utility, and generate the domain list of type ids in preperation
+of compiling the simulation files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The stoichiometric and dependency_graph</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – Timestep size exceeds output frequency or Model is missing a domain</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Model.delete_all_parameters">
 <span class="sig-name descname"><span class="pre">delete_all_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.delete_all_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Model.delete_all_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove all parameters from model.listOfParameters.</p>
@@ -3582,7 +3708,7 @@ If given a String expression, it should be evaluable in the namespace of a paren
 <li><p><strong>propensity_function</strong> (<em>str</em>) – String with the expression for the reaction’s propensity</p></li>
 <li><p><strong>rate</strong> (<em>spatialpy.model.Parameter</em>) – if mass action, rate is a reference to a parameter instance.</p></li>
 <li><p><strong>annotation</strong> (<em>str</em>) – Description of the reaction (meta)</p></li>
-<li><p><strong>restrict_to</strong> (<em>int</em><em> or </em><em>list of ints</em>) – Restrict reaction execution to a type or list of types within the domain.</p></li>
+<li><p><strong>restrict_to</strong> (<em>int</em><em>, </em><em>str</em><em>, </em><em>list of ints</em><em> or </em><em>list of strs</em>) – Restrict reaction execution to a type or list of types within the domain.</p></li>
 </ul>
 </dd>
 </dl>
@@ -3921,7 +4047,7 @@ False (default)</p></li>
 </dd>
 </dl>
 <p>This effectively restricts the movement of ‘species’ to the types specified in ‘listOfTypes’.
-:type restrict_to: int or list of ints</p>
+:type restrict_to: int, str, list of ints or list of strs</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Species.set_diffusion_coefficient">
 <span class="sig-name descname"><span class="pre">set_diffusion_coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diffusion_coefficient</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/species.html#Species.set_diffusion_coefficient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Species.set_diffusion_coefficient" title="Permalink to this definition">¶</a></dt>

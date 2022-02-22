@@ -187,9 +187,8 @@
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">pass</span>
 
-    <span class="k">def</span> <span class="nf">__create_propensity_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__create_propensity_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stoich_matrix</span><span class="p">,</span> <span class="n">dep_graph</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># process initial conditions here</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_apply_initial_conditions</span><span class="p">()</span>
         <span class="n">nspecies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">u0</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">ncells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">u0</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
@@ -234,7 +233,7 @@
             <span class="s2">&quot;__DEFINE_CHEM_FUN_INITS__&quot;</span><span class="p">:</span> <span class="n">deterministic_chem_rxn_function_init</span><span class="p">,</span>
             <span class="s2">&quot;__INIT_PARTICLES__&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_particle_inits</span><span class="p">(</span><span class="n">num_chem_species</span><span class="p">),</span>
             <span class="s2">&quot;__DATA_FUNCTION_ASSIGN__&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_data_fn_assign</span><span class="p">(</span><span class="n">ncells</span><span class="p">),</span>
-            <span class="s2">&quot;__INPUT_CONSTANTS__&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_input_constants</span><span class="p">(</span><span class="n">nspecies</span><span class="p">,</span> <span class="n">ncells</span><span class="p">),</span>
+            <span class="s2">&quot;__INPUT_CONSTANTS__&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_input_constants</span><span class="p">(</span><span class="n">nspecies</span><span class="p">,</span> <span class="n">ncells</span><span class="p">,</span> <span class="n">stoich_matrix</span><span class="p">,</span> <span class="n">dep_graph</span><span class="p">),</span>
             <span class="s2">&quot;__SYSTEM_CONFIG__&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_system_config</span><span class="p">(</span><span class="n">num_types</span><span class="p">,</span> <span class="n">num_chem_species</span><span class="p">,</span> <span class="n">num_chem_rxns</span><span class="p">,</span>
                                                           <span class="n">num_stoch_species</span><span class="p">,</span> <span class="n">num_stoch_rxns</span><span class="p">,</span> <span class="n">num_data_fn</span><span class="p">),</span>
             <span class="s2">&quot;__INIT_RDME__&quot;</span><span class="p">:</span> <span class="n">init_rdme</span><span class="p">,</span>
@@ -266,8 +265,6 @@
                     <span class="k">for</span> <span class="n">type_id</span> <span class="ow">in</span> <span class="n">reac</span><span class="o">.</span><span class="n">restrict_to</span><span class="p">:</span>
                         <span class="n">conds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sd == </span><span class="si">{</span><span class="n">type_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="n">func</span> <span class="o">+=</span> <span class="s2">&quot;||&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">conds</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reac</span><span class="o">.</span><span class="n">restrict_to</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-                    <span class="n">func</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;sd == </span><span class="si">{</span><span class="n">reac</span><span class="o">.</span><span class="n">restrict_to</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">errmsg</span> <span class="o">=</span> <span class="s2">&quot;When restricting reaction to types, you must specify either a list or an int&quot;</span>
                     <span class="k">raise</span> <span class="n">SimulationError</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span>
@@ -298,7 +295,7 @@
 
         <span class="k">return</span> <span class="n">outstr</span>
 
-    <span class="k">def</span> <span class="nf">__get_input_constants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nspecies</span><span class="p">,</span> <span class="n">ncells</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__get_input_constants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nspecies</span><span class="p">,</span> <span class="n">ncells</span><span class="p">,</span> <span class="n">stoich_matrix</span><span class="p">,</span> <span class="n">dep_graph</span><span class="p">):</span>
         <span class="n">input_constants</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
         <span class="n">outstr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;unsigned int input_u0[</span><span class="si">{</span><span class="n">nspecies</span> <span class="o">*</span> <span class="n">ncells</span><span class="si">}</span><span class="s2">] = &quot;</span>
@@ -313,7 +310,6 @@
         <span class="n">input_constants</span> <span class="o">+=</span> <span class="n">outstr</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">listOfSpecies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">stoich_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_create_stoichiometric_matrix</span><span class="p">()</span>
             <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">stoich_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">dense_matrix</span> <span class="o">=</span> <span class="n">stoich_matrix</span><span class="o">.</span><span class="n">todense</span><span class="p">()</span> <span class="c1"># this will not work if Nrxn or Nspecies is zero</span>
                 <span class="n">outstr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;static int input_N_dense[</span><span class="si">{</span><span class="n">dense_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">dense_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">] = &quot;</span>
@@ -347,7 +343,6 @@
                 <span class="n">input_constants</span> <span class="o">+=</span> <span class="s2">&quot;static size_t input_jcN[0] = </span><span class="si">{}</span><span class="s2">;</span><span class="se">\n</span><span class="s2">&quot;</span>
                 <span class="n">input_constants</span> <span class="o">+=</span> <span class="s2">&quot;static int input_prN[0] = </span><span class="si">{}</span><span class="s2">;</span><span class="se">\n</span><span class="s2">&quot;</span>
 
-            <span class="n">dep_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_create_dependency_graph</span><span class="p">()</span>
             <span class="n">input_constants</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_input_constant</span><span class="p">(</span><span class="s2">&quot;static size_t input_irG&quot;</span><span class="p">,</span> <span class="n">dep_graph</span><span class="o">.</span><span class="n">indices</span><span class="p">)</span>
             <span class="n">input_constants</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_input_constant</span><span class="p">(</span><span class="s2">&quot;static size_t input_jcG&quot;</span><span class="p">,</span> <span class="n">dep_graph</span><span class="o">.</span><span class="n">indptr</span><span class="p">)</span>
 
@@ -364,7 +359,7 @@
         <span class="n">outstr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;const double input_subdomain_diffusion_matrix[</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">listOfSpecies</span><span class="p">)</span> <span class="o">*</span> <span class="n">num_types</span><span class="si">}</span><span class="s2">] = &quot;</span>
         <span class="n">outstr</span> <span class="o">+=</span> <span class="s2">&quot;{&quot;</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">species</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">listOfSpecies</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
-            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">type_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">listOfTypeIDs</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">type_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">typeNdxMapping</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
                 <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">outstr</span> <span class="o">+=</span> <span class="s1">&#39;,&#39;</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -401,14 +396,16 @@
             <span class="n">param</span> <span class="o">=</span> <span class="n">sanitized_parameters</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span>
             <span class="n">parameters</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;const double </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">listOfParameters</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">;</span><span class="se">\n</span><span class="s2">&quot;</span>
 
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">ndx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">typeNdxMapping</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">parameters</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;const size_t </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">ndx</span><span class="si">}</span><span class="s2">;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">parameters</span>
 
     <span class="k">def</span> <span class="nf">__get_particle_inits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_chem_species</span><span class="p">):</span>
         <span class="n">init_particles</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">get_num_voxels</span><span class="p">())</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">type_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">type_id</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">type_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">type_id</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;type 1&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">get_num_voxels</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">type_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">type_id</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">type_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">errmsg</span> <span class="o">=</span> <span class="s2">&quot;Not all particles have been defined in a type. Mass and other properties must be defined&quot;</span>
                 <span class="k">raise</span> <span class="n">SimulationError</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span>
             <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">coordinates</span><span class="p">()[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
@@ -453,8 +450,6 @@
                     <span class="k">for</span> <span class="n">type_id</span> <span class="ow">in</span> <span class="n">reac</span><span class="o">.</span><span class="n">restrict_to</span><span class="p">:</span>
                         <span class="n">conds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sd == </span><span class="si">{</span><span class="n">type_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="n">func</span> <span class="o">+=</span> <span class="s2">&quot;||&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">conds</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reac</span><span class="o">.</span><span class="n">restrict_to</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-                    <span class="n">func</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;sd == </span><span class="si">{</span><span class="n">reac</span><span class="o">.</span><span class="n">restrict_to</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">errmsg</span> <span class="o">=</span> <span class="s2">&quot;When restricting reaction to types, you must specify either a list or an int&quot;</span>
                     <span class="k">raise</span> <span class="n">SimulationError</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span>
@@ -548,19 +543,7 @@
 
 <span class="sd">        :raises SimulationError: Failed to compile</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">timestep_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">timestep_size</span> <span class="o">=</span> <span class="mf">1e-5</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">output_freq</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">timestep_size</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ModelError</span><span class="p">(</span><span class="s2">&quot;Timestep size exceeds output frequency.&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Make sure all paramters are evaluated to scalars before we write them to the file.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_resolve_parameters</span><span class="p">()</span>
-
-        <span class="c1"># Update the models diffusion restrictions</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_update_diffusion_restrictions</span><span class="p">()</span>
-
-        <span class="c1"># Create the models expression utility</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_get_expression_utility</span><span class="p">()</span>
+        <span class="n">stoich_matrix</span><span class="p">,</span> <span class="n">dep_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">compile_prep</span><span class="p">()</span>
 
         <span class="c1"># Create a unique directory each time call to compile.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">build_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span>
@@ -576,7 +559,7 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug_level</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating propensity file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_file_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__create_propensity_file</span><span class="p">(</span><span class="n">file_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_file_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__create_propensity_file</span><span class="p">(</span><span class="n">stoich_matrix</span><span class="p">,</span> <span class="n">dep_graph</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_file_name</span><span class="p">)</span>
 
         <span class="c1"># Build the solver</span>
         <span class="n">makefile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spatialpy_rootdir</span><span class="o">+</span><span class="s1">&#39;/build/Makefile&#39;</span>

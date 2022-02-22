@@ -119,7 +119,7 @@
 
 <span class="sd">    :param restrict_to: Set the diffusion coefficient to zero for &#39;species&#39; in all types not in &#39;listOfTypes&#39;.</span>
 <span class="sd">    This effectively restricts the movement of &#39;species&#39; to the types specified in &#39;listOfTypes&#39;.</span>
-<span class="sd">    :type restrict_to: int or list of ints</span>
+<span class="sd">    :type restrict_to: int, str, list of ints or list of strs</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">diffusion_coefficient</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -135,17 +135,19 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">diffusion_coefficient</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span> <span class="ow">and</span> <span class="n">diffusion_coefficient</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">SpeciesError</span><span class="p">(</span><span class="s2">&quot;Diffusion coefficient must be non-negative.&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">restrict_to</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">restrict_to</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">))):</span>
-            <span class="k">raise</span> <span class="n">SpeciesError</span><span class="p">(</span><span class="s2">&quot;Restrict_to must be an int or list of ints.&quot;</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">restrict_to</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">restrict_to</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">restrict_to</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">SpeciesError</span><span class="p">(</span><span class="s2">&quot;Restrict_to must be an int or list of ints.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">restrict_to</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">restrict_to</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">))):</span>
+            <span class="k">raise</span> <span class="n">SpeciesError</span><span class="p">(</span><span class="s2">&quot;Restrict_to must be an int, str or list of ints or strs.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">restrict_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">restrict_to</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="n">restrict_to</span> <span class="o">=</span> <span class="p">[</span><span class="n">restrict_to</span><span class="p">]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_coefficient</span> <span class="o">=</span> <span class="n">diffusion_coefficient</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">restrict_to</span> <span class="o">=</span> <span class="n">restrict_to</span>
+        <span class="k">if</span> <span class="n">restrict_to</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">restrict_to</span> <span class="o">=</span> <span class="n">restrict_to</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">restrict_to</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">type_id</span> <span class="ow">in</span> <span class="n">restrict_to</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">restrict_to</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;type_</span><span class="si">{</span><span class="n">type_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">print_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">diffusion_coefficient</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
