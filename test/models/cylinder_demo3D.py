@@ -37,6 +37,10 @@ class Middle(spatialpy.Geometry):
     def inside(self, x, on_boundary):
         return abs(x[0] - MIN_X_DIM) >= 0.05
 class cylinderDemo3D(spatialpy.Model):
+    EDGE1 = Edge1.__name__
+    EDGE2 = Edge2.__name__
+    MIDDLE = Middle.__name__
+
     def __init__(self, model_name="cylinder_demo3d"):
         spatialpy.Model.__init__(self, model_name)
 
@@ -46,28 +50,24 @@ class cylinderDemo3D(spatialpy.Model):
         D_const = 0.1
 
         # Define Species
-        A = spatialpy.Species(name="A", diffusion_coefficient=D_const)
-        B = spatialpy.Species(name="B", diffusion_coefficient=D_const)
+        A = spatialpy.Species(name="A", diffusion_coefficient=D_const, restrict_to=[self.MIDDLE, self.EDGE1])
+        B = spatialpy.Species(name="B", diffusion_coefficient=D_const, restrict_to=[self.MIDDLE, self.EDGE2])
         self.add_species([A, B])
 
         # Define Geometry
         # Make sure that we have the correct path to the mesh file even if we are not executing from the basedir.
         basedir = os.path.dirname(os.path.abspath(__file__))
-        self.domain = spatialpy.Domain.read_xml_mesh(basedir+'cylinder.xml')
+        self.domain = spatialpy.Domain.read_xml_mesh(basedir + 'cylinder.xml')
 
         # Define Types
-        self.set_type(Middle(), 1)
-        self.set_type(Edge1(), 2)
-        self.set_type(Edge2(), 3)
-
-        # Restrict the movement of Chemical Species
-        self.restrict(A,[1,2])
-        self.restrict(B,[1,3])
+        self.set_properties(Middle(), self.MIDDLE)
+        self.set_properties(Edge1(), self.EDGE1)
+        self.set_properties(Edge2(), self.EDGE2)
 
         vol = self.domain.get_vol()
         type_id = self.domain.type
-        left = numpy.sum(vol[type_id == 2])
-        right = numpy.sum(vol[type_id == 3])
+        left = numpy.sum(vol[type_id == self.domain.get_type_def(self.EDGE1)])
+        right = numpy.sum(vol[type_id == self.domain.get_type_def(self.EDGE2)])
         print("left "+str(left)+" right "+str(right))
 
         k_react = spatialpy.Parameter(name="k_react", expression=1.0)
@@ -75,14 +75,14 @@ class cylinderDemo3D(spatialpy.Model):
                                      expression=100/left)
         k_creat2 = spatialpy.Parameter(name="k_creat2",
                                      expression=100/right)
-        self.add_parameter([k_react, k_creat1,k_creat2])
+        self.add_parameter([k_react, k_creat1, k_creat2])
 
 
         # Define Reactions
         R1 = spatialpy.Reaction(reactants=None, products={A:1},
-                                rate=k_creat1, restrict_to=2)
+                                rate=k_creat1, restrict_to=self.EDGE1)
         R2 = spatialpy.Reaction(reactants=None, products={B:1},
-                              rate=k_creat2, restrict_to=3)
+                              rate=k_creat2, restrict_to=self.EDGE2)
         R3 = spatialpy.Reaction(reactants={A:1, B:1}, products=None,
                               rate=k_react)
         self.add_reaction([R1, R2, R3])

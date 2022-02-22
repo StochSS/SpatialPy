@@ -39,7 +39,7 @@ class diffusion_debug(spatialpy.Model):
         self.add_species([A])
 
         self.domain = spatialpy.Domain.create_2D_domain(
-            xlim=[-1, 1], ylim=[-1, 1], nx=50, ny=50, type_id=1.0,
+            xlim=[-1, 1], ylim=[-1, 1], nx=50, ny=50, type_id=1,
             mass=1.0, nu=1.0, fixed=True,  rho0=1.0, c0=1.0, P0=1.0
         )
 
