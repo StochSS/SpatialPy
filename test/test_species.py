@@ -71,6 +71,26 @@ class TestSpecies(unittest.TestCase):
             species = Species(name="test_species", diffusion_coefficient="0")
 
 
+    def test_constructor__restrict_to_not_accepted_type(self):
+        """ Test the Species constructor with a restrict_to that is not the proper type. """
+        with self.assertRaises(ReactionError):
+            species = Species(name="test_species", diffusion_coefficient="0", restrict_to=1.5)
+
+
+    def test_constructor__int_restrict_to(self):
+        """ Test the Species constructor with a int restrict_to. """
+        species = Species(name="test_species", diffusion_coefficient="0", restrict_to=1)
+        self.assertIsInstance(species.restrict_to, list)
+        self.assertEqual(species.restrict_to, ["type_1"])
+
+
+    def test_constructor__str_restrict_to(self):
+        """ Test the Species constructor with a string restrict_to. """
+        species = Species(name="test_species", diffusion_coefficient="0", restrict_to="Walls")
+        self.assertIsInstance(species.restrict_to, list)
+        self.assertEqual(species.restrict_to, ["type_Walls"])
+
+
     def test___str___(self):
         """ Test Species.__str__ method. """
         species = Species(name="test_species", diffusion_coefficient=0)
