@@ -222,9 +222,9 @@ class Result():
         types = {}
         if property_name == 'type':
             for i, val in enumerate(data['type']):
-                name = self.model.domain.typeNameMapping[val]
+                name = self.model.domain.typeNameMapping[val][5:]
 
-                if included_types_list is None or val in included_types_list:
+                if included_types_list is None or name in included_types_list:
                     if name in types:
                         types[name]['points'].append(points[i])
                         types[name]['data'].append(data[property_name][i])
@@ -838,13 +838,13 @@ class Result():
             os.mkdir(folder_name)
 
         #['Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity']
-        with open(os.path.join(folder_name, self.model.name + '_mesh.csv'), 'w+') as csvfile:
-            mesh = self.model.mesh
+        with open(os.path.join(folder_name, self.model.name + '_domain.csv'), 'w+') as csvfile:
+            domain = self.model.domain
             writer = csv.writer(csvfile, delimiter=',')
             writer.writerow(['Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity'])
-            for ndx in range(len(mesh.vertices)):
-                writer.writerow([ndx] + mesh.coordinates()[ndx,:].tolist() + [mesh.type_id[ndx]] \
-                    + [mesh.vol[ndx]] + [mesh.mass[ndx]] + [mesh.nu[ndx]])
+            for ndx in range(len(domain.vertices)):
+                writer.writerow([ndx] + domain.coordinates()[ndx,:].tolist() + [domain.type_id[ndx]] \
+                    + [domain.vol[ndx]] + [domain.mass[ndx]] + [domain.nu[ndx]])
 
         for species in self.model.listOfSpecies:
             #['Voxel', 'Time 0', Time 1', ... 'Time N']

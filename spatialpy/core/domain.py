@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import json
+import string
 
 import xml.etree.ElementTree as ET
 from itertools import combinations
@@ -68,7 +69,7 @@ class Domain():
 
         self.vol = numpy.zeros((numpoints), dtype=float)
         self.mass = numpy.zeros((numpoints), dtype=float)
-        self.type_id = numpy.zeros((numpoints), dtype=int)
+        self.type_id = numpy.array([None] * numpoints, dtype=object)
         self.nu = numpy.zeros((numpoints), dtype=float)
         self.c = numpy.zeros((numpoints), dtype=float)
         self.rho = numpy.zeros((numpoints), dtype=float)
@@ -110,7 +111,41 @@ class Domain():
         for name, ndx in self.typeNdxMapping.items():
             self.typeNameMapping[ndx] = name
 
-    def add_point(self, point, vol=0, mass=0, type_id=0, nu=0, fixed=False, rho=None, c=0):
+    def get_type_def(self, type_id):
+        """
+        Get the C++ type definition for the given type.
+
+        :param type_id: The type_id within the domain.
+        :type type_id: str
+
+        :returns: The C++ type definition for the type_id.
+        :rtype: str
+
+        :raises DomainError: If the type is not defined within the domain.
+        """
+        type_id = f"type_{type_id}"
+        if type_id not in self.typeNdxMapping:
+            errmsg = f"Type_id {type_id} could not be found. "
+            errmsg += "Use Domain.set_properties to set the type_id for particles."
+            raise DomainError(errmsg)
+        return type_id
+
+    def compile_prep(self):
+        """
+        Generate the domain list of type ids and check for invalid type_ids and rho values
+        in preperation of compiling the simulation files.
+
+        :raises DomainError: If a type_id is not set or rh for a particle is 0.
+        """
+        if self.type_id.tolist().count(None) > 0:
+            raise DomainError(f"Particles must be assigned a type_id.")
+        if numpy.count_nonzero(self.rho) < len(self.rho):
+            raise DomainError(f"Rho must be a positive value.")
+
+        self.listOfTypeIDs = list(self.typeNdxMapping.values())
+        self._get_type_name_mapping()
+
+    def add_point(self, point, vol=0, mass=0, type_id=1, nu=0, fixed=False, rho=None, c=0):
         """
         Add a single point particle to the domain space.
 
@@ -137,23 +172,25 @@ class Domain():
 
         :param rho: Default density of particle to be created
         :type rho: float
-        """
 
+        :raises DomainError: Type_id is 0 or type_id contains an invalid character.
+        """
         if vol < 0:
             raise DomainError("Volume must be a positive value.")
 
-        if type_id == 0:
-            self.type_id = numpy.append(self.type_id, 0)
-        else:
-            if isinstance(type_id, int):
-                type_id = f"type {type_id}"
-            if type_id not in self.typeNdxMapping:
-                self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
-            self.type_id = numpy.append(self.type_id, self.typeNdxMapping[type_id])
+        if isinstance(type_id, int) and type_id <= 0:
+            raise DomainError("Type_id must be a non-zero positive integer or a string.")
+        type_id = f"type_{type_id}"
+        for char in type_id:
+            if (char in string.punctuation and char != "_") or char == " ":
+                raise DomainError(f"Type_id cannot contain {char}")
+        if type_id not in self.typeNdxMapping:
+            self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
 
         if rho is None:
             rho = mass / vol
 
+        self.type_id = numpy.append(self.type_id, type_id)
         self.vol = numpy.append(self.vol, vol)
         self.mass = numpy.append(self.mass, mass)
         self.nu = numpy.append(self.nu, nu)
@@ -194,11 +231,15 @@ class Domain():
 
         :returns: The number of particles that were tagged with this type_id.
         :rtype: int
+
+        :raises DomainError: Type_id is 0 or type_id contains an invalid character.
         """
-        if isinstance(type_id, int):
-            if type_id <= 0:
-                raise DomainError("Type_id must be a non-zero positive integer or a string.")
-            type_id = f"type {type_id}"
+        if isinstance(type_id, int) and type_id <= 0:
+            raise DomainError("Type_id must be a non-zero positive integer or a string.")
+        type_id = f"type_{type_id}"
+        for char in type_id:
+            if (char in string.punctuation and char != "_") or char == " ":
+                raise DomainError(f"Type_id cannot contain {char}")
         if type_id not in self.typeNdxMapping:
             self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
         # apply the type to all points, set type for any points that match
@@ -206,7 +247,7 @@ class Domain():
         on_boundary = self.find_boundary_points()
         for v_ndx in range(self.get_num_voxels()):
             if geometry_ivar.inside(self.coordinates()[v_ndx, :], on_boundary[v_ndx]):
-                self.type_id[v_ndx] = self.typeNdxMapping[type_id]
+                self.type_id[v_ndx] = type_id
                 if vol is not None:
                     self.vol[v_ndx] = vol
                 if mass is not None:
@@ -553,15 +594,14 @@ class Domain():
         self._get_type_name_mapping()
 
         types = {}
-        for i, val in enumerate(self.type_id):
-            name = self.typeNameMapping[val]
-
-            if included_types_list is None or val in included_types_list:
+        for i, type_id in enumerate(self.type_id):
+            name = type_id[5:]
+            if included_types_list is None or name in included_types_list:
                 if name in types:
                     types[name]['points'].append(self.vertices[i])
-                    types[name]['data'].append(self.type_id[i])
+                    types[name]['data'].append(self.typeNdxMapping[type_id])
                 else:
-                    types[name] = {"points":[self.vertices[i]], "data":[self.type_id[i]]}
+                    types[name] = {"points":[self.vertices[i]], "data":[self.typeNdxMapping[type_id]]}
 
         if use_matplotlib:
             import matplotlib.pyplot as plt # pylint: disable=import-outside-toplevel
@@ -722,17 +762,22 @@ class Domain():
 
         :param type_ids: Mapping of type indecies to type names.
         :type type_ids: dict{str:str}
+
+        :raises DomainError: Domain file could not be read or type_id contains an invalid character.
         """
         with open(filename,'r', encoding="utf-8") as file_obj:
             for lnum, line in enumerate(file_obj):
                 try:
                     (ndx, type_id) = line.rstrip().split(',')
 
-                    type_id = f"type {type_id}" if type_ids is None else type_ids[type_id]
+                    type_id = f"type_{type_id if type_ids is None else type_ids[type_id]}"
+                    for char in type_id:
+                        if (char in string.punctuation and char != "_") or char == " ":
+                            raise DomainError(f"Type_id cannot contain {char}")
                     if type_id not in self.typeNdxMapping:
                         self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
 
-                    self.type_id[int(ndx)] = self.typeNdxMapping[type_id]
+                    self.type_id[int(ndx)] = type_id
 
                 except ValueError as err:
                     raise DomainError(f"Could not read in subdomain file, error on line {lnum}: {line}") from err

@@ -93,13 +93,9 @@ class Reaction():
         if restrict_to is None:
             self.restrict_to = restrict_to
         else:
-            type_ids = []
+            self.restrict_to = []
             for type_id in restrict_to:
-                if isinstance(type_id, str):
-                    type_ids.append(type_id)
-                else:
-                    type_ids.append(f"type {type_id}")
-            self.restrict_to = type_ids
+                self.restrict_to.append(f"type_{type_id}")
 
         self.type = None
         self.marate = None

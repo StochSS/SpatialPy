@@ -88,8 +88,8 @@ class BoundaryCondition():
             raise BoundaryConditionError("Z-max must be of type int or float.")
         if type_id is not None and not isinstance(type_id, (int, str)):
             raise BoundaryConditionError("Type-ID must be of type int.")
-        elif type_id is not None and isinstance(type_id, int):
-            type_id = f"type {type_id}"
+        elif type_id is not None:
+            type_id = f"type_{type_id}"
         if target is None or not (isinstance(target, (str, Species)) or
                 type(target).__name__ == 'Species' or property in ('nu', 'rho', 'v')):
             raise BoundaryConditionError("Target must be of type string or SpatialPy.Species")
@@ -104,8 +104,6 @@ class BoundaryCondition():
             raise BoundaryConditionError("Value must be of type float or float[3].") from err
         if not (model is None or isinstance(model, Model) or type(model).__name__ == 'Model'):
             raise BoundaryConditionError("Model must be of type SpatialPy.Model.")
-        elif type_id is not None and model is not None:
-            type_id = model.domain.typeNdxMapping[type_id]
 
         self.xmin = xmin
         self.xmax = xmax
