@@ -605,10 +605,17 @@ class Result():
             t_index_arr = [t_index_arr]
             num_timepoints = 1
 
-        ret = numpy.zeros( (num_timepoints, num_voxel))
+        
+        if property_name == "v":
+            ret = numpy.zeros((num_timepoints, num_voxel, 3))
+        else:
+            ret = numpy.zeros((num_timepoints, num_voxel))
         for ndx, _ in enumerate(t_index_arr):
             (_, step) = self.read_step(ndx)
-            ret[ndx,:] = step[property_name]
+            if property_name == "v":
+                ret[ndx, :, :] = step[property_name]
+            else:
+                ret[ndx,:] = step[property_name]
         if ret.shape[0] == 1:
             ret = ret.flatten()
         return ret
