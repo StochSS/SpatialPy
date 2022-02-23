@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>spatialpy.core.boundarycondition &#8212; SpatialPy 0.5.1 documentation</title>
+    <title>spatialpy.core.boundarycondition &#8212; SpatialPy 1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/spatialpy_alabaster_customizations.css" />
@@ -18,7 +18,7 @@
    
   <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
   
-    <link rel="apple-touch-icon" href="../../../_static/SpatialPy_logo.svg" />
+    <link rel="apple-touch-icon" href="../../../_static/img/SpatialPy_logo.svg" />
   
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
@@ -30,7 +30,7 @@
         <div class="sphinxsidebarwrapper">
 <p class="logo">
   <a href="../../../index.html">
-    <img class="logo" src="../../../_static/SpatialPy_logo.png" alt="Logo"/>
+    <img class="logo" src="../../../_static/img/SpatialPy_logo.png" alt="Logo"/>
     
   </a>
 </p>
@@ -50,6 +50,10 @@
 
 
 <h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../classes/spatialpy.html">spatialpy package</a></li>
+</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
@@ -105,7 +109,7 @@
 <span class="sd">along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
-<span class="kn">from</span> <span class="nn">spatialpy.core.spatialpyerror</span> <span class="k">import</span> <span class="n">BoundaryConditionError</span>
+<span class="kn">from</span> <span class="nn">spatialpy.core.spatialpyerror</span> <span class="kn">import</span> <span class="n">BoundaryConditionError</span>
 
 
 <div class="viewcode-block" id="BoundaryCondition"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.boundarycondition.BoundaryCondition">[docs]</a><span class="k">class</span> <span class="nc">BoundaryCondition</span><span class="p">():</span>
@@ -159,10 +163,10 @@
 <span class="sd">    :type model: spatialpy.Model.Model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ymin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ymax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ymin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ymax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">type_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">deterministic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">spatialpy.core.model</span> <span class="k">import</span> <span class="n">Model</span> <span class="c1"># pylint: disable=import-outside-toplevel</span>
-        <span class="kn">from</span> <span class="nn">spatialpy.core.species</span> <span class="k">import</span> <span class="n">Species</span> <span class="c1"># pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span> <span class="nn">spatialpy.core.model</span> <span class="kn">import</span> <span class="n">Model</span> <span class="c1"># pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span> <span class="nn">spatialpy.core.species</span> <span class="kn">import</span> <span class="n">Species</span> <span class="c1"># pylint: disable=import-outside-toplevel</span>
         <span class="k">if</span> <span class="n">xmin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="n">BoundaryConditionError</span><span class="p">(</span><span class="s2">&quot;X-min must be of type int or float.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">xmax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xmax</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
@@ -178,7 +182,7 @@
         <span class="k">if</span> <span class="n">type_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_id</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="n">BoundaryConditionError</span><span class="p">(</span><span class="s2">&quot;Type-ID must be of type int.&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">type_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">type_id</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;type_</span><span class="si">{type_id}</span><span class="s2">&quot;</span>
+            <span class="n">type_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;type_</span><span class="si">{</span><span class="n">type_id</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Species</span><span class="p">))</span> <span class="ow">or</span>
                 <span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;Species&#39;</span> <span class="ow">or</span> <span class="nb">property</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;nu&#39;</span><span class="p">,</span> <span class="s1">&#39;rho&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="n">BoundaryConditionError</span><span class="p">(</span><span class="s2">&quot;Target must be of type string or SpatialPy.Species&quot;</span><span class="p">)</span>
@@ -218,26 +222,26 @@
             <span class="k">raise</span> <span class="n">BoundaryConditionError</span><span class="p">(</span><span class="s2">&quot;Must set value&quot;</span><span class="p">)</span>
         <span class="n">cond</span><span class="o">=</span><span class="p">[]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xmin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cond</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;(me-&gt;x[0] &gt;= </span><span class="si">{self.xmin}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="n">cond</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(me-&gt;x[0] &gt;= </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">xmin</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xmax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cond</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;(me-&gt;x[0] &lt;= </span><span class="si">{self.xmax}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="n">cond</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(me-&gt;x[0] &lt;= </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">xmax</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ymin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cond</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;(me-&gt;x[1] &gt;= </span><span class="si">{self.ymin}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="n">cond</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(me-&gt;x[1] &gt;= </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ymin</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ymax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cond</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;(me-&gt;x[1] &lt;= </span><span class="si">{self.ymax}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="n">cond</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(me-&gt;x[1] &lt;= </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ymax</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">zmin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cond</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;(me-&gt;x[2] &gt;= </span><span class="si">{self.zmin}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="n">cond</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(me-&gt;x[2] &gt;= </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">zmin</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">zmax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cond</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;(me-&gt;x[2] &lt;= </span><span class="si">{self.zmax}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="n">cond</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(me-&gt;x[2] &lt;= </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">zmax</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cond</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;(me-&gt;type == </span><span class="si">{self.type_id}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="n">cond</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(me-&gt;type == </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type_id</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cond</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">BoundaryConditionError</span><span class="p">(</span><span class="s1">&#39;need at least one condition on the BoundaryCondition&#39;</span><span class="p">)</span>
         <span class="n">bcstr</span> <span class="o">=</span> <span class="s2">&quot;if(&quot;</span> <span class="o">+</span> <span class="s1">&#39;&amp;&amp;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cond</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;){&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">listOfSpecies</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">deterministic</span><span class="p">:</span>
                 <span class="n">s_ndx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">species_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">listOfSpecies</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]]</span>
-                <span class="n">bcstr</span> <span class="o">+=</span> <span class="n">f</span><span class="s2">&quot;me-&gt;C[</span><span class="si">{s_ndx}</span><span class="s2">] = </span><span class="si">{self.value}</span><span class="s2">;&quot;</span>
+                <span class="n">bcstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;me-&gt;C[</span><span class="si">{</span><span class="n">s_ndx</span><span class="si">}</span><span class="s2">] = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">;&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">BoundaryConditionError</span><span class="p">(</span>
                     <span class="s2">&quot;BoundaryConditions don&#39;t work for stochastic species yet.&quot;</span>
@@ -245,13 +249,13 @@
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">==</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-                    <span class="n">bcstr</span><span class="o">+=</span> <span class="n">f</span><span class="s2">&quot;me-&gt;v[</span><span class="si">{i}</span><span class="s2">]=</span><span class="si">{self.value[i]}</span><span class="s2">;&quot;</span>
+                    <span class="n">bcstr</span><span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;me-&gt;v[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">;&quot;</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">==</span> <span class="s1">&#39;nu&#39;</span><span class="p">:</span>
-                <span class="n">bcstr</span> <span class="o">+=</span> <span class="n">f</span><span class="s2">&quot;me-&gt;nu=</span><span class="si">{self.value}</span><span class="s2">;&quot;</span>
+                <span class="n">bcstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;me-&gt;nu=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">;&quot;</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">==</span> <span class="s1">&#39;rho&#39;</span><span class="p">:</span>
-                <span class="n">bcstr</span> <span class="o">+=</span> <span class="n">f</span><span class="s2">&quot;me-&gt;rho=</span><span class="si">{self.value}</span><span class="s2">;&quot;</span>
+                <span class="n">bcstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;me-&gt;rho=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">;&quot;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">BoundaryConditionError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Unable handle boundary condition for property &#39;</span><span class="si">{self.target}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">BoundaryConditionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable handle boundary condition for property &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
         <span class="n">bcstr</span><span class="o">+=</span> <span class="s2">&quot;}&quot;</span>
         <span class="k">return</span> <span class="n">bcstr</span></div></div>
 </pre></div>
@@ -270,10 +274,10 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;Copyright (C) 2017-2020.
+      &copy;Copyright (C) 2017-2022.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
