@@ -96,6 +96,21 @@ publish:
 	git checkout @{-1}
 	git stash pop
 
+publish-release:
+	make clean
+	git stash
+	git checkout main
+	make html
+	-git add -f "$(BUILDDIR)"
+	-git commit -m "Latest build." "$(BUILDDIR)"
+	git push origin main -f
+	make clean
+	git checkout gh-pages
+	git pull origin main
+	git push origin gh-pages -f
+	git checkout @{-2}
+	git stash pop
+
 apidocs: build-dir
 	sphinx-apidoc -f -T -o classes ../spatialpy
 
