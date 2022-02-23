@@ -18,7 +18,7 @@
    
   <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
   
-    <link rel="apple-touch-icon" href="../../../_static/img/spatialpy-logo.svg" />
+    <link rel="apple-touch-icon" href="../../../_static/SpatialPy_logo.svg" />
   
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
@@ -30,7 +30,7 @@
         <div class="sphinxsidebarwrapper">
 <p class="logo">
   <a href="../../../index.html">
-    <img class="logo" src="../../../_static/img/spatialpy-logo.svg" alt="Logo"/>
+    <img class="logo" src="../../../_static/SpatialPy_logo.png" alt="Logo"/>
     
   </a>
 </p>
@@ -41,7 +41,7 @@
 
 
 <p>
-<iframe src="https://ghbtns.com/github-btn.html?user=SpatialPy&repo=SpatialPy&type=watch&count=true&size=large&v=2"
+<iframe src="https://ghbtns.com/github-btn.html?user=StochSS&repo=SpatialPy&type=watch&count=true&size=large&v=2"
   allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
 </p>
 
@@ -104,7 +104,7 @@
 <span class="sd">You should have received a copy of the GNU General Public License</span>
 <span class="sd">along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
 <span class="sd">&#39;&#39;&#39;</span>
-<span class="kn">from</span> <span class="nn">spatialpy.core.spatialpyerror</span> <span class="kn">import</span> <span class="n">ParameterError</span>
+<span class="kn">from</span> <span class="nn">spatialpy.core.spatialpyerror</span> <span class="k">import</span> <span class="n">ParameterError</span>
 
 <div class="viewcode-block" id="Parameter"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.parameter.Parameter">[docs]</a><span class="k">class</span> <span class="nc">Parameter</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -121,7 +121,7 @@
 <span class="sd">    :param value: Parameter as value rather than expression.</span>
 <span class="sd">    :type value: float</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">expression</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">expression</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ParameterError</span><span class="p">(</span><span class="s2">&quot;name is required for a Parameter.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -140,8 +140,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">print_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">print_string</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{self.name}</span><span class="s2">: {str(self.expression)}&quot;</span>
         <span class="k">return</span> <span class="n">print_string</span>
 
     <span class="k">def</span> <span class="nf">_evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -156,7 +156,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="n">namespace</span><span class="p">)))</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-            <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Could not evaluate expression &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;Could not evaluate expression &#39;</span><span class="si">{self.expression}</span><span class="s2">&#39;: </span><span class="si">{err}</span><span class="s2">.&quot;</span>
             <span class="k">raise</span> <span class="n">ParameterError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span></div>
 </pre></div>
 
@@ -177,13 +177,13 @@
       &copy;Copyright (C) 2017-2020.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 
     
-    <a href="https://github.com/SpatialPy/SpatialPy" class="github">
+    <a href="https://github.com/StochSS/SpatialPy" class="github">
         <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
     </a>
     

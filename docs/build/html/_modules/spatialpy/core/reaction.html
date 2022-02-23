@@ -18,7 +18,7 @@
    
   <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
   
-    <link rel="apple-touch-icon" href="../../../_static/img/spatialpy-logo.svg" />
+    <link rel="apple-touch-icon" href="../../../_static/SpatialPy_logo.svg" />
   
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
@@ -30,7 +30,7 @@
         <div class="sphinxsidebarwrapper">
 <p class="logo">
   <a href="../../../index.html">
-    <img class="logo" src="../../../_static/img/spatialpy-logo.svg" alt="Logo"/>
+    <img class="logo" src="../../../_static/SpatialPy_logo.png" alt="Logo"/>
     
   </a>
 </p>
@@ -41,7 +41,7 @@
 
 
 <p>
-<iframe src="https://ghbtns.com/github-btn.html?user=SpatialPy&repo=SpatialPy&type=watch&count=true&size=large&v=2"
+<iframe src="https://ghbtns.com/github-btn.html?user=StochSS&repo=SpatialPy&type=watch&count=true&size=large&v=2"
   allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
 </p>
 
@@ -106,9 +106,9 @@
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="kn">import</span> <span class="nn">uuid</span>
 
-<span class="kn">from</span> <span class="nn">spatialpy.core.species</span> <span class="kn">import</span> <span class="n">Species</span>
-<span class="kn">from</span> <span class="nn">spatialpy.core.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
-<span class="kn">from</span> <span class="nn">spatialpy.core.spatialpyerror</span> <span class="kn">import</span> <span class="n">ReactionError</span>
+<span class="kn">from</span> <span class="nn">spatialpy.core.species</span> <span class="k">import</span> <span class="n">Species</span>
+<span class="kn">from</span> <span class="nn">spatialpy.core.parameter</span> <span class="k">import</span> <span class="n">Parameter</span>
+<span class="kn">from</span> <span class="nn">spatialpy.core.spatialpyerror</span> <span class="k">import</span> <span class="n">ReactionError</span>
 
 <div class="viewcode-block" id="Reaction"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.reaction.Reaction">[docs]</a><span class="k">class</span> <span class="nc">Reaction</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -139,13 +139,13 @@
 <span class="sd">    :param restrict_to: Restrict reaction execution to a type or list of types within the domain.</span>
 <span class="sd">    :type restrict_to: int, str, list of ints or list of strs</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">reactants</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">products</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">propensity_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">reactants</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">products</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">propensity_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">rate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">restrict_to</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ReactionError</span><span class="p">(</span><span class="s2">&quot;Reaction name must be of type str.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;rxn</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;rxn{uuid.uuid4()}&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
 
@@ -174,7 +174,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">rate</span> <span class="o">=</span> <span class="n">rate</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">restrict_to</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">restrict_to</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">))):</span>
-            <span class="n">errmsg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Reaction </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: restrict_to must be an int, str, list of ints or list of strs.&quot;</span>
+            <span class="n">errmsg</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;Reaction </span><span class="si">{self.name}</span><span class="s2">: restrict_to must be an int, str, list of ints or list of strs.&quot;</span>
             <span class="k">raise</span> <span class="n">ReactionError</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">restrict_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">restrict_to</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
             <span class="n">restrict_to</span> <span class="o">=</span> <span class="p">[</span><span class="n">restrict_to</span><span class="p">]</span>
@@ -184,7 +184,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">restrict_to</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">type_id</span> <span class="ow">in</span> <span class="n">restrict_to</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">restrict_to</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;type_</span><span class="si">{</span><span class="n">type_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">restrict_to</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;type_</span><span class="si">{type_id}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">marate</span> <span class="o">=</span> <span class="kc">None</span>
@@ -192,19 +192,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ode_propensity_function</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span> <span class="o">=</span> <span class="n">annotation</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">print_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, Active in: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">restrict_to</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">print_string</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{self.name}</span><span class="s2">, Active in: {str(self.restrict_to)}&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reactants</span><span class="p">):</span>
             <span class="n">print_string</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">Reactants&quot;</span>
             <span class="k">for</span> <span class="n">species</span><span class="p">,</span> <span class="n">stoichiometry</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reactants</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="n">species</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">species</span><span class="o">.</span><span class="n">name</span>
-                <span class="n">print_string</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\t\t</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">stoichiometry</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">print_string</span> <span class="o">+=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="se">\n\t\t</span><span class="si">{name}</span><span class="s2">: </span><span class="si">{stoichiometry}</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">products</span><span class="p">):</span>
             <span class="n">print_string</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">Products&quot;</span>
             <span class="k">for</span> <span class="n">species</span><span class="p">,</span> <span class="n">stoichiometry</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">products</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="n">species</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">species</span><span class="o">.</span><span class="n">name</span>
-                <span class="n">print_string</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\t\t</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">stoichiometry</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">print_string</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">Propensity Function: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">propensity_function</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">print_string</span> <span class="o">+=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="se">\n\t\t</span><span class="si">{name}</span><span class="s2">: </span><span class="si">{stoichiometry}</span><span class="s2">&quot;</span>
+        <span class="n">print_string</span> <span class="o">+=</span> <span class="n">f</span><span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">Propensity Function: </span><span class="si">{self.propensity_function}</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">print_string</span>
 
 
@@ -245,12 +245,12 @@
         <span class="k">for</span> <span class="n">reactant</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reactants</span><span class="p">:</span>
             <span class="c1"># Case 1: 2X -&gt; Y</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reactants</span><span class="p">[</span><span class="n">reactant</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">propensity_function</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;0.5 * </span><span class="si">{</span><span class="n">propensity_function</span><span class="si">}</span><span class="s2"> * </span><span class="si">{</span><span class="n">reactant</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> * (</span><span class="si">{</span><span class="n">reactant</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - 1) / vol&quot;</span>
-                <span class="n">ode_propensity_function</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; * </span><span class="si">{</span><span class="n">reactant</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> * </span><span class="si">{</span><span class="n">reactant</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">propensity_function</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;0.5 * </span><span class="si">{propensity_function}</span><span class="s2"> * </span><span class="si">{reactant.name}</span><span class="s2"> * (</span><span class="si">{reactant.name}</span><span class="s2"> - 1) / vol&quot;</span>
+                <span class="n">ode_propensity_function</span> <span class="o">+=</span> <span class="n">f</span><span class="s2">&quot; * </span><span class="si">{reactant.name}</span><span class="s2"> * </span><span class="si">{reactant.name}</span><span class="s2">&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Case 3: X1, X2 -&gt; Y;</span>
-                <span class="n">propensity_function</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; * </span><span class="si">{</span><span class="n">reactant</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="n">ode_propensity_function</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; * </span><span class="si">{</span><span class="n">reactant</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">propensity_function</span> <span class="o">+=</span> <span class="n">f</span><span class="s2">&quot; * </span><span class="si">{reactant.name}</span><span class="s2">&quot;</span>
+                <span class="n">ode_propensity_function</span> <span class="o">+=</span> <span class="n">f</span><span class="s2">&quot; * </span><span class="si">{reactant.name}</span><span class="s2">&quot;</span>
 
         <span class="c1"># Set the volume dependency based on order.</span>
         <span class="n">order</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reactants</span><span class="p">)</span>
@@ -318,13 +318,13 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">propensity_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">errmsg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Reaction </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: You must either set the reaction to be &quot;</span>
+                <span class="n">errmsg</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;Reaction </span><span class="si">{self.name}</span><span class="s2">: You must either set the reaction to be &quot;</span>
                 <span class="n">errmsg</span> <span class="o">+=</span> <span class="s2">&quot;mass-action or specifiy a propensity function.&quot;</span>
                 <span class="k">raise</span> <span class="n">ReactionError</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">massaction</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">errmsg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Reaction </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: You cannot set the propensity type to mass-action &quot;</span>
+                <span class="n">errmsg</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;Reaction </span><span class="si">{self.name}</span><span class="s2">: You cannot set the propensity type to mass-action &quot;</span>
                 <span class="n">errmsg</span> <span class="o">+=</span> <span class="s2">&quot;and simultaneously set a propensity function.&quot;</span>
                 <span class="k">raise</span> <span class="n">ReactionError</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span>
             <span class="c1"># If they don&#39;t give us a propensity function and do give a rate, assume mass-action.</span>
@@ -338,11 +338,11 @@
                 <span class="n">rtype</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">reactant</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
                 <span class="k">if</span> <span class="n">rtype</span><span class="o">==</span><span class="s1">&#39;Species&#39;</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">reactant</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">listOfSpecies</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="n">ReactionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find species &#39;</span><span class="si">{</span><span class="n">reactant</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; in model.&quot;</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">ReactionError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Could not find species &#39;</span><span class="si">{reactant.name}</span><span class="s2">&#39; in model.&quot;</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">reactants</span><span class="p">[</span><span class="n">reactant</span><span class="p">]</span> <span class="o">=</span> <span class="n">reactants</span><span class="p">[</span><span class="n">reactant</span><span class="p">]</span>
                 <span class="k">elif</span> <span class="n">rtype</span><span class="o">==</span><span class="s1">&#39;str&#39;</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">reactant</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">listOfSpecies</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="n">ReactionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find species &#39;</span><span class="si">{</span><span class="n">reactant</span><span class="si">}</span><span class="s2">&#39; in model.&quot;</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">ReactionError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Could not find species &#39;</span><span class="si">{reactant}</span><span class="s2">&#39; in model.&quot;</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">reactants</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">listOfSpecies</span><span class="p">[</span><span class="n">reactant</span><span class="p">]]</span> <span class="o">=</span> <span class="n">reactants</span><span class="p">[</span><span class="n">reactant</span><span class="p">]</span>
 
         <span class="n">products</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">products</span>
@@ -352,11 +352,11 @@
                 <span class="n">rtype</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">product</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
                 <span class="k">if</span> <span class="n">rtype</span><span class="o">==</span><span class="s1">&#39;Species&#39;</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">product</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">listOfSpecies</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="n">ReactionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find species &#39;</span><span class="si">{</span><span class="n">product</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; in model.&quot;</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">ReactionError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Could not find species &#39;</span><span class="si">{product.name}</span><span class="s2">&#39; in model.&quot;</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">products</span><span class="p">[</span><span class="n">product</span><span class="p">]</span> <span class="o">=</span> <span class="n">products</span><span class="p">[</span><span class="n">product</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">product</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">listOfSpecies</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="n">ReactionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find species &#39;</span><span class="si">{</span><span class="n">product</span><span class="si">}</span><span class="s2">&#39; in model.&quot;</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">ReactionError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Could not find species &#39;</span><span class="si">{product}</span><span class="s2">&#39; in model.&quot;</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">products</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">listOfSpecies</span><span class="p">[</span><span class="n">product</span><span class="p">]]</span> <span class="o">=</span> <span class="n">products</span><span class="p">[</span><span class="n">product</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">massaction</span><span class="p">:</span>
@@ -382,13 +382,13 @@
       &copy;Copyright (C) 2017-2020.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 
     
-    <a href="https://github.com/SpatialPy/SpatialPy" class="github">
+    <a href="https://github.com/StochSS/SpatialPy" class="github">
         <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
     </a>
     
