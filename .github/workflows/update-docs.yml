@@ -1,0 +1,13 @@
+name: Publish SpatialPy Docs
+
+on:
+  push:
+    branches: [develop-clone]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Update and Publish docs
+    - run: cd docs && make publish-release
