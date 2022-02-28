@@ -16,4 +16,6 @@ jobs:
       
     - name: Update and Publish docs
       working-directory: docs
-      run: make publish-release
+      run: |
+        ls ../.github/workflows/
+        make publish-release
