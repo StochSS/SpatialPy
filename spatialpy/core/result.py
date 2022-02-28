@@ -578,7 +578,14 @@ class Result():
         given, that value is used to index into the timespan, and that time point is returned \
         as a 1D array with size (number of voxel).
 
-        :param property_name: A string describing the property to be returned.
+        :param property_name: A string describing the property to be returned.  Can be one of: {
+            'v' : velocity,
+            'rho': density,
+            'mass': mass,
+            'id': type_id,
+            'type': type as str,
+            'bvf_phi': boundary volume fraction,
+            'nu': viscosity}
         :type property_name: str
 
         :param timepoints: timespan index to be returned.  Default is None

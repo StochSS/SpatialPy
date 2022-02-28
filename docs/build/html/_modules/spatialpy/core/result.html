@@ -671,7 +671,14 @@
 <span class="sd">        given, that value is used to index into the timespan, and that time point is returned \</span>
 <span class="sd">        as a 1D array with size (number of voxel).</span>
 
-<span class="sd">        :param property_name: A string describing the property to be returned.</span>
+<span class="sd">        :param property_name: A string describing the property to be returned.  Can be one of: {</span>
+<span class="sd">            &#39;v&#39; : velocity,</span>
+<span class="sd">            &#39;rho&#39;: density,</span>
+<span class="sd">            &#39;mass&#39;: mass,</span>
+<span class="sd">            &#39;id&#39;: type_id,</span>
+<span class="sd">            &#39;type&#39;: type as str,</span>
+<span class="sd">            &#39;bvf_phi&#39;: boundary volume fraction,</span>
+<span class="sd">            &#39;nu&#39;: viscosity}</span>
 <span class="sd">        :type property_name: str</span>
 
 <span class="sd">        :param timepoints: timespan index to be returned.  Default is None</span>

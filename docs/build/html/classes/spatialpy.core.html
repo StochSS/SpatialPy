@@ -1643,7 +1643,14 @@ Not currently implemented.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>property_name</strong> (<em>str</em>) – A string describing the property to be returned.</p></li>
+<li><p><strong>property_name</strong> (<em>str</em>) – A string describing the property to be returned.  Can be one of: {
+‘v’ : velocity,
+‘rho’: density,
+‘mass’: mass,
+‘id’: type_id,
+‘type’: type as str,
+‘bvf_phi’: boundary volume fraction,
+‘nu’: viscosity}</p></li>
 <li><p><strong>timepoints</strong> (<em>int</em>) – timespan index to be returned.  Default is None</p></li>
 </ul>
 </dd>
@@ -3825,7 +3832,14 @@ Not currently implemented.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>property_name</strong> (<em>str</em>) – A string describing the property to be returned.</p></li>
+<li><p><strong>property_name</strong> (<em>str</em>) – A string describing the property to be returned.  Can be one of: {
+‘v’ : velocity,
+‘rho’: density,
+‘mass’: mass,
+‘id’: type_id,
+‘type’: type as str,
+‘bvf_phi’: boundary volume fraction,
+‘nu’: viscosity}</p></li>
 <li><p><strong>timepoints</strong> (<em>int</em>) – timespan index to be returned.  Default is None</p></li>
 </ul>
 </dd>
