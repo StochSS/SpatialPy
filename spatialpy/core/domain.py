@@ -715,11 +715,13 @@ class Domain():
         #vertices
         obj.vertices = mesh_obj.points
         # triangles
-        if 'triangle' in mesh_obj.cells:
-            obj.triangles = mesh_obj.cells['triangle']
+        triangles = list(filter(lambda cell: cell.type == "triangle", mesh_obj.cells))
+        if triangles:
+            obj.triangles = triangles[0].data
         #tetrahedrons
-        if 'tetra' in mesh_obj.cells:
-            obj.tetrahedrons = mesh_obj.cells['tetra']
+        tetras = list(filter(lambda cell: cell.type == "tetra", mesh_obj.cells))
+        if tetras:
+            obj.tetrahedrons = tetras[0].data
         # volume
         obj.calculate_vol()
         if not numpy.count_nonzero(obj.vol):
@@ -742,10 +744,6 @@ class Domain():
         :returns: SpatialPy Domain object created from the mesh file.
         :rtype: spatialpy.Domain.Domain
         """
-        # try:
-        #     import pygmsh # pylint: disable=import-outside-toplevel
-        # except ImportError as err:
-        #     raise DomainError("The python package 'pygmsh' is not installed.") from err
         try:
             import meshio # pylint: disable=import-outside-toplevel
         except ImportError as err:
