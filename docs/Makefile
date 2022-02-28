@@ -89,7 +89,7 @@ publish:
 	git stash
 	git pull
 	git checkout gh-pages
-	make html
+	make autobuild
 	-git add -f "$(BUILDDIR)"
 	-git commit -m "Latest build." "$(BUILDDIR)"
 	git push origin gh-pages -f
@@ -101,7 +101,7 @@ publish-release: publish
 	make clean
 	git stash
 	git checkout main
-	make html
+	make autobuild
 	-git add -f "$(BUILDDIR)"
 	-git commit -m "Latest docs build." "$(BUILDDIR)"
 	git push origin main -f
