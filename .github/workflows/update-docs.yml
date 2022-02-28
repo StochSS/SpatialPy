@@ -10,5 +10,5 @@ jobs:
 
     steps:
     - name: Update and Publish docs
-      working-directory: /docs
-      run: make publish-release
+      # working-directory: /docs
+      run: pwd
