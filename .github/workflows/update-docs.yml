@@ -10,4 +10,4 @@ jobs:
 
     steps:
     - name: Update and Publish docs
-    - run: cd docs && make publish-release
+      run: cd docs && make publish-release
