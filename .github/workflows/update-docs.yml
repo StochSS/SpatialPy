@@ -12,7 +12,7 @@ jobs:
     - name: Initialize environment
       uses: actions/checkout@v2
       with:
-        ref: develop-clone
+        ref: develop
       
     - name: Update and Publish docs
       working-directory: docs
