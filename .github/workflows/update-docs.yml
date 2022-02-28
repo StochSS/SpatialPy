@@ -9,6 +9,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Initialize environment
+      uses: actions/checkout@v2
+      
     - name: Update and Publish docs
       # working-directory: /docs
       run: pwd && ls ./
