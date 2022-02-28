@@ -10,8 +10,8 @@ jobs:
 
     steps:
     - name: Initialize environment
-      # uses: actions/checkout@v2
-      uses: StochSS/SpatialPy@develop-clone
+      uses: actions/checkout@develop-clone
+      # uses: StochSS/SpatialPy@develop-clone
       
     - name: Update and Publish docs
       working-directory: docs
