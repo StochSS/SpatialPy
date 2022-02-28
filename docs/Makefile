@@ -87,6 +87,7 @@ clean:
 publish:
 	make clean
 	git stash
+	git pull
 	git checkout gh-pages
 	make html
 	-git add -f "$(BUILDDIR)"
