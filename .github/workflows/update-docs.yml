@@ -10,4 +10,5 @@ jobs:
 
     steps:
     - name: Update and Publish docs
-      run: cd /SpatialPy/docs && make publish-release
+      working-directory: ./docs
+      run: make publish-release
