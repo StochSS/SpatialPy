@@ -742,16 +742,16 @@ class Domain():
         :returns: SpatialPy Domain object created from the mesh file.
         :rtype: spatialpy.Domain.Domain
         """
-        try:
-            import pygmsh # pylint: disable=import-outside-toplevel
-        except ImportError as err:
-            raise DomainError("The python package 'pygmsh' is not installed.") from err
+        # try:
+        #     import pygmsh # pylint: disable=import-outside-toplevel
+        # except ImportError as err:
+        #     raise DomainError("The python package 'pygmsh' is not installed.") from err
         try:
             import meshio # pylint: disable=import-outside-toplevel
         except ImportError as err:
             raise DomainError("The python package 'meshio' is not installed.") from err
 
-        return cls.import_meshio_object(meshio.msh_io.read(filename))
+        return cls.import_meshio_object(meshio.read(filename))
 
     def read_stochss_subdomain_file(self, filename, type_ids=None):
         """
