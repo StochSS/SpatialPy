@@ -11,4 +11,4 @@ jobs:
     steps:
     - name: Update and Publish docs
       # working-directory: /docs
-      run: pwd && ls ../
+      run: pwd && ls ./
