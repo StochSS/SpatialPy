@@ -1,2 +1,4 @@
-graft spatialpy/ssa_sdpd-c-simulation-engine/ 
+recursive-include spatialpy/solvers/c_base/ssa_sdpd-c-simulation-engine/ *
 include requirements.txt
+include LICENSE
+include COPYRIGHT

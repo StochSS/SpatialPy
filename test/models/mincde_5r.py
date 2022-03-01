@@ -1,3 +1,21 @@
+'''
+SpatialPy is a Python 3 package for simulation of
+spatial deterministic/stochastic reaction-diffusion-advection problems
+Copyright (C) 2019 - 2022 SpatialPy developers.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 #!/usr/bin/env python3
 """ spatialpy model file for the MinCDE example. """
 
@@ -29,11 +47,11 @@ class MinCDE5R(spatialpy.Model):
         spatialpy.URDMEModel.__init__(self,model_name)
 
         # Species
-        MinD_m     = spatialpy.Species(name="MinD_m", diffusion_constant=1e-14, D=2)
-        MinD_c_adp = spatialpy.Species(name="MinD_c_adp", diffusion_constant=2.5e-12, D=3)
-        MinD_c_atp = spatialpy.Species(name="MinD_c_atp", diffusion_constant=2.5e-12, D=3)
-        MinD_e     = spatialpy.Species(name="MinD_e", diffusion_constant=2.5e-12, D=3)
-        MinDE      = spatialpy.Species(name="MinDE", diffusion_constant=1e-14, D=2)
+        MinD_m     = spatialpy.Species(name="MinD_m", diffusion_coefficient=1e-14)
+        MinD_c_adp = spatialpy.Species(name="MinD_c_adp", diffusion_coefficient=2.5e-12)
+        MinD_c_atp = spatialpy.Species(name="MinD_c_atp", diffusion_coefficient=2.5e-12)
+        MinD_e     = spatialpy.Species(name="MinD_e", diffusion_coefficient=2.5e-12)
+        MinDE      = spatialpy.Species(name="MinDE", diffusion_coefficient=1e-14)
 
         self.add_species([MinD_m,MinD_c_atp,MinD_c_adp,MinD_e,MinDE])
 
