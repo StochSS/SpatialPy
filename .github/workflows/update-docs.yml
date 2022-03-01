@@ -14,6 +14,9 @@ jobs:
       with:
         ref: develop-clone
       
+    - name: Install Sphinx Dependency
+      run: apt-get install python3-sphinx
+
     - name: Update and Publish docs
       working-directory: docs
       run: |
