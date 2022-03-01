@@ -23,6 +23,8 @@ class DataFunction():
 
     :param name: Name of the Data Function.
     :type name: str
+
+    :raises DataFunctionError: If a name is not provided.
     """
 
     def __init__(self, name=None):
