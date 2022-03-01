@@ -23,11 +23,14 @@ class InitialCondition():
     """
     Class used to defined initial conditions in SpatialPy.
     SubClasses must implement the 'apply(model)' method, which
-    direction modifies the model.u0[species,voxel] matrix.
+    direction modifies the model.u0[species, voxel] matrix.
     """
     def apply(self, model):
         """
         Set the initial condition of the species to the count.
+
+        :param model: Model contianing the target species.
+        :type model: spatialpy.model.Model
         """
         raise InitialConditionError("spatialpy.InitialCondition subclasses must implement apply()")
 
