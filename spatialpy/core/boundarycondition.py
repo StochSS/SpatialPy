@@ -31,7 +31,7 @@ class BoundaryCondition():
          - type_id: type (subdomain) of the partciles
     Targets (one of the following must be set):
         property: (str), 'nu', 'rho','v'
-        species: (str) name of a chemical species.
+        species: (str) name of a chemical species. \
                    Must also set deterministic=True/False flag.
 
     :param xmin: x-axis coordinate lower bound of **condition**
