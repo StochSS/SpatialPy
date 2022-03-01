@@ -474,7 +474,12 @@ class Solver:
 
         # Build the solver
         makefile = self.spatialpy_rootdir+'/build/Makefile'
-        cmd_list = ['cd', self.core_dir, '&&', 'make', 'CORE', '-f',  makefile,
+        makefile_ann = self.spatialpy_rootdir+'/external/ANN/src/Makefile.spatialpy'
+        cmd_list = ['cd', self.core_dir, '&&',
+            'make', '-f' , makefile_ann, 
+            'ROOTINC="' + self.spatialpy_rootinc+'"',
+            '&&',
+            'make', 'CORE', '-f',  makefile,
             'ROOT="' + self.spatialpy_rootparam+'"',
             'ROOTINC="' + self.spatialpy_rootinc+'"',
             'BUILD='+self.core_dir, '&&'
