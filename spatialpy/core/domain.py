@@ -204,7 +204,7 @@ class Domain():
         """
         Add a type definition to the domain. By default, all regions are set to type 0.
 
-        :param geometry_ivar: an instance of a :py:class:`spatialpy.Geometry` subclass.  The 'inside()' method
+        :param geometry_ivar: an instance of a :py:class:`Geometry` subclass.  The 'inside()' method
                    of this object will be used to assign properties to points.
         :type geometry_ivar: spatialpy.geometry.Geometry
 
