@@ -59,7 +59,7 @@ class BoundaryCondition():
     and applies to deterministic simulation. **BoundaryCondition not yet implemeneted for Stochastic Species**.
     :type deterministic: bool
 
-    :param target: Set **target** to properties, can be 'nu' 'rho' or 'v' or species name
+    :param target: Set **target** to properties, can be 'nu' 'rho' or 'v' or species name \
     If species name, determinstic must also be set to True/False.
     :type target: str
 
