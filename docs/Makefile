@@ -87,7 +87,7 @@ clean:
 publish:
 	make clean
 	git stash
-	git pull origin staging
+	git pull
 	git checkout staging
 	make autobuild
 	-git add -f "$(BUILDDIR)"
