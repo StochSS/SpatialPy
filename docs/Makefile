@@ -87,14 +87,17 @@ clean:
 publish:
 	make clean
 	git stash
-	git pull
-	git checkout gh-pages
+	git pull origin staging
+	git checkout staging
 	make autobuild
 	-git add -f "$(BUILDDIR)"
-	-git commit -m "Latest build." "$(BUILDDIR)"
-	git push origin gh-pages -f
+	-git commit -m "Latest docs build." "$(BUILDDIR)"
+	git push origin staging -f
 	make clean
-	git checkout @{-1}
+	git checkout gh-pages
+	git pull origin staging
+	git push origin gh-pages -f
+	git checkout @{-2}
 	git stash pop
 
 publish-release: publish
