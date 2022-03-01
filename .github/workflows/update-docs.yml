@@ -14,8 +14,13 @@ jobs:
       with:
         ref: develop-clone
       
+    - name: Install Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.7'
+
     - name: Install Sphinx Dependency
-      run: pip install -U sphinx
+      run: python3 pip install -U sphinx
 
     - name: Update and Publish docs
       working-directory: docs
