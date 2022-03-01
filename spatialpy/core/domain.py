@@ -132,10 +132,10 @@ class Domain():
 
     def compile_prep(self):
         """
-        Generate the domain list of type ids and check for invalid type_ids and rho values
+        Generate the domains list of type ids and check for invalid type_ids and rho values
         in preperation of compiling the simulation files.
 
-        :raises DomainError: If a type_id is not set or rh for a particle is 0.
+        :raises DomainError: If a type_id is not set or rho=0 for a particle.
         """
         if self.type_id.tolist().count(None) > 0:
             raise DomainError(f"Particles must be assigned a type_id.")
@@ -150,7 +150,7 @@ class Domain():
         Add a single point particle to the domain space.
 
         :param point: Spatial coordinate vertices of point to be added
-        :type point: tuple(float, float, float) or tuple(float, float)
+        :type point: tuple(float, float, float)
 
         :param vol: Default volume of particle to be added
         :type vol: float
@@ -158,19 +158,19 @@ class Domain():
         :param mass: Default mass of particle to be added
         :type mass: float
 
-        :param type_id: Particle type ID of particle to be created
+        :param type_id: Particle type ID of particle to be craddedeated
         :type type_id: str | int
 
-        :param nu: Default viscosity of particle to be created
+        :param nu: Default viscosity of particle to be added
         :type nu: float
 
         :param fixed: True if particle is spatially fixed, else False
         :type fixed: bool
 
-        :param c: Default artificial speed of sound of particle to be created
+        :param c: Default artificial speed of sound of particle to be added
         :type c: float
 
-        :param rho: Default density of particle to be created
+        :param rho: Default density of particle to be added
         :type rho: float
 
         :raises DomainError: Type_id is 0 or type_id contains an invalid character.
@@ -204,9 +204,9 @@ class Domain():
         """
         Add a type definition to the domain. By default, all regions are set to type 0.
 
-        :param geometry_ivar: an instance of a 'spatialpy.Geometry' subclass.  The 'inside()' method
+        :param geometry_ivar: an instance of a :py:class:`Geometry` subclass.  The 'inside()' method
                    of this object will be used to assign properties to points.
-        :type geometry_ivar: spatialpy.Geometry.Geometry
+        :type geometry_ivar: spatialpy.geometry.Geometry
 
         :param type_id: The identifier for this type.
         :type type_id: str | int
@@ -301,8 +301,7 @@ class Domain():
         :param zmax: Maximum z value of the bounding box (defaults to Domain.zlim[1]).
         :type zmax: float
 
-        :param kwargs: Key word arguments for Domain.add_point.
-        :type kwargs: dict
+        :param \**kwargs: addition keyword arguments passed to :py:meth:`Domain.add_point`.
 
         :returns: The number of particles that were created within this geometry.
         :rtype: int
@@ -416,10 +415,10 @@ class Domain():
         Get distance between 2 domain vertices.
 
         :param start: Starting point
-        :type start: tuple(float, float, float) or tuple(float, float)
+        :type start: tuple(float, float, float)
 
         :param end: Ending point
-        :type end: tuple(float, float, float) or tuple(float, float)
+        :type end: tuple(float, float, float)
 
         :returns: a distance measurement between start and end point
         :rtype: float
@@ -431,7 +430,7 @@ class Domain():
         Find the nearest vertex of a given point in the domain.
 
         :param point: Target source point
-        :type point: tuple(float, float, float) or tuple(float, float)
+        :type point: tuple(float, float, float)
 
         :returns: The coordinates of the nearest vertex to the source point.
         :rtype: tuple(float, float, float) or tuple(float, float)
@@ -855,20 +854,13 @@ class Domain():
         :type c: float
 
         :param rho: default density of particles to be created.
-        :type rho:
+        :type rho: float
 
         :param fixed: spatially fixed flag of particles to be created. Defaults to false.
         :type fixed: bool
 
-        :param rho0: background density for the system. Defaults to 1.0
-        :type rho0: float
-
-        :param c0: speed of sound for the system. Defaults to 10
-        :type c0: float
-
-        :param P0: background pressure for the system. Defaults to 10
-        :type P0: float
-
+        :param \**kwargs: addition keyword arguments passed to :py:class:`Domain`.
+        
         :returns: Uniform 3D SpatialPy Domain object.
         :rtype: spatialpy.Domain.Domain
         """
@@ -921,19 +913,12 @@ class Domain():
         :type c: float
 
         :param rho: default density of particles to be created.
-        :type rho:
+        :type rho: float
 
         :param fixed: spatially fixed flag of particles to be created. Defaults to false.
         :type fixed: bool
 
-        :param rho0: background density for the system. Defaults to 1.0
-        :type rho0: float
-
-        :param c0: speed of sound for the system. Defaults to 10
-        :type c0: float
-
-        :param P0: background pressure for the system. Defaults to 10
-        :type P0: float
+        :param \**kwargs: addition keyword arguments passed to :py:class:`Domain`.
 
         :returns: Uniform 2D SpatialPy Domain object.
         :rtype: spatialpy.Domain.Domain
