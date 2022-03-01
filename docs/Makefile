@@ -89,7 +89,7 @@ publish:
 	git stash
 	git pull
 	git checkout staging
-	make autobuild
+	make html
 	-git add -f "$(BUILDDIR)"
 	-git commit -m "Latest docs build." "$(BUILDDIR)"
 	git push origin staging -f
@@ -104,7 +104,7 @@ publish-release: publish
 	make clean
 	git stash
 	git checkout main
-	make autobuild
+	make html
 	-git add -f "$(BUILDDIR)"
 	-git commit -m "Latest docs build." "$(BUILDDIR)"
 	git push origin main -f
