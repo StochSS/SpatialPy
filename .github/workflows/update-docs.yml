@@ -20,7 +20,7 @@ jobs:
         python-version: '3.7'
 
     - name: Install Sphinx Dependency
-      run: python3 pip install -U sphinx
+      run: python3 -m pip install -U sphinx
 
     - name: Update and Publish docs
       working-directory: docs
