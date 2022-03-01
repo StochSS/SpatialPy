@@ -24,6 +24,7 @@ jobs:
         python3 -m pip install --upgrade pip
         python3 -m pip install -U sphinx
         python3 -m pip install numpy
+        python3 -m pip install requirements.txt
 
     - name: Update and Publish docs
       working-directory: docs
