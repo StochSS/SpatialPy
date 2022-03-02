@@ -405,25 +405,25 @@
 <span class="sd">        one or all timepoints. Returns a numpy array containing the species population/concentration values.</span>
 
 <span class="sd">        :param species: A species in string or dictionary form to retreive information about</span>
-<span class="sd">        :type species: str | dict</span>
+<span class="sd">        :type species: str | spatialpy.core.species.Species</span>
 
 <span class="sd">        :param timepoints: A time point where the information should be retreived from.</span>
 <span class="sd">            If &#39;timepoints&#39; is None (default), a matrix of dimension:</span>
 <span class="sd">            (number of timepoints) x (number of voxels) is returned.</span>
 <span class="sd">            If an integer value is given, that value is used to index into the timespan, and that time point is returned</span>
-<span class="sd">            as a 1D array with size (number of voxel).</span>
-<span class="sd">        :type timepoints: int (default None)</span>
+<span class="sd">            as a 1D array with size (number of voxel).  Defaults to None</span>
+<span class="sd">        :type timepoints: int</span>
 
 <span class="sd">        :param concentration: Whether or not the species is a concentration (True) or population (False)</span>
 <span class="sd">            If concentration is False (default), the integer, raw, trajectory data is returned.</span>
-<span class="sd">            If set to True, the concentration (=copy_number/volume) is returned.</span>
-<span class="sd">        :type concentration: bool (default False)</span>
+<span class="sd">            If set to True, the concentration (=copy_number/volume) is returned.  Defaults to False</span>
+<span class="sd">        :type concentration: bool</span>
 
-<span class="sd">        :param deterministic: Whether or not the species is deterministic (True) or stochastic (False)</span>
-<span class="sd">        :type deterministic: bool (default False)</span>
+<span class="sd">        :param deterministic: Whether or not the species is deterministic (True) or stochastic (False).  Defaults to False</span>
+<span class="sd">        :type deterministic: bool</span>
 
-<span class="sd">        :param debug: Whether or not debug information should be printed</span>
-<span class="sd">        :type debug: bool (default False)</span>
+<span class="sd">        :param debug: Whether or not debug information should be printed. Defaults to False</span>
+<span class="sd">        :type debug: bool</span>
 
 <span class="sd">        :returns: A numpy array containing population/concentration values for target species across specified</span>
 <span class="sd">                    timepoints.  Defaults to all timepoints.</span>
@@ -433,7 +433,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">num_voxel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">get_num_voxels</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">species</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">spec_name</span> <span class="o">=</span> <span class="n">species</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">spec_name</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">name</span>
@@ -497,11 +497,13 @@
 <span class="sd">        :param deterministic: Whether or not to plot the data as deterministic</span>
 <span class="sd">        :type deterministic: bool</span>
 
-<span class="sd">        :param width: Width in pixels of output plot box</span>
-<span class="sd">        :type width: int (default 500)</span>
+<span class="sd">        :param width: Width in pixels of output plot box or for matplotlib inches of output plot box. \</span>
+<span class="sd">        Defaults to 500 (Plotly) or 6.4 (MatPlotLib)</span>
+<span class="sd">        :type width: int</span>
 
-<span class="sd">        :param height: Height in pixels of output plot box</span>
-<span class="sd">        :type height: int (default 500)</span>
+<span class="sd">        :param height: Height in pixels of output plot box or for matplotlib inches of output plot box. \</span>
+<span class="sd">        Defaults to 500 (Plotly) or 4.8 (MatPlotLib)</span>
+<span class="sd">        :type height: int</span>
 
 <span class="sd">        :param colormap: colormap to use.  Plotly specification, valid values: &quot;Plotly3&quot;,&quot;Jet&quot;,&quot;Blues&quot;,&quot;YlOrRd&quot;,</span>
 <span class="sd">                &quot;PuRd&quot;,&quot;BuGn&quot;,&quot;YlOrBr&quot;,&quot;PuBuGn&quot;,&quot;BuPu&quot;,&quot;YlGnBu&quot;, &quot;PuBu&quot;,&quot;GnBu&quot;,&quot;YlGn&quot;,&quot;Greens&quot;,&quot;Reds&quot;,</span>
@@ -543,7 +545,7 @@
 <span class="sd">        :returns: A dictionary containing data for a plotly figure of species output trajectory</span>
 <span class="sd">        :rtype: dict</span>
 
-<span class="sd">        :raises ResultsError: unable to plot species for given time</span>
+<span class="sd">        :raises ResultError: unable to plot species for given time</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">time_index_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_timespan</span><span class="p">()</span>
 
@@ -687,7 +689,7 @@
 <span class="sd">        :returns: a numpy array of target property values across timepoints, defaults to all timepoints.</span>
 <span class="sd">        :rtype: numpy.ndarray</span>
 
-<span class="sd">        :raises ResultsError: Could not get data for given timepoints.</span>
+<span class="sd">        :raises ResultError: Could not get data for given timepoints.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">l_time</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_timespan</span><span class="p">())</span> <span class="o">-</span> <span class="mi">1</span>
@@ -739,11 +741,13 @@
 <span class="sd">        :param p_ndx: The property index of the results to be plotted</span>
 <span class="sd">        :type p_ndx: int</span>
 
-<span class="sd">        :param width: Width in pixels of output plot box or for matplotlib inches of output plot box</span>
-<span class="sd">        :type width: int (default 500)</span>
+<span class="sd">        :param width: Width in pixels of output plot box or for matplotlib inches of output plot box. \</span>
+<span class="sd">        Defaults to 500 (Plotly) or 6.4 (MatPlotLib)</span>
+<span class="sd">        :type width: int</span>
 
-<span class="sd">        :param height: Height in pixels of output plot box or for matplotlib inches of output plot box</span>
-<span class="sd">        :type height: int (default 500)</span>
+<span class="sd">        :param height: Height in pixels of output plot box or for matplotlib inches of output plot box. \</span>
+<span class="sd">        Defaults to 500 (Plotly) or 4.8 (MatPlotLib)</span>
+<span class="sd">        :type height: int</span>
 
 <span class="sd">        :param colormap: colormap to use.  Plotly specification, valid values: &quot;Plotly3&quot;,&quot;Jet&quot;,&quot;Blues&quot;,&quot;YlOrRd&quot;,</span>
 <span class="sd">                &quot;PuRd&quot;,&quot;BuGn&quot;,&quot;YlOrBr&quot;,&quot;PuBuGn&quot;,&quot;BuPu&quot;,&quot;YlGnBu&quot;, &quot;PuBu&quot;,&quot;GnBu&quot;,&quot;YlGn&quot;,&quot;Greens&quot;,&quot;Reds&quot;,</span>
@@ -935,9 +939,9 @@
 <span class="sd">        The columns of modelname_mesh.csv are: &#39;Voxel ID&#39;, &#39;X&#39;, &#39;Y&#39;, &#39;Z&#39;, &#39;Type&#39;, &#39;Volume&#39;, &#39;Mass&#39;, &#39;Viscosity&#39;</span>
 <span class="sd">        The columns of modelname_species_S.csv: &#39;Time&#39;, &#39;Voxel 0&#39;, Voxel 1&#39;, ... &#39;Voxel N&#39;.</span>
 
-<span class="sd">        :type folder_name: str (default current working directory)</span>
-<span class="sd">        :param folder_name: A path where the vtk files will be written, created if non-existant.</span>
-<span class="sd">        If no path is provided current working directory is used.</span>
+<span class="sd">        :type folder_name: str</span>
+<span class="sd">        :param folder_name: A path where the vtk files will be written, created if non-existant. \</span>
+<span class="sd">        Defaults current working directory</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">folder_name</span><span class="p">:</span>
             <span class="n">folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
@@ -966,13 +970,13 @@
                 <span class="k">for</span> <span class="n">voxel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_vox</span><span class="p">):</span>
                     <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="n">voxel</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[:,</span><span class="n">voxel</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="Result.export_to_vtk"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.result.Result.export_to_vtk">[docs]</a>    <span class="k">def</span> <span class="nf">export_to_vtk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timespan</span><span class="p">,</span> <span class="n">folder_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__export_to_vtk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timespan</span><span class="p">,</span> <span class="n">folder_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write the trajectory to a collection of vtk files.</span>
 <span class="sd">        The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension.</span>
 <span class="sd">        Not currently implemented.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="n">ResultError</span><span class="p">(</span><span class="s2">&quot;Not implemented.&quot;</span><span class="p">)</span></div></div>
+        <span class="k">raise</span> <span class="n">ResultError</span><span class="p">(</span><span class="s2">&quot;Not implemented.&quot;</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

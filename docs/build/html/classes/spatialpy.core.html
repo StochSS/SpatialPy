@@ -1613,18 +1613,9 @@ The columns of modelname_mesh.csv are: ‘Voxel ID’, ‘X’, ‘Y’, ‘Z’
 The columns of modelname_species_S.csv: ‘Time’, ‘Voxel 0’, Voxel 1’, … ‘Voxel N’.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>folder_name</strong> (<em>str</em><em> (</em><em>default current working directory</em><em>)</em>) – A path where the vtk files will be written, created if non-existant.</p>
+<dd class="field-odd"><p><strong>folder_name</strong> (<em>str</em>) – A path where the vtk files will be written, created if non-existant.         Defaults current working directory</p>
 </dd>
 </dl>
-<p>If no path is provided current working directory is used.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spatialpy.core.result.Result.export_to_vtk">
-<span class="sig-name descname"><span class="pre">export_to_vtk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timespan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/result.html#Result.export_to_vtk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.result.Result.export_to_vtk" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write the trajectory to a collection of vtk files.
-The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension.
-Not currently implemented.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1652,7 +1643,7 @@ Not currently implemented.</p>
 <dd class="field-odd"><p>numpy.ndarray</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>ResultsError</strong> – Could not get data for given timepoints.</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ResultError" title="spatialpy.core.spatialpyerror.ResultError"><strong>ResultError</strong></a> – Could not get data for given timepoints.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1665,17 +1656,17 @@ one or all timepoints. Returns a numpy array containing the species population/c
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>str</em><em> | </em><em>dict</em>) – A species in string or dictionary form to retreive information about</p></li>
-<li><p><strong>timepoints</strong> (<em>int</em><em> (</em><em>default None</em><em>)</em>) – A time point where the information should be retreived from.
+<li><p><strong>species</strong> (<em>str</em><em> | </em><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – A species in string or dictionary form to retreive information about</p></li>
+<li><p><strong>timepoints</strong> (<em>int</em>) – A time point where the information should be retreived from.
 If ‘timepoints’ is None (default), a matrix of dimension:
 (number of timepoints) x (number of voxels) is returned.
 If an integer value is given, that value is used to index into the timespan, and that time point is returned
-as a 1D array with size (number of voxel).</p></li>
-<li><p><strong>concentration</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether or not the species is a concentration (True) or population (False)
+as a 1D array with size (number of voxel).  Defaults to None</p></li>
+<li><p><strong>concentration</strong> (<em>bool</em>) – Whether or not the species is a concentration (True) or population (False)
 If concentration is False (default), the integer, raw, trajectory data is returned.
-If set to True, the concentration (=copy_number/volume) is returned.</p></li>
-<li><p><strong>deterministic</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether or not the species is deterministic (True) or stochastic (False)</p></li>
-<li><p><strong>debug</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether or not debug information should be printed</p></li>
+If set to True, the concentration (=copy_number/volume) is returned.  Defaults to False</p></li>
+<li><p><strong>deterministic</strong> (<em>bool</em>) – Whether or not the species is deterministic (True) or stochastic (False).  Defaults to False</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – Whether or not debug information should be printed. Defaults to False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1716,8 +1707,8 @@ timepoints.  Defaults to all timepoints.</p>
 <li><p><strong>t_ndx</strong> (<em>int</em>) – The time index of the results to be plotted</p></li>
 <li><p><strong>t_val</strong> (<em>float</em>) – The time value of the results to be plotted, ignored if animated is set to True</p></li>
 <li><p><strong>p_ndx</strong> (<em>int</em>) – The property index of the results to be plotted</p></li>
-<li><p><strong>width</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Width in pixels of output plot box or for matplotlib inches of output plot box</p></li>
-<li><p><strong>height</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Height in pixels of output plot box or for matplotlib inches of output plot box</p></li>
+<li><p><strong>width</strong> (<em>int</em>) – Width in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 6.4 (MatPlotLib)</p></li>
+<li><p><strong>height</strong> (<em>int</em>) – Height in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 4.8 (MatPlotLib)</p></li>
 <li><p><strong>colormap</strong> (<em>str</em>) – colormap to use.  Plotly specification, valid values: “Plotly3”,”Jet”,”Blues”,”YlOrRd”,
 “PuRd”,”BuGn”,”YlOrBr”,”PuBuGn”,”BuPu”,”YlGnBu”, “PuBu”,”GnBu”,”YlGn”,”Greens”,”Reds”,
 “Greys”,”RdPu”,”OrRd”,”Purples”,”Oranges”.</p></li>
@@ -1764,8 +1755,8 @@ if set to True, the concentration (=copy_number/volume) is returned.</p>
 <li><p><strong>concentration</strong> (<em>bool</em>) – Whether or not to plot the data as stochastic concentration, ignored if deterministic is
 set to True</p></li>
 <li><p><strong>deterministic</strong> (<em>bool</em>) – Whether or not to plot the data as deterministic</p></li>
-<li><p><strong>width</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Width in pixels of output plot box</p></li>
-<li><p><strong>height</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Height in pixels of output plot box</p></li>
+<li><p><strong>width</strong> (<em>int</em>) – Width in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 6.4 (MatPlotLib)</p></li>
+<li><p><strong>height</strong> (<em>int</em>) – Height in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 4.8 (MatPlotLib)</p></li>
 <li><p><strong>colormap</strong> (<em>str</em>) – colormap to use.  Plotly specification, valid values: “Plotly3”,”Jet”,”Blues”,”YlOrRd”,
 “PuRd”,”BuGn”,”YlOrBr”,”PuBuGn”,”BuPu”,”YlGnBu”, “PuBu”,”GnBu”,”YlGn”,”Greens”,”Reds”,
 “Greys”,”RdPu”,”OrRd”,”Purples”,”Oranges”.</p></li>
@@ -1789,7 +1780,7 @@ False (default)</p></li>
 <dd class="field-odd"><p>dict</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>ResultsError</strong> – unable to plot species for given time</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ResultError" title="spatialpy.core.spatialpyerror.ResultError"><strong>ResultError</strong></a> – unable to plot species for given time</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4143,18 +4134,9 @@ The columns of modelname_mesh.csv are: ‘Voxel ID’, ‘X’, ‘Y’, ‘Z’
 The columns of modelname_species_S.csv: ‘Time’, ‘Voxel 0’, Voxel 1’, … ‘Voxel N’.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>folder_name</strong> (<em>str</em><em> (</em><em>default current working directory</em><em>)</em>) – A path where the vtk files will be written, created if non-existant.</p>
+<dd class="field-odd"><p><strong>folder_name</strong> (<em>str</em>) – A path where the vtk files will be written, created if non-existant.         Defaults current working directory</p>
 </dd>
 </dl>
-<p>If no path is provided current working directory is used.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spatialpy.core.Result.export_to_vtk">
-<span class="sig-name descname"><span class="pre">export_to_vtk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timespan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/result.html#Result.export_to_vtk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Result.export_to_vtk" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write the trajectory to a collection of vtk files.
-The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension.
-Not currently implemented.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -4182,7 +4164,7 @@ Not currently implemented.</p>
 <dd class="field-odd"><p>numpy.ndarray</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>ResultsError</strong> – Could not get data for given timepoints.</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ResultError" title="spatialpy.core.ResultError"><strong>ResultError</strong></a> – Could not get data for given timepoints.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4195,17 +4177,17 @@ one or all timepoints. Returns a numpy array containing the species population/c
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>str</em><em> | </em><em>dict</em>) – A species in string or dictionary form to retreive information about</p></li>
-<li><p><strong>timepoints</strong> (<em>int</em><em> (</em><em>default None</em><em>)</em>) – A time point where the information should be retreived from.
+<li><p><strong>species</strong> (<em>str</em><em> | </em><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – A species in string or dictionary form to retreive information about</p></li>
+<li><p><strong>timepoints</strong> (<em>int</em>) – A time point where the information should be retreived from.
 If ‘timepoints’ is None (default), a matrix of dimension:
 (number of timepoints) x (number of voxels) is returned.
 If an integer value is given, that value is used to index into the timespan, and that time point is returned
-as a 1D array with size (number of voxel).</p></li>
-<li><p><strong>concentration</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether or not the species is a concentration (True) or population (False)
+as a 1D array with size (number of voxel).  Defaults to None</p></li>
+<li><p><strong>concentration</strong> (<em>bool</em>) – Whether or not the species is a concentration (True) or population (False)
 If concentration is False (default), the integer, raw, trajectory data is returned.
-If set to True, the concentration (=copy_number/volume) is returned.</p></li>
-<li><p><strong>deterministic</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether or not the species is deterministic (True) or stochastic (False)</p></li>
-<li><p><strong>debug</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether or not debug information should be printed</p></li>
+If set to True, the concentration (=copy_number/volume) is returned.  Defaults to False</p></li>
+<li><p><strong>deterministic</strong> (<em>bool</em>) – Whether or not the species is deterministic (True) or stochastic (False).  Defaults to False</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – Whether or not debug information should be printed. Defaults to False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -4246,8 +4228,8 @@ timepoints.  Defaults to all timepoints.</p>
 <li><p><strong>t_ndx</strong> (<em>int</em>) – The time index of the results to be plotted</p></li>
 <li><p><strong>t_val</strong> (<em>float</em>) – The time value of the results to be plotted, ignored if animated is set to True</p></li>
 <li><p><strong>p_ndx</strong> (<em>int</em>) – The property index of the results to be plotted</p></li>
-<li><p><strong>width</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Width in pixels of output plot box or for matplotlib inches of output plot box</p></li>
-<li><p><strong>height</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Height in pixels of output plot box or for matplotlib inches of output plot box</p></li>
+<li><p><strong>width</strong> (<em>int</em>) – Width in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 6.4 (MatPlotLib)</p></li>
+<li><p><strong>height</strong> (<em>int</em>) – Height in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 4.8 (MatPlotLib)</p></li>
 <li><p><strong>colormap</strong> (<em>str</em>) – colormap to use.  Plotly specification, valid values: “Plotly3”,”Jet”,”Blues”,”YlOrRd”,
 “PuRd”,”BuGn”,”YlOrBr”,”PuBuGn”,”BuPu”,”YlGnBu”, “PuBu”,”GnBu”,”YlGn”,”Greens”,”Reds”,
 “Greys”,”RdPu”,”OrRd”,”Purples”,”Oranges”.</p></li>
@@ -4294,8 +4276,8 @@ if set to True, the concentration (=copy_number/volume) is returned.</p>
 <li><p><strong>concentration</strong> (<em>bool</em>) – Whether or not to plot the data as stochastic concentration, ignored if deterministic is
 set to True</p></li>
 <li><p><strong>deterministic</strong> (<em>bool</em>) – Whether or not to plot the data as deterministic</p></li>
-<li><p><strong>width</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Width in pixels of output plot box</p></li>
-<li><p><strong>height</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Height in pixels of output plot box</p></li>
+<li><p><strong>width</strong> (<em>int</em>) – Width in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 6.4 (MatPlotLib)</p></li>
+<li><p><strong>height</strong> (<em>int</em>) – Height in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 4.8 (MatPlotLib)</p></li>
 <li><p><strong>colormap</strong> (<em>str</em>) – colormap to use.  Plotly specification, valid values: “Plotly3”,”Jet”,”Blues”,”YlOrRd”,
 “PuRd”,”BuGn”,”YlOrBr”,”PuBuGn”,”BuPu”,”YlGnBu”, “PuBu”,”GnBu”,”YlGn”,”Greens”,”Reds”,
 “Greys”,”RdPu”,”OrRd”,”Purples”,”Oranges”.</p></li>
@@ -4319,7 +4301,7 @@ False (default)</p></li>
 <dd class="field-odd"><p>dict</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>ResultsError</strong> – unable to plot species for given time</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ResultError" title="spatialpy.core.ResultError"><strong>ResultError</strong></a> – unable to plot species for given time</p>
 </dd>
 </dl>
 </dd></dl>
