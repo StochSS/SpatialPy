@@ -123,7 +123,7 @@
 <span class="sd">        Set the initial condition of the species to the count.</span>
 
 <span class="sd">        :param model: Model contianing the target species.</span>
-<span class="sd">        :type model: spatialpy.model.Model</span>
+<span class="sd">        :type model: spatialpy.core.model.Model</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="n">InitialConditionError</span><span class="p">(</span><span class="s2">&quot;spatialpy.InitialCondition subclasses must implement apply()&quot;</span><span class="p">)</span></div></div>
 
@@ -132,7 +132,7 @@
 <span class="sd">    Class used to defined the place initial condition in SpatialPy.</span>
 
 <span class="sd">    :param species: The species to set the initial condition.</span>
-<span class="sd">    :type species: spatialpy.species.Species</span>
+<span class="sd">    :type species: spatialpy.core.species.Species</span>
 
 <span class="sd">    :param count: The initial condition for the target species.</span>
 <span class="sd">    :type count: int</span>
@@ -154,7 +154,7 @@
 <span class="sd">        Set the initial condition of the species to the count at the location.</span>
 
 <span class="sd">        :param model: Model contianing the target species.</span>
-<span class="sd">        :type model: spatialpy.model.Model</span>
+<span class="sd">        :type model: spatialpy.core.model.Model</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">spec_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="o">.</span><span class="n">name</span>
         <span class="n">spec_ndx</span> <span class="o">=</span> <span class="kc">None</span>
@@ -170,7 +170,7 @@
 <span class="sd">    Class used to defined the uniform initial condition in SpatialPy.</span>
 
 <span class="sd">    :param species: The species to set the initial condition.</span>
-<span class="sd">    :type species: spatialpy.species.Species</span>
+<span class="sd">    :type species: spatialpy.core.species.Species</span>
 
 <span class="sd">    :param count: The initial condition for the target species.</span>
 <span class="sd">    :type count: int</span>
@@ -197,7 +197,7 @@
 <span class="sd">        Set &#39;count&#39; of &#39;species&#39; in over the list of types (all types if None).</span>
 
 <span class="sd">        :param model: Model contianing the target species.</span>
-<span class="sd">        :type model: spatialpy.model.Model</span>
+<span class="sd">        :type model: spatialpy.core.model.Model</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">spec_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="o">.</span><span class="n">name</span>
         <span class="n">spec_ndx</span> <span class="o">=</span> <span class="kc">None</span>
@@ -222,7 +222,7 @@
 <span class="sd">    Class used to defined the scatter initial condition in SpatialPy.</span>
 
 <span class="sd">    :param species: The species to set the initial condition.</span>
-<span class="sd">    :type species: spatialpy.species.Species</span>
+<span class="sd">    :type species: spatialpy.core.species.Species</span>
 
 <span class="sd">    :param count: The initial condition for the target species.</span>
 <span class="sd">    :type count: int</span>
@@ -249,7 +249,7 @@
 <span class="sd">        Scatter &#39;count&#39; of &#39;species&#39; randomly over the list of types (all types if None).</span>
 
 <span class="sd">        :param model: Model contianing the target species.</span>
-<span class="sd">        :type model: spatialpy.model.Model</span>
+<span class="sd">        :type model: spatialpy.core.model.Model</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">spec_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="o">.</span><span class="n">name</span>
         <span class="n">spec_ndx</span> <span class="o">=</span> <span class="kc">None</span>

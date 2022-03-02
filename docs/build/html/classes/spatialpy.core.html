@@ -886,7 +886,7 @@ direction modifies the model.u0[species, voxel] matrix.</p>
 <dd><p>Set the initial condition of the species to the count.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.model.Model</em>) – Model contianing the target species.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -901,7 +901,7 @@ direction modifies the model.u0[species, voxel] matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spatialpy.species.Species</em>) – The species to set the initial condition.</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species to set the initial condition.</p></li>
 <li><p><strong>count</strong> (<em>int</em>) – The initial condition for the target species.</p></li>
 <li><p><strong>location</strong> (<em>float</em><em>[</em><em>3</em><em>]</em>) – X, Y, Z coordinates to place the initial condition.</p></li>
 </ul>
@@ -913,7 +913,7 @@ direction modifies the model.u0[species, voxel] matrix.</p>
 <dd><p>Set the initial condition of the species to the count at the location.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.model.Model</em>) – Model contianing the target species.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -928,7 +928,7 @@ direction modifies the model.u0[species, voxel] matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spatialpy.species.Species</em>) – The species to set the initial condition.</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species to set the initial condition.</p></li>
 <li><p><strong>count</strong> (<em>int</em>) – The initial condition for the target species.</p></li>
 <li><p><strong>types</strong> (<em>list</em>) – Types of the particles to place the initial condition.</p></li>
 </ul>
@@ -940,7 +940,7 @@ direction modifies the model.u0[species, voxel] matrix.</p>
 <dd><p>Scatter ‘count’ of ‘species’ randomly over the list of types (all types if None).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.model.Model</em>) – Model contianing the target species.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -955,7 +955,7 @@ direction modifies the model.u0[species, voxel] matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spatialpy.species.Species</em>) – The species to set the initial condition.</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species to set the initial condition.</p></li>
 <li><p><strong>count</strong> (<em>int</em>) – The initial condition for the target species.</p></li>
 <li><p><strong>types</strong> (<em>list</em>) – Types of the particles to place the initial condition.</p></li>
 </ul>
@@ -967,7 +967,7 @@ direction modifies the model.u0[species, voxel] matrix.</p>
 <dd><p>Set ‘count’ of ‘species’ in over the list of types (all types if None).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.model.Model</em>) – Model contianing the target species.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1002,10 +1002,10 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.model.Model.add_boundary_condition">
 <span class="sig-name descname"><span class="pre">add_boundary_condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bound_cond</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.add_boundary_condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.model.Model.add_boundary_condition" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add an BoundaryCondition object to the model.</p>
+<dd><p>Add an boundary condition object to the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>bound_cond</strong> (<em>spatialpy.BoundaryCondition</em>) – Boundary condition to be added</p>
+<dd class="field-odd"><p><strong>bound_cond</strong> (<a class="reference internal" href="#spatialpy.core.boundarycondition.BoundaryCondition" title="spatialpy.core.boundarycondition.BoundaryCondition"><em>spatialpy.core.boundarycondition.BoundaryCondition</em></a>) – Boundary condition to be added</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1025,7 +1025,7 @@ the spatial positon ‘point’ as an array, and it returns a float value.</p>
 <dd class="field-even"><p>DataFunction object(s) added tothe model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.DataFunction | list(spatialpy.DataFunction)</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.datafunction.DataFunction" title="spatialpy.core.datafunction.DataFunction">spatialpy.core.datafunction.DataFunction</a> | list(<a class="reference internal" href="#spatialpy.core.datafunction.DataFunction" title="spatialpy.core.datafunction.DataFunction">spatialpy.core.datafunction.DataFunction</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – Invalid DataFunction</p>
@@ -1039,7 +1039,7 @@ the spatial positon ‘point’ as an array, and it returns a float value.</p>
 <dd><p>Add a spatial domain to the model</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>domain</strong> (<em>spatialpy.Domain.Domain</em>) – The Domain object to be added to the model</p>
+<dd class="field-odd"><p><strong>domain</strong> (<a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain"><em>spatialpy.core.domain.Domain</em></a>) – The Domain object to be added to the model</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – Invalid Domain object</p>
@@ -1053,7 +1053,7 @@ the spatial positon ‘point’ as an array, and it returns a float value.</p>
 <dd><p>Add an initial condition object to the initialization of the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>init_cond</strong> (<em>spatialpy.InitialCondition.InitialCondition</em>) – Initial condition to be added</p>
+<dd class="field-odd"><p><strong>init_cond</strong> (<a class="reference internal" href="#spatialpy.core.initialcondition.InitialCondition" title="spatialpy.core.initialcondition.InitialCondition"><em>spatialpy.core.initialcondition.InitialCondition</em></a>) – Initial condition to be added</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1065,16 +1065,16 @@ the spatial positon ‘point’ as an array, and it returns a float value.</p>
 Parameter object or a list of Parameter objects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>params</strong> (<em>spatialpy.parameter.Parameter</em><em> | </em><em>list</em><em>(</em><em>spatialpy.parameter.Parameter</em><em>)</em>) – Parameter object or list of Parameters to be added.</p>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a><em> | </em><em>list</em><em>(</em><a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a><em>)</em>) – Parameter object or list of Parameters to be added.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Parameter object which has been added to the model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.parameter.Parameter | list(spatialpy.parameter.Parameter)</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter">spatialpy.core.parameter.Parameter</a> | list(<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter">spatialpy.core.parameter.Parameter</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – if obj is not a spatialpy.parameter.Parameter</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – if obj is not a spatialpy.core.parameter.Parameter</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1086,16 +1086,16 @@ Parameter object or a list of Parameter objects.</p>
 or a dict with name, instance pairs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>reacs</strong> (<em>spatialpy.model.Reaction</em><em> | </em><em>list</em><em>(</em><em>spatialpy.model.Reaction</em><em>)</em>) – Reaction or list of Reactions to be added.</p>
+<dd class="field-odd"><p><strong>reacs</strong> (<a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction"><em>spatialpy.core.reaction.Reaction</em></a><em> | </em><em>list</em><em>(</em><a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction"><em>spatialpy.core.reaction.Reaction</em></a><em>)</em>) – Reaction or list of Reactions to be added.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The Reaction object(s) added to the model</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.model.Reaction</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction">spatialpy.core.reaction.Reaction</a> | list(<a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction">spatialpy.core.reaction.Reaction</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – Invalid input/reaction to add_reaction()</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – if obj is not a spatialpy.core.reaction.Reaction</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1106,16 +1106,16 @@ or a dict with name, instance pairs.</p>
 <dd><p>Adds a species, or list of species to the model. Will return the added object upon success.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.species.Species</em><em> | </em><em>list</em><em>(</em><em>spatialpy.species.Species</em>) – The species or list of species to be added to the model object.</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a><em> | </em><em>list</em><em>(</em><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species or list of species to be added to the model object.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Species object which was added to the model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.species.Species | list(spatialpy.species.Species)</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species">spatialpy.core.species.Species</a> | list(<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species">spatialpy.core.species.Species</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – If obj is not a spatialpy.species.Species</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – If obj is not a spatialpy.core.species.Species</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1163,7 +1163,7 @@ of compiling the simulation files.</p>
 <dd><p>Remove a Parameter from model.listOfParameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.Model.Parameter</em>) – Parameter object to be removed</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a>) – Parameter object to be removed</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1174,7 +1174,7 @@ of compiling the simulation files.</p>
 <dd><p>Remove reaction from model.listOfReactions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.Model.Reaction</em>) – Reaction to be removed.</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction"><em>spatialpy.core.reaction.Reaction</em></a>) – Reaction to be removed.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1185,7 +1185,7 @@ of compiling the simulation files.</p>
 <dd><p>Remove a Species from model.listOfSpecies.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.Model.Species</em>) – Species object to be removed</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – Species object to be removed</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1266,13 +1266,13 @@ of compiling the simulation files.</p>
 <dd><p>Return the Parameter object from model associated with ‘pname’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>pname</strong> (<em>spatialpy.Model.Parameter</em>) – Name of parameter to be removed</p>
+<dd class="field-odd"><p><strong>pname</strong> (<em>str</em>) – Name of parameter to be returned</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The Parameter object represented in the model by ‘pname’</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Spatialpy.Model.Parameter</p>
+<dd class="field-odd"><p>Spatialpy.core.parameter.Parameter</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – No parameter named {pname}</p>
@@ -1286,13 +1286,13 @@ of compiling the simulation files.</p>
 <dd><p>Retrieve a reaction object from the model by name</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>rname</strong> (<em>str</em>) – name of Reaction to retrieve</p>
+<dd class="field-odd"><p><strong>rname</strong> (<em>str</em>) – name of the reaction to be returned</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The Reaction Object in the model represented by ‘rname’</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Model.Reaction</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction">spatialpy.core.reaction.Reaction</a></p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – Could not find reaction</p>
@@ -1312,7 +1312,7 @@ of compiling the simulation files.</p>
 <dd class="field-even"><p>The Species objected represented by given ‘sname’</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Model.Species</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species">spatialpy.core.species.Species</a></p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – if the model does not contain the requested species</p>
@@ -1346,7 +1346,7 @@ killed upon reaching timeout.</p></li>
 <dd class="field-even"><p>A SpatialPy Result object containing simulation data.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Result.Result</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.result.Result" title="spatialpy.core.result.Result">spatialpy.core.result.Result</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1399,8 +1399,7 @@ later on by SpatialPySolvers evaluating reaction propensity functions.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.model.Model.set_timesteps">
 <span class="sig-name descname"><span class="pre">set_timesteps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_interval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.set_timesteps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.model.Model.set_timesteps" title="Permalink to this definition">¶</a></dt>
-<dd><p>”
-Set the simlation time span parameters.</p>
+<dd><p>Set the simlation time span parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1453,7 +1452,7 @@ non-uniform timespans.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>spatailpy_model</strong> – SpatialPy model to be converted to StochSS</p></li>
+<li><p><strong>spatialpy_model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – SpatialPy model to be converted to StochSS</p></li>
 <li><p><strong>filename</strong> (<em>str</em>) – Path to the exported stochss model</p></li>
 <li><p><strong>return_stochss_model</strong> (<em>bool</em>) – Whether or not to return the model</p></li>
 </ul>
@@ -2788,7 +2787,7 @@ direction modifies the model.u0[species, voxel] matrix.</p>
 <dd><p>Set the initial condition of the species to the count.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.model.Model</em>) – Model contianing the target species.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3477,10 +3476,10 @@ and ‘v’ is returned,</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Model.add_boundary_condition">
 <span class="sig-name descname"><span class="pre">add_boundary_condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bound_cond</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.add_boundary_condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Model.add_boundary_condition" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add an BoundaryCondition object to the model.</p>
+<dd><p>Add an boundary condition object to the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>bound_cond</strong> (<em>spatialpy.BoundaryCondition</em>) – Boundary condition to be added</p>
+<dd class="field-odd"><p><strong>bound_cond</strong> (<a class="reference internal" href="#spatialpy.core.boundarycondition.BoundaryCondition" title="spatialpy.core.boundarycondition.BoundaryCondition"><em>spatialpy.core.boundarycondition.BoundaryCondition</em></a>) – Boundary condition to be added</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3500,7 +3499,7 @@ the spatial positon ‘point’ as an array, and it returns a float value.</p>
 <dd class="field-even"><p>DataFunction object(s) added tothe model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.DataFunction | list(spatialpy.DataFunction)</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.datafunction.DataFunction" title="spatialpy.core.datafunction.DataFunction">spatialpy.core.datafunction.DataFunction</a> | list(<a class="reference internal" href="#spatialpy.core.datafunction.DataFunction" title="spatialpy.core.datafunction.DataFunction">spatialpy.core.datafunction.DataFunction</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – Invalid DataFunction</p>
@@ -3514,7 +3513,7 @@ the spatial positon ‘point’ as an array, and it returns a float value.</p>
 <dd><p>Add a spatial domain to the model</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>domain</strong> (<em>spatialpy.Domain.Domain</em>) – The Domain object to be added to the model</p>
+<dd class="field-odd"><p><strong>domain</strong> (<a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain"><em>spatialpy.core.domain.Domain</em></a>) – The Domain object to be added to the model</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – Invalid Domain object</p>
@@ -3528,7 +3527,7 @@ the spatial positon ‘point’ as an array, and it returns a float value.</p>
 <dd><p>Add an initial condition object to the initialization of the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>init_cond</strong> (<em>spatialpy.InitialCondition.InitialCondition</em>) – Initial condition to be added</p>
+<dd class="field-odd"><p><strong>init_cond</strong> (<a class="reference internal" href="#spatialpy.core.initialcondition.InitialCondition" title="spatialpy.core.initialcondition.InitialCondition"><em>spatialpy.core.initialcondition.InitialCondition</em></a>) – Initial condition to be added</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3540,16 +3539,16 @@ the spatial positon ‘point’ as an array, and it returns a float value.</p>
 Parameter object or a list of Parameter objects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>params</strong> (<em>spatialpy.parameter.Parameter</em><em> | </em><em>list</em><em>(</em><em>spatialpy.parameter.Parameter</em><em>)</em>) – Parameter object or list of Parameters to be added.</p>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a><em> | </em><em>list</em><em>(</em><a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a><em>)</em>) – Parameter object or list of Parameters to be added.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Parameter object which has been added to the model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.parameter.Parameter | list(spatialpy.parameter.Parameter)</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter">spatialpy.core.parameter.Parameter</a> | list(<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter">spatialpy.core.parameter.Parameter</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – if obj is not a spatialpy.parameter.Parameter</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – if obj is not a spatialpy.core.parameter.Parameter</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3561,16 +3560,16 @@ Parameter object or a list of Parameter objects.</p>
 or a dict with name, instance pairs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>reacs</strong> (<em>spatialpy.model.Reaction</em><em> | </em><em>list</em><em>(</em><em>spatialpy.model.Reaction</em><em>)</em>) – Reaction or list of Reactions to be added.</p>
+<dd class="field-odd"><p><strong>reacs</strong> (<a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction"><em>spatialpy.core.reaction.Reaction</em></a><em> | </em><em>list</em><em>(</em><a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction"><em>spatialpy.core.reaction.Reaction</em></a><em>)</em>) – Reaction or list of Reactions to be added.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The Reaction object(s) added to the model</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.model.Reaction</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction">spatialpy.core.reaction.Reaction</a> | list(<a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction">spatialpy.core.reaction.Reaction</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – Invalid input/reaction to add_reaction()</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – if obj is not a spatialpy.core.reaction.Reaction</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3581,16 +3580,16 @@ or a dict with name, instance pairs.</p>
 <dd><p>Adds a species, or list of species to the model. Will return the added object upon success.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.species.Species</em><em> | </em><em>list</em><em>(</em><em>spatialpy.species.Species</em>) – The species or list of species to be added to the model object.</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a><em> | </em><em>list</em><em>(</em><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species or list of species to be added to the model object.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Species object which was added to the model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.species.Species | list(spatialpy.species.Species)</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species">spatialpy.core.species.Species</a> | list(<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species">spatialpy.core.species.Species</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – If obj is not a spatialpy.species.Species</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – If obj is not a spatialpy.core.species.Species</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3638,7 +3637,7 @@ of compiling the simulation files.</p>
 <dd><p>Remove a Parameter from model.listOfParameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.Model.Parameter</em>) – Parameter object to be removed</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a>) – Parameter object to be removed</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3649,7 +3648,7 @@ of compiling the simulation files.</p>
 <dd><p>Remove reaction from model.listOfReactions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.Model.Reaction</em>) – Reaction to be removed.</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction"><em>spatialpy.core.reaction.Reaction</em></a>) – Reaction to be removed.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3660,7 +3659,7 @@ of compiling the simulation files.</p>
 <dd><p>Remove a Species from model.listOfSpecies.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.Model.Species</em>) – Species object to be removed</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – Species object to be removed</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3741,13 +3740,13 @@ of compiling the simulation files.</p>
 <dd><p>Return the Parameter object from model associated with ‘pname’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>pname</strong> (<em>spatialpy.Model.Parameter</em>) – Name of parameter to be removed</p>
+<dd class="field-odd"><p><strong>pname</strong> (<em>str</em>) – Name of parameter to be returned</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The Parameter object represented in the model by ‘pname’</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Spatialpy.Model.Parameter</p>
+<dd class="field-odd"><p>Spatialpy.core.parameter.Parameter</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – No parameter named {pname}</p>
@@ -3761,13 +3760,13 @@ of compiling the simulation files.</p>
 <dd><p>Retrieve a reaction object from the model by name</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>rname</strong> (<em>str</em>) – name of Reaction to retrieve</p>
+<dd class="field-odd"><p><strong>rname</strong> (<em>str</em>) – name of the reaction to be returned</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The Reaction Object in the model represented by ‘rname’</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Model.Reaction</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction">spatialpy.core.reaction.Reaction</a></p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – Could not find reaction</p>
@@ -3787,7 +3786,7 @@ of compiling the simulation files.</p>
 <dd class="field-even"><p>The Species objected represented by given ‘sname’</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Model.Species</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species">spatialpy.core.species.Species</a></p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – if the model does not contain the requested species</p>
@@ -3821,7 +3820,7 @@ killed upon reaching timeout.</p></li>
 <dd class="field-even"><p>A SpatialPy Result object containing simulation data.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Result.Result</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.result.Result" title="spatialpy.core.result.Result">spatialpy.core.result.Result</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -3874,8 +3873,7 @@ later on by SpatialPySolvers evaluating reaction propensity functions.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Model.set_timesteps">
 <span class="sig-name descname"><span class="pre">set_timesteps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_interval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.set_timesteps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Model.set_timesteps" title="Permalink to this definition">¶</a></dt>
-<dd><p>”
-Set the simlation time span parameters.</p>
+<dd><p>Set the simlation time span parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -4035,7 +4033,7 @@ If given a String expression, it should be evaluable in the namespace of a paren
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spatialpy.species.Species</em>) – The species to set the initial condition.</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species to set the initial condition.</p></li>
 <li><p><strong>count</strong> (<em>int</em>) – The initial condition for the target species.</p></li>
 <li><p><strong>location</strong> (<em>float</em><em>[</em><em>3</em><em>]</em>) – X, Y, Z coordinates to place the initial condition.</p></li>
 </ul>
@@ -4047,7 +4045,7 @@ If given a String expression, it should be evaluable in the namespace of a paren
 <dd><p>Set the initial condition of the species to the count at the location.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.model.Model</em>) – Model contianing the target species.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4366,7 +4364,7 @@ False (default)</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spatialpy.species.Species</em>) – The species to set the initial condition.</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species to set the initial condition.</p></li>
 <li><p><strong>count</strong> (<em>int</em>) – The initial condition for the target species.</p></li>
 <li><p><strong>types</strong> (<em>list</em>) – Types of the particles to place the initial condition.</p></li>
 </ul>
@@ -4378,7 +4376,7 @@ False (default)</p></li>
 <dd><p>Scatter ‘count’ of ‘species’ randomly over the list of types (all types if None).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.model.Model</em>) – Model contianing the target species.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4446,7 +4444,7 @@ False (default)</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spatialpy.species.Species</em>) – The species to set the initial condition.</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species to set the initial condition.</p></li>
 <li><p><strong>count</strong> (<em>int</em>) – The initial condition for the target species.</p></li>
 <li><p><strong>types</strong> (<em>list</em>) – Types of the particles to place the initial condition.</p></li>
 </ul>
@@ -4458,7 +4456,7 @@ False (default)</p></li>
 <dd><p>Set ‘count’ of ‘species’ in over the list of types (all types if None).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.model.Model</em>) – Model contianing the target species.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
 </dd>
 </dl>
 </dd></dl>
