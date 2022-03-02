@@ -329,12 +329,12 @@ class Model():
         Adds a species, or list of species to the model. Will return the added object upon success.
 
         :param obj: The species or list of species to be added to the model object.
-        :type obj: spatialpy.Model.Species | list(spatialpy.Model.Species
+        :type obj: spatialpy.species.Species | list(spatialpy.species.Species
 
         :returns: Species object which was added to the model.
-        :rtype: spatialpy.Species | list(spatialpy.Species)
+        :rtype: spatialpy.species.Species | list(spatialpy.species.Species)
 
-        :raises ModelError: If obj is not a spatialpy.Species
+        :raises ModelError: If obj is not a spatialpy.species.Species
         """
         from spatialpy.core.species import Species # pylint: disable=import-outside-toplevel
         if isinstance(obj, list):
@@ -417,12 +417,12 @@ class Model():
         Parameter object or a list of Parameter objects.
 
         :param params: Parameter object or list of Parameters to be added.
-        :type params: spatialpy.Model.Parameter | list(spatialpy.Model.Parameter)
+        :type params: spatialpy.parameter.Parameter | list(spatialpy.parameter.Parameter)
 
         :returns: Parameter object which has been added to the model.
-        :rtype: spatialpy.Parameter | list(spatialpy.Parameter)
+        :rtype: spatialpy.parameter.Parameter | list(spatialpy.parameter.Parameter)
 
-        :raises ModelError: if obj is not a spatialpy.Parameter
+        :raises ModelError: if obj is not a spatialpy.parameter.Parameter
         """
         from spatialpy.core.parameter import Parameter # pylint: disable=import-outside-toplevel
         if isinstance(params,list):
@@ -499,10 +499,10 @@ class Model():
         or a dict with name, instance pairs.
 
         :param reacs: Reaction or list of Reactions to be added.
-        :type reacs: spatialpy.Model.Reaction | list(spatialpy.Model.Reaction)
+        :type reacs: spatialpy.model.Reaction | list(spatialpy.model.Reaction)
 
         :returns: The Reaction object(s) added to the model
-        :rtype: spatialpy.Model.Reaction
+        :rtype: spatialpy.model.Reaction
 
         :raises ModelError: Invalid input/reaction to add_reaction()
         """
@@ -681,9 +681,9 @@ class Model():
     def add_data_function(self, data_function):
         """
         Add a scalar spatial function to the simulation. This is useful if you have a
-        spatially varying in put to your model. Argument is a instances of subclass of the
-        spatialpy.DataFunction class. It must implement a function 'map(x)' which takes a
-        the spatial positon 'x' as an array, and it returns a float value.
+        spatially varying input to your model. Argument is a instances of subclass of the
+        spatialpy.DataFunction class. It must implement a function 'map(point)' which takes a
+        the spatial positon 'point' as an array, and it returns a float value.
 
         :param data_function: Data function to be added.
         :type data_function: spatialpy.DataFunction

@@ -67,7 +67,7 @@ class BoundaryCondition():
     :type value: float or float[3]
 
     :param model: Target model of boundary condition
-    :type model: spatialpy.Model.Model
+    :type model: spatialpy.core.model.Model
     """
 
     def __init__(self, xmin=None, xmax=None, ymin=None, ymax=None, zmin=None, zmax=None,

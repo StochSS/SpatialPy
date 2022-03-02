@@ -37,13 +37,13 @@ class Domain():
     :type numpoints: int
 
     :param xlim: Range of domain along x-axis
-    :type xlim: tuple(float)
+    :type xlim: float(2)
 
     :param ylim: Range of domain along y-axis
-    :type ylim: tuple(float)
+    :type ylim: float(2)
 
     :param zlim: Range of domain along z-axis
-    :type zlim: tuple(float)
+    :type zlim: float(2)
 
     :param rho: Background density for the system
     :type rho: float
@@ -55,7 +55,7 @@ class Domain():
     :type P0: float
 
     :param gravity: Acceleration of gravity for the system.
-    :type species: float
+    :type gravity: float[3]
     """
     def __init__(self, numpoints, xlim, ylim, zlim, rho0=1.0, c0=10, P0=None, gravity=None):
         self.vertices = numpy.zeros((numpoints, 3), dtype=float)
@@ -150,7 +150,7 @@ class Domain():
         Add a single point particle to the domain space.
 
         :param point: Spatial coordinate vertices of point to be added
-        :type point: tuple(float, float, float)
+        :type point: float(3)
 
         :param vol: Default volume of particle to be added
         :type vol: float
@@ -204,9 +204,9 @@ class Domain():
         """
         Add a type definition to the domain. By default, all regions are set to type 0.
 
-        :param geometry_ivar: an instance of a :py:class:`Geometry` subclass.  The 'inside()' method
+        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass.  The 'inside()' method
                    of this object will be used to assign properties to points.
-        :type geometry_ivar: spatialpy.geometry.Geometry
+        :type geometry_ivar: spatialpy.core.geometry.Geometry
 
         :param type_id: The identifier for this type.
         :type type_id: str | int
@@ -270,9 +270,9 @@ class Domain():
         """
         Fill a geometric shape with particles.
 
-        :param geometry_ivar: an instance of a 'spatialpy.Geometry' subclass.  The 'inside()' method
+        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass.  The 'inside()' method
                    of this object will be used to create add the particles.
-        :type geometry_ivar: spatialpy.geometry.Geometry
+        :type geometry_ivar: spatialpy.core.geometry.Geometry
 
         :param deltax: Distance between particles on the x-axis.
         :type deltax: float
@@ -415,10 +415,10 @@ class Domain():
         Get distance between 2 domain vertices.
 
         :param start: Starting point
-        :type start: tuple(float, float, float)
+        :type start: float(3)
 
         :param end: Ending point
-        :type end: tuple(float, float, float)
+        :type end: float(2)
 
         :returns: a distance measurement between start and end point
         :rtype: float
@@ -430,10 +430,10 @@ class Domain():
         Find the nearest vertex of a given point in the domain.
 
         :param point: Target source point
-        :type point: tuple(float, float, float)
+        :type point: float(3)
 
         :returns: The coordinates of the nearest vertex to the source point.
-        :rtype: tuple(float, float, float) or tuple(float, float)
+        :rtype: float(3)
         """
         min_dist = None
         min_vtx = None
@@ -651,7 +651,7 @@ class Domain():
         :type filename: str
 
         :returns: SpatialPy Domain object created from xml mesh.
-        :rtype: spatialpy.Domain.Domain
+        :rtype: spatialpy.core.domain.Domain
         """
         root = ET.parse(filename).getroot()
         if not root.tag == 'dolfin':
@@ -704,7 +704,7 @@ class Domain():
         :type mesh_obj: meshio.Mesh
 
         :returns: SpatialPy Domain object created from the meshio object
-        :rtype: spatialpy.Domain.Domain
+        :rtype: spatialpy.core.domain.Domain
         """
         # create domain object
         xlim = (min(mesh_obj.points[:, 0]), max(mesh_obj.points[:, 0]))
@@ -741,7 +741,7 @@ class Domain():
         :type filename: str
 
         :returns: SpatialPy Domain object created from the mesh file.
-        :rtype: spatialpy.Domain.Domain
+        :rtype: spatialpy.core.domain.Domain
         """
         try:
             import meshio # pylint: disable=import-outside-toplevel
@@ -788,7 +788,7 @@ class Domain():
         :type filename: str
 
         :returns: SpatialPy Domain object created from StochSS domain.
-        :rtype: spatialpy.Domain.Domain
+        :rtype: spatialpy.core.domain.Domain
         """
         try:
             with open(filename, "r", encoding="utf-8") as domain_file:
@@ -824,13 +824,13 @@ class Domain():
         Create a filled 3D domain
 
         :param xlim: highest and lowest coordinate in the x dimension
-        :type xlim: tuple(float, float)
+        :type xlim: float(2)
 
         :param ylim: highest and lowest coordinate in the y dimension
-        :type ylim: tuple(float, float)
+        :type ylim: float(2)
 
         :param zlim: highest and lowest coordinate in the z dimension
-        :type zlim: tuple(float, float)
+        :type zlim: float(2)
 
         :param nx: number of particle spacing in the x dimension
         :type nx: int
@@ -862,7 +862,7 @@ class Domain():
         :param \**kwargs: addition keyword arguments passed to :py:class:`Domain`.
         
         :returns: Uniform 3D SpatialPy Domain object.
-        :rtype: spatialpy.Domain.Domain
+        :rtype: spatialpy.core.domain.Domain
         """
         # Create domain object
         numberparticles = nx * ny * nz
@@ -889,10 +889,10 @@ class Domain():
         Create a filled 2D domain
 
         :param xlim: highest and lowest coordinate in the x dimension
-        :type xlim: tuple(float, float)
+        :type xlim: float(2)
 
         :param ylim: highest and lowest coordinate in the y dimension
-        :type ylim: tuple(float, float)
+        :type ylim: float(2)
 
         :param nx: number of particle spacing in the x dimension
         :type nx: int
@@ -921,7 +921,7 @@ class Domain():
         :param \**kwargs: addition keyword arguments passed to :py:class:`Domain`.
 
         :returns: Uniform 2D SpatialPy Domain object.
-        :rtype: spatialpy.Domain.Domain
+        :rtype: spatialpy.core.domain.Domain
         """
         # Create domain object
         numberparticles = nx * ny

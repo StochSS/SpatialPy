@@ -39,7 +39,7 @@ class PlaceInitialCondition(InitialCondition):
     Class used to defined the place initial condition in SpatialPy.
 
     :param species: The species to set the initial condition.
-    :type species: spayialpy.species.Species
+    :type species: spatialpy.species.Species
 
     :param count: The initial condition for the target species.
     :type count: int
@@ -77,7 +77,7 @@ class UniformInitialCondition(InitialCondition):
     Class used to defined the uniform initial condition in SpatialPy.
 
     :param species: The species to set the initial condition.
-    :type species: spayialpy.species.Species
+    :type species: spatialpy.species.Species
 
     :param count: The initial condition for the target species.
     :type count: int
@@ -129,7 +129,7 @@ class ScatterInitialCondition(InitialCondition):
     Class used to defined the scatter initial condition in SpatialPy.
 
     :param species: The species to set the initial condition.
-    :type species: spayialpy.species.Species
+    :type species: spatialpy.species.Species
 
     :param count: The initial condition for the target species.
     :type count: int
