@@ -200,13 +200,17 @@ def export(model, path=None, return_stochss_model=False):
     """
     SpatialPy model to StochSS converter
 
-    Args:
-        spatialpy_model : spatialpy.Model
-            SpatialPy model to be converted to StochSS
-        filename : str
-            Path to the exported stochss model
-        return_stochss_model : bool
-            Whether or not to return the model
+    :param model: SpatialPy model to be converted to StochSS.
+    :type model: spatialpy.core.model.Model
+
+    :param filename: Path to the exported stochss model.
+    :type filename: str
+
+    :param return_stochss_model: Whether or not to return the model.
+    :type return_stochss_model: bool
+
+    :returns: StochSS model dict if return_stochss_model is True else path to StochSS model file.
+    :rtype: dict | str
     """
     _ = model.compile_prep()
     if path is None:
