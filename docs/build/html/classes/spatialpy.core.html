@@ -1948,12 +1948,10 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – Name of the Species</p></li>
 <li><p><strong>diffusion_coefficient</strong> (<em>float</em>) – Non-constant coefficient of diffusion for Species.</p></li>
-<li><p><strong>restrict_to</strong> – Set the diffusion coefficient to zero for ‘species’ in all types not in ‘listOfTypes’.</p></li>
+<li><p><strong>restrict_to</strong> (<em>int</em><em>, </em><em>str</em><em>, </em><em>list of ints</em><em> or </em><em>list of strs</em>) – Set the diffusion coefficient to zero for ‘species’ in all types not in ‘listOfTypes’.     This effectively restricts the movement of ‘species’ to the types specified in ‘listOfTypes’.</p></li>
 </ul>
 </dd>
 </dl>
-<p>This effectively restricts the movement of ‘species’ to the types specified in ‘listOfTypes’.
-:type restrict_to: int, str, list of ints or list of strs</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.species.Species.set_diffusion_coefficient">
 <span class="sig-name descname"><span class="pre">set_diffusion_coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diffusion_coefficient</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/species.html#Species.set_diffusion_coefficient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.species.Species.set_diffusion_coefficient" title="Permalink to this definition">¶</a></dt>
@@ -1963,7 +1961,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dd class="field-odd"><p><strong>diffusion_coefficient</strong> (<em>float</em>) – Non-constant coefficient of diffusion for Species.</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.SpeciesError" title="spatialpy.core.spatialpyerror.SpeciesError"><strong>SpeciesError</strong></a> – If diffusion_coefficient is negative.</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.SpeciesError" title="spatialpy.core.spatialpyerror.SpeciesError"><strong>SpeciesError</strong></a> – If diffusion_coefficient is negative or not a valid type.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4389,12 +4387,10 @@ False (default)</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – Name of the Species</p></li>
 <li><p><strong>diffusion_coefficient</strong> (<em>float</em>) – Non-constant coefficient of diffusion for Species.</p></li>
-<li><p><strong>restrict_to</strong> – Set the diffusion coefficient to zero for ‘species’ in all types not in ‘listOfTypes’.</p></li>
+<li><p><strong>restrict_to</strong> (<em>int</em><em>, </em><em>str</em><em>, </em><em>list of ints</em><em> or </em><em>list of strs</em>) – Set the diffusion coefficient to zero for ‘species’ in all types not in ‘listOfTypes’.     This effectively restricts the movement of ‘species’ to the types specified in ‘listOfTypes’.</p></li>
 </ul>
 </dd>
 </dl>
-<p>This effectively restricts the movement of ‘species’ to the types specified in ‘listOfTypes’.
-:type restrict_to: int, str, list of ints or list of strs</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Species.set_diffusion_coefficient">
 <span class="sig-name descname"><span class="pre">set_diffusion_coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diffusion_coefficient</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/species.html#Species.set_diffusion_coefficient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Species.set_diffusion_coefficient" title="Permalink to this definition">¶</a></dt>
@@ -4404,7 +4400,7 @@ False (default)</p></li>
 <dd class="field-odd"><p><strong>diffusion_coefficient</strong> (<em>float</em>) – Non-constant coefficient of diffusion for Species.</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.SpeciesError" title="spatialpy.core.SpeciesError"><strong>SpeciesError</strong></a> – If diffusion_coefficient is negative.</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.SpeciesError" title="spatialpy.core.SpeciesError"><strong>SpeciesError</strong></a> – If diffusion_coefficient is negative or not a valid type.</p>
 </dd>
 </dl>
 </dd></dl>
