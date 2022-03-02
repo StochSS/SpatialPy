@@ -293,13 +293,17 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    SpatialPy model to StochSS converter</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        spatialpy_model : spatialpy.Model</span>
-<span class="sd">            SpatialPy model to be converted to StochSS</span>
-<span class="sd">        filename : str</span>
-<span class="sd">            Path to the exported stochss model</span>
-<span class="sd">        return_stochss_model : bool</span>
-<span class="sd">            Whether or not to return the model</span>
+<span class="sd">    :param model: SpatialPy model to be converted to StochSS.</span>
+<span class="sd">    :type model: spatialpy.core.model.Model</span>
+
+<span class="sd">    :param filename: Path to the exported stochss model.</span>
+<span class="sd">    :type filename: str</span>
+
+<span class="sd">    :param return_stochss_model: Whether or not to return the model.</span>
+<span class="sd">    :type return_stochss_model: bool</span>
+
+<span class="sd">    :returns: StochSS model dict if return_stochss_model is True else path to StochSS model file.</span>
+<span class="sd">    :rtype: dict | str</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">compile_prep</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

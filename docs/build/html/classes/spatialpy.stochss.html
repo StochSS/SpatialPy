@@ -128,13 +128,16 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>spatialpy_model</strong> – spatialpy.Model
-SpatialPy model to be converted to StochSS</p></li>
-<li><p><strong>filename</strong> – str
-Path to the exported stochss model</p></li>
-<li><p><strong>return_stochss_model</strong> – bool
-Whether or not to return the model</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="spatialpy.core.html#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – SpatialPy model to be converted to StochSS.</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – Path to the exported stochss model.</p></li>
+<li><p><strong>return_stochss_model</strong> (<em>bool</em>) – Whether or not to return the model.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>StochSS model dict if return_stochss_model is True else path to StochSS model file.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict | str</p>
 </dd>
 </dl>
 </dd></dl>
