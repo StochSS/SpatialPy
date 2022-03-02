@@ -1526,7 +1526,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <li><p><strong>reactants</strong> (<em>dict</em>) – Dictionary of {species:stoichiometry} of reaction reactants</p></li>
 <li><p><strong>products</strong> (<em>dict</em>) – Dictionary of {species:stoichiometry} of reaction products</p></li>
 <li><p><strong>propensity_function</strong> (<em>str</em>) – String with the expression for the reaction’s propensity</p></li>
-<li><p><strong>rate</strong> (<em>spatialpy.model.Parameter</em>) – if mass action, rate is a reference to a parameter instance.</p></li>
+<li><p><strong>rate</strong> (<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a>) – if mass action, rate is a reference to a parameter instance.</p></li>
 <li><p><strong>annotation</strong> (<em>str</em>) – Description of the reaction (meta)</p></li>
 <li><p><strong>restrict_to</strong> (<em>int</em><em>, </em><em>str</em><em>, </em><em>list of ints</em><em> or </em><em>list of strs</em>) – Restrict reaction execution to a type or list of types within the domain.</p></li>
 </ul>
@@ -1539,7 +1539,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>S</strong> (<em>spatialpy.Model.Species</em>) – Species object to be produced by the reaction</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – Species object to be produced by the reaction</p></li>
 <li><p><strong>stoichiometry</strong> (<em>int</em>) – Stoichiometry of this product.</p></li>
 </ul>
 </dd>
@@ -1553,7 +1553,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spatialpy.Model.Species</em>) – reactant Species object</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – reactant Species object</p></li>
 <li><p><strong>stoichiometry</strong> (<em>int</em>) – Stoichiometry of this participant reactant</p></li>
 </ul>
 </dd>
@@ -1577,7 +1577,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dd><p>Deferred object initialization, called by model.add_reaction().</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.Model</em>) – Target SpatialPy Model for annotation.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Target SpatialPy Model for annotation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4064,7 +4064,7 @@ If given a String expression, it should be evaluable in the namespace of a paren
 <li><p><strong>reactants</strong> (<em>dict</em>) – Dictionary of {species:stoichiometry} of reaction reactants</p></li>
 <li><p><strong>products</strong> (<em>dict</em>) – Dictionary of {species:stoichiometry} of reaction products</p></li>
 <li><p><strong>propensity_function</strong> (<em>str</em>) – String with the expression for the reaction’s propensity</p></li>
-<li><p><strong>rate</strong> (<em>spatialpy.model.Parameter</em>) – if mass action, rate is a reference to a parameter instance.</p></li>
+<li><p><strong>rate</strong> (<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a>) – if mass action, rate is a reference to a parameter instance.</p></li>
 <li><p><strong>annotation</strong> (<em>str</em>) – Description of the reaction (meta)</p></li>
 <li><p><strong>restrict_to</strong> (<em>int</em><em>, </em><em>str</em><em>, </em><em>list of ints</em><em> or </em><em>list of strs</em>) – Restrict reaction execution to a type or list of types within the domain.</p></li>
 </ul>
@@ -4077,7 +4077,7 @@ If given a String expression, it should be evaluable in the namespace of a paren
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>S</strong> (<em>spatialpy.Model.Species</em>) – Species object to be produced by the reaction</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – Species object to be produced by the reaction</p></li>
 <li><p><strong>stoichiometry</strong> (<em>int</em>) – Stoichiometry of this product.</p></li>
 </ul>
 </dd>
@@ -4091,7 +4091,7 @@ If given a String expression, it should be evaluable in the namespace of a paren
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spatialpy.Model.Species</em>) – reactant Species object</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – reactant Species object</p></li>
 <li><p><strong>stoichiometry</strong> (<em>int</em>) – Stoichiometry of this participant reactant</p></li>
 </ul>
 </dd>
@@ -4115,7 +4115,7 @@ If given a String expression, it should be evaluable in the namespace of a paren
 <dd><p>Deferred object initialization, called by model.add_reaction().</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.Model</em>) – Target SpatialPy Model for annotation.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Target SpatialPy Model for annotation.</p>
 </dd>
 </dl>
 </dd></dl>

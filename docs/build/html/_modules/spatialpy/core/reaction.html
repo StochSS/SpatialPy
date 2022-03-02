@@ -135,7 +135,7 @@
 <span class="sd">    :type propensity_function: str</span>
 
 <span class="sd">    :param rate: if mass action, rate is a reference to a parameter instance.</span>
-<span class="sd">    :type rate: spatialpy.model.Parameter</span>
+<span class="sd">    :type rate: spatialpy.core.parameter.Parameter</span>
 
 <span class="sd">    :param annotation: Description of the reaction (meta)</span>
 <span class="sd">    :type annotation: str</span>
@@ -270,8 +270,8 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a product to this reaction</span>
 
-<span class="sd">        :param S: Species object to be produced by the reaction</span>
-<span class="sd">        :type S: spatialpy.Model.Species</span>
+<span class="sd">        :param species: Species object to be produced by the reaction</span>
+<span class="sd">        :type species: spatialpy.core.species.Species</span>
 
 <span class="sd">        :param stoichiometry: Stoichiometry of this product.</span>
 <span class="sd">        :type stoichiometry: int</span>
@@ -288,7 +288,7 @@
 <span class="sd">        Add a reactant to this reaction</span>
 
 <span class="sd">        :param species: reactant Species object</span>
-<span class="sd">        :type species: spatialpy.Model.Species</span>
+<span class="sd">        :type species: spatialpy.core.species.Species</span>
 
 <span class="sd">        :param stoichiometry: Stoichiometry of this participant reactant</span>
 <span class="sd">        :type stoichiometry: int</span>
@@ -316,7 +316,7 @@
 <span class="sd">        Deferred object initialization, called by model.add_reaction().</span>
 
 <span class="sd">        :param model: Target SpatialPy Model for annotation.</span>
-<span class="sd">        :type model: spatialpy.Model</span>
+<span class="sd">        :type model: spatialpy.core.model.Model</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ode_propensity_function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propensity_function</span>
 
