@@ -28,7 +28,7 @@ class Species():
     :param diffusion_coefficient: Non-constant coefficient of diffusion for Species.
     :type diffusion_coefficient: float
 
-    :param restrict_to: Set the diffusion coefficient to zero for 'species' in all types not in 'listOfTypes'.
+    :param restrict_to: Set the diffusion coefficient to zero for 'species' in all types not in 'listOfTypes'. \
     This effectively restricts the movement of 'species' to the types specified in 'listOfTypes'.
     :type restrict_to: int, str, list of ints or list of strs
     """
@@ -71,7 +71,7 @@ class Species():
         :param diffusion_coefficient: Non-constant coefficient of diffusion for Species.
         :type diffusion_coefficient: float
 
-        :raises SpeciesError: If diffusion_coefficient is negative.
+        :raises SpeciesError: If diffusion_coefficient is negative or not a valid type.
         """
         if not (isinstance(diffusion_coefficient, (Parameter, float, int)) or \
                             type(diffusion_coefficient).__name__ == 'Parameter'):
