@@ -49,7 +49,7 @@ class Solver:
     SpatialPy solver object.
 
     :param model: Target model of solver simulation.
-    :type model: spatialpy.Model.Model
+    :type model: spatialpy.core.model.Model
 
     :param debug_level: Target level of debugging.
     :type debug_level: int
