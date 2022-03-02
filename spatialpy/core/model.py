@@ -32,8 +32,8 @@ def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
     """
     SpatialPy model to StochSS converter
 
-    :param spatailpy_model: SpatialPy model to be converted to StochSS
-    :type spatialpy_model: spatialpy.Model
+    :param spatialpy_model: SpatialPy model to be converted to StochSS
+    :type spatialpy_model: spatialpy.core.model.Model
 
     :param filename: Path to the exported stochss model
     :type filename: str
@@ -329,12 +329,12 @@ class Model():
         Adds a species, or list of species to the model. Will return the added object upon success.
 
         :param obj: The species or list of species to be added to the model object.
-        :type obj: spatialpy.species.Species | list(spatialpy.species.Species
+        :type obj: spatialpy.core.species.Species | list(spatialpy.core.species.Species
 
         :returns: Species object which was added to the model.
-        :rtype: spatialpy.species.Species | list(spatialpy.species.Species)
+        :rtype: spatialpy.core.species.Species | list(spatialpy.core.species.Species)
 
-        :raises ModelError: If obj is not a spatialpy.species.Species
+        :raises ModelError: If obj is not a spatialpy.core.species.Species
         """
         from spatialpy.core.species import Species # pylint: disable=import-outside-toplevel
         if isinstance(obj, list):
@@ -359,7 +359,7 @@ class Model():
         Remove a Species from model.listOfSpecies.
 
         :param obj: Species object to be removed
-        :type obj: spatialpy.Model.Species
+        :type obj: spatialpy.core.species.Species
         """
         self.listOfSpecies.pop(obj) # raises key error if param is missing
 
@@ -389,7 +389,7 @@ class Model():
         :type sname: str
 
         :returns: The Species objected represented by given 'sname'
-        :rtype: spatialpy.Model.Species
+        :rtype: spatialpy.core.species.Species
 
         :raises ModelError: if the model does not contain the requested species
         """
@@ -417,12 +417,12 @@ class Model():
         Parameter object or a list of Parameter objects.
 
         :param params: Parameter object or list of Parameters to be added.
-        :type params: spatialpy.parameter.Parameter | list(spatialpy.parameter.Parameter)
+        :type params: spatialpy.core.parameter.Parameter | list(spatialpy.core.parameter.Parameter)
 
         :returns: Parameter object which has been added to the model.
-        :rtype: spatialpy.parameter.Parameter | list(spatialpy.parameter.Parameter)
+        :rtype: spatialpy.core.parameter.Parameter | list(spatialpy.core.parameter.Parameter)
 
-        :raises ModelError: if obj is not a spatialpy.parameter.Parameter
+        :raises ModelError: if obj is not a spatialpy.core.parameter.Parameter
         """
         from spatialpy.core.parameter import Parameter # pylint: disable=import-outside-toplevel
         if isinstance(params,list):
@@ -449,7 +449,7 @@ class Model():
         Remove a Parameter from model.listOfParameters.
 
         :param obj: Parameter object to be removed
-        :type obj: spatialpy.Model.Parameter
+        :type obj: spatialpy.core.parameter.Parameter
         """
         self.listOfParameters.pop(obj)
 
@@ -466,11 +466,11 @@ class Model():
         """
         Return the Parameter object from model associated with 'pname'
 
-        :param pname: Name of parameter to be removed
-        :type pname: spatialpy.Model.Parameter
+        :param pname: Name of parameter to be returned
+        :type pname: str
 
         :returns: The Parameter object represented in the model by 'pname'
-        :rtype: Spatialpy.Model.Parameter
+        :rtype: Spatialpy.core.parameter.Parameter
 
         :raises ModelError: No parameter named {pname}
         """
@@ -499,12 +499,12 @@ class Model():
         or a dict with name, instance pairs.
 
         :param reacs: Reaction or list of Reactions to be added.
-        :type reacs: spatialpy.model.Reaction | list(spatialpy.model.Reaction)
+        :type reacs: spatialpy.core.reaction.Reaction | list(spatialpy.core.reaction.Reaction)
 
         :returns: The Reaction object(s) added to the model
-        :rtype: spatialpy.model.Reaction
+        :rtype: spatialpy.core.reaction.Reaction | list(spatialpy.core.reaction.Reaction)
 
-        :raises ModelError: Invalid input/reaction to add_reaction()
+        :raises ModelError: if obj is not a spatialpy.core.reaction.Reaction
         """
         from spatialpy.core.reaction import Reaction # pylint: disable=import-outside-toplevel
         if isinstance(reacs, list):
@@ -529,7 +529,7 @@ class Model():
         Remove reaction from model.listOfReactions
 
         :param obj: Reaction to be removed.
-        :type obj: spatialpy.Model.Reaction
+        :type obj: spatialpy.core.reaction.Reaction
         """
         self.listOfReactions.pop(obj)
 
@@ -555,11 +555,11 @@ class Model():
         """
         Retrieve a reaction object from the model by name
 
-        :param rname: name of Reaction to retrieve
+        :param rname: name of the reaction to be returned
         :type rname: str
 
         :returns: The Reaction Object in the model represented by 'rname'
-        :rtype: spatialpy.Model.Reaction
+        :rtype: spatialpy.core.reaction.Reaction
 
         :raises ModelError: Could not find reaction
         """
@@ -596,7 +596,7 @@ class Model():
         :type profile: bool
 
         :returns: A SpatialPy Result object containing simulation data.
-        :rtype: spatialpy.Result.Result
+        :rtype: spatialpy.core.result.Result
         """
         from spatialpy.solvers.solver import Solver # pylint: disable=import-outside-toplevel
 
@@ -608,7 +608,7 @@ class Model():
 
 
     def set_timesteps(self, output_interval, num_steps, timestep_size=None):
-        """"
+        """
         Set the simlation time span parameters.
 
         :param output_interval: size of each output timestep in seconds
@@ -668,7 +668,7 @@ class Model():
         Add a spatial domain to the model
 
         :param domain: The Domain object to be added to the model
-        :type domain: spatialpy.Domain.Domain
+        :type domain: spatialpy.core.domain.Domain
 
         :raises ModelError: Invalid Domain object
         """
@@ -689,7 +689,7 @@ class Model():
         :type data_function: spatialpy.DataFunction
 
         :returns: DataFunction object(s) added tothe model.
-        :rtype: spatialpy.DataFunction | list(spatialpy.DataFunction)
+        :rtype: spatialpy.core.datafunction.DataFunction | list(spatialpy.core.datafunction.DataFunction)
 
         :raises ModelError: Invalid DataFunction
         """
@@ -711,16 +711,16 @@ class Model():
         Add an initial condition object to the initialization of the model.
 
         :param init_cond: Initial condition to be added
-        :type init_cond: spatialpy.InitialCondition.InitialCondition
+        :type init_cond: spatialpy.core.initialcondition.InitialCondition
         """
         self.listOfInitialConditions.append(init_cond)
 
     def add_boundary_condition(self, bound_cond):
         """
-        Add an BoundaryCondition object to the model.
+        Add an boundary condition object to the model.
 
         :param bound_cond: Boundary condition to be added
-        :type bound_cond: spatialpy.BoundaryCondition
+        :type bound_cond: spatialpy.core.boundarycondition.BoundaryCondition
         """
         bound_cond.model = self
         self.listOfBoundaryConditions.append(bound_cond)
