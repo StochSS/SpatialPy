@@ -2,7 +2,7 @@ name: Run SpatialPy Integration Tests
 
 on:
   push:
-    branches: [staging]
+    branches: [fake_staging-testing_target]
 
 jobs:
   run-tests:
