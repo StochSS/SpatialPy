@@ -150,7 +150,7 @@
 <div class="viewcode-block" id="GeometryExterior"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.geometry.GeometryExterior">[docs]</a><span class="k">class</span> <span class="nc">GeometryExterior</span><span class="p">(</span><span class="n">Geometry</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mark particles that are on the edge of the domain.</span>
-<span class="sd">    only works for meshes that define triangles and tetrahedrons.</span>
+<span class="sd">    only works for domains that define triangles and tetrahedrons.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="GeometryExterior.inside"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.geometry.GeometryExterior.inside">[docs]</a>    <span class="k">def</span> <span class="nf">inside</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">on_boundary</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -168,7 +168,7 @@
 <div class="viewcode-block" id="GeometryInterior"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.geometry.GeometryInterior">[docs]</a><span class="k">class</span> <span class="nc">GeometryInterior</span><span class="p">(</span><span class="n">Geometry</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mark particles that are not on the edge of the domain.</span>
-<span class="sd">    Only works for meshes that define triangles and tetrahedrons.</span>
+<span class="sd">    Only works for domains that define triangles and tetrahedrons.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="GeometryInterior.inside"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.geometry.GeometryInterior.inside">[docs]</a>    <span class="k">def</span> <span class="nf">inside</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">on_boundary</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

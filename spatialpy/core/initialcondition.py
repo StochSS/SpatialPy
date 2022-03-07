@@ -23,11 +23,14 @@ class InitialCondition():
     """
     Class used to defined initial conditions in SpatialPy.
     SubClasses must implement the 'apply(model)' method, which
-    direction modifies the model.u0[species,voxel] matrix.
+    direction modifies the model.u0[species, voxel] matrix.
     """
     def apply(self, model):
         """
         Set the initial condition of the species to the count.
+
+        :param model: Model contianing the target species.
+        :type model: spatialpy.core.model.Model
         """
         raise InitialConditionError("spatialpy.InitialCondition subclasses must implement apply()")
 
@@ -36,7 +39,7 @@ class PlaceInitialCondition(InitialCondition):
     Class used to defined the place initial condition in SpatialPy.
 
     :param species: The species to set the initial condition.
-    :type species: spayialpy.species.Species
+    :type species: spatialpy.core.species.Species
 
     :param count: The initial condition for the target species.
     :type count: int
@@ -58,7 +61,7 @@ class PlaceInitialCondition(InitialCondition):
         Set the initial condition of the species to the count at the location.
 
         :param model: Model contianing the target species.
-        :type model: spatialpy.model.Model
+        :type model: spatialpy.core.model.Model
         """
         spec_name = self.species.name
         spec_ndx = None
@@ -74,7 +77,7 @@ class UniformInitialCondition(InitialCondition):
     Class used to defined the uniform initial condition in SpatialPy.
 
     :param species: The species to set the initial condition.
-    :type species: spayialpy.species.Species
+    :type species: spatialpy.core.species.Species
 
     :param count: The initial condition for the target species.
     :type count: int
@@ -101,7 +104,7 @@ class UniformInitialCondition(InitialCondition):
         Set 'count' of 'species' in over the list of types (all types if None).
 
         :param model: Model contianing the target species.
-        :type model: spatialpy.model.Model
+        :type model: spatialpy.core.model.Model
         """
         spec_name = self.species.name
         spec_ndx = None
@@ -126,7 +129,7 @@ class ScatterInitialCondition(InitialCondition):
     Class used to defined the scatter initial condition in SpatialPy.
 
     :param species: The species to set the initial condition.
-    :type species: spayialpy.species.Species
+    :type species: spatialpy.core.species.Species
 
     :param count: The initial condition for the target species.
     :type count: int
@@ -153,7 +156,7 @@ class ScatterInitialCondition(InitialCondition):
         Scatter 'count' of 'species' randomly over the list of types (all types if None).
 
         :param model: Model contianing the target species.
-        :type model: spatialpy.model.Model
+        :type model: spatialpy.core.model.Model
         """
         spec_name = self.species.name
         spec_ndx = None

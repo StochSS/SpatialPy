@@ -312,25 +312,25 @@ class Result():
         one or all timepoints. Returns a numpy array containing the species population/concentration values.
 
         :param species: A species in string or dictionary form to retreive information about
-        :type species: str | dict
+        :type species: str | spatialpy.core.species.Species
 
         :param timepoints: A time point where the information should be retreived from.
             If 'timepoints' is None (default), a matrix of dimension:
             (number of timepoints) x (number of voxels) is returned.
             If an integer value is given, that value is used to index into the timespan, and that time point is returned
-            as a 1D array with size (number of voxel).
-        :type timepoints: int (default None)
+            as a 1D array with size (number of voxel).  Defaults to None
+        :type timepoints: int
 
         :param concentration: Whether or not the species is a concentration (True) or population (False)
             If concentration is False (default), the integer, raw, trajectory data is returned.
-            If set to True, the concentration (=copy_number/volume) is returned.
-        :type concentration: bool (default False)
+            If set to True, the concentration (=copy_number/volume) is returned.  Defaults to False
+        :type concentration: bool
 
-        :param deterministic: Whether or not the species is deterministic (True) or stochastic (False)
-        :type deterministic: bool (default False)
+        :param deterministic: Whether or not the species is deterministic (True) or stochastic (False).  Defaults to False
+        :type deterministic: bool
 
-        :param debug: Whether or not debug information should be printed
-        :type debug: bool (default False)
+        :param debug: Whether or not debug information should be printed. Defaults to False
+        :type debug: bool
 
         :returns: A numpy array containing population/concentration values for target species across specified
                     timepoints.  Defaults to all timepoints.
@@ -340,7 +340,7 @@ class Result():
         """
         num_voxel = self.model.domain.get_num_voxels()
 
-        if isinstance(species,str):
+        if isinstance(species, str):
             spec_name = species
         else:
             spec_name = species.name
@@ -404,11 +404,13 @@ class Result():
         :param deterministic: Whether or not to plot the data as deterministic
         :type deterministic: bool
 
-        :param width: Width in pixels of output plot box
-        :type width: int (default 500)
+        :param width: Width in pixels of output plot box or for matplotlib inches of output plot box. \
+        Defaults to 500 (Plotly) or 6.4 (MatPlotLib)
+        :type width: int
 
-        :param height: Height in pixels of output plot box
-        :type height: int (default 500)
+        :param height: Height in pixels of output plot box or for matplotlib inches of output plot box. \
+        Defaults to 500 (Plotly) or 4.8 (MatPlotLib)
+        :type height: int
 
         :param colormap: colormap to use.  Plotly specification, valid values: "Plotly3","Jet","Blues","YlOrRd",
                 "PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu", "PuBu","GnBu","YlGn","Greens","Reds",
@@ -450,7 +452,7 @@ class Result():
         :returns: A dictionary containing data for a plotly figure of species output trajectory
         :rtype: dict
 
-        :raises ResultsError: unable to plot species for given time
+        :raises ResultError: unable to plot species for given time
         """
         time_index_list = self.get_timespan()
 
@@ -578,7 +580,14 @@ class Result():
         given, that value is used to index into the timespan, and that time point is returned \
         as a 1D array with size (number of voxel).
 
-        :param property_name: A string describing the property to be returned.
+        :param property_name: A string describing the property to be returned.  Can be one of: {
+            'v' : velocity,
+            'rho': density,
+            'mass': mass,
+            'id': type_id,
+            'type': type as str,
+            'bvf_phi': boundary volume fraction,
+            'nu': viscosity}
         :type property_name: str
 
         :param timepoints: timespan index to be returned.  Default is None
@@ -587,7 +596,7 @@ class Result():
         :returns: a numpy array of target property values across timepoints, defaults to all timepoints.
         :rtype: numpy.ndarray
 
-        :raises ResultsError: Could not get data for given timepoints.
+        :raises ResultError: Could not get data for given timepoints.
         """
 
         l_time = len(self.get_timespan()) - 1
@@ -639,11 +648,13 @@ class Result():
         :param p_ndx: The property index of the results to be plotted
         :type p_ndx: int
 
-        :param width: Width in pixels of output plot box or for matplotlib inches of output plot box
-        :type width: int (default 500)
+        :param width: Width in pixels of output plot box or for matplotlib inches of output plot box. \
+        Defaults to 500 (Plotly) or 6.4 (MatPlotLib)
+        :type width: int
 
-        :param height: Height in pixels of output plot box or for matplotlib inches of output plot box
-        :type height: int (default 500)
+        :param height: Height in pixels of output plot box or for matplotlib inches of output plot box. \
+        Defaults to 500 (Plotly) or 4.8 (MatPlotLib)
+        :type height: int
 
         :param colormap: colormap to use.  Plotly specification, valid values: "Plotly3","Jet","Blues","YlOrRd",
                 "PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu", "PuBu","GnBu","YlGn","Greens","Reds",
@@ -835,9 +846,9 @@ class Result():
         The columns of modelname_mesh.csv are: 'Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity'
         The columns of modelname_species_S.csv: 'Time', 'Voxel 0', Voxel 1', ... 'Voxel N'.
 
-        :type folder_name: str (default current working directory)
-        :param folder_name: A path where the vtk files will be written, created if non-existant.
-        If no path is provided current working directory is used.
+        :type folder_name: str
+        :param folder_name: A path where the vtk files will be written, created if non-existant. \
+        Defaults current working directory
         """
         if not folder_name:
             folder_name = os.path.abspath(os.getcwd())
@@ -866,7 +877,7 @@ class Result():
                 for voxel in range(num_vox):
                     writer.writerow([voxel] + data[:,voxel].tolist())
 
-    def export_to_vtk(self, timespan, folder_name=None):
+    def __export_to_vtk(self, timespan, folder_name=None):
         """
         Write the trajectory to a collection of vtk files.
         The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension.

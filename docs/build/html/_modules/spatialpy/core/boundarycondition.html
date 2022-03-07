@@ -124,7 +124,7 @@
 <span class="sd">         - type_id: type (subdomain) of the partciles</span>
 <span class="sd">    Targets (one of the following must be set):</span>
 <span class="sd">        property: (str), &#39;nu&#39;, &#39;rho&#39;,&#39;v&#39;</span>
-<span class="sd">        species: (str) name of a chemical species.</span>
+<span class="sd">        species: (str) name of a chemical species. \</span>
 <span class="sd">                   Must also set deterministic=True/False flag.</span>
 
 <span class="sd">    :param xmin: x-axis coordinate lower bound of **condition**</span>
@@ -152,7 +152,7 @@
 <span class="sd">    and applies to deterministic simulation. **BoundaryCondition not yet implemeneted for Stochastic Species**.</span>
 <span class="sd">    :type deterministic: bool</span>
 
-<span class="sd">    :param target: Set **target** to properties, can be &#39;nu&#39; &#39;rho&#39; or &#39;v&#39; or species name</span>
+<span class="sd">    :param target: Set **target** to properties, can be &#39;nu&#39; &#39;rho&#39; or &#39;v&#39; or species name \</span>
 <span class="sd">    If species name, determinstic must also be set to True/False.</span>
 <span class="sd">    :type target: str</span>
 
@@ -160,7 +160,7 @@
 <span class="sd">    :type value: float or float[3]</span>
 
 <span class="sd">    :param model: Target model of boundary condition</span>
-<span class="sd">    :type model: spatialpy.Model.Model</span>
+<span class="sd">    :type model: spatialpy.core.model.Model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ymin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ymax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
