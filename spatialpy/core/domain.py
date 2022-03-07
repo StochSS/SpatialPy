@@ -301,7 +301,7 @@ class Domain():
         :param zmax: Maximum z value of the bounding box (defaults to Domain.zlim[1]).
         :type zmax: float
 
-        :param \**kwargs: addition keyword arguments passed to :py:meth:`Domain.add_point`.
+        :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
 
         :returns: The number of particles that were created within this geometry.
         :rtype: int
@@ -859,7 +859,7 @@ class Domain():
         :param fixed: spatially fixed flag of particles to be created. Defaults to false.
         :type fixed: bool
 
-        :param \**kwargs: addition keyword arguments passed to :py:class:`Domain`.
+        :param \**kwargs: Additional keyword arguments passed to :py:class:`Domain`.
         
         :returns: Uniform 3D SpatialPy Domain object.
         :rtype: spatialpy.core.domain.Domain
@@ -918,7 +918,7 @@ class Domain():
         :param fixed: spatially fixed flag of particles to be created. Defaults to false.
         :type fixed: bool
 
-        :param \**kwargs: addition keyword arguments passed to :py:class:`Domain`.
+        :param \**kwargs: Additional keyword arguments passed to :py:class:`Domain`.
 
         :returns: Uniform 2D SpatialPy Domain object.
         :rtype: spatialpy.core.domain.Domain
