@@ -57,7 +57,7 @@ class GeometryAll(Geometry):
 class GeometryExterior(Geometry):
     """
     Mark particles that are on the edge of the domain.
-    only works for meshes that define triangles and tetrahedrons.
+    only works for domains that define triangles and tetrahedrons.
     """
     def inside(self, point, on_boundary):
         """
@@ -75,7 +75,7 @@ class GeometryExterior(Geometry):
 class GeometryInterior(Geometry):
     """
     Mark particles that are not on the edge of the domain.
-    Only works for meshes that define triangles and tetrahedrons.
+    Only works for domains that define triangles and tetrahedrons.
     """
     def inside(self, point, on_boundary):
         """

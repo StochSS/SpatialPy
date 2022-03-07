@@ -42,7 +42,7 @@ class Reaction():
     :type propensity_function: str
 
     :param rate: if mass action, rate is a reference to a parameter instance.
-    :type rate: spatialpy.model.Parameter
+    :type rate: spatialpy.core.parameter.Parameter
 
     :param annotation: Description of the reaction (meta)
     :type annotation: str
@@ -177,8 +177,8 @@ class Reaction():
         """
         Add a product to this reaction
 
-        :param S: Species object to be produced by the reaction
-        :type S: spatialpy.Model.Species
+        :param species: Species object to be produced by the reaction
+        :type species: spatialpy.core.species.Species
 
         :param stoichiometry: Stoichiometry of this product.
         :type stoichiometry: int
@@ -195,7 +195,7 @@ class Reaction():
         Add a reactant to this reaction
 
         :param species: reactant Species object
-        :type species: spatialpy.Model.Species
+        :type species: spatialpy.core.species.Species
 
         :param stoichiometry: Stoichiometry of this participant reactant
         :type stoichiometry: int
@@ -223,7 +223,7 @@ class Reaction():
         Deferred object initialization, called by model.add_reaction().
 
         :param model: Target SpatialPy Model for annotation.
-        :type model: spatialpy.Model
+        :type model: spatialpy.core.model.Model
         """
         self.ode_propensity_function = self.propensity_function
 

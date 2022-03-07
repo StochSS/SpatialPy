@@ -20,7 +20,7 @@ The latest version of SpatialPy can be found on `PyPI <https://pypi.org/project/
 
 Examples
 ********
-See our `Example Notebook - Getting Started <https://github.com/StochSS/SpatialPy/blob/develop/examples/Start_Here.ipynb>`_ for more information on how to build and simulate your models with SpatialPy. For an example of how to use SpatialPy to simulate a spatial stochastic reaction-diffusion system, see the `3D Cylinder Demo <https://github.com/StochSS/SpatialPy/blob/develop/examples/3D_Cylinder_Demo.ipynb>`_. We also provide examples of how to use SpatialPy to simulate physics (`Gravity Demo <https://github.com/StochSS/SpatialPy/blob/develop/examples/Gravity.ipynb>`_) and fluid flow (`Weir Model <https://github.com/StochSS/SpatialPy/blob/develop/examples/weir.ipynb>`_).
+See our `Example Notebook - Start Here <https://github.com/StochSS/SpatialPy/blob/develop/examples/StartHere.ipynb>`_ for more information on how to build and simulate your models with SpatialPy. For an example of how to use SpatialPy to simulate a spatial stochastic reaction-diffusion system, see the `3D Cylinder Demo <https://github.com/StochSS/SpatialPy/blob/develop/examples/3D_Cylinder_Demo.ipynb>`_. We also provide examples of how to use SpatialPy to simulate physics (`Gravity Demo <https://github.com/StochSS/SpatialPy/blob/develop/examples/Gravity.ipynb>`_) and fluid flow (`Weir Model <https://github.com/StochSS/SpatialPy/blob/develop/examples/weir.ipynb>`_).
 
 
 Reporting Issues

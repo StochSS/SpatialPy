@@ -23,6 +23,8 @@ class DataFunction():
 
     :param name: Name of the Data Function.
     :type name: str
+
+    :raises DataFunctionError: If a name is not provided.
     """
 
     def __init__(self, name=None):
@@ -35,11 +37,11 @@ class DataFunction():
         """
         This method must be overridden by the DataFunction subclass.
 
-        NOTE: The spatial location is evaulated at t=0 and is not
-              reevaluated as the fluid domain moves over time.
+        NOTE: The spatial location is evaulated at t=0 and is not \
+              re-evaluated as the fluid domain moves over time.
 
-        :param point: The x,y,z position
-        :type point: vector of 3 doubles
+        :param point: The x, y, z position.
+        :type point: float[3]
 
         :returns: Value of function at this spatial location.
         :rtype: float

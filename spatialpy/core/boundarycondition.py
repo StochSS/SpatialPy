@@ -31,7 +31,7 @@ class BoundaryCondition():
          - type_id: type (subdomain) of the partciles
     Targets (one of the following must be set):
         property: (str), 'nu', 'rho','v'
-        species: (str) name of a chemical species.
+        species: (str) name of a chemical species. \
                    Must also set deterministic=True/False flag.
 
     :param xmin: x-axis coordinate lower bound of **condition**
@@ -59,7 +59,7 @@ class BoundaryCondition():
     and applies to deterministic simulation. **BoundaryCondition not yet implemeneted for Stochastic Species**.
     :type deterministic: bool
 
-    :param target: Set **target** to properties, can be 'nu' 'rho' or 'v' or species name
+    :param target: Set **target** to properties, can be 'nu' 'rho' or 'v' or species name \
     If species name, determinstic must also be set to True/False.
     :type target: str
 
@@ -67,7 +67,7 @@ class BoundaryCondition():
     :type value: float or float[3]
 
     :param model: Target model of boundary condition
-    :type model: spatialpy.Model.Model
+    :type model: spatialpy.core.model.Model
     """
 
     def __init__(self, xmin=None, xmax=None, ymin=None, ymax=None, zmin=None, zmax=None,

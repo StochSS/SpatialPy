@@ -130,13 +130,13 @@
 <span class="sd">    :type numpoints: int</span>
 
 <span class="sd">    :param xlim: Range of domain along x-axis</span>
-<span class="sd">    :type xlim: tuple(float)</span>
+<span class="sd">    :type xlim: float(2)</span>
 
 <span class="sd">    :param ylim: Range of domain along y-axis</span>
-<span class="sd">    :type ylim: tuple(float)</span>
+<span class="sd">    :type ylim: float(2)</span>
 
 <span class="sd">    :param zlim: Range of domain along z-axis</span>
-<span class="sd">    :type zlim: tuple(float)</span>
+<span class="sd">    :type zlim: float(2)</span>
 
 <span class="sd">    :param rho: Background density for the system</span>
 <span class="sd">    :type rho: float</span>
@@ -148,7 +148,7 @@
 <span class="sd">    :type P0: float</span>
 
 <span class="sd">    :param gravity: Acceleration of gravity for the system.</span>
-<span class="sd">    :type species: float</span>
+<span class="sd">    :type gravity: float[3]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numpoints</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span><span class="p">,</span> <span class="n">rho0</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">c0</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">P0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gravity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numpoints</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -225,10 +225,10 @@
 
 <div class="viewcode-block" id="Domain.compile_prep"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.compile_prep">[docs]</a>    <span class="k">def</span> <span class="nf">compile_prep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Generate the domain list of type ids and check for invalid type_ids and rho values</span>
+<span class="sd">        Generate the domains list of type ids and check for invalid type_ids and rho values</span>
 <span class="sd">        in preperation of compiling the simulation files.</span>
 
-<span class="sd">        :raises DomainError: If a type_id is not set or rh for a particle is 0.</span>
+<span class="sd">        :raises DomainError: If a type_id is not set or rho=0 for a particle.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_id</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Particles must be assigned a type_id.&quot;</span><span class="p">)</span>
@@ -243,7 +243,7 @@
 <span class="sd">        Add a single point particle to the domain space.</span>
 
 <span class="sd">        :param point: Spatial coordinate vertices of point to be added</span>
-<span class="sd">        :type point: tuple(float, float, float) or tuple(float, float)</span>
+<span class="sd">        :type point: float(3)</span>
 
 <span class="sd">        :param vol: Default volume of particle to be added</span>
 <span class="sd">        :type vol: float</span>
@@ -251,19 +251,19 @@
 <span class="sd">        :param mass: Default mass of particle to be added</span>
 <span class="sd">        :type mass: float</span>
 
-<span class="sd">        :param type_id: Particle type ID of particle to be created</span>
+<span class="sd">        :param type_id: Particle type ID of particle to be craddedeated</span>
 <span class="sd">        :type type_id: str | int</span>
 
-<span class="sd">        :param nu: Default viscosity of particle to be created</span>
+<span class="sd">        :param nu: Default viscosity of particle to be added</span>
 <span class="sd">        :type nu: float</span>
 
 <span class="sd">        :param fixed: True if particle is spatially fixed, else False</span>
 <span class="sd">        :type fixed: bool</span>
 
-<span class="sd">        :param c: Default artificial speed of sound of particle to be created</span>
+<span class="sd">        :param c: Default artificial speed of sound of particle to be added</span>
 <span class="sd">        :type c: float</span>
 
-<span class="sd">        :param rho: Default density of particle to be created</span>
+<span class="sd">        :param rho: Default density of particle to be added</span>
 <span class="sd">        :type rho: float</span>
 
 <span class="sd">        :raises DomainError: Type_id is 0 or type_id contains an invalid character.</span>
@@ -297,9 +297,9 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a type definition to the domain. By default, all regions are set to type 0.</span>
 
-<span class="sd">        :param geometry_ivar: an instance of a &#39;spatialpy.Geometry&#39; subclass.  The &#39;inside()&#39; method</span>
+<span class="sd">        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass.  The &#39;inside()&#39; method</span>
 <span class="sd">                   of this object will be used to assign properties to points.</span>
-<span class="sd">        :type geometry_ivar: spatialpy.Geometry.Geometry</span>
+<span class="sd">        :type geometry_ivar: spatialpy.core.geometry.Geometry</span>
 
 <span class="sd">        :param type_id: The identifier for this type.</span>
 <span class="sd">        :type type_id: str | int</span>
@@ -363,9 +363,9 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fill a geometric shape with particles.</span>
 
-<span class="sd">        :param geometry_ivar: an instance of a &#39;spatialpy.Geometry&#39; subclass.  The &#39;inside()&#39; method</span>
+<span class="sd">        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass.  The &#39;inside()&#39; method</span>
 <span class="sd">                   of this object will be used to create add the particles.</span>
-<span class="sd">        :type geometry_ivar: spatialpy.geometry.Geometry</span>
+<span class="sd">        :type geometry_ivar: spatialpy.core.geometry.Geometry</span>
 
 <span class="sd">        :param deltax: Distance between particles on the x-axis.</span>
 <span class="sd">        :type deltax: float</span>
@@ -394,8 +394,7 @@
 <span class="sd">        :param zmax: Maximum z value of the bounding box (defaults to Domain.zlim[1]).</span>
 <span class="sd">        :type zmax: float</span>
 
-<span class="sd">        :param kwargs: Key word arguments for Domain.add_point.</span>
-<span class="sd">        :type kwargs: dict</span>
+<span class="sd">        :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.</span>
 
 <span class="sd">        :returns: The number of particles that were created within this geometry.</span>
 <span class="sd">        :rtype: int</span>
@@ -509,10 +508,10 @@
 <span class="sd">        Get distance between 2 domain vertices.</span>
 
 <span class="sd">        :param start: Starting point</span>
-<span class="sd">        :type start: tuple(float, float, float) or tuple(float, float)</span>
+<span class="sd">        :type start: float(3)</span>
 
 <span class="sd">        :param end: Ending point</span>
-<span class="sd">        :type end: tuple(float, float, float) or tuple(float, float)</span>
+<span class="sd">        :type end: float(2)</span>
 
 <span class="sd">        :returns: a distance measurement between start and end point</span>
 <span class="sd">        :rtype: float</span>
@@ -524,10 +523,10 @@
 <span class="sd">        Find the nearest vertex of a given point in the domain.</span>
 
 <span class="sd">        :param point: Target source point</span>
-<span class="sd">        :type point: tuple(float, float, float) or tuple(float, float)</span>
+<span class="sd">        :type point: float(3)</span>
 
 <span class="sd">        :returns: The coordinates of the nearest vertex to the source point.</span>
-<span class="sd">        :rtype: tuple(float, float, float) or tuple(float, float)</span>
+<span class="sd">        :rtype: float(3)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">min_dist</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">min_vtx</span> <span class="o">=</span> <span class="kc">None</span>
@@ -745,7 +744,7 @@
 <span class="sd">        :type filename: str</span>
 
 <span class="sd">        :returns: SpatialPy Domain object created from xml mesh.</span>
-<span class="sd">        :rtype: spatialpy.Domain.Domain</span>
+<span class="sd">        :rtype: spatialpy.core.domain.Domain</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">root</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;dolfin&#39;</span><span class="p">:</span>
@@ -798,7 +797,7 @@
 <span class="sd">        :type mesh_obj: meshio.Mesh</span>
 
 <span class="sd">        :returns: SpatialPy Domain object created from the meshio object</span>
-<span class="sd">        :rtype: spatialpy.Domain.Domain</span>
+<span class="sd">        :rtype: spatialpy.core.domain.Domain</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># create domain object</span>
         <span class="n">xlim</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]),</span> <span class="nb">max</span><span class="p">(</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]))</span>
@@ -808,11 +807,13 @@
         <span class="c1">#vertices</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">vertices</span> <span class="o">=</span> <span class="n">mesh_obj</span><span class="o">.</span><span class="n">points</span>
         <span class="c1"># triangles</span>
-        <span class="k">if</span> <span class="s1">&#39;triangle&#39;</span> <span class="ow">in</span> <span class="n">mesh_obj</span><span class="o">.</span><span class="n">cells</span><span class="p">:</span>
-            <span class="n">obj</span><span class="o">.</span><span class="n">triangles</span> <span class="o">=</span> <span class="n">mesh_obj</span><span class="o">.</span><span class="n">cells</span><span class="p">[</span><span class="s1">&#39;triangle&#39;</span><span class="p">]</span>
+        <span class="n">triangles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">cell</span><span class="p">:</span> <span class="n">cell</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;triangle&quot;</span><span class="p">,</span> <span class="n">mesh_obj</span><span class="o">.</span><span class="n">cells</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">triangles</span><span class="p">:</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">triangles</span> <span class="o">=</span> <span class="n">triangles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
         <span class="c1">#tetrahedrons</span>
-        <span class="k">if</span> <span class="s1">&#39;tetra&#39;</span> <span class="ow">in</span> <span class="n">mesh_obj</span><span class="o">.</span><span class="n">cells</span><span class="p">:</span>
-            <span class="n">obj</span><span class="o">.</span><span class="n">tetrahedrons</span> <span class="o">=</span> <span class="n">mesh_obj</span><span class="o">.</span><span class="n">cells</span><span class="p">[</span><span class="s1">&#39;tetra&#39;</span><span class="p">]</span>
+        <span class="n">tetras</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">cell</span><span class="p">:</span> <span class="n">cell</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;tetra&quot;</span><span class="p">,</span> <span class="n">mesh_obj</span><span class="o">.</span><span class="n">cells</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">tetras</span><span class="p">:</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">tetrahedrons</span> <span class="o">=</span> <span class="n">tetras</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
         <span class="c1"># volume</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">calculate_vol</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">vol</span><span class="p">):</span>
@@ -833,18 +834,14 @@
 <span class="sd">        :type filename: str</span>
 
 <span class="sd">        :returns: SpatialPy Domain object created from the mesh file.</span>
-<span class="sd">        :rtype: spatialpy.Domain.Domain</span>
+<span class="sd">        :rtype: spatialpy.core.domain.Domain</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">pygmsh</span> <span class="c1"># pylint: disable=import-outside-toplevel</span>
-        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="s2">&quot;The python package &#39;pygmsh&#39; is not installed.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">meshio</span> <span class="c1"># pylint: disable=import-outside-toplevel</span>
         <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="s2">&quot;The python package &#39;meshio&#39; is not installed.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">import_meshio_object</span><span class="p">(</span><span class="n">meshio</span><span class="o">.</span><span class="n">msh_io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">import_meshio_object</span><span class="p">(</span><span class="n">meshio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="Domain.read_stochss_subdomain_file"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.read_stochss_subdomain_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_stochss_subdomain_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">type_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -884,7 +881,7 @@
 <span class="sd">        :type filename: str</span>
 
 <span class="sd">        :returns: SpatialPy Domain object created from StochSS domain.</span>
-<span class="sd">        :rtype: spatialpy.Domain.Domain</span>
+<span class="sd">        :rtype: spatialpy.core.domain.Domain</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">domain_file</span><span class="p">:</span>
@@ -920,13 +917,13 @@
 <span class="sd">        Create a filled 3D domain</span>
 
 <span class="sd">        :param xlim: highest and lowest coordinate in the x dimension</span>
-<span class="sd">        :type xlim: tuple(float, float)</span>
+<span class="sd">        :type xlim: float(2)</span>
 
 <span class="sd">        :param ylim: highest and lowest coordinate in the y dimension</span>
-<span class="sd">        :type ylim: tuple(float, float)</span>
+<span class="sd">        :type ylim: float(2)</span>
 
 <span class="sd">        :param zlim: highest and lowest coordinate in the z dimension</span>
-<span class="sd">        :type zlim: tuple(float, float)</span>
+<span class="sd">        :type zlim: float(2)</span>
 
 <span class="sd">        :param nx: number of particle spacing in the x dimension</span>
 <span class="sd">        :type nx: int</span>
@@ -950,22 +947,15 @@
 <span class="sd">        :type c: float</span>
 
 <span class="sd">        :param rho: default density of particles to be created.</span>
-<span class="sd">        :type rho:</span>
+<span class="sd">        :type rho: float</span>
 
 <span class="sd">        :param fixed: spatially fixed flag of particles to be created. Defaults to false.</span>
 <span class="sd">        :type fixed: bool</span>
 
-<span class="sd">        :param rho0: background density for the system. Defaults to 1.0</span>
-<span class="sd">        :type rho0: float</span>
-
-<span class="sd">        :param c0: speed of sound for the system. Defaults to 10</span>
-<span class="sd">        :type c0: float</span>
-
-<span class="sd">        :param P0: background pressure for the system. Defaults to 10</span>
-<span class="sd">        :type P0: float</span>
-
+<span class="sd">        :param \**kwargs: Additional keyword arguments passed to :py:class:`Domain`.</span>
+<span class="sd">        </span>
 <span class="sd">        :returns: Uniform 3D SpatialPy Domain object.</span>
-<span class="sd">        :rtype: spatialpy.Domain.Domain</span>
+<span class="sd">        :rtype: spatialpy.core.domain.Domain</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Create domain object</span>
         <span class="n">numberparticles</span> <span class="o">=</span> <span class="n">nx</span> <span class="o">*</span> <span class="n">ny</span> <span class="o">*</span> <span class="n">nz</span>
@@ -992,10 +982,10 @@
 <span class="sd">        Create a filled 2D domain</span>
 
 <span class="sd">        :param xlim: highest and lowest coordinate in the x dimension</span>
-<span class="sd">        :type xlim: tuple(float, float)</span>
+<span class="sd">        :type xlim: float(2)</span>
 
 <span class="sd">        :param ylim: highest and lowest coordinate in the y dimension</span>
-<span class="sd">        :type ylim: tuple(float, float)</span>
+<span class="sd">        :type ylim: float(2)</span>
 
 <span class="sd">        :param nx: number of particle spacing in the x dimension</span>
 <span class="sd">        :type nx: int</span>
@@ -1016,22 +1006,15 @@
 <span class="sd">        :type c: float</span>
 
 <span class="sd">        :param rho: default density of particles to be created.</span>
-<span class="sd">        :type rho:</span>
+<span class="sd">        :type rho: float</span>
 
 <span class="sd">        :param fixed: spatially fixed flag of particles to be created. Defaults to false.</span>
 <span class="sd">        :type fixed: bool</span>
 
-<span class="sd">        :param rho0: background density for the system. Defaults to 1.0</span>
-<span class="sd">        :type rho0: float</span>
-
-<span class="sd">        :param c0: speed of sound for the system. Defaults to 10</span>
-<span class="sd">        :type c0: float</span>
-
-<span class="sd">        :param P0: background pressure for the system. Defaults to 10</span>
-<span class="sd">        :type P0: float</span>
+<span class="sd">        :param \**kwargs: Additional keyword arguments passed to :py:class:`Domain`.</span>
 
 <span class="sd">        :returns: Uniform 2D SpatialPy Domain object.</span>
-<span class="sd">        :rtype: spatialpy.Domain.Domain</span>
+<span class="sd">        :rtype: spatialpy.core.domain.Domain</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Create domain object</span>
         <span class="n">numberparticles</span> <span class="o">=</span> <span class="n">nx</span> <span class="o">*</span> <span class="n">ny</span>

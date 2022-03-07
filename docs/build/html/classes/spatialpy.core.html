@@ -128,7 +128,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Set spatial regions of the domain where a property of
 particles are held constant (updated each simulation step)</p>
-<dl>
+<dl class="simple">
 <dt>Conditions (one or more of the following must be set):</dt><dd><ul class="simple">
 <li><p>xmin, xmax: (float) min or max value in the x dimension</p></li>
 <li><p>ymin, ymax: (float) min or max value in the y dimension</p></li>
@@ -137,10 +137,7 @@ particles are held constant (updated each simulation step)</p>
 </ul>
 </dd>
 <dt>Targets (one of the following must be set):</dt><dd><p>property: (str), ‘nu’, ‘rho’,’v’
-species: (str) name of a chemical species.</p>
-<blockquote>
-<div><p>Must also set deterministic=True/False flag.</p>
-</div></blockquote>
+species: (str) name of a chemical species.                    Must also set deterministic=True/False flag.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
@@ -154,17 +151,9 @@ species: (str) name of a chemical species.</p>
 <li><p><strong>zmax</strong> (<em>float</em>) – z-axis coordinate upper bound of <strong>condition</strong></p></li>
 <li><p><strong>type_id</strong> (<em>int</em><em> | </em><em>str</em>) – Set <strong>condition</strong> to particle type id</p></li>
 <li><p><strong>deterministic</strong> (<em>bool</em>) – <strong>Must be set if target is Species.</strong> Set True if boundary condition target is species     and applies to deterministic simulation. <strong>BoundaryCondition not yet implemeneted for Stochastic Species</strong>.</p></li>
-<li><p><strong>target</strong> – Set <strong>target</strong> to properties, can be ‘nu’ ‘rho’ or ‘v’ or species name</p></li>
-</ul>
-</dd>
-</dl>
-<p>If species name, determinstic must also be set to True/False.
-:type target: str</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<em>str</em>) – Set <strong>target</strong> to properties, can be ‘nu’ ‘rho’ or ‘v’ or species name     If species name, determinstic must also be set to True/False.</p></li>
 <li><p><strong>value</strong> (<em>float</em><em> or </em><em>float</em><em>[</em><em>3</em><em>]</em>) – Value property will take in region defined by the conditions</p></li>
-<li><p><strong>model</strong> (<em>spatialpy.Model.Model</em>) – Target model of boundary condition</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Target model of boundary condition</p></li>
 </ul>
 </dd>
 </dl>
@@ -257,18 +246,18 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – Name of the Data Function.</p>
 </dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.DataFunctionError" title="spatialpy.core.spatialpyerror.DataFunctionError"><strong>DataFunctionError</strong></a> – If a name is not provided.</p>
+</dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.datafunction.DataFunction.map">
 <span class="sig-name descname"><span class="pre">map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/datafunction.html#DataFunction.map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.datafunction.DataFunction.map" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method must be overridden by the DataFunction subclass.</p>
-<dl class="simple">
-<dt>NOTE: The spatial location is evaulated at t=0 and is not</dt><dd><p>reevaluated as the fluid domain moves over time.</p>
-</dd>
-</dl>
+<p>NOTE: The spatial location is evaulated at t=0 and is not               re-evaluated as the fluid domain moves over time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>point</strong> (<em>vector of 3 doubles</em>) – The x,y,z position</p>
+<dd class="field-odd"><p><strong>point</strong> (<em>float</em><em>[</em><em>3</em><em>]</em>) – The x, y, z position.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Value of function at this spatial location.</p>
@@ -305,13 +294,13 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>numpoints</strong> (<em>int</em>) – Total number of spatial domain points</p></li>
-<li><p><strong>xlim</strong> (<em>tuple</em><em>(</em><em>float</em><em>)</em>) – Range of domain along x-axis</p></li>
-<li><p><strong>ylim</strong> (<em>tuple</em><em>(</em><em>float</em><em>)</em>) – Range of domain along y-axis</p></li>
-<li><p><strong>zlim</strong> (<em>tuple</em><em>(</em><em>float</em><em>)</em>) – Range of domain along z-axis</p></li>
+<li><p><strong>xlim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – Range of domain along x-axis</p></li>
+<li><p><strong>ylim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – Range of domain along y-axis</p></li>
+<li><p><strong>zlim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – Range of domain along z-axis</p></li>
 <li><p><strong>rho</strong> (<em>float</em>) – Background density for the system</p></li>
 <li><p><strong>c0</strong> (<em>float</em>) – Speed of sound for the system</p></li>
 <li><p><strong>P0</strong> (<em>float</em>) – Background pressure for the system</p></li>
-<li><p><strong>gravity</strong> – Acceleration of gravity for the system.</p></li>
+<li><p><strong>gravity</strong> (<em>float</em><em>[</em><em>3</em><em>]</em>) – Acceleration of gravity for the system.</p></li>
 </ul>
 </dd>
 </dl>
@@ -322,14 +311,14 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>point</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>) or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – Spatial coordinate vertices of point to be added</p></li>
+<li><p><strong>point</strong> (<em>float</em><em>(</em><em>3</em><em>)</em>) – Spatial coordinate vertices of point to be added</p></li>
 <li><p><strong>vol</strong> (<em>float</em>) – Default volume of particle to be added</p></li>
 <li><p><strong>mass</strong> (<em>float</em>) – Default mass of particle to be added</p></li>
-<li><p><strong>type_id</strong> (<em>str</em><em> | </em><em>int</em>) – Particle type ID of particle to be created</p></li>
-<li><p><strong>nu</strong> (<em>float</em>) – Default viscosity of particle to be created</p></li>
+<li><p><strong>type_id</strong> (<em>str</em><em> | </em><em>int</em>) – Particle type ID of particle to be craddedeated</p></li>
+<li><p><strong>nu</strong> (<em>float</em>) – Default viscosity of particle to be added</p></li>
 <li><p><strong>fixed</strong> (<em>bool</em>) – True if particle is spatially fixed, else False</p></li>
-<li><p><strong>c</strong> (<em>float</em>) – Default artificial speed of sound of particle to be created</p></li>
-<li><p><strong>rho</strong> (<em>float</em>) – Default density of particle to be created</p></li>
+<li><p><strong>c</strong> (<em>float</em>) – Default artificial speed of sound of particle to be added</p></li>
+<li><p><strong>rho</strong> (<em>float</em>) – Default density of particle to be added</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
@@ -350,13 +339,13 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dd><p>Find the nearest vertex of a given point in the domain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>point</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>) or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – Target source point</p>
+<dd class="field-odd"><p><strong>point</strong> (<em>float</em><em>(</em><em>3</em><em>)</em>) – Target source point</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The coordinates of the nearest vertex to the source point.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple(float, float, float) or tuple(float, float)</p>
+<dd class="field-odd"><p>float(3)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -364,11 +353,11 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.domain.Domain.compile_prep">
 <span class="sig-name descname"><span class="pre">compile_prep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.compile_prep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.domain.Domain.compile_prep" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate the domain list of type ids and check for invalid type_ids and rho values
+<dd><p>Generate the domains list of type ids and check for invalid type_ids and rho values
 in preperation of compiling the simulation files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.DomainError" title="spatialpy.core.spatialpyerror.DomainError"><strong>DomainError</strong></a> – If a type_id is not set or rh for a particle is 0.</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.DomainError" title="spatialpy.core.spatialpyerror.DomainError"><strong>DomainError</strong></a> – If a type_id is not set or rho=0 for a particle.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -394,26 +383,24 @@ in preperation of compiling the simulation files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>xlim</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – highest and lowest coordinate in the x dimension</p></li>
-<li><p><strong>ylim</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – highest and lowest coordinate in the y dimension</p></li>
+<li><p><strong>xlim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – highest and lowest coordinate in the x dimension</p></li>
+<li><p><strong>ylim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – highest and lowest coordinate in the y dimension</p></li>
 <li><p><strong>nx</strong> (<em>int</em>) – number of particle spacing in the x dimension</p></li>
 <li><p><strong>ny</strong> (<em>int</em>) – number of particle spacing in the y dimension</p></li>
 <li><p><strong>type_id</strong> (<em>int</em>) – default type ID of particles to be created. Defaults to 1</p></li>
 <li><p><strong>mass</strong> (<em>float</em>) – default mass of particles to be created. Defaults to 1.0</p></li>
 <li><p><strong>nu</strong> (<em>float</em>) – default viscosity of particles to be created. Defaults to 1.0</p></li>
 <li><p><strong>c</strong> (<em>float</em>) – default artificial speed of sound of particles to be created. Defaults to 0.0.</p></li>
-<li><p><strong>rho</strong> – default density of particles to be created.</p></li>
+<li><p><strong>rho</strong> (<em>float</em>) – default density of particles to be created.</p></li>
 <li><p><strong>fixed</strong> (<em>bool</em>) – spatially fixed flag of particles to be created. Defaults to false.</p></li>
-<li><p><strong>rho0</strong> (<em>float</em>) – background density for the system. Defaults to 1.0</p></li>
-<li><p><strong>c0</strong> (<em>float</em>) – speed of sound for the system. Defaults to 10</p></li>
-<li><p><strong>P0</strong> (<em>float</em>) – background pressure for the system. Defaults to 10</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments passed to <a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain"><code class="xref py py-class docutils literal notranslate"><span class="pre">Domain</span></code></a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Uniform 2D SpatialPy Domain object.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Domain.Domain</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain">spatialpy.core.domain.Domain</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -425,9 +412,9 @@ in preperation of compiling the simulation files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>xlim</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – highest and lowest coordinate in the x dimension</p></li>
-<li><p><strong>ylim</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – highest and lowest coordinate in the y dimension</p></li>
-<li><p><strong>zlim</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – highest and lowest coordinate in the z dimension</p></li>
+<li><p><strong>xlim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – highest and lowest coordinate in the x dimension</p></li>
+<li><p><strong>ylim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – highest and lowest coordinate in the y dimension</p></li>
+<li><p><strong>zlim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – highest and lowest coordinate in the z dimension</p></li>
 <li><p><strong>nx</strong> (<em>int</em>) – number of particle spacing in the x dimension</p></li>
 <li><p><strong>ny</strong> (<em>int</em>) – number of particle spacing in the y dimension</p></li>
 <li><p><strong>nz</strong> (<em>int</em>) – number of particle spacing in the z dimension</p></li>
@@ -435,18 +422,16 @@ in preperation of compiling the simulation files.</p>
 <li><p><strong>mass</strong> (<em>float</em>) – default mass of particles to be created. Defaults to 1.0</p></li>
 <li><p><strong>nu</strong> (<em>float</em>) – default viscosity of particles to be created. Defaults to 1.0</p></li>
 <li><p><strong>c</strong> (<em>float</em>) – default artificial speed of sound of particles to be created. Defaults to 0.0.</p></li>
-<li><p><strong>rho</strong> – default density of particles to be created.</p></li>
+<li><p><strong>rho</strong> (<em>float</em>) – default density of particles to be created.</p></li>
 <li><p><strong>fixed</strong> (<em>bool</em>) – spatially fixed flag of particles to be created. Defaults to false.</p></li>
-<li><p><strong>rho0</strong> (<em>float</em>) – background density for the system. Defaults to 1.0</p></li>
-<li><p><strong>c0</strong> (<em>float</em>) – speed of sound for the system. Defaults to 10</p></li>
-<li><p><strong>P0</strong> (<em>float</em>) – background pressure for the system. Defaults to 10</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments passed to <a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain"><code class="xref py py-class docutils literal notranslate"><span class="pre">Domain</span></code></a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Uniform 3D SpatialPy Domain object.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Domain.Domain</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain">spatialpy.core.domain.Domain</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -458,8 +443,8 @@ in preperation of compiling the simulation files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>start</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>) or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – Starting point</p></li>
-<li><p><strong>end</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>) or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – Ending point</p></li>
+<li><p><strong>start</strong> (<em>float</em><em>(</em><em>3</em><em>)</em>) – Starting point</p></li>
+<li><p><strong>end</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – Ending point</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -478,7 +463,7 @@ in preperation of compiling the simulation files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>geometry_ivar</strong> (<em>spatialpy.geometry.Geometry</em>) – an instance of a ‘spatialpy.Geometry’ subclass.  The ‘inside()’ method
+<li><p><strong>geometry_ivar</strong> (<a class="reference internal" href="#spatialpy.core.geometry.Geometry" title="spatialpy.core.geometry.Geometry"><em>spatialpy.core.geometry.Geometry</em></a>) – an instance of a <a class="reference internal" href="#spatialpy.core.geometry.Geometry" title="spatialpy.core.geometry.Geometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">spatialpy.core.geometry.Geometry</span></code></a> subclass.  The ‘inside()’ method
 of this object will be used to create add the particles.</p></li>
 <li><p><strong>deltax</strong> (<em>float</em>) – Distance between particles on the x-axis.</p></li>
 <li><p><strong>deltay</strong> (<em>float</em>) – Distance between particles on the y-axis (defaults to deltax).</p></li>
@@ -489,7 +474,7 @@ of this object will be used to create add the particles.</p></li>
 <li><p><strong>ymax</strong> (<em>float</em>) – Maximum y value of the bounding box (defaults to Domain.ylim[1]).</p></li>
 <li><p><strong>zmin</strong> (<em>float</em>) – Minimum z value of the bounding box (defaults to Domain.zlim[0]).</p></li>
 <li><p><strong>zmax</strong> (<em>float</em>) – Maximum z value of the bounding box (defaults to Domain.zlim[1]).</p></li>
-<li><p><strong>kwargs</strong> (<em>dict</em>) – Key word arguments for Domain.add_point.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments passed to <a class="reference internal" href="#spatialpy.core.domain.Domain.add_point" title="spatialpy.core.domain.Domain.add_point"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Domain.add_point()</span></code></a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -619,7 +604,7 @@ is a part of.</p>
 <dd class="field-even"><p>SpatialPy Domain object created from the meshio object</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Domain.Domain</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain">spatialpy.core.domain.Domain</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -662,7 +647,7 @@ is a part of.</p>
 <dd class="field-even"><p>SpatialPy Domain object created from the mesh file.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Domain.Domain</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain">spatialpy.core.domain.Domain</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -679,7 +664,7 @@ is a part of.</p>
 <dd class="field-even"><p>SpatialPy Domain object created from StochSS domain.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Domain.Domain</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain">spatialpy.core.domain.Domain</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -713,7 +698,7 @@ is a part of.</p>
 <dd class="field-even"><p>SpatialPy Domain object created from xml mesh.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Domain.Domain</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain">spatialpy.core.domain.Domain</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -725,7 +710,7 @@ is a part of.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>geometry_ivar</strong> (<em>spatialpy.Geometry.Geometry</em>) – an instance of a ‘spatialpy.Geometry’ subclass.  The ‘inside()’ method
+<li><p><strong>geometry_ivar</strong> (<a class="reference internal" href="#spatialpy.core.geometry.Geometry" title="spatialpy.core.geometry.Geometry"><em>spatialpy.core.geometry.Geometry</em></a>) – an instance of a <a class="reference internal" href="#spatialpy.core.geometry.Geometry" title="spatialpy.core.geometry.Geometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">spatialpy.core.geometry.Geometry</span></code></a> subclass.  The ‘inside()’ method
 of this object will be used to assign properties to points.</p></li>
 <li><p><strong>type_id</strong> (<em>str</em><em> | </em><em>int</em>) – The identifier for this type.</p></li>
 <li><p><strong>vol</strong> (<em>float</em>) – The volume of each particle in the type.</p></li>
@@ -822,7 +807,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">spatialpy.core.geometry.</span></span><span class="sig-name descname"><span class="pre">GeometryExterior</span></span><a class="reference internal" href="../_modules/spatialpy/core/geometry.html#GeometryExterior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.geometry.GeometryExterior" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#spatialpy.core.geometry.Geometry" title="spatialpy.core.geometry.Geometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">spatialpy.core.geometry.Geometry</span></code></a></p>
 <p>Mark particles that are on the edge of the domain.
-only works for meshes that define triangles and tetrahedrons.</p>
+only works for domains that define triangles and tetrahedrons.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.geometry.GeometryExterior.inside">
 <span class="sig-name descname"><span class="pre">inside</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_boundary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/geometry.html#GeometryExterior.inside"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.geometry.GeometryExterior.inside" title="Permalink to this definition">¶</a></dt>
@@ -849,7 +834,7 @@ only works for meshes that define triangles and tetrahedrons.</p>
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">spatialpy.core.geometry.</span></span><span class="sig-name descname"><span class="pre">GeometryInterior</span></span><a class="reference internal" href="../_modules/spatialpy/core/geometry.html#GeometryInterior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.geometry.GeometryInterior" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#spatialpy.core.geometry.Geometry" title="spatialpy.core.geometry.Geometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">spatialpy.core.geometry.Geometry</span></code></a></p>
 <p>Mark particles that are not on the edge of the domain.
-Only works for meshes that define triangles and tetrahedrons.</p>
+Only works for domains that define triangles and tetrahedrons.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.geometry.GeometryInterior.inside">
 <span class="sig-name descname"><span class="pre">inside</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_boundary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/geometry.html#GeometryInterior.inside"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.geometry.GeometryInterior.inside" title="Permalink to this definition">¶</a></dt>
@@ -892,11 +877,16 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class used to defined initial conditions in SpatialPy.
 SubClasses must implement the ‘apply(model)’ method, which
-direction modifies the model.u0[species,voxel] matrix.</p>
+direction modifies the model.u0[species, voxel] matrix.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.initialcondition.InitialCondition.apply">
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/initialcondition.html#InitialCondition.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.initialcondition.InitialCondition.apply" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the initial condition of the species to the count.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -909,7 +899,7 @@ direction modifies the model.u0[species,voxel] matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spayialpy.species.Species</em>) – The species to set the initial condition.</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species to set the initial condition.</p></li>
 <li><p><strong>count</strong> (<em>int</em>) – The initial condition for the target species.</p></li>
 <li><p><strong>location</strong> (<em>float</em><em>[</em><em>3</em><em>]</em>) – X, Y, Z coordinates to place the initial condition.</p></li>
 </ul>
@@ -921,7 +911,7 @@ direction modifies the model.u0[species,voxel] matrix.</p>
 <dd><p>Set the initial condition of the species to the count at the location.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.model.Model</em>) – Model contianing the target species.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -936,7 +926,7 @@ direction modifies the model.u0[species,voxel] matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spayialpy.species.Species</em>) – The species to set the initial condition.</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species to set the initial condition.</p></li>
 <li><p><strong>count</strong> (<em>int</em>) – The initial condition for the target species.</p></li>
 <li><p><strong>types</strong> (<em>list</em>) – Types of the particles to place the initial condition.</p></li>
 </ul>
@@ -948,7 +938,7 @@ direction modifies the model.u0[species,voxel] matrix.</p>
 <dd><p>Scatter ‘count’ of ‘species’ randomly over the list of types (all types if None).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.model.Model</em>) – Model contianing the target species.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -963,7 +953,7 @@ direction modifies the model.u0[species,voxel] matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spayialpy.species.Species</em>) – The species to set the initial condition.</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species to set the initial condition.</p></li>
 <li><p><strong>count</strong> (<em>int</em>) – The initial condition for the target species.</p></li>
 <li><p><strong>types</strong> (<em>list</em>) – Types of the particles to place the initial condition.</p></li>
 </ul>
@@ -975,7 +965,7 @@ direction modifies the model.u0[species,voxel] matrix.</p>
 <dd><p>Set ‘count’ of ‘species’ in over the list of types (all types if None).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.model.Model</em>) – Model contianing the target species.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1010,10 +1000,10 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.model.Model.add_boundary_condition">
 <span class="sig-name descname"><span class="pre">add_boundary_condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bound_cond</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.add_boundary_condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.model.Model.add_boundary_condition" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add an BoundaryCondition object to the model.</p>
+<dd><p>Add an boundary condition object to the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>bound_cond</strong> (<em>spatialpy.BoundaryCondition</em>) – Boundary condition to be added</p>
+<dd class="field-odd"><p><strong>bound_cond</strong> (<a class="reference internal" href="#spatialpy.core.boundarycondition.BoundaryCondition" title="spatialpy.core.boundarycondition.BoundaryCondition"><em>spatialpy.core.boundarycondition.BoundaryCondition</em></a>) – Boundary condition to be added</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1022,9 +1012,9 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dt class="sig sig-object py" id="spatialpy.core.model.Model.add_data_function">
 <span class="sig-name descname"><span class="pre">add_data_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_function</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.add_data_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.model.Model.add_data_function" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a scalar spatial function to the simulation. This is useful if you have a
-spatially varying in put to your model. Argument is a instances of subclass of the
-spatialpy.DataFunction class. It must implement a function ‘map(x)’ which takes a
-the spatial positon ‘x’ as an array, and it returns a float value.</p>
+spatially varying input to your model. Argument is a instances of subclass of the
+spatialpy.DataFunction class. It must implement a function ‘map(point)’ which takes a
+the spatial positon ‘point’ as an array, and it returns a float value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>data_function</strong> (<em>spatialpy.DataFunction</em>) – Data function to be added.</p>
@@ -1033,7 +1023,7 @@ the spatial positon ‘x’ as an array, and it returns a float value.</p>
 <dd class="field-even"><p>DataFunction object(s) added tothe model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.DataFunction | list(spatialpy.DataFunction)</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.datafunction.DataFunction" title="spatialpy.core.datafunction.DataFunction">spatialpy.core.datafunction.DataFunction</a> | list(<a class="reference internal" href="#spatialpy.core.datafunction.DataFunction" title="spatialpy.core.datafunction.DataFunction">spatialpy.core.datafunction.DataFunction</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – Invalid DataFunction</p>
@@ -1047,7 +1037,7 @@ the spatial positon ‘x’ as an array, and it returns a float value.</p>
 <dd><p>Add a spatial domain to the model</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>domain</strong> (<em>spatialpy.Domain.Domain</em>) – The Domain object to be added to the model</p>
+<dd class="field-odd"><p><strong>domain</strong> (<a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain"><em>spatialpy.core.domain.Domain</em></a>) – The Domain object to be added to the model</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – Invalid Domain object</p>
@@ -1061,7 +1051,7 @@ the spatial positon ‘x’ as an array, and it returns a float value.</p>
 <dd><p>Add an initial condition object to the initialization of the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>init_cond</strong> (<em>spatialpy.InitialCondition.InitialCondition</em>) – Initial condition to be added</p>
+<dd class="field-odd"><p><strong>init_cond</strong> (<a class="reference internal" href="#spatialpy.core.initialcondition.InitialCondition" title="spatialpy.core.initialcondition.InitialCondition"><em>spatialpy.core.initialcondition.InitialCondition</em></a>) – Initial condition to be added</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1073,16 +1063,16 @@ the spatial positon ‘x’ as an array, and it returns a float value.</p>
 Parameter object or a list of Parameter objects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>params</strong> (<em>spatialpy.Model.Parameter</em><em> | </em><em>list</em><em>(</em><em>spatialpy.Model.Parameter</em><em>)</em>) – Parameter object or list of Parameters to be added.</p>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a><em> | </em><em>list</em><em>(</em><a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a><em>)</em>) – Parameter object or list of Parameters to be added.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Parameter object which has been added to the model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Parameter | list(spatialpy.Parameter)</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter">spatialpy.core.parameter.Parameter</a> | list(<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter">spatialpy.core.parameter.Parameter</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – if obj is not a spatialpy.Parameter</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – if obj is not a spatialpy.core.parameter.Parameter</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1094,16 +1084,16 @@ Parameter object or a list of Parameter objects.</p>
 or a dict with name, instance pairs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>reacs</strong> (<em>spatialpy.Model.Reaction</em><em> | </em><em>list</em><em>(</em><em>spatialpy.Model.Reaction</em><em>)</em>) – Reaction or list of Reactions to be added.</p>
+<dd class="field-odd"><p><strong>reacs</strong> (<a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction"><em>spatialpy.core.reaction.Reaction</em></a><em> | </em><em>list</em><em>(</em><a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction"><em>spatialpy.core.reaction.Reaction</em></a><em>)</em>) – Reaction or list of Reactions to be added.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The Reaction object(s) added to the model</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Model.Reaction</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction">spatialpy.core.reaction.Reaction</a> | list(<a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction">spatialpy.core.reaction.Reaction</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – Invalid input/reaction to add_reaction()</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – if obj is not a spatialpy.core.reaction.Reaction</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1114,16 +1104,16 @@ or a dict with name, instance pairs.</p>
 <dd><p>Adds a species, or list of species to the model. Will return the added object upon success.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.Model.Species</em><em> | </em><em>list</em><em>(</em><em>spatialpy.Model.Species</em>) – The species or list of species to be added to the model object.</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a><em> | </em><em>list</em><em>(</em><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species or list of species to be added to the model object.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Species object which was added to the model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Species | list(spatialpy.Species)</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species">spatialpy.core.species.Species</a> | list(<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species">spatialpy.core.species.Species</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – If obj is not a spatialpy.Species</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – If obj is not a spatialpy.core.species.Species</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1171,7 +1161,7 @@ of compiling the simulation files.</p>
 <dd><p>Remove a Parameter from model.listOfParameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.Model.Parameter</em>) – Parameter object to be removed</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a>) – Parameter object to be removed</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1182,7 +1172,7 @@ of compiling the simulation files.</p>
 <dd><p>Remove reaction from model.listOfReactions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.Model.Reaction</em>) – Reaction to be removed.</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction"><em>spatialpy.core.reaction.Reaction</em></a>) – Reaction to be removed.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1193,7 +1183,7 @@ of compiling the simulation files.</p>
 <dd><p>Remove a Species from model.listOfSpecies.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.Model.Species</em>) – Species object to be removed</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – Species object to be removed</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1274,13 +1264,13 @@ of compiling the simulation files.</p>
 <dd><p>Return the Parameter object from model associated with ‘pname’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>pname</strong> (<em>spatialpy.Model.Parameter</em>) – Name of parameter to be removed</p>
+<dd class="field-odd"><p><strong>pname</strong> (<em>str</em>) – Name of parameter to be returned</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The Parameter object represented in the model by ‘pname’</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Spatialpy.Model.Parameter</p>
+<dd class="field-odd"><p>Spatialpy.core.parameter.Parameter</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – No parameter named {pname}</p>
@@ -1294,13 +1284,13 @@ of compiling the simulation files.</p>
 <dd><p>Retrieve a reaction object from the model by name</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>rname</strong> (<em>str</em>) – name of Reaction to retrieve</p>
+<dd class="field-odd"><p><strong>rname</strong> (<em>str</em>) – name of the reaction to be returned</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The Reaction Object in the model represented by ‘rname’</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Model.Reaction</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction">spatialpy.core.reaction.Reaction</a></p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – Could not find reaction</p>
@@ -1320,7 +1310,7 @@ of compiling the simulation files.</p>
 <dd class="field-even"><p>The Species objected represented by given ‘sname’</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Model.Species</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species">spatialpy.core.species.Species</a></p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ModelError" title="spatialpy.core.spatialpyerror.ModelError"><strong>ModelError</strong></a> – if the model does not contain the requested species</p>
@@ -1354,7 +1344,7 @@ killed upon reaching timeout.</p></li>
 <dd class="field-even"><p>A SpatialPy Result object containing simulation data.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Result.Result</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.result.Result" title="spatialpy.core.result.Result">spatialpy.core.result.Result</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1407,8 +1397,7 @@ later on by SpatialPySolvers evaluating reaction propensity functions.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.model.Model.set_timesteps">
 <span class="sig-name descname"><span class="pre">set_timesteps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_interval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.set_timesteps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.model.Model.set_timesteps" title="Permalink to this definition">¶</a></dt>
-<dd><p>”
-Set the simlation time span parameters.</p>
+<dd><p>Set the simlation time span parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1461,7 +1450,7 @@ non-uniform timespans.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>spatailpy_model</strong> – SpatialPy model to be converted to StochSS</p></li>
+<li><p><strong>spatialpy_model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – SpatialPy model to be converted to StochSS</p></li>
 <li><p><strong>filename</strong> (<em>str</em>) – Path to the exported stochss model</p></li>
 <li><p><strong>return_stochss_model</strong> (<em>bool</em>) – Whether or not to return the model</p></li>
 </ul>
@@ -1535,7 +1524,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <li><p><strong>reactants</strong> (<em>dict</em>) – Dictionary of {species:stoichiometry} of reaction reactants</p></li>
 <li><p><strong>products</strong> (<em>dict</em>) – Dictionary of {species:stoichiometry} of reaction products</p></li>
 <li><p><strong>propensity_function</strong> (<em>str</em>) – String with the expression for the reaction’s propensity</p></li>
-<li><p><strong>rate</strong> (<em>spatialpy.model.Parameter</em>) – if mass action, rate is a reference to a parameter instance.</p></li>
+<li><p><strong>rate</strong> (<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a>) – if mass action, rate is a reference to a parameter instance.</p></li>
 <li><p><strong>annotation</strong> (<em>str</em>) – Description of the reaction (meta)</p></li>
 <li><p><strong>restrict_to</strong> (<em>int</em><em>, </em><em>str</em><em>, </em><em>list of ints</em><em> or </em><em>list of strs</em>) – Restrict reaction execution to a type or list of types within the domain.</p></li>
 </ul>
@@ -1548,7 +1537,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>S</strong> (<em>spatialpy.Model.Species</em>) – Species object to be produced by the reaction</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – Species object to be produced by the reaction</p></li>
 <li><p><strong>stoichiometry</strong> (<em>int</em>) – Stoichiometry of this product.</p></li>
 </ul>
 </dd>
@@ -1562,7 +1551,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spatialpy.Model.Species</em>) – reactant Species object</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – reactant Species object</p></li>
 <li><p><strong>stoichiometry</strong> (<em>int</em>) – Stoichiometry of this participant reactant</p></li>
 </ul>
 </dd>
@@ -1586,7 +1575,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dd><p>Deferred object initialization, called by model.add_reaction().</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.Model</em>) – Target SpatialPy Model for annotation.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Target SpatialPy Model for annotation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1622,18 +1611,9 @@ The columns of modelname_mesh.csv are: ‘Voxel ID’, ‘X’, ‘Y’, ‘Z’
 The columns of modelname_species_S.csv: ‘Time’, ‘Voxel 0’, Voxel 1’, … ‘Voxel N’.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>folder_name</strong> (<em>str</em><em> (</em><em>default current working directory</em><em>)</em>) – A path where the vtk files will be written, created if non-existant.</p>
+<dd class="field-odd"><p><strong>folder_name</strong> (<em>str</em>) – A path where the vtk files will be written, created if non-existant.         Defaults current working directory</p>
 </dd>
 </dl>
-<p>If no path is provided current working directory is used.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spatialpy.core.result.Result.export_to_vtk">
-<span class="sig-name descname"><span class="pre">export_to_vtk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timespan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/result.html#Result.export_to_vtk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.result.Result.export_to_vtk" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write the trajectory to a collection of vtk files.
-The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension.
-Not currently implemented.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1643,7 +1623,14 @@ Not currently implemented.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>property_name</strong> (<em>str</em>) – A string describing the property to be returned.</p></li>
+<li><p><strong>property_name</strong> (<em>str</em>) – A string describing the property to be returned.  Can be one of: {
+‘v’ : velocity,
+‘rho’: density,
+‘mass’: mass,
+‘id’: type_id,
+‘type’: type as str,
+‘bvf_phi’: boundary volume fraction,
+‘nu’: viscosity}</p></li>
 <li><p><strong>timepoints</strong> (<em>int</em>) – timespan index to be returned.  Default is None</p></li>
 </ul>
 </dd>
@@ -1654,7 +1641,7 @@ Not currently implemented.</p>
 <dd class="field-odd"><p>numpy.ndarray</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>ResultsError</strong> – Could not get data for given timepoints.</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ResultError" title="spatialpy.core.spatialpyerror.ResultError"><strong>ResultError</strong></a> – Could not get data for given timepoints.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1667,17 +1654,17 @@ one or all timepoints. Returns a numpy array containing the species population/c
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>str</em><em> | </em><em>dict</em>) – A species in string or dictionary form to retreive information about</p></li>
-<li><p><strong>timepoints</strong> (<em>int</em><em> (</em><em>default None</em><em>)</em>) – A time point where the information should be retreived from.
+<li><p><strong>species</strong> (<em>str</em><em> | </em><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – A species in string or dictionary form to retreive information about</p></li>
+<li><p><strong>timepoints</strong> (<em>int</em>) – A time point where the information should be retreived from.
 If ‘timepoints’ is None (default), a matrix of dimension:
 (number of timepoints) x (number of voxels) is returned.
 If an integer value is given, that value is used to index into the timespan, and that time point is returned
-as a 1D array with size (number of voxel).</p></li>
-<li><p><strong>concentration</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether or not the species is a concentration (True) or population (False)
+as a 1D array with size (number of voxel).  Defaults to None</p></li>
+<li><p><strong>concentration</strong> (<em>bool</em>) – Whether or not the species is a concentration (True) or population (False)
 If concentration is False (default), the integer, raw, trajectory data is returned.
-If set to True, the concentration (=copy_number/volume) is returned.</p></li>
-<li><p><strong>deterministic</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether or not the species is deterministic (True) or stochastic (False)</p></li>
-<li><p><strong>debug</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether or not debug information should be printed</p></li>
+If set to True, the concentration (=copy_number/volume) is returned.  Defaults to False</p></li>
+<li><p><strong>deterministic</strong> (<em>bool</em>) – Whether or not the species is deterministic (True) or stochastic (False).  Defaults to False</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – Whether or not debug information should be printed. Defaults to False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1718,8 +1705,8 @@ timepoints.  Defaults to all timepoints.</p>
 <li><p><strong>t_ndx</strong> (<em>int</em>) – The time index of the results to be plotted</p></li>
 <li><p><strong>t_val</strong> (<em>float</em>) – The time value of the results to be plotted, ignored if animated is set to True</p></li>
 <li><p><strong>p_ndx</strong> (<em>int</em>) – The property index of the results to be plotted</p></li>
-<li><p><strong>width</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Width in pixels of output plot box or for matplotlib inches of output plot box</p></li>
-<li><p><strong>height</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Height in pixels of output plot box or for matplotlib inches of output plot box</p></li>
+<li><p><strong>width</strong> (<em>int</em>) – Width in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 6.4 (MatPlotLib)</p></li>
+<li><p><strong>height</strong> (<em>int</em>) – Height in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 4.8 (MatPlotLib)</p></li>
 <li><p><strong>colormap</strong> (<em>str</em>) – colormap to use.  Plotly specification, valid values: “Plotly3”,”Jet”,”Blues”,”YlOrRd”,
 “PuRd”,”BuGn”,”YlOrBr”,”PuBuGn”,”BuPu”,”YlGnBu”, “PuBu”,”GnBu”,”YlGn”,”Greens”,”Reds”,
 “Greys”,”RdPu”,”OrRd”,”Purples”,”Oranges”.</p></li>
@@ -1766,8 +1753,8 @@ if set to True, the concentration (=copy_number/volume) is returned.</p>
 <li><p><strong>concentration</strong> (<em>bool</em>) – Whether or not to plot the data as stochastic concentration, ignored if deterministic is
 set to True</p></li>
 <li><p><strong>deterministic</strong> (<em>bool</em>) – Whether or not to plot the data as deterministic</p></li>
-<li><p><strong>width</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Width in pixels of output plot box</p></li>
-<li><p><strong>height</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Height in pixels of output plot box</p></li>
+<li><p><strong>width</strong> (<em>int</em>) – Width in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 6.4 (MatPlotLib)</p></li>
+<li><p><strong>height</strong> (<em>int</em>) – Height in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 4.8 (MatPlotLib)</p></li>
 <li><p><strong>colormap</strong> (<em>str</em>) – colormap to use.  Plotly specification, valid values: “Plotly3”,”Jet”,”Blues”,”YlOrRd”,
 “PuRd”,”BuGn”,”YlOrBr”,”PuBuGn”,”BuPu”,”YlGnBu”, “PuBu”,”GnBu”,”YlGn”,”Greens”,”Reds”,
 “Greys”,”RdPu”,”OrRd”,”Purples”,”Oranges”.</p></li>
@@ -1791,7 +1778,7 @@ False (default)</p></li>
 <dd class="field-odd"><p>dict</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>ResultsError</strong> – unable to plot species for given time</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.ResultError" title="spatialpy.core.spatialpyerror.ResultError"><strong>ResultError</strong></a> – unable to plot species for given time</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1959,12 +1946,10 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – Name of the Species</p></li>
 <li><p><strong>diffusion_coefficient</strong> (<em>float</em>) – Non-constant coefficient of diffusion for Species.</p></li>
-<li><p><strong>restrict_to</strong> – Set the diffusion coefficient to zero for ‘species’ in all types not in ‘listOfTypes’.</p></li>
+<li><p><strong>restrict_to</strong> (<em>int</em><em>, </em><em>str</em><em>, </em><em>list of ints</em><em> or </em><em>list of strs</em>) – Set the diffusion coefficient to zero for ‘species’ in all types not in ‘listOfTypes’.     This effectively restricts the movement of ‘species’ to the types specified in ‘listOfTypes’.</p></li>
 </ul>
 </dd>
 </dl>
-<p>This effectively restricts the movement of ‘species’ to the types specified in ‘listOfTypes’.
-:type restrict_to: int, str, list of ints or list of strs</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.species.Species.set_diffusion_coefficient">
 <span class="sig-name descname"><span class="pre">set_diffusion_coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diffusion_coefficient</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/species.html#Species.set_diffusion_coefficient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.species.Species.set_diffusion_coefficient" title="Permalink to this definition">¶</a></dt>
@@ -1974,7 +1959,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dd class="field-odd"><p><strong>diffusion_coefficient</strong> (<em>float</em>) – Non-constant coefficient of diffusion for Species.</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.SpeciesError" title="spatialpy.core.spatialpyerror.SpeciesError"><strong>SpeciesError</strong></a> – If diffusion_coefficient is negative.</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.spatialpyerror.SpeciesError" title="spatialpy.core.spatialpyerror.SpeciesError"><strong>SpeciesError</strong></a> – If diffusion_coefficient is negative or not a valid type.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2114,7 +2099,7 @@ along with this program.  If not, see &lt;<a class="reference external" href="ht
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Set spatial regions of the domain where a property of
 particles are held constant (updated each simulation step)</p>
-<dl>
+<dl class="simple">
 <dt>Conditions (one or more of the following must be set):</dt><dd><ul class="simple">
 <li><p>xmin, xmax: (float) min or max value in the x dimension</p></li>
 <li><p>ymin, ymax: (float) min or max value in the y dimension</p></li>
@@ -2123,10 +2108,7 @@ particles are held constant (updated each simulation step)</p>
 </ul>
 </dd>
 <dt>Targets (one of the following must be set):</dt><dd><p>property: (str), ‘nu’, ‘rho’,’v’
-species: (str) name of a chemical species.</p>
-<blockquote>
-<div><p>Must also set deterministic=True/False flag.</p>
-</div></blockquote>
+species: (str) name of a chemical species.                    Must also set deterministic=True/False flag.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
@@ -2140,17 +2122,9 @@ species: (str) name of a chemical species.</p>
 <li><p><strong>zmax</strong> (<em>float</em>) – z-axis coordinate upper bound of <strong>condition</strong></p></li>
 <li><p><strong>type_id</strong> (<em>int</em><em> | </em><em>str</em>) – Set <strong>condition</strong> to particle type id</p></li>
 <li><p><strong>deterministic</strong> (<em>bool</em>) – <strong>Must be set if target is Species.</strong> Set True if boundary condition target is species     and applies to deterministic simulation. <strong>BoundaryCondition not yet implemeneted for Stochastic Species</strong>.</p></li>
-<li><p><strong>target</strong> – Set <strong>target</strong> to properties, can be ‘nu’ ‘rho’ or ‘v’ or species name</p></li>
-</ul>
-</dd>
-</dl>
-<p>If species name, determinstic must also be set to True/False.
-:type target: str</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<em>str</em>) – Set <strong>target</strong> to properties, can be ‘nu’ ‘rho’ or ‘v’ or species name     If species name, determinstic must also be set to True/False.</p></li>
 <li><p><strong>value</strong> (<em>float</em><em> or </em><em>float</em><em>[</em><em>3</em><em>]</em>) – Value property will take in region defined by the conditions</p></li>
-<li><p><strong>model</strong> (<em>spatialpy.Model.Model</em>) – Target model of boundary condition</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Target model of boundary condition</p></li>
 </ul>
 </dd>
 </dl>
@@ -2186,18 +2160,18 @@ species: (str) name of a chemical species.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – Name of the Data Function.</p>
 </dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.DataFunctionError" title="spatialpy.core.DataFunctionError"><strong>DataFunctionError</strong></a> – If a name is not provided.</p>
+</dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.DataFunction.map">
 <span class="sig-name descname"><span class="pre">map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/datafunction.html#DataFunction.map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.DataFunction.map" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method must be overridden by the DataFunction subclass.</p>
-<dl class="simple">
-<dt>NOTE: The spatial location is evaulated at t=0 and is not</dt><dd><p>reevaluated as the fluid domain moves over time.</p>
-</dd>
-</dl>
+<p>NOTE: The spatial location is evaulated at t=0 and is not               re-evaluated as the fluid domain moves over time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>point</strong> (<em>vector of 3 doubles</em>) – The x,y,z position</p>
+<dd class="field-odd"><p><strong>point</strong> (<em>float</em><em>[</em><em>3</em><em>]</em>) – The x, y, z position.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Value of function at this spatial location.</p>
@@ -2226,13 +2200,13 @@ species: (str) name of a chemical species.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>numpoints</strong> (<em>int</em>) – Total number of spatial domain points</p></li>
-<li><p><strong>xlim</strong> (<em>tuple</em><em>(</em><em>float</em><em>)</em>) – Range of domain along x-axis</p></li>
-<li><p><strong>ylim</strong> (<em>tuple</em><em>(</em><em>float</em><em>)</em>) – Range of domain along y-axis</p></li>
-<li><p><strong>zlim</strong> (<em>tuple</em><em>(</em><em>float</em><em>)</em>) – Range of domain along z-axis</p></li>
+<li><p><strong>xlim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – Range of domain along x-axis</p></li>
+<li><p><strong>ylim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – Range of domain along y-axis</p></li>
+<li><p><strong>zlim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – Range of domain along z-axis</p></li>
 <li><p><strong>rho</strong> (<em>float</em>) – Background density for the system</p></li>
 <li><p><strong>c0</strong> (<em>float</em>) – Speed of sound for the system</p></li>
 <li><p><strong>P0</strong> (<em>float</em>) – Background pressure for the system</p></li>
-<li><p><strong>gravity</strong> – Acceleration of gravity for the system.</p></li>
+<li><p><strong>gravity</strong> (<em>float</em><em>[</em><em>3</em><em>]</em>) – Acceleration of gravity for the system.</p></li>
 </ul>
 </dd>
 </dl>
@@ -2243,14 +2217,14 @@ species: (str) name of a chemical species.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>point</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>) or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – Spatial coordinate vertices of point to be added</p></li>
+<li><p><strong>point</strong> (<em>float</em><em>(</em><em>3</em><em>)</em>) – Spatial coordinate vertices of point to be added</p></li>
 <li><p><strong>vol</strong> (<em>float</em>) – Default volume of particle to be added</p></li>
 <li><p><strong>mass</strong> (<em>float</em>) – Default mass of particle to be added</p></li>
-<li><p><strong>type_id</strong> (<em>str</em><em> | </em><em>int</em>) – Particle type ID of particle to be created</p></li>
-<li><p><strong>nu</strong> (<em>float</em>) – Default viscosity of particle to be created</p></li>
+<li><p><strong>type_id</strong> (<em>str</em><em> | </em><em>int</em>) – Particle type ID of particle to be craddedeated</p></li>
+<li><p><strong>nu</strong> (<em>float</em>) – Default viscosity of particle to be added</p></li>
 <li><p><strong>fixed</strong> (<em>bool</em>) – True if particle is spatially fixed, else False</p></li>
-<li><p><strong>c</strong> (<em>float</em>) – Default artificial speed of sound of particle to be created</p></li>
-<li><p><strong>rho</strong> (<em>float</em>) – Default density of particle to be created</p></li>
+<li><p><strong>c</strong> (<em>float</em>) – Default artificial speed of sound of particle to be added</p></li>
+<li><p><strong>rho</strong> (<em>float</em>) – Default density of particle to be added</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
@@ -2271,13 +2245,13 @@ species: (str) name of a chemical species.</p>
 <dd><p>Find the nearest vertex of a given point in the domain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>point</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>) or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – Target source point</p>
+<dd class="field-odd"><p><strong>point</strong> (<em>float</em><em>(</em><em>3</em><em>)</em>) – Target source point</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The coordinates of the nearest vertex to the source point.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple(float, float, float) or tuple(float, float)</p>
+<dd class="field-odd"><p>float(3)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2285,11 +2259,11 @@ species: (str) name of a chemical species.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Domain.compile_prep">
 <span class="sig-name descname"><span class="pre">compile_prep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.compile_prep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Domain.compile_prep" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate the domain list of type ids and check for invalid type_ids and rho values
+<dd><p>Generate the domains list of type ids and check for invalid type_ids and rho values
 in preperation of compiling the simulation files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.DomainError" title="spatialpy.core.DomainError"><strong>DomainError</strong></a> – If a type_id is not set or rh for a particle is 0.</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.DomainError" title="spatialpy.core.DomainError"><strong>DomainError</strong></a> – If a type_id is not set or rho=0 for a particle.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2315,26 +2289,24 @@ in preperation of compiling the simulation files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>xlim</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – highest and lowest coordinate in the x dimension</p></li>
-<li><p><strong>ylim</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – highest and lowest coordinate in the y dimension</p></li>
+<li><p><strong>xlim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – highest and lowest coordinate in the x dimension</p></li>
+<li><p><strong>ylim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – highest and lowest coordinate in the y dimension</p></li>
 <li><p><strong>nx</strong> (<em>int</em>) – number of particle spacing in the x dimension</p></li>
 <li><p><strong>ny</strong> (<em>int</em>) – number of particle spacing in the y dimension</p></li>
 <li><p><strong>type_id</strong> (<em>int</em>) – default type ID of particles to be created. Defaults to 1</p></li>
 <li><p><strong>mass</strong> (<em>float</em>) – default mass of particles to be created. Defaults to 1.0</p></li>
 <li><p><strong>nu</strong> (<em>float</em>) – default viscosity of particles to be created. Defaults to 1.0</p></li>
 <li><p><strong>c</strong> (<em>float</em>) – default artificial speed of sound of particles to be created. Defaults to 0.0.</p></li>
-<li><p><strong>rho</strong> – default density of particles to be created.</p></li>
+<li><p><strong>rho</strong> (<em>float</em>) – default density of particles to be created.</p></li>
 <li><p><strong>fixed</strong> (<em>bool</em>) – spatially fixed flag of particles to be created. Defaults to false.</p></li>
-<li><p><strong>rho0</strong> (<em>float</em>) – background density for the system. Defaults to 1.0</p></li>
-<li><p><strong>c0</strong> (<em>float</em>) – speed of sound for the system. Defaults to 10</p></li>
-<li><p><strong>P0</strong> (<em>float</em>) – background pressure for the system. Defaults to 10</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments passed to <a class="reference internal" href="#spatialpy.core.Domain" title="spatialpy.core.Domain"><code class="xref py py-class docutils literal notranslate"><span class="pre">Domain</span></code></a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Uniform 2D SpatialPy Domain object.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Domain.Domain</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain">spatialpy.core.domain.Domain</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2346,9 +2318,9 @@ in preperation of compiling the simulation files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>xlim</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – highest and lowest coordinate in the x dimension</p></li>
-<li><p><strong>ylim</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – highest and lowest coordinate in the y dimension</p></li>
-<li><p><strong>zlim</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – highest and lowest coordinate in the z dimension</p></li>
+<li><p><strong>xlim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – highest and lowest coordinate in the x dimension</p></li>
+<li><p><strong>ylim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – highest and lowest coordinate in the y dimension</p></li>
+<li><p><strong>zlim</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – highest and lowest coordinate in the z dimension</p></li>
 <li><p><strong>nx</strong> (<em>int</em>) – number of particle spacing in the x dimension</p></li>
 <li><p><strong>ny</strong> (<em>int</em>) – number of particle spacing in the y dimension</p></li>
 <li><p><strong>nz</strong> (<em>int</em>) – number of particle spacing in the z dimension</p></li>
@@ -2356,18 +2328,16 @@ in preperation of compiling the simulation files.</p>
 <li><p><strong>mass</strong> (<em>float</em>) – default mass of particles to be created. Defaults to 1.0</p></li>
 <li><p><strong>nu</strong> (<em>float</em>) – default viscosity of particles to be created. Defaults to 1.0</p></li>
 <li><p><strong>c</strong> (<em>float</em>) – default artificial speed of sound of particles to be created. Defaults to 0.0.</p></li>
-<li><p><strong>rho</strong> – default density of particles to be created.</p></li>
+<li><p><strong>rho</strong> (<em>float</em>) – default density of particles to be created.</p></li>
 <li><p><strong>fixed</strong> (<em>bool</em>) – spatially fixed flag of particles to be created. Defaults to false.</p></li>
-<li><p><strong>rho0</strong> (<em>float</em>) – background density for the system. Defaults to 1.0</p></li>
-<li><p><strong>c0</strong> (<em>float</em>) – speed of sound for the system. Defaults to 10</p></li>
-<li><p><strong>P0</strong> (<em>float</em>) – background pressure for the system. Defaults to 10</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments passed to <a class="reference internal" href="#spatialpy.core.Domain" title="spatialpy.core.Domain"><code class="xref py py-class docutils literal notranslate"><span class="pre">Domain</span></code></a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Uniform 3D SpatialPy Domain object.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Domain.Domain</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain">spatialpy.core.domain.Domain</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2379,8 +2349,8 @@ in preperation of compiling the simulation files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>start</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>) or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – Starting point</p></li>
-<li><p><strong>end</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>) or </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – Ending point</p></li>
+<li><p><strong>start</strong> (<em>float</em><em>(</em><em>3</em><em>)</em>) – Starting point</p></li>
+<li><p><strong>end</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – Ending point</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -2399,7 +2369,7 @@ in preperation of compiling the simulation files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>geometry_ivar</strong> (<em>spatialpy.geometry.Geometry</em>) – an instance of a ‘spatialpy.Geometry’ subclass.  The ‘inside()’ method
+<li><p><strong>geometry_ivar</strong> (<a class="reference internal" href="#spatialpy.core.geometry.Geometry" title="spatialpy.core.geometry.Geometry"><em>spatialpy.core.geometry.Geometry</em></a>) – an instance of a <a class="reference internal" href="#spatialpy.core.geometry.Geometry" title="spatialpy.core.geometry.Geometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">spatialpy.core.geometry.Geometry</span></code></a> subclass.  The ‘inside()’ method
 of this object will be used to create add the particles.</p></li>
 <li><p><strong>deltax</strong> (<em>float</em>) – Distance between particles on the x-axis.</p></li>
 <li><p><strong>deltay</strong> (<em>float</em>) – Distance between particles on the y-axis (defaults to deltax).</p></li>
@@ -2410,7 +2380,7 @@ of this object will be used to create add the particles.</p></li>
 <li><p><strong>ymax</strong> (<em>float</em>) – Maximum y value of the bounding box (defaults to Domain.ylim[1]).</p></li>
 <li><p><strong>zmin</strong> (<em>float</em>) – Minimum z value of the bounding box (defaults to Domain.zlim[0]).</p></li>
 <li><p><strong>zmax</strong> (<em>float</em>) – Maximum z value of the bounding box (defaults to Domain.zlim[1]).</p></li>
-<li><p><strong>kwargs</strong> (<em>dict</em>) – Key word arguments for Domain.add_point.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments passed to <a class="reference internal" href="#spatialpy.core.Domain.add_point" title="spatialpy.core.Domain.add_point"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Domain.add_point()</span></code></a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -2540,7 +2510,7 @@ is a part of.</p>
 <dd class="field-even"><p>SpatialPy Domain object created from the meshio object</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Domain.Domain</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain">spatialpy.core.domain.Domain</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2583,7 +2553,7 @@ is a part of.</p>
 <dd class="field-even"><p>SpatialPy Domain object created from the mesh file.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Domain.Domain</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain">spatialpy.core.domain.Domain</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2600,7 +2570,7 @@ is a part of.</p>
 <dd class="field-even"><p>SpatialPy Domain object created from StochSS domain.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Domain.Domain</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain">spatialpy.core.domain.Domain</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2634,7 +2604,7 @@ is a part of.</p>
 <dd class="field-even"><p>SpatialPy Domain object created from xml mesh.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Domain.Domain</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain">spatialpy.core.domain.Domain</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2646,7 +2616,7 @@ is a part of.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>geometry_ivar</strong> (<em>spatialpy.Geometry.Geometry</em>) – an instance of a ‘spatialpy.Geometry’ subclass.  The ‘inside()’ method
+<li><p><strong>geometry_ivar</strong> (<a class="reference internal" href="#spatialpy.core.geometry.Geometry" title="spatialpy.core.geometry.Geometry"><em>spatialpy.core.geometry.Geometry</em></a>) – an instance of a <a class="reference internal" href="#spatialpy.core.geometry.Geometry" title="spatialpy.core.geometry.Geometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">spatialpy.core.geometry.Geometry</span></code></a> subclass.  The ‘inside()’ method
 of this object will be used to assign properties to points.</p></li>
 <li><p><strong>type_id</strong> (<em>str</em><em> | </em><em>int</em>) – The identifier for this type.</p></li>
 <li><p><strong>vol</strong> (<em>float</em>) – The volume of each particle in the type.</p></li>
@@ -2742,7 +2712,7 @@ of this object will be used to assign properties to points.</p></li>
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">spatialpy.core.</span></span><span class="sig-name descname"><span class="pre">GeometryExterior</span></span><a class="reference internal" href="../_modules/spatialpy/core/geometry.html#GeometryExterior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.GeometryExterior" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#spatialpy.core.geometry.Geometry" title="spatialpy.core.geometry.Geometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">spatialpy.core.geometry.Geometry</span></code></a></p>
 <p>Mark particles that are on the edge of the domain.
-only works for meshes that define triangles and tetrahedrons.</p>
+only works for domains that define triangles and tetrahedrons.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.GeometryExterior.inside">
 <span class="sig-name descname"><span class="pre">inside</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_boundary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/geometry.html#GeometryExterior.inside"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.GeometryExterior.inside" title="Permalink to this definition">¶</a></dt>
@@ -2769,7 +2739,7 @@ only works for meshes that define triangles and tetrahedrons.</p>
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">spatialpy.core.</span></span><span class="sig-name descname"><span class="pre">GeometryInterior</span></span><a class="reference internal" href="../_modules/spatialpy/core/geometry.html#GeometryInterior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.GeometryInterior" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#spatialpy.core.geometry.Geometry" title="spatialpy.core.geometry.Geometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">spatialpy.core.geometry.Geometry</span></code></a></p>
 <p>Mark particles that are not on the edge of the domain.
-Only works for meshes that define triangles and tetrahedrons.</p>
+Only works for domains that define triangles and tetrahedrons.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.GeometryInterior.inside">
 <span class="sig-name descname"><span class="pre">inside</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_boundary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/geometry.html#GeometryInterior.inside"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.GeometryInterior.inside" title="Permalink to this definition">¶</a></dt>
@@ -2797,11 +2767,16 @@ Only works for meshes that define triangles and tetrahedrons.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class used to defined initial conditions in SpatialPy.
 SubClasses must implement the ‘apply(model)’ method, which
-direction modifies the model.u0[species,voxel] matrix.</p>
+direction modifies the model.u0[species, voxel] matrix.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.InitialCondition.apply">
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/initialcondition.html#InitialCondition.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.InitialCondition.apply" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the initial condition of the species to the count.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -3136,10 +3111,10 @@ any distance greater than max_distance.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Model.add_boundary_condition">
 <span class="sig-name descname"><span class="pre">add_boundary_condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bound_cond</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.add_boundary_condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Model.add_boundary_condition" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add an BoundaryCondition object to the model.</p>
+<dd><p>Add an boundary condition object to the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>bound_cond</strong> (<em>spatialpy.BoundaryCondition</em>) – Boundary condition to be added</p>
+<dd class="field-odd"><p><strong>bound_cond</strong> (<a class="reference internal" href="#spatialpy.core.boundarycondition.BoundaryCondition" title="spatialpy.core.boundarycondition.BoundaryCondition"><em>spatialpy.core.boundarycondition.BoundaryCondition</em></a>) – Boundary condition to be added</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3148,9 +3123,9 @@ any distance greater than max_distance.</p>
 <dt class="sig sig-object py" id="spatialpy.core.Model.add_data_function">
 <span class="sig-name descname"><span class="pre">add_data_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_function</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.add_data_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Model.add_data_function" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a scalar spatial function to the simulation. This is useful if you have a
-spatially varying in put to your model. Argument is a instances of subclass of the
-spatialpy.DataFunction class. It must implement a function ‘map(x)’ which takes a
-the spatial positon ‘x’ as an array, and it returns a float value.</p>
+spatially varying input to your model. Argument is a instances of subclass of the
+spatialpy.DataFunction class. It must implement a function ‘map(point)’ which takes a
+the spatial positon ‘point’ as an array, and it returns a float value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>data_function</strong> (<em>spatialpy.DataFunction</em>) – Data function to be added.</p>
@@ -3159,7 +3134,7 @@ the spatial positon ‘x’ as an array, and it returns a float value.</p>
 <dd class="field-even"><p>DataFunction object(s) added tothe model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.DataFunction | list(spatialpy.DataFunction)</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.datafunction.DataFunction" title="spatialpy.core.datafunction.DataFunction">spatialpy.core.datafunction.DataFunction</a> | list(<a class="reference internal" href="#spatialpy.core.datafunction.DataFunction" title="spatialpy.core.datafunction.DataFunction">spatialpy.core.datafunction.DataFunction</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – Invalid DataFunction</p>
@@ -3173,7 +3148,7 @@ the spatial positon ‘x’ as an array, and it returns a float value.</p>
 <dd><p>Add a spatial domain to the model</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>domain</strong> (<em>spatialpy.Domain.Domain</em>) – The Domain object to be added to the model</p>
+<dd class="field-odd"><p><strong>domain</strong> (<a class="reference internal" href="#spatialpy.core.domain.Domain" title="spatialpy.core.domain.Domain"><em>spatialpy.core.domain.Domain</em></a>) – The Domain object to be added to the model</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – Invalid Domain object</p>
@@ -3187,7 +3162,7 @@ the spatial positon ‘x’ as an array, and it returns a float value.</p>
 <dd><p>Add an initial condition object to the initialization of the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>init_cond</strong> (<em>spatialpy.InitialCondition.InitialCondition</em>) – Initial condition to be added</p>
+<dd class="field-odd"><p><strong>init_cond</strong> (<a class="reference internal" href="#spatialpy.core.initialcondition.InitialCondition" title="spatialpy.core.initialcondition.InitialCondition"><em>spatialpy.core.initialcondition.InitialCondition</em></a>) – Initial condition to be added</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3199,16 +3174,16 @@ the spatial positon ‘x’ as an array, and it returns a float value.</p>
 Parameter object or a list of Parameter objects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>params</strong> (<em>spatialpy.Model.Parameter</em><em> | </em><em>list</em><em>(</em><em>spatialpy.Model.Parameter</em><em>)</em>) – Parameter object or list of Parameters to be added.</p>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a><em> | </em><em>list</em><em>(</em><a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a><em>)</em>) – Parameter object or list of Parameters to be added.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Parameter object which has been added to the model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Parameter | list(spatialpy.Parameter)</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter">spatialpy.core.parameter.Parameter</a> | list(<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter">spatialpy.core.parameter.Parameter</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – if obj is not a spatialpy.Parameter</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – if obj is not a spatialpy.core.parameter.Parameter</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3220,16 +3195,16 @@ Parameter object or a list of Parameter objects.</p>
 or a dict with name, instance pairs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>reacs</strong> (<em>spatialpy.Model.Reaction</em><em> | </em><em>list</em><em>(</em><em>spatialpy.Model.Reaction</em><em>)</em>) – Reaction or list of Reactions to be added.</p>
+<dd class="field-odd"><p><strong>reacs</strong> (<a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction"><em>spatialpy.core.reaction.Reaction</em></a><em> | </em><em>list</em><em>(</em><a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction"><em>spatialpy.core.reaction.Reaction</em></a><em>)</em>) – Reaction or list of Reactions to be added.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The Reaction object(s) added to the model</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Model.Reaction</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction">spatialpy.core.reaction.Reaction</a> | list(<a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction">spatialpy.core.reaction.Reaction</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – Invalid input/reaction to add_reaction()</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – if obj is not a spatialpy.core.reaction.Reaction</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3240,16 +3215,16 @@ or a dict with name, instance pairs.</p>
 <dd><p>Adds a species, or list of species to the model. Will return the added object upon success.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.Model.Species</em><em> | </em><em>list</em><em>(</em><em>spatialpy.Model.Species</em>) – The species or list of species to be added to the model object.</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a><em> | </em><em>list</em><em>(</em><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species or list of species to be added to the model object.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Species object which was added to the model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Species | list(spatialpy.Species)</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species">spatialpy.core.species.Species</a> | list(<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species">spatialpy.core.species.Species</a>)</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – If obj is not a spatialpy.Species</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – If obj is not a spatialpy.core.species.Species</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3297,7 +3272,7 @@ of compiling the simulation files.</p>
 <dd><p>Remove a Parameter from model.listOfParameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.Model.Parameter</em>) – Parameter object to be removed</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a>) – Parameter object to be removed</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3308,7 +3283,7 @@ of compiling the simulation files.</p>
 <dd><p>Remove reaction from model.listOfReactions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.Model.Reaction</em>) – Reaction to be removed.</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction"><em>spatialpy.core.reaction.Reaction</em></a>) – Reaction to be removed.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3319,7 +3294,7 @@ of compiling the simulation files.</p>
 <dd><p>Remove a Species from model.listOfSpecies.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>spatialpy.Model.Species</em>) – Species object to be removed</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – Species object to be removed</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3400,13 +3375,13 @@ of compiling the simulation files.</p>
 <dd><p>Return the Parameter object from model associated with ‘pname’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>pname</strong> (<em>spatialpy.Model.Parameter</em>) – Name of parameter to be removed</p>
+<dd class="field-odd"><p><strong>pname</strong> (<em>str</em>) – Name of parameter to be returned</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The Parameter object represented in the model by ‘pname’</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Spatialpy.Model.Parameter</p>
+<dd class="field-odd"><p>Spatialpy.core.parameter.Parameter</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – No parameter named {pname}</p>
@@ -3420,13 +3395,13 @@ of compiling the simulation files.</p>
 <dd><p>Retrieve a reaction object from the model by name</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>rname</strong> (<em>str</em>) – name of Reaction to retrieve</p>
+<dd class="field-odd"><p><strong>rname</strong> (<em>str</em>) – name of the reaction to be returned</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The Reaction Object in the model represented by ‘rname’</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Model.Reaction</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.reaction.Reaction" title="spatialpy.core.reaction.Reaction">spatialpy.core.reaction.Reaction</a></p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – Could not find reaction</p>
@@ -3446,7 +3421,7 @@ of compiling the simulation files.</p>
 <dd class="field-even"><p>The Species objected represented by given ‘sname’</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Model.Species</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species">spatialpy.core.species.Species</a></p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ModelError" title="spatialpy.core.ModelError"><strong>ModelError</strong></a> – if the model does not contain the requested species</p>
@@ -3480,7 +3455,7 @@ killed upon reaching timeout.</p></li>
 <dd class="field-even"><p>A SpatialPy Result object containing simulation data.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>spatialpy.Result.Result</p>
+<dd class="field-odd"><p><a class="reference internal" href="#spatialpy.core.result.Result" title="spatialpy.core.result.Result">spatialpy.core.result.Result</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -3533,8 +3508,7 @@ later on by SpatialPySolvers evaluating reaction propensity functions.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Model.set_timesteps">
 <span class="sig-name descname"><span class="pre">set_timesteps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_interval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.set_timesteps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Model.set_timesteps" title="Permalink to this definition">¶</a></dt>
-<dd><p>”
-Set the simlation time span parameters.</p>
+<dd><p>Set the simlation time span parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -3694,7 +3668,7 @@ If given a String expression, it should be evaluable in the namespace of a paren
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spayialpy.species.Species</em>) – The species to set the initial condition.</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species to set the initial condition.</p></li>
 <li><p><strong>count</strong> (<em>int</em>) – The initial condition for the target species.</p></li>
 <li><p><strong>location</strong> (<em>float</em><em>[</em><em>3</em><em>]</em>) – X, Y, Z coordinates to place the initial condition.</p></li>
 </ul>
@@ -3706,7 +3680,7 @@ If given a String expression, it should be evaluable in the namespace of a paren
 <dd><p>Set the initial condition of the species to the count at the location.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.model.Model</em>) – Model contianing the target species.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3725,7 +3699,7 @@ If given a String expression, it should be evaluable in the namespace of a paren
 <li><p><strong>reactants</strong> (<em>dict</em>) – Dictionary of {species:stoichiometry} of reaction reactants</p></li>
 <li><p><strong>products</strong> (<em>dict</em>) – Dictionary of {species:stoichiometry} of reaction products</p></li>
 <li><p><strong>propensity_function</strong> (<em>str</em>) – String with the expression for the reaction’s propensity</p></li>
-<li><p><strong>rate</strong> (<em>spatialpy.model.Parameter</em>) – if mass action, rate is a reference to a parameter instance.</p></li>
+<li><p><strong>rate</strong> (<a class="reference internal" href="#spatialpy.core.parameter.Parameter" title="spatialpy.core.parameter.Parameter"><em>spatialpy.core.parameter.Parameter</em></a>) – if mass action, rate is a reference to a parameter instance.</p></li>
 <li><p><strong>annotation</strong> (<em>str</em>) – Description of the reaction (meta)</p></li>
 <li><p><strong>restrict_to</strong> (<em>int</em><em>, </em><em>str</em><em>, </em><em>list of ints</em><em> or </em><em>list of strs</em>) – Restrict reaction execution to a type or list of types within the domain.</p></li>
 </ul>
@@ -3738,7 +3712,7 @@ If given a String expression, it should be evaluable in the namespace of a paren
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>S</strong> (<em>spatialpy.Model.Species</em>) – Species object to be produced by the reaction</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – Species object to be produced by the reaction</p></li>
 <li><p><strong>stoichiometry</strong> (<em>int</em>) – Stoichiometry of this product.</p></li>
 </ul>
 </dd>
@@ -3752,7 +3726,7 @@ If given a String expression, it should be evaluable in the namespace of a paren
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spatialpy.Model.Species</em>) – reactant Species object</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – reactant Species object</p></li>
 <li><p><strong>stoichiometry</strong> (<em>int</em>) – Stoichiometry of this participant reactant</p></li>
 </ul>
 </dd>
@@ -3776,7 +3750,7 @@ If given a String expression, it should be evaluable in the namespace of a paren
 <dd><p>Deferred object initialization, called by model.add_reaction().</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.Model</em>) – Target SpatialPy Model for annotation.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Target SpatialPy Model for annotation.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3804,18 +3778,9 @@ The columns of modelname_mesh.csv are: ‘Voxel ID’, ‘X’, ‘Y’, ‘Z’
 The columns of modelname_species_S.csv: ‘Time’, ‘Voxel 0’, Voxel 1’, … ‘Voxel N’.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>folder_name</strong> (<em>str</em><em> (</em><em>default current working directory</em><em>)</em>) – A path where the vtk files will be written, created if non-existant.</p>
+<dd class="field-odd"><p><strong>folder_name</strong> (<em>str</em>) – A path where the vtk files will be written, created if non-existant.         Defaults current working directory</p>
 </dd>
 </dl>
-<p>If no path is provided current working directory is used.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spatialpy.core.Result.export_to_vtk">
-<span class="sig-name descname"><span class="pre">export_to_vtk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timespan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/result.html#Result.export_to_vtk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Result.export_to_vtk" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write the trajectory to a collection of vtk files.
-The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension.
-Not currently implemented.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3825,7 +3790,14 @@ Not currently implemented.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>property_name</strong> (<em>str</em>) – A string describing the property to be returned.</p></li>
+<li><p><strong>property_name</strong> (<em>str</em>) – A string describing the property to be returned.  Can be one of: {
+‘v’ : velocity,
+‘rho’: density,
+‘mass’: mass,
+‘id’: type_id,
+‘type’: type as str,
+‘bvf_phi’: boundary volume fraction,
+‘nu’: viscosity}</p></li>
 <li><p><strong>timepoints</strong> (<em>int</em>) – timespan index to be returned.  Default is None</p></li>
 </ul>
 </dd>
@@ -3836,7 +3808,7 @@ Not currently implemented.</p>
 <dd class="field-odd"><p>numpy.ndarray</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>ResultsError</strong> – Could not get data for given timepoints.</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ResultError" title="spatialpy.core.ResultError"><strong>ResultError</strong></a> – Could not get data for given timepoints.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3849,17 +3821,17 @@ one or all timepoints. Returns a numpy array containing the species population/c
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>str</em><em> | </em><em>dict</em>) – A species in string or dictionary form to retreive information about</p></li>
-<li><p><strong>timepoints</strong> (<em>int</em><em> (</em><em>default None</em><em>)</em>) – A time point where the information should be retreived from.
+<li><p><strong>species</strong> (<em>str</em><em> | </em><a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – A species in string or dictionary form to retreive information about</p></li>
+<li><p><strong>timepoints</strong> (<em>int</em>) – A time point where the information should be retreived from.
 If ‘timepoints’ is None (default), a matrix of dimension:
 (number of timepoints) x (number of voxels) is returned.
 If an integer value is given, that value is used to index into the timespan, and that time point is returned
-as a 1D array with size (number of voxel).</p></li>
-<li><p><strong>concentration</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether or not the species is a concentration (True) or population (False)
+as a 1D array with size (number of voxel).  Defaults to None</p></li>
+<li><p><strong>concentration</strong> (<em>bool</em>) – Whether or not the species is a concentration (True) or population (False)
 If concentration is False (default), the integer, raw, trajectory data is returned.
-If set to True, the concentration (=copy_number/volume) is returned.</p></li>
-<li><p><strong>deterministic</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether or not the species is deterministic (True) or stochastic (False)</p></li>
-<li><p><strong>debug</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether or not debug information should be printed</p></li>
+If set to True, the concentration (=copy_number/volume) is returned.  Defaults to False</p></li>
+<li><p><strong>deterministic</strong> (<em>bool</em>) – Whether or not the species is deterministic (True) or stochastic (False).  Defaults to False</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – Whether or not debug information should be printed. Defaults to False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -3900,8 +3872,8 @@ timepoints.  Defaults to all timepoints.</p>
 <li><p><strong>t_ndx</strong> (<em>int</em>) – The time index of the results to be plotted</p></li>
 <li><p><strong>t_val</strong> (<em>float</em>) – The time value of the results to be plotted, ignored if animated is set to True</p></li>
 <li><p><strong>p_ndx</strong> (<em>int</em>) – The property index of the results to be plotted</p></li>
-<li><p><strong>width</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Width in pixels of output plot box or for matplotlib inches of output plot box</p></li>
-<li><p><strong>height</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Height in pixels of output plot box or for matplotlib inches of output plot box</p></li>
+<li><p><strong>width</strong> (<em>int</em>) – Width in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 6.4 (MatPlotLib)</p></li>
+<li><p><strong>height</strong> (<em>int</em>) – Height in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 4.8 (MatPlotLib)</p></li>
 <li><p><strong>colormap</strong> (<em>str</em>) – colormap to use.  Plotly specification, valid values: “Plotly3”,”Jet”,”Blues”,”YlOrRd”,
 “PuRd”,”BuGn”,”YlOrBr”,”PuBuGn”,”BuPu”,”YlGnBu”, “PuBu”,”GnBu”,”YlGn”,”Greens”,”Reds”,
 “Greys”,”RdPu”,”OrRd”,”Purples”,”Oranges”.</p></li>
@@ -3948,8 +3920,8 @@ if set to True, the concentration (=copy_number/volume) is returned.</p>
 <li><p><strong>concentration</strong> (<em>bool</em>) – Whether or not to plot the data as stochastic concentration, ignored if deterministic is
 set to True</p></li>
 <li><p><strong>deterministic</strong> (<em>bool</em>) – Whether or not to plot the data as deterministic</p></li>
-<li><p><strong>width</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Width in pixels of output plot box</p></li>
-<li><p><strong>height</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – Height in pixels of output plot box</p></li>
+<li><p><strong>width</strong> (<em>int</em>) – Width in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 6.4 (MatPlotLib)</p></li>
+<li><p><strong>height</strong> (<em>int</em>) – Height in pixels of output plot box or for matplotlib inches of output plot box.         Defaults to 500 (Plotly) or 4.8 (MatPlotLib)</p></li>
 <li><p><strong>colormap</strong> (<em>str</em>) – colormap to use.  Plotly specification, valid values: “Plotly3”,”Jet”,”Blues”,”YlOrRd”,
 “PuRd”,”BuGn”,”YlOrBr”,”PuBuGn”,”BuPu”,”YlGnBu”, “PuBu”,”GnBu”,”YlGn”,”Greens”,”Reds”,
 “Greys”,”RdPu”,”OrRd”,”Purples”,”Oranges”.</p></li>
@@ -3973,7 +3945,7 @@ False (default)</p></li>
 <dd class="field-odd"><p>dict</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>ResultsError</strong> – unable to plot species for given time</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.ResultError" title="spatialpy.core.ResultError"><strong>ResultError</strong></a> – unable to plot species for given time</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4018,7 +3990,7 @@ False (default)</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spayialpy.species.Species</em>) – The species to set the initial condition.</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species to set the initial condition.</p></li>
 <li><p><strong>count</strong> (<em>int</em>) – The initial condition for the target species.</p></li>
 <li><p><strong>types</strong> (<em>list</em>) – Types of the particles to place the initial condition.</p></li>
 </ul>
@@ -4030,7 +4002,7 @@ False (default)</p></li>
 <dd><p>Scatter ‘count’ of ‘species’ randomly over the list of types (all types if None).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.model.Model</em>) – Model contianing the target species.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4061,12 +4033,10 @@ False (default)</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – Name of the Species</p></li>
 <li><p><strong>diffusion_coefficient</strong> (<em>float</em>) – Non-constant coefficient of diffusion for Species.</p></li>
-<li><p><strong>restrict_to</strong> – Set the diffusion coefficient to zero for ‘species’ in all types not in ‘listOfTypes’.</p></li>
+<li><p><strong>restrict_to</strong> (<em>int</em><em>, </em><em>str</em><em>, </em><em>list of ints</em><em> or </em><em>list of strs</em>) – Set the diffusion coefficient to zero for ‘species’ in all types not in ‘listOfTypes’.     This effectively restricts the movement of ‘species’ to the types specified in ‘listOfTypes’.</p></li>
 </ul>
 </dd>
 </dl>
-<p>This effectively restricts the movement of ‘species’ to the types specified in ‘listOfTypes’.
-:type restrict_to: int, str, list of ints or list of strs</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Species.set_diffusion_coefficient">
 <span class="sig-name descname"><span class="pre">set_diffusion_coefficient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diffusion_coefficient</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/species.html#Species.set_diffusion_coefficient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Species.set_diffusion_coefficient" title="Permalink to this definition">¶</a></dt>
@@ -4076,7 +4046,7 @@ False (default)</p></li>
 <dd class="field-odd"><p><strong>diffusion_coefficient</strong> (<em>float</em>) – Non-constant coefficient of diffusion for Species.</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.SpeciesError" title="spatialpy.core.SpeciesError"><strong>SpeciesError</strong></a> – If diffusion_coefficient is negative.</p>
+<dd class="field-even"><p><a class="reference internal" href="#spatialpy.core.SpeciesError" title="spatialpy.core.SpeciesError"><strong>SpeciesError</strong></a> – If diffusion_coefficient is negative or not a valid type.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4098,7 +4068,7 @@ False (default)</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>spayialpy.species.Species</em>) – The species to set the initial condition.</p></li>
+<li><p><strong>species</strong> (<a class="reference internal" href="#spatialpy.core.species.Species" title="spatialpy.core.species.Species"><em>spatialpy.core.species.Species</em></a>) – The species to set the initial condition.</p></li>
 <li><p><strong>count</strong> (<em>int</em>) – The initial condition for the target species.</p></li>
 <li><p><strong>types</strong> (<em>list</em>) – Types of the particles to place the initial condition.</p></li>
 </ul>
@@ -4110,7 +4080,7 @@ False (default)</p></li>
 <dd><p>Set ‘count’ of ‘species’ in over the list of types (all types if None).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>spatialpy.model.Model</em>) – Model contianing the target species.</p>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="#spatialpy.core.model.Model" title="spatialpy.core.model.Model"><em>spatialpy.core.model.Model</em></a>) – Model contianing the target species.</p>
 </dd>
 </dl>
 </dd></dl>
