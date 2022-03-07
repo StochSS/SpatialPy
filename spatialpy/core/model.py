@@ -28,6 +28,8 @@ from spatialpy.solvers.build_expression import BuildExpression
 
 from spatialpy.core.spatialpyerror import ModelError
 
+raise Exception("Breaking SpatialPy")
+
 def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
     """
     SpatialPy model to StochSS converter
