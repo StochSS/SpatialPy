@@ -1,7 +1,7 @@
 '''
 SpatialPy is a Python 3 package for simulation of
 spatial deterministic/stochastic reaction-diffusion-advection problems
-Copyright (C) 2021 SpatialPy developers.
+Copyright (C) 2019 - 2022 SpatialPy developers.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
@@ -20,15 +20,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #from .spatialpy import *
 
 import sys
-if (sys.version_info < (3,0)):
-    raise Exception("SpatialPy only works in Python 3.0 and higher")
 
-from spatialpy.Model import *
-from spatialpy.Solver import *
-from spatialpy.Geometry import *
-from spatialpy.Domain import *
-from spatialpy.DataFunction import DataFunction
-from spatialpy.InitialCondition import *
-from spatialpy.BoundaryCondition import BoundaryCondition
-from spatialpy.VTKReader import *
-from spatialpy.cleanup import *
+from spatialpy.core import *
+from spatialpy.solvers import *
+
+from .__version__ import __version__, __title__, __description__, __url__
+from .__version__ import __author__, __email__
+from .__version__ import __license__, __copyright__
+
+if sys.version_info < (3,0):
+    raise Exception("SpatialPy only works in Python 3.0 and higher")

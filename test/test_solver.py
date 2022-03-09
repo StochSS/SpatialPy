@@ -1,7 +1,7 @@
 '''
 SpatialPy is a Python 3 package for simulation of
 spatial deterministic/stochastic reaction-diffusion-advection problems
-Copyright (C) 2021 SpatialPy developers.
+Copyright (C) 2019 - 2022 SpatialPy developers.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
@@ -25,7 +25,7 @@ import pickle
 import unittest
 import numpy
 import spatialpy
-from spatialpy.expression import Expression, ExpressionConverter
+from spatialpy.solvers.build_expression import BuildExpression, ExpressionConverter
 
 
 class diffusion_debug(spatialpy.Model):
@@ -39,7 +39,7 @@ class diffusion_debug(spatialpy.Model):
         self.add_species([A])
 
         self.domain = spatialpy.Domain.create_2D_domain(
-            xlim=[-1, 1], ylim=[-1, 1], nx=50, ny=50, type_id=1.0,
+            xlim=[-1, 1], ylim=[-1, 1], nx=50, ny=50, type_id=1,
             mass=1.0, nu=1.0, fixed=True,  rho0=1.0, c0=1.0, P0=1.0
         )
 
@@ -224,7 +224,7 @@ class TestSolverFunctionality(unittest.TestCase):
         def test_expressions(expressions: "list[ExpressionTestCase]", use_bool=False):
             for entry in expressions:
                 expression = ExpressionConverter.convert_str(entry.expression)
-                expr = Expression(namespace=entry.args)
+                expr = BuildExpression(namespace=entry.args)
                 cpp_expr = expr.getexpr_cpp(expression)
                 with self.subTest(msg="Evaluating converted C expressions",
                                   expression=entry.expression,

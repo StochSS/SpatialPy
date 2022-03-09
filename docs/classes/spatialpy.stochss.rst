@@ -4,10 +4,10 @@ spatialpy.stochss package
 Submodules
 ----------
 
-spatialpy.stochss.StochSSexport module
---------------------------------------
+spatialpy.stochss.stochss\_export module
+----------------------------------------
 
-.. automodule:: spatialpy.stochss.StochSSexport
+.. automodule:: spatialpy.stochss.stochss_export
    :members:
    :undoc-members:
    :show-inheritance:

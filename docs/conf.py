@@ -3,7 +3,7 @@
 # @file  conf.py
 # @brief Configuration file for the Sphinx documentation builder.
 # @license Please see the file named LICENSE in the project directory
-# @website https://github.com/SpatialPy/GillesPy2
+# @website https://github.com/StochSS/SpatialPy/
 #
 # This file does only contain a selection of the most common options. For a
 # full list see the documentation: http://www.sphinx-doc.org/en/master/config
@@ -130,7 +130,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'SpatialPy.tex', 'GillesPy2 Documentation',
+    (master_doc, 'SpatialPy.tex', 'SpatialPy Documentation',
      'Author', 'manual'),
 ]
 
@@ -151,7 +151,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'SpatialPy', 'GillesPy2 Documentation',
+    (master_doc, 'SpatialPy', 'SpatialPy Documentation',
      author, 'SpatialPy', 'One line description of project.',
      'Miscellaneous'),
 ]
@@ -184,12 +184,12 @@ extensions.append('alabaster')
 html_theme = 'alabaster'
 
 html_theme_options = {
-    'github_user': 'SpatialPy',
+    'github_user': 'StochSS',
     'github_repo': 'SpatialPy',
     'fixed_sidebar': 'true',
     'github_banner': 'true',
-    'logo': 'img/spatialpy-logo.svg',
-    'touch_icon': 'img/spatialpy-logo.svg',
+    'logo': 'img/SpatialPy_logo.png',
+    'touch_icon': 'img/SpatialPy_logo.svg',
     'show_relbar_bottom': 'true',
     'link_hover': 'purple',
     'caption_font_size': '150%',
