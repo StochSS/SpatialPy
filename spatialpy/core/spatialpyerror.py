@@ -27,6 +27,11 @@ class ResultError(Exception):
     Class for exceptions in the results module.
     """
 
+class VisualizationError(Exception):
+    """
+    Class for exceptions in the visualization module.
+    """
+
 class VTKReaderError(Exception):
     """
     Bass class for exceptions in the vtkreader module.
@@ -79,6 +84,9 @@ class SpeciesError(ModelError):
     """
 
 # Result Exceptions
+
+
+# Visualization Exceptions
 
 
 # VTKReader Exceptions
