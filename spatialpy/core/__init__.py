@@ -30,6 +30,7 @@ from .reaction import *
 from .result import *
 from .spatialpyerror import *
 from .species import *
+from .visualization import Visualization
 from .vtkreader import *
 
 _formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
