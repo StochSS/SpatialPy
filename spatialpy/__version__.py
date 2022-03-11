@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # @website https://github.com/StochSS/SpatialPy
 # =============================================================================
 
-__version__      = '1.0'
+__version__      = '1.0.1'
 __title__        = 'SpatialPy'
 __description__  = 'Python Interface for Spatial Stochastic Biochemical Simulations'
 __url__          = 'https://spatialpy.github.io/SpatialPy/'

@@ -1,5 +1,5 @@
 <p align="left">
-<img src="https://raw.githubusercontent.com/StochSS/SpatialPy/main/logo/SpatialPy_logo.png">
+<img src="https://raw.githubusercontent.com/StochSS/SpatialPy/main/.graphics/SpatialPy_logo.png">
 </p>
 
 SpatialPy is a Python 3 package for simulation of spatial deterministic/stochastic reaction-diffusion-advection problems embedded in Lagrangian reference frame particle based fluid dynamics domain
@@ -7,7 +7,7 @@ SpatialPy is a Python 3 package for simulation of spatial deterministic/stochast
 This package is intended to replace the PyURDME software https://github.com/pyurdme/pyurdme and will feature both a NSM solver for RDME simulation on static domains and a sSSA-SDPD particle based fluid dynamics solver as described in the publication "A hybrid smoothed dissipative particle dynamics (SDPD) spatial stochastic simulation algorithm (sSSA) for advection–diffusion–reaction problems" by Drawert, Jacob, Li, Yi, Petzold https://www.sciencedirect.com/science/article/pii/S0021999118307101
 
 <table><tr><td><b>
-<img width="20%" align="right" src="https://raw.githubusercontent.com/SpatialPy/SpatialPy/develop/.graphics/stochss-logo.png">
+<img width="20%" align="right" src="https://raw.githubusercontent.com/SpatialPy/SpatialPy/main/.graphics/stochss-logo.png">
 <a href="https://docs.google.com/forms/d/12tAH4f8CJ-3F-lK44Q9uQHFio_mGoK0oY829q5lD7i4/viewform">PLEASE REGISTER AS A USER</a>, so that we can prove SpatialPy has many users when we seek funding to support development. SpatialPy is part of the <a href="http://www.stochss.org">StochSS</a> project.
 </td></tr></table>
 
@@ -25,9 +25,11 @@ Table of contents
   - [_Using the source code repository_](#using-the-source-code-repository)
 - [Usage](#usage)
   - [_Simple example to illustrate the use of SpatialPy_](#simple-example-to-illustrate-the-use-of-spatialpy)
+<!--
   - [_Docker environment_](#docker-environment)
   - [_Debugging_](#debugging)
   - [_Profiling_](#profiling)
+-->
 - [Getting help](#getting-help)
 - [Contributing](#contributing)
 - [License](#license)
@@ -72,8 +74,8 @@ SpatialPy provides simple object-oriented abstractions for defining a model of a
 
 The `run()` method can be customized using keyword arguments to select different solvers, random seed, data return type and more.  For more detailed examples on how to use SpatialPy, please see the Jupyter notebooks contained in the [examples](https://github.com/StochSS/SpatialPy/tree/main/examples) subdirectory.
 
-
-### Docker environment
+<!-- 
+### Docker environment (DOES NOT WORK)
 
 You can use Docker to create a repeatable environment for developing and debugging SpatialPy. The supplied Dockerfile starts a jupyter server with SpatialPy dependencies installed.
 
@@ -102,6 +104,7 @@ You can invoke `solver.run_debugger()` anytime after you instantiate a solver in
 ### Profiling
 
 To enable profiling, both `solver.compile()` and `solver.run()` need to be invoked with `profile=True`. If you don't run `solver.compile()` explicitly, invoking `solver.run()` with `profile=True` will run `compile()` correctly for you.
+-->
 
 Getting help
 ------------
