@@ -33,11 +33,13 @@ if __name__ == '__main__':
     import test_species
     import test_parameter
     import test_reaction
+    import test_notebooks
     
     modules = [
         test_species,
         test_parameter,
-        test_reaction
+        test_reaction,
+        test_notebooks
     ]
 
     for module in modules:
