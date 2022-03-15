@@ -18,7 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import math
 import numpy
-import matplotlib.pyplot as plt
+
+try:
+    import matplotlib.pyplot as plt
+    mpl_import_err = None
+except ImportError as err:
+    mpl_import_err = err
 
 from spatialpy.core.spatialpyerror import VisualizationError
 
@@ -132,6 +137,9 @@ class Visualization():
         If ploted separately a shape may be provided.
         :type multiple_graphs: bool | tuple(nrows, ncols)
         """
+        if mpl_import_err is not None:
+            raise VisualizationError("Missing MatPlotLib dependency.") from mpl_import_err
+
         plot_args = _validate_mplplot_args(plot_args)
         if multiple_graphs:
             plot_args['nrows'], plot_args['ncols'] = self.__get_grid_shape(multiple_graphs)
