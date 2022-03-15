@@ -25,9 +25,11 @@ Table of contents
   - [_Using the source code repository_](#using-the-source-code-repository)
 - [Usage](#usage)
   - [_Simple example to illustrate the use of SpatialPy_](#simple-example-to-illustrate-the-use-of-spatialpy)
+<!--
   - [_Docker environment_](#docker-environment)
   - [_Debugging_](#debugging)
   - [_Profiling_](#profiling)
+-->
 - [Getting help](#getting-help)
 - [Contributing](#contributing)
 - [License](#license)
@@ -72,8 +74,8 @@ SpatialPy provides simple object-oriented abstractions for defining a model of a
 
 The `run()` method can be customized using keyword arguments to select different solvers, random seed, data return type and more.  For more detailed examples on how to use SpatialPy, please see the Jupyter notebooks contained in the [examples](https://github.com/StochSS/SpatialPy/tree/main/examples) subdirectory.
 
-
-### Docker environment
+<!-- 
+### Docker environment (DOES NOT WORK)
 
 You can use Docker to create a repeatable environment for developing and debugging SpatialPy. The supplied Dockerfile starts a jupyter server with SpatialPy dependencies installed.
 
@@ -102,6 +104,7 @@ You can invoke `solver.run_debugger()` anytime after you instantiate a solver in
 ### Profiling
 
 To enable profiling, both `solver.compile()` and `solver.run()` need to be invoked with `profile=True`. If you don't run `solver.compile()` explicitly, invoking `solver.run()` with `profile=True` will run `compile()` correctly for you.
+-->
 
 Getting help
 ------------
