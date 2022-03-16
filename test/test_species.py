@@ -115,4 +115,4 @@ class TestSpecies(unittest.TestCase):
         """ Test Species.set_diffusion_coefficient method with non-str, non-int, or non-float diffusion_coefficient. """
         species = Species(name="test_species", diffusion_coefficient=0)
         with self.assertRaises(SpeciesError):
-            species.set_diffusion_coefficient(diffusion_coefficient="1")
+            species.set_diffusion_coefficient(diffusion_coefficient=[0])
