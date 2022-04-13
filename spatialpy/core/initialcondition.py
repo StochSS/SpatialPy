@@ -63,6 +63,10 @@ class PlaceInitialCondition(InitialCondition):
         :param model: Model contianing the target species.
         :type model: spatialpy.core.model.Model
         """
+        if isinstance(self.species, str):
+            if self.species not in model.listOfSpecies:
+                raise InitialConditionError(f"Species {self.species} does not exist in the model.")
+            self.species = model.listOfSpecies[self.species]
         spec_name = self.species.name
         spec_ndx = None
         for index, spec_name in enumerate(model.listOfSpecies.keys()):
@@ -106,6 +110,10 @@ class UniformInitialCondition(InitialCondition):
         :param model: Model contianing the target species.
         :type model: spatialpy.core.model.Model
         """
+        if isinstance(self.species, str):
+            if self.species not in model.listOfSpecies:
+                raise InitialConditionError(f"Species {self.species} does not exist in the model.")
+            self.species = model.listOfSpecies[self.species]
         spec_name = self.species.name
         spec_ndx = None
         for index, spec_name in enumerate(model.listOfSpecies.keys()):
@@ -158,6 +166,10 @@ class ScatterInitialCondition(InitialCondition):
         :param model: Model contianing the target species.
         :type model: spatialpy.core.model.Model
         """
+        if isinstance(self.species, str):
+            if self.species not in model.listOfSpecies:
+                raise InitialConditionError(f"Species {self.species} does not exist in the model.")
+            self.species = model.listOfSpecies[self.species]
         spec_name = self.species.name
         spec_ndx = None
         for index, spec_name in enumerate(model.listOfSpecies.keys()):
