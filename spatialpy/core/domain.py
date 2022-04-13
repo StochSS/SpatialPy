@@ -27,6 +27,7 @@ import numpy
 from plotly.offline import init_notebook_mode, iplot
 from scipy.spatial import KDTree
 
+from spatialpy.core.visualization import Visualization
 from spatialpy.core.spatialpyerror import DomainError
 
 class Domain():
@@ -204,8 +205,8 @@ class Domain():
         """
         Add a type definition to the domain. By default, all regions are set to type 0.
 
-        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass.  The 'inside()' method
-                   of this object will be used to assign properties to points.
+        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass. \
+                   The 'inside()' method of this object will be used to assign properties to points.
         :type geometry_ivar: spatialpy.core.geometry.Geometry
 
         :param type_id: The identifier for this type.
@@ -270,8 +271,8 @@ class Domain():
         """
         Fill a geometric shape with particles.
 
-        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass.  The 'inside()' method
-                   of this object will be used to create add the particles.
+        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass. \
+                   The 'inside()' method of this object will be used to create add the particles.
         :type geometry_ivar: spatialpy.core.geometry.Geometry
 
         :param deltax: Distance between particles on the x-axis.
@@ -535,7 +536,7 @@ class Domain():
             self.vol[v3] += t_vol / 4
             self.vol[v4] += t_vol / 4
 
-    def plot_types(self, width=None, height=None, colormap=None, size=5, title=None,
+    def plot_types(self, width=None, height=None, colormap=None, size=None, title=None,
                    included_types_list=None, use_matplotlib=False, return_plotly_figure=False):
         '''
         Plots the domain using plotly. Can only be viewed in a Jupyter Notebook.
@@ -574,13 +575,10 @@ class Domain():
         '''
         from spatialpy.core.result import _plotly_iterate # pylint: disable=import-outside-toplevel
 
-        if use_matplotlib:
-            width = 6.4 if width in (None, "auto") else width
-            height = 4.8 if height in (None, "auto") else height
-        else:
+        if not use_matplotlib:
             if width in (None, "auto"):
                 width = None if width == "auto" else 500
-            if height is None:
+            if height in (None, "auto"):
                 height = None if height == "auto" else 500
 
         if not numpy.count_nonzero(self.vertices[:, 1]):
@@ -593,31 +591,66 @@ class Domain():
         self._get_type_name_mapping()
 
         types = {}
+        # Normalize volumes to [0, 1]
+        vols = (self.vol - numpy.min(self.vol))/numpy.ptp(self.vol)
         for i, type_id in enumerate(self.type_id):
             name = type_id[5:]
             if included_types_list is None or name in included_types_list:
                 if name in types:
                     types[name]['points'].append(self.vertices[i])
                     types[name]['data'].append(self.typeNdxMapping[type_id])
+                    types[name]['size_scale'] = numpy.append(types[name]['size_scale'], vols[i])
                 else:
-                    types[name] = {"points":[self.vertices[i]], "data":[self.typeNdxMapping[type_id]]}
+                    types[name] = {
+                        "points": [self.vertices[i]],
+                        "data": [self.typeNdxMapping[type_id]],
+                        "size_scale": numpy.array([vols[i]])
+                    }
 
         if use_matplotlib:
-            import matplotlib.pyplot as plt # pylint: disable=import-outside-toplevel
+            if not isinstance(use_matplotlib, dict):
+                use_matplotlib = {}
+            use_matplotlib['limits'] = (
+                (self.xlim[0] - 0.25, self.xlim[1] + 0.25), (self.ylim[0] - 0.25, self.ylim[1] + 0.25)
+            )
 
-            fig, ax = plt.subplots(figsize=(width, height))
-            for name, data in types.items():
-                x_coords = list(map(lambda point: point[0], data["points"]))
-                y_coords = list(map(lambda point: point[1], data["points"]))
+            # Support for width, height, and title args
+            if width not in (None, "auto") and height not in (None, "auto"):
+                # TODO: Deprecation warning for width and height
+                plot_args = {"figsize": (width, height)}
 
-                ax.scatter(x_coords, y_coords, label=name)
-                ax.grid(linestyle='--', linewidth=1)
-                ax.legend(loc='upper right', fontsize=12)
-                if title is not None:
-                    ax.set_title(title)
+                if "plot_args" in use_matplotlib:
+                    for name, val in use_matplotlib['plot_args'].items():
+                        plot_args[name] = val
+                use_matplotlib['plot_args'] = plot_args
 
-            plt.axis('scaled')
+            base_group_args = {}
+            if colormap is not None:
+                base_group_args['cmap'] = colormap
+                base_group_args['vmin'] = 1 # minimum number of defined types
+                base_group_args['vmax'] = len(self.typeNdxMapping) # number of defined types
+            if size is not None:
+                base_group_args['s'] = size
+
+            if "scatter_args" not in use_matplotlib:
+                use_matplotlib['scatter_args'] = {}
+            for type_id in self.typeNdxMapping.keys():
+                type_id = type_id[5:]
+                group_args = base_group_args.copy()
+                if type_id in use_matplotlib['scatter_args']:
+                    for name, val in use_matplotlib['scatter_args'][type_id].items():
+                        group_args[name] = val
+                use_matplotlib['scatter_args'][type_id] = group_args
+
+            if title is not None:
+                use_matplotlib['title'] = title
+
+            vis_obj = Visualization(data=types)
+            vis_obj.plot_scatter(**use_matplotlib)
             return
+
+        if size is None:
+            size = 5
 
         is_2d = self.dimensions == 2
 
@@ -860,7 +893,7 @@ class Domain():
         :type fixed: bool
 
         :param \**kwargs: Additional keyword arguments passed to :py:class:`Domain`.
-        
+
         :returns: Uniform 3D SpatialPy Domain object.
         :rtype: spatialpy.core.domain.Domain
         """
