@@ -65,10 +65,10 @@ class TestSpecies(unittest.TestCase):
         self.assertIsInstance(species.diffusion_coefficient, Parameter)
 
 
-    def test_constructor__diffusion_coefficient_not_int_or_float(self):
-        """ Test the Species constructor with non-int or non-float diffusion_coefficient. """
+    def test_constructor__diffusion_coefficient_not_str_int_or_float(self):
+        """ Test the Species constructor with non-str, non-int, or non-float diffusion_coefficient. """
         with self.assertRaises(SpeciesError):
-            species = Species(name="test_species", diffusion_coefficient="0")
+            species = Species(name="test_species", diffusion_coefficient=[0])
 
 
     def test_constructor__restrict_to_not_accepted_type(self):
@@ -111,8 +111,8 @@ class TestSpecies(unittest.TestCase):
             species.set_diffusion_coefficient(diffusion_coefficient=-1)
 
 
-    def test_set_diffusion_coefficient__diffusion_coefficient_not_int_or_float(self):
-        """ Test Species.set_diffusion_coefficient method with non-int or non-float diffusion_coefficient. """
+    def test_set_diffusion_coefficient__diffusion_coefficient_not_str_int_or_float(self):
+        """ Test Species.set_diffusion_coefficient method with non-str, non-int, or non-float diffusion_coefficient. """
         species = Species(name="test_species", diffusion_coefficient=0)
         with self.assertRaises(SpeciesError):
-            species.set_diffusion_coefficient(diffusion_coefficient="1")
+            species.set_diffusion_coefficient(diffusion_coefficient=[0])

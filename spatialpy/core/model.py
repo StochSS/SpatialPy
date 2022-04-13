@@ -318,6 +318,15 @@ class Model():
         self.__update_diffusion_restrictions()
         self.__apply_initial_conditions()
         self.__resolve_parameters()
+
+        sanitized_params = self.sanitized_parameter_names()
+        for species in self.listOfSpecies.values():
+            diff_coeff = species.diffusion_coefficient
+            if isinstance(diff_coeff, str):
+                if diff_coeff not in sanitized_params:
+                    raise ModelError(f"Parameterm {diff_coeff} doesn't exist.")
+                species.diffusion_coefficient = sanitized_params[diff_coeff]
+
         self.__get_expression_utility()
         stoich_matrix = self.__create_stoichiometric_matrix()
         dep_graph = self.__create_dependency_graph()

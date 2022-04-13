@@ -40,9 +40,9 @@ class Species():
 
         if  diffusion_coefficient is None:
             raise SpeciesError("Species must have a diffusion_coefficient.")
-        if not (isinstance(diffusion_coefficient, (Parameter, float, int)) or \
+        if not (isinstance(diffusion_coefficient, (Parameter, str, float, int)) or \
                     type(diffusion_coefficient).__name__ == 'Parameter'):
-            raise SpeciesError("Diffusion coefficient must be a spatialpy.Parameter, float, or int.")
+            raise SpeciesError("Diffusion coefficient must be a spatialpy.Parameter, str, float, or int.")
         if isinstance(diffusion_coefficient, (float, int)) and diffusion_coefficient < 0:
             raise SpeciesError("Diffusion coefficient must be non-negative.")
 
@@ -73,9 +73,9 @@ class Species():
 
         :raises SpeciesError: If diffusion_coefficient is negative or not a valid type.
         """
-        if not (isinstance(diffusion_coefficient, (Parameter, float, int)) or \
+        if not (isinstance(diffusion_coefficient, (Parameter, str, float, int)) or \
                             type(diffusion_coefficient).__name__ == 'Parameter'):
-            raise SpeciesError("Diffusion coefficient must be a spatialpy.Parameter, float, or int.")
+            raise SpeciesError("Diffusion coefficient must be a spatialpy.Parameter, str, float, or int.")
         if diffusion_coefficient < 0:
             raise SpeciesError("Diffusion coefficient must be non-negative.")
 
