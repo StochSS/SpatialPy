@@ -100,6 +100,14 @@ spatialpy.core.species module
    :undoc-members:
    :show-inheritance:
 
+spatialpy.core.visualization module
+-----------------------------------
+
+.. automodule:: spatialpy.core.visualization
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 spatialpy.core.vtkreader module
 -------------------------------
 
