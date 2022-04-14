@@ -1,20 +1,18 @@
-'''
-SpatialPy is a Python 3 package for simulation of
-spatial deterministic/stochastic reaction-diffusion-advection problems
-Copyright (C) 2019 - 2022 SpatialPy developers.
+# SpatialPy is a Python 3 package for simulation of
+# spatial deterministic/stochastic reaction-diffusion-advection problems
+# Copyright (C) 2019 - 2022 SpatialPy developers.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
-published by the Free Software Foundation.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+# published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
 
 import spatialpy
@@ -65,10 +63,10 @@ class TestSpecies(unittest.TestCase):
         self.assertIsInstance(species.diffusion_coefficient, Parameter)
 
 
-    def test_constructor__diffusion_coefficient_not_int_or_float(self):
-        """ Test the Species constructor with non-int or non-float diffusion_coefficient. """
+    def test_constructor__diffusion_coefficient_not_str_int_or_float(self):
+        """ Test the Species constructor with non-str, non-int, or non-float diffusion_coefficient. """
         with self.assertRaises(SpeciesError):
-            species = Species(name="test_species", diffusion_coefficient="0")
+            species = Species(name="test_species", diffusion_coefficient=[0])
 
 
     def test_constructor__restrict_to_not_accepted_type(self):
@@ -111,8 +109,8 @@ class TestSpecies(unittest.TestCase):
             species.set_diffusion_coefficient(diffusion_coefficient=-1)
 
 
-    def test_set_diffusion_coefficient__diffusion_coefficient_not_int_or_float(self):
-        """ Test Species.set_diffusion_coefficient method with non-int or non-float diffusion_coefficient. """
+    def test_set_diffusion_coefficient__diffusion_coefficient_not_str_int_or_float(self):
+        """ Test Species.set_diffusion_coefficient method with non-str, non-int, or non-float diffusion_coefficient. """
         species = Species(name="test_species", diffusion_coefficient=0)
         with self.assertRaises(SpeciesError):
-            species.set_diffusion_coefficient(diffusion_coefficient="1")
+            species.set_diffusion_coefficient(diffusion_coefficient=[0])

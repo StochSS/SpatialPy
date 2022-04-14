@@ -1,20 +1,18 @@
-'''
-SpatialPy is a Python 3 package for simulation of
-spatial deterministic/stochastic reaction-diffusion-advection problems
-Copyright (C) 2019 - 2022 SpatialPy developers.
+# SpatialPy is a Python 3 package for simulation of
+# spatial deterministic/stochastic reaction-diffusion-advection problems
+# Copyright (C) 2019 - 2022 SpatialPy developers.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
-published by the Free Software Foundation.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+# published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import csv
 import filecmp
@@ -29,6 +27,7 @@ import plotly.graph_objs as go
 from plotly.offline import init_notebook_mode, iplot
 
 # from spatialpy.core.model import *
+from spatialpy.core.visualization import Visualization
 from spatialpy.core.vtkreader import VTKReader
 from spatialpy.core.spatialpyerror import ResultError
 
@@ -221,6 +220,9 @@ class Result():
     def __map_property_to_type(self, property_name, data, included_types_list, points, p_ndx):
         types = {}
         if property_name == 'type':
+            # Normalize volumes to [0, 1]
+            vol = data['mass'] / data['rho']
+            vols = (vol - numpy.min(vol))/numpy.ptp(vol)
             for i, val in enumerate(data['type']):
                 name = self.model.domain.typeNameMapping[val][5:]
 
@@ -228,9 +230,15 @@ class Result():
                     if name in types:
                         types[name]['points'].append(points[i])
                         types[name]['data'].append(data[property_name][i])
+                        types[name]['size_scale'] = numpy.append(types[name]['size_scale'], vols[i])
                     else:
-                        types[name] = {"points":[points[i]], "data":[data[property_name][i]]}
-        elif property_name == 'v':
+                        types[name] = {
+                            "points": [points[i]],
+                            "data": [data[property_name][i]],
+                            "size_scale": numpy.array([vols[i]])
+                        }
+            return types
+        if property_name == 'v':
             types[property_name] = {
                 "points": points,
                 "data" : [data[property_name][i][p_ndx] for i in range(0,len(data[property_name]))]
@@ -326,7 +334,8 @@ class Result():
             If set to True, the concentration (=copy_number/volume) is returned.  Defaults to False
         :type concentration: bool
 
-        :param deterministic: Whether or not the species is deterministic (True) or stochastic (False).  Defaults to False
+        :param deterministic: Whether or not the species is deterministic (True) or stochastic (False). \
+                Defaults to False
         :type deterministic: bool
 
         :param debug: Whether or not debug information should be printed. Defaults to False
@@ -614,7 +623,6 @@ class Result():
             t_index_arr = [t_index_arr]
             num_timepoints = 1
 
-        
         if property_name == "v":
             ret = numpy.zeros((num_timepoints, num_voxel, 3))
         else:
@@ -630,7 +638,7 @@ class Result():
         return ret
 
     def plot_property(self, property_name, t_ndx=None, t_val=None, p_ndx=0, width=None, height=None,
-                      colormap=None, size=5, title=None, animated=False, t_ndx_list=None, speed=1,
+                      colormap=None, size=None, title=None, animated=False, t_ndx_list=None, speed=1,
                       f_duration=500, t_duration=300, included_types_list=None, return_plotly_figure=False,
                       use_matplotlib=False, debug=False):
         """
@@ -743,17 +751,47 @@ class Result():
         if use_matplotlib:
             import matplotlib.pyplot as plt # pylint: disable=import-outside-toplevel
 
-            if property_name == "type":
-                fig, ax = plt.subplots(figsize=(width, height))
-                for name, data in types.items():
-                    x_coords = list(map(lambda point: point[0], data["points"]))
-                    y_coords = list(map(lambda point: point[1], data["points"]))
+            if not isinstance(use_matplotlib, dict):
+                use_matplotlib = {}
+            use_matplotlib['limits'] = (
+                (self.model.domain.xlim[0] - 0.25, self.model.domain.xlim[1] + 0.25),
+                (self.model.domain.ylim[0] - 0.25, self.model.domain.ylim[1] + 0.25)
+            )
 
-                    ax.scatter(x_coords, y_coords, label=name)
-                    ax.grid(linestyle='--', linewidth=1)
-                    ax.legend(loc='upper right', fontsize=12)
-                    if title is not None:
-                        ax.set_title(title)
+            # Support for width, height, and title args
+            if width not in (None, "auto") and height not in (None, "auto"):
+                # TODO: Deprecation warning for width and height
+                plot_args = {"figsize": (width, height)}
+
+                if "plot_args" in use_matplotlib:
+                    for name, val in use_matplotlib['plot_args'].items():
+                        plot_args[name] = val
+                use_matplotlib['plot_args'] = plot_args
+
+            base_group_args = {}
+            if colormap is not None:
+                base_group_args['cmap'] = colormap
+                base_group_args['vmin'] = 1 # minimum number of defined types
+                base_group_args['vmax'] = len(self.model.domain.typeNdxMapping) # number of defined types
+            if size is not None:
+                base_group_args['s'] = size
+
+            if "scatter_args" not in use_matplotlib:
+                use_matplotlib['scatter_args'] = {}
+            for type_id in self.model.domain.typeNdxMapping.keys():
+                type_id = type_id[5:]
+                group_args = base_group_args.copy()
+                if type_id in use_matplotlib['scatter_args']:
+                    for name, val in use_matplotlib['scatter_args'][type_id].items():
+                        group_args[name] = val
+                use_matplotlib['scatter_args'][type_id] = group_args
+
+            if title is not None:
+                use_matplotlib['title'] = title
+
+            if property_name == "type":
+                vis_obj = Visualization(data=types)
+                vis_obj.plot_scatter(**use_matplotlib)
             else:
                 if property_name == 'v':
                     p_data = data[property_name]
@@ -769,8 +807,11 @@ class Result():
                 if title is not None:
                     plt.title(title)
                 plt.grid(linestyle='--', linewidth=1)
-            plt.axis('scaled')
+                plt.axis('scaled')
             return
+
+        if size is None:
+            size = 5
 
         is_2d = self.model.domain.dimensions == 2
         trace_list = _plotly_iterate(types, size=size, property_name=property_name,

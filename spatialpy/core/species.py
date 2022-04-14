@@ -1,20 +1,18 @@
-'''
-SpatialPy is a Python 3 package for simulation of
-spatial deterministic/stochastic reaction-diffusion-advection problems
-Copyright (C) 2019 - 2022 SpatialPy developers.
+# SpatialPy is a Python 3 package for simulation of
+# spatial deterministic/stochastic reaction-diffusion-advection problems
+# Copyright (C) 2019 - 2022 SpatialPy developers.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
-published by the Free Software Foundation.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+# published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from spatialpy.core.parameter import Parameter
 from spatialpy.core.spatialpyerror import SpeciesError
 
@@ -40,9 +38,9 @@ class Species():
 
         if  diffusion_coefficient is None:
             raise SpeciesError("Species must have a diffusion_coefficient.")
-        if not (isinstance(diffusion_coefficient, (Parameter, float, int)) or \
+        if not (isinstance(diffusion_coefficient, (Parameter, str, float, int)) or \
                     type(diffusion_coefficient).__name__ == 'Parameter'):
-            raise SpeciesError("Diffusion coefficient must be a spatialpy.Parameter, float, or int.")
+            raise SpeciesError("Diffusion coefficient must be a spatialpy.Parameter, str, float, or int.")
         if isinstance(diffusion_coefficient, (float, int)) and diffusion_coefficient < 0:
             raise SpeciesError("Diffusion coefficient must be non-negative.")
 
@@ -73,9 +71,9 @@ class Species():
 
         :raises SpeciesError: If diffusion_coefficient is negative or not a valid type.
         """
-        if not (isinstance(diffusion_coefficient, (Parameter, float, int)) or \
+        if not (isinstance(diffusion_coefficient, (Parameter, str, float, int)) or \
                             type(diffusion_coefficient).__name__ == 'Parameter'):
-            raise SpeciesError("Diffusion coefficient must be a spatialpy.Parameter, float, or int.")
+            raise SpeciesError("Diffusion coefficient must be a spatialpy.Parameter, str, float, or int.")
         if diffusion_coefficient < 0:
             raise SpeciesError("Diffusion coefficient must be non-negative.")
 
