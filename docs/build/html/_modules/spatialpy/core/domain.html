@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>spatialpy.core.domain &#8212; SpatialPy 1.0 documentation</title>
+    <title>spatialpy.core.domain &#8212; SpatialPy 1.0.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/spatialpy_alabaster_customizations.css" />
@@ -91,23 +91,21 @@
           <div class="body" role="main">
             
   <h1>Source code for spatialpy.core.domain</h1><div class="highlight"><pre>
-<span></span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">SpatialPy is a Python 3 package for simulation of</span>
-<span class="sd">spatial deterministic/stochastic reaction-diffusion-advection problems</span>
-<span class="sd">Copyright (C) 2019 - 2022 SpatialPy developers.</span>
+<span></span><span class="c1"># SpatialPy is a Python 3 package for simulation of</span>
+<span class="c1"># spatial deterministic/stochastic reaction-diffusion-advection problems</span>
+<span class="c1"># Copyright (C) 2019 - 2022 SpatialPy developers.</span>
 
-<span class="sd">This program is free software: you can redistribute it and/or modify</span>
-<span class="sd">it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as</span>
-<span class="sd">published by the Free Software Foundation.</span>
+<span class="c1"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as</span>
+<span class="c1"># published by the Free Software Foundation.</span>
 
-<span class="sd">This program is distributed in the hope that it will be useful,</span>
-<span class="sd">but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
-<span class="sd">MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
-<span class="sd">GNU GENERAL PUBLIC LICENSE Version 3 for more details.</span>
+<span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU GENERAL PUBLIC LICENSE Version 3 for more details.</span>
 
-<span class="sd">You should have received a copy of the GNU General Public License</span>
-<span class="sd">along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
 
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">string</span>
@@ -120,6 +118,7 @@
 <span class="kn">from</span> <span class="nn">plotly.offline</span> <span class="kn">import</span> <span class="n">init_notebook_mode</span><span class="p">,</span> <span class="n">iplot</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">KDTree</span>
 
+<span class="kn">from</span> <span class="nn">spatialpy.core.visualization</span> <span class="kn">import</span> <span class="n">Visualization</span>
 <span class="kn">from</span> <span class="nn">spatialpy.core.spatialpyerror</span> <span class="kn">import</span> <span class="n">DomainError</span>
 
 <div class="viewcode-block" id="Domain"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain">[docs]</a><span class="k">class</span> <span class="nc">Domain</span><span class="p">():</span>
@@ -297,8 +296,8 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a type definition to the domain. By default, all regions are set to type 0.</span>
 
-<span class="sd">        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass.  The &#39;inside()&#39; method</span>
-<span class="sd">                   of this object will be used to assign properties to points.</span>
+<span class="sd">        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass. \</span>
+<span class="sd">                   The &#39;inside()&#39; method of this object will be used to assign properties to points.</span>
 <span class="sd">        :type geometry_ivar: spatialpy.core.geometry.Geometry</span>
 
 <span class="sd">        :param type_id: The identifier for this type.</span>
@@ -363,8 +362,8 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fill a geometric shape with particles.</span>
 
-<span class="sd">        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass.  The &#39;inside()&#39; method</span>
-<span class="sd">                   of this object will be used to create add the particles.</span>
+<span class="sd">        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass. \</span>
+<span class="sd">                   The &#39;inside()&#39; method of this object will be used to create add the particles.</span>
 <span class="sd">        :type geometry_ivar: spatialpy.core.geometry.Geometry</span>
 
 <span class="sd">        :param deltax: Distance between particles on the x-axis.</span>
@@ -628,7 +627,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">vol</span><span class="p">[</span><span class="n">v3</span><span class="p">]</span> <span class="o">+=</span> <span class="n">t_vol</span> <span class="o">/</span> <span class="mi">4</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">vol</span><span class="p">[</span><span class="n">v4</span><span class="p">]</span> <span class="o">+=</span> <span class="n">t_vol</span> <span class="o">/</span> <span class="mi">4</span></div>
 
-<div class="viewcode-block" id="Domain.plot_types"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.plot_types">[docs]</a>    <span class="k">def</span> <span class="nf">plot_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="Domain.plot_types"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.plot_types">[docs]</a>    <span class="k">def</span> <span class="nf">plot_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                    <span class="n">included_types_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_matplotlib</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_plotly_figure</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Plots the domain using plotly. Can only be viewed in a Jupyter Notebook.</span>
@@ -667,13 +666,10 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="kn">from</span> <span class="nn">spatialpy.core.result</span> <span class="kn">import</span> <span class="n">_plotly_iterate</span> <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
-        <span class="k">if</span> <span class="n">use_matplotlib</span><span class="p">:</span>
-            <span class="n">width</span> <span class="o">=</span> <span class="mf">6.4</span> <span class="k">if</span> <span class="n">width</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">width</span>
-            <span class="n">height</span> <span class="o">=</span> <span class="mf">4.8</span> <span class="k">if</span> <span class="n">height</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">height</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">use_matplotlib</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">width</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">):</span>
                 <span class="n">width</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">width</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span> <span class="k">else</span> <span class="mi">500</span>
-            <span class="k">if</span> <span class="n">height</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">height</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">):</span>
                 <span class="n">height</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">height</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span> <span class="k">else</span> <span class="mi">500</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]):</span>
@@ -686,31 +682,66 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_get_type_name_mapping</span><span class="p">()</span>
 
         <span class="n">types</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Normalize volumes to [0, 1]</span>
+        <span class="n">vols</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol</span><span class="p">))</span><span class="o">/</span><span class="n">numpy</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">type_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_id</span><span class="p">):</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">type_id</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span>
             <span class="k">if</span> <span class="n">included_types_list</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">included_types_list</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
                     <span class="n">types</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;points&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
                     <span class="n">types</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typeNdxMapping</span><span class="p">[</span><span class="n">type_id</span><span class="p">])</span>
+                    <span class="n">types</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;size_scale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">types</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;size_scale&#39;</span><span class="p">],</span> <span class="n">vols</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">types</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;points&quot;</span><span class="p">:[</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="s2">&quot;data&quot;</span><span class="p">:[</span><span class="bp">self</span><span class="o">.</span><span class="n">typeNdxMapping</span><span class="p">[</span><span class="n">type_id</span><span class="p">]]}</span>
+                    <span class="n">types</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;points&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span>
+                        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">typeNdxMapping</span><span class="p">[</span><span class="n">type_id</span><span class="p">]],</span>
+                        <span class="s2">&quot;size_scale&quot;</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">vols</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+                    <span class="p">}</span>
 
         <span class="k">if</span> <span class="n">use_matplotlib</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span> <span class="c1"># pylint: disable=import-outside-toplevel</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">use_matplotlib</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">use_matplotlib</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">use_matplotlib</span><span class="p">[</span><span class="s1">&#39;limits&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.25</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xlim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.25</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ylim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.25</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.25</span><span class="p">)</span>
+            <span class="p">)</span>
 
-            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">types</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">x_coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">point</span><span class="p">:</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;points&quot;</span><span class="p">]))</span>
-                <span class="n">y_coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">point</span><span class="p">:</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;points&quot;</span><span class="p">]))</span>
+            <span class="c1"># Support for width, height, and title args</span>
+            <span class="k">if</span> <span class="n">width</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">height</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">):</span>
+                <span class="c1"># TODO: Deprecation warning for width and height</span>
+                <span class="n">plot_args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;figsize&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)}</span>
 
-                <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x_coords</span><span class="p">,</span> <span class="n">y_coords</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-                <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s2">&quot;plot_args&quot;</span> <span class="ow">in</span> <span class="n">use_matplotlib</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">use_matplotlib</span><span class="p">[</span><span class="s1">&#39;plot_args&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">plot_args</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="n">use_matplotlib</span><span class="p">[</span><span class="s1">&#39;plot_args&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plot_args</span>
 
-            <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;scaled&#39;</span><span class="p">)</span>
+            <span class="n">base_group_args</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">colormap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">base_group_args</span><span class="p">[</span><span class="s1">&#39;cmap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">colormap</span>
+                <span class="n">base_group_args</span><span class="p">[</span><span class="s1">&#39;vmin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># minimum number of defined types</span>
+                <span class="n">base_group_args</span><span class="p">[</span><span class="s1">&#39;vmax&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typeNdxMapping</span><span class="p">)</span> <span class="c1"># number of defined types</span>
+            <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">base_group_args</span><span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">size</span>
+
+            <span class="k">if</span> <span class="s2">&quot;scatter_args&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">use_matplotlib</span><span class="p">:</span>
+                <span class="n">use_matplotlib</span><span class="p">[</span><span class="s1">&#39;scatter_args&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">type_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">typeNdxMapping</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">type_id</span> <span class="o">=</span> <span class="n">type_id</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span>
+                <span class="n">group_args</span> <span class="o">=</span> <span class="n">base_group_args</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">type_id</span> <span class="ow">in</span> <span class="n">use_matplotlib</span><span class="p">[</span><span class="s1">&#39;scatter_args&#39;</span><span class="p">]:</span>
+                    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">use_matplotlib</span><span class="p">[</span><span class="s1">&#39;scatter_args&#39;</span><span class="p">][</span><span class="n">type_id</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">group_args</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="n">use_matplotlib</span><span class="p">[</span><span class="s1">&#39;scatter_args&#39;</span><span class="p">][</span><span class="n">type_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_args</span>
+
+            <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">use_matplotlib</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">title</span>
+
+            <span class="n">vis_obj</span> <span class="o">=</span> <span class="n">Visualization</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">types</span><span class="p">)</span>
+            <span class="n">vis_obj</span><span class="o">.</span><span class="n">plot_scatter</span><span class="p">(</span><span class="o">**</span><span class="n">use_matplotlib</span><span class="p">)</span>
             <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="mi">5</span>
 
         <span class="n">is_2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="mi">2</span>
 
@@ -953,7 +984,7 @@
 <span class="sd">        :type fixed: bool</span>
 
 <span class="sd">        :param \**kwargs: Additional keyword arguments passed to :py:class:`Domain`.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :returns: Uniform 3D SpatialPy Domain object.</span>
 <span class="sd">        :rtype: spatialpy.core.domain.Domain</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1047,10 +1078,10 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;Copyright (C) 2017-2022.
+      &copy;Copyright (C) 2019-2022.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
