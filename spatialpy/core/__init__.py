@@ -28,6 +28,7 @@ from .reaction import *
 from .result import *
 from .spatialpyerror import *
 from .species import *
+from .timespan import TimeSpan
 from .visualization import Visualization
 from .vtkreader import *
 
