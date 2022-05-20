@@ -17,7 +17,7 @@ import numpy
 import unittest
 
 from spatialpy.core.timespan import TimeSpan
-from spatialpy.core.gillespyError import TimespanError
+from spatialpy.core.spatialpyerror import TimespanError
 
 class TestTimeSpan(unittest.TestCase):
     '''
