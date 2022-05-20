@@ -31,11 +31,13 @@ if __name__ == '__main__':
     from unit_tests import test_species
     from unit_tests import test_parameter
     from unit_tests import test_reaction
+    from unit_tests import test_timespan
     
     modules = [
         test_species,
         test_parameter,
-        test_reaction
+        test_reaction,
+        test_timespan
     ]
 
     for module in modules:
