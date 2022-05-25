@@ -17,14 +17,21 @@
 #This module defines a model that simulates a discrete, stoachastic, mixed biochemical reaction network in python.
 
 import math
+from typing import Set, Type
 from collections import OrderedDict
 
 import numpy
 import scipy
 
+from spatialpy.core.domain import Domain
+from spatialpy.core.species import Species
+from spatialpy.core.initialcondition import InitialCondition
+from spatialpy.core.parameter import Parameter
+from spatialpy.core.reaction import Reaction
+from spatialpy.core.boundarycondition import BoundaryCondition
+from spatialpy.core.datafunction import DataFunction
 from spatialpy.core.timespan import TimeSpan
 from spatialpy.solvers.build_expression import BuildExpression
-
 from spatialpy.core.spatialpyerror import ModelError
 
 def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
@@ -300,7 +307,6 @@ class Model():
 
         :raises ModelError: Invalid Domain object
         """
-        from spatialpy.core.domain import Domain # pylint: disable=import-outside-toplevel
         if not isinstance(domain,Domain) and type(domain).__name__ != 'Domain':
             raise ModelError("Unexpected parameter for add_domain. Parameter must be a Domain.")
 
@@ -318,7 +324,6 @@ class Model():
 
         :raises ModelError: If obj is not a spatialpy.core.species.Species
         """
-        from spatialpy.core.species import Species # pylint: disable=import-outside-toplevel
         if isinstance(obj, list):
             for species in obj:
                 self.add_species(species)
@@ -415,7 +420,6 @@ class Model():
 
         :raises ModelError: if obj is not a spatialpy.core.parameter.Parameter
         """
-        from spatialpy.core.parameter import Parameter # pylint: disable=import-outside-toplevel
         if isinstance(params,list):
             for param in params:
                 self.add_parameter(param)
@@ -497,7 +501,6 @@ class Model():
 
         :raises ModelError: if obj is not a spatialpy.core.reaction.Reaction
         """
-        from spatialpy.core.reaction import Reaction # pylint: disable=import-outside-toplevel
         if isinstance(reacs, list):
             for reaction in reacs:
                 self.add_reaction(reaction)
@@ -584,7 +587,6 @@ class Model():
 
         :raises ModelError: Invalid DataFunction
         """
-        from spatialpy.core.datafunction import DataFunction # pylint: disable=import-outside-toplevel
         if isinstance(data_function, list):
             for data_fn in data_function:
                 self.add_data_function(data_fn)
