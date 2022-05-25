@@ -295,8 +295,9 @@ class Model():
         """
         Create a dict with flattened parameter and species objects.
         """
+        self.namespace = OrderedDict([])
         for param in self.listOfParameters:
-            self.namespace[param]=self.listOfParameters[param].value
+            self.namespace[param] = self.listOfParameters[param].value
 
     def add_domain(self, domain):
         """
