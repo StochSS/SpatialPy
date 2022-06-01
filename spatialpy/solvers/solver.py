@@ -239,7 +239,7 @@ class Solver:
                     outstr = f"static double input_data_fn[{len(self.model.listOfDataFunctions) * ncells}] = "
                     outstr += "{"
                     coords = self.model.domain.coordinates()
-                    for ndf, data_fn in enumerate(self.model.listOfDataFunctions):
+                    for ndf, data_fn in enumerate(self.model.listOfDataFunctions.values()):
                         for i in range(ncells):
                             if i > 0 and ndf == 0:
                                 outstr += ','
