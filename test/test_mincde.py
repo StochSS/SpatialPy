@@ -16,7 +16,7 @@
 
 #!/usr/bin/env python3
 
-from models.mincde import mincde
+from models.mincde import create_mincde
 from models.mincde_5r import MinCDE5R
 import scipy.fftpack
 import numpy
@@ -43,7 +43,7 @@ class TestMinCDE(unittest.TestCase):
 
     def test_mincde_oscillation_period(self):
         """ Check that the MinCDE model is producing oscillation of the right period. """
-        model = mincde()
+        model = create_mincde()
         result = model.run()
         mindm = result.get_species("MinD_m")
         y_vals = model.mesh.coordinates()[:, 1]
