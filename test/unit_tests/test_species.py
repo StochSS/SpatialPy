@@ -25,36 +25,37 @@ class TestSpecies(unittest.TestCase):
     Unit tests for spatialpy.Species.
     ################################################################################################
     '''
+    def setUp(self):
+        self.species = Species(name="test_species", diffusion_coefficient=0)
+
     def test_constructor(self):
         """ Test the Species constructor. """
         species = Species(name="test_species", diffusion_coefficient=0)
         self.assertEqual(species.name, "test_species")
         self.assertEqual(species.diffusion_coefficient, 0)
 
-
     def test_constructor__no_name(self):
         """ Test the Species constructor without name. """
         with self.assertRaises(SpeciesError):
             species = Species(diffusion_coefficient=0)
 
-
-    def test_constructor__name_not_str(self):
-        """ Test the Species constructor with non-str name. """
-        with self.assertRaises(SpeciesError):
-            species = Species(name=0, diffusion_coefficient=0)
-
+    def test_constructor__invalid_name(self):
+        """ Test the Species constructor with an invalid name. """
+        test_names = ["", None, 0, 0.5, [0]]
+        for test_name in test_names:
+            with self.subTest(name=test_name):
+                with self.assertRaises(SpeciesError):
+                    species = Species(name=test_name, diffusion_coefficient=0)
 
     def test_constructor__no_diffusion_coefficient(self):
         """ Test the Species constructor without diffusion_coefficient. """
         with self.assertRaises(SpeciesError):
             species = Species(name="test_species")
 
-
     def test_constructor__negative_diffusion_coefficient(self):
         """ Test the Species constructor with negative diffusion_coefficient. """
         with self.assertRaises(SpeciesError):
             species = Species(name="test_species", diffusion_coefficient=-1)
-
 
     def test_constructor__parameter_diffusion_coefficient(self):
         """ Test the Species constructor with a parameter for diffusion_coefficient. """
@@ -62,18 +63,21 @@ class TestSpecies(unittest.TestCase):
         species = Species(name="test_species", diffusion_coefficient=test_parameter)
         self.assertIsInstance(species.diffusion_coefficient, Parameter)
 
+    def test_constructor__invalid_diffusion_coefficient(self):
+        """ Test the Species constructor with an invalid diffusion_coefficient. """
+        test_dcs = [None, [0]]
+        for test_dc in test_dcs:
+            with self.subTest(initial_value=test_dc):
+                with self.assertRaises(SpeciesError):
+                    species = Species(name="test_species", diffusion_coefficient=test_dc)
 
-    def test_constructor__diffusion_coefficient_not_str_int_or_float(self):
-        """ Test the Species constructor with non-str, non-int, or non-float diffusion_coefficient. """
-        with self.assertRaises(SpeciesError):
-            species = Species(name="test_species", diffusion_coefficient=[0])
-
-
-    def test_constructor__restrict_to_not_accepted_type(self):
-        """ Test the Species constructor with a restrict_to that is not the proper type. """
-        with self.assertRaises(SpeciesError):
-            species = Species(name="test_species", diffusion_coefficient="0", restrict_to=1.5)
-
+    def test_constructor__invalid_restrict_to(self):
+        """ Test the Species constructor with an invalid restrict_to. """
+        test_rts = [0.5, [], (5, 2), {'x': 5}]
+        for test_rt in test_rts:
+            with self.subTest(restrict_to=test_rt):
+                with self.assertRaises(SpeciesError):
+                    species = Species(name="test_species", diffusion_coefficient="0", restrict_to=test_rt)
 
     def test_constructor__int_restrict_to(self):
         """ Test the Species constructor with a int restrict_to. """
@@ -81,36 +85,75 @@ class TestSpecies(unittest.TestCase):
         self.assertIsInstance(species.restrict_to, list)
         self.assertEqual(species.restrict_to, ["type_1"])
 
-
     def test_constructor__str_restrict_to(self):
         """ Test the Species constructor with a string restrict_to. """
         species = Species(name="test_species", diffusion_coefficient=0, restrict_to="Walls")
         self.assertIsInstance(species.restrict_to, list)
         self.assertEqual(species.restrict_to, ["type_Walls"])
 
-
     def test___str___(self):
         """ Test Species.__str__ method. """
-        species = Species(name="test_species", diffusion_coefficient=0)
-        self.assertIsInstance(str(species), str)
-
+        self.assertIsInstance(str(self.species), str)
 
     def test_set_diffusion_coefficient(self):
         """ Test Species.set_diffusion_coefficient method. """
-        species = Species(name="test_species", diffusion_coefficient=0)
-        species.set_diffusion_coefficient(diffusion_coefficient=1)
-        self.assertEqual(species.diffusion_coefficient, 1)
+        self.species.set_diffusion_coefficient(diffusion_coefficient=1)
+        self.assertEqual(self.species.diffusion_coefficient, 1)
 
+    def test_set_diffusion_coefficient__invalid_diffusion_coefficient(self):
+        """ Test Species.set_diffusion_coefficient method with an invalid diffusion_coefficient. """
+        test_dcs = [None, [1]]
+        for test_dc in test_dcs:
+            with self.subTest(diffusion_coefficient=test_dc):
+                with self.assertRaises(SpeciesError):
+                    self.species.set_diffusion_coefficient(diffusion_coefficient=test_dc)
 
     def test_set_diffusion_coefficient__negative_diffusion_coefficient(self):
         """ Test Species.set_diffusion_coefficient method with negative diffusion_coefficient. """
-        species = Species(name="test_species", diffusion_coefficient=0)
         with self.assertRaises(SpeciesError):
-            species.set_diffusion_coefficient(diffusion_coefficient=-1)
+            self.species.set_diffusion_coefficient(diffusion_coefficient=-1)
 
+    def test_validate__invalid_name(self):
+        """ Test Species.validate with an invalid name. """
+        test_names = ["", None, 0, 0.5, [0]]
+        for test_name in test_names:
+            with self.subTest(name=test_name):
+                with self.assertRaises(SpeciesError):
+                    self.species.name = test_name
+                    self.species.validate()
 
-    def test_set_diffusion_coefficient__diffusion_coefficient_not_str_int_or_float(self):
-        """ Test Species.set_diffusion_coefficient method with non-str, non-int, or non-float diffusion_coefficient. """
-        species = Species(name="test_species", diffusion_coefficient=0)
-        with self.assertRaises(SpeciesError):
-            species.set_diffusion_coefficient(diffusion_coefficient=[0])
+    def test_validate__invalid_diffusion_coefficient(self):
+        """ Test Species.validate with an invalid diffusion_coefficient. """
+        test_dcs = [None, [0]]
+        for test_dc in test_dcs:
+            with self.subTest(initial_value=test_dc):
+                with self.assertRaises(SpeciesError):
+                    self.species.diffusion_coefficient = test_dc
+                    self.species.validate()
+
+    def test_validate__invalid_diffusion_coefficient_value(self):
+        """ Test Species.validate with an invalid diffusion_coefficient value. """
+        test_dcs = [-0.5, -1, -3, -5]
+        for test_dc in test_dcs:
+            with self.subTest(initial_value=test_dc):
+                with self.assertRaises(SpeciesError):
+                    self.species.diffusion_coefficient = test_dc
+                    self.species.validate()
+
+    def test_validate__invalid_restrict_to(self):
+        """ Test Species.validate with an invalid restrict_to. """
+        test_rts = ["5", 1, 0.5, [], (1, 2), {'x': 1}]
+        for test_rt in test_rts:
+            with self.subTest(restrict_to=test_rt):
+                with self.assertRaises(SpeciesError):
+                    self.species.restrict_to = test_rt
+                    self.species.validate()
+
+    def test_comp_time_of_validate(self):
+        """ Check the computation time of validate. """
+        import time
+        from datetime import datetime
+        start = time.time()
+        self.species.validate()
+        tic = datetime.utcfromtimestamp(time.time() - start)
+        print(f"Total time to run validate: {tic.strftime('%M mins %S secs %f msecs')}")
