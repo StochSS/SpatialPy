@@ -319,6 +319,13 @@ class Reaction():
         newFunc.visit(expr)
         return newFunc.string
 
+    def _create_sanitized_reaction(self, n_ndx, species_mappings, parameter_mappings):
+        name = f"R{n_ndx}"
+        reactants = {species_mappings[species.name]: self.reactants[species] for species in self.reactants}
+        products = {species_mappings[species.name]: self.products[species] for species in self.products}
+        propensity_function = self.sanitized_propensity_function(species_mappings, parameter_mappings)
+        return Reaction(name=name, reactants=reactants, products=products, propensity_function=propensity_function)
+
     def add_product(self, species, stoichiometry):
         """
         Add a product to this reaction
@@ -377,6 +384,16 @@ class Reaction():
 
         return new
     
+    def sanitized_propensity_function(self, species_mappings, parameter_mappings, ode=False):
+        names = sorted(list(species_mappings.keys()) + list(parameter_mappings.keys()), key=lambda x: len(x),
+                       reverse=True)
+        replacements = [parameter_mappings[name] if name in parameter_mappings else species_mappings[name]
+                        for name in names]
+        sanitized_propensity = self.ode_propensity_function if ode else self.propensity_function
+        for id, name in enumerate(names):
+            sanitized_propensity = sanitized_propensity.replace(name, "{" + str(id) + "}")
+        return sanitized_propensity.format(*replacements)
+
     def set_annotation(self, annotation):
         """
         Add an annotation to this reaction.
