@@ -17,53 +17,93 @@ from spatialpy.core.spatialpyerror import ParameterError
 
 class Parameter():
     """
-    Model of a rate paramter.
-    A parameter can be given as a String expression (function) or directly as a scalar value.
-    If given a String expression, it should be evaluable in the namespace of a parent Model.
+    A parameter can be given as an expression (function) or directly
+    as a value (scalar). If given an expression, it should be
+    understood as evaluable in the namespace of a parent Model.
 
-    :param name: Name of the Parameter.
+    :param name: The name by which this parameter is called or referenced.
     :type name: str
 
-    :param expression: Mathematical expression of Parameter.
+    :param expression: String for a function calculating parameter values. Should be
+                       evaluable in namespace of Model.
     :type expression: str
 
-    :param value: Parameter as value rather than expression.
-    :type value: float
+    :raises ParameterError: Arg is of invalid type.  Required arg set to None.  Arg value is outside of accepted bounds.
     """
     def __init__(self, name=None, expression=None):
-        if name is None:
-            raise ParameterError("name is required for a Parameter.")
-        if not isinstance(name, str):
-            raise ParameterError("Parameter name must be a string.")
-
-        if expression is None:
-            raise ParameterError("expression is required for a Parameter.")
-
-        self.name = name
-        self.value = None
         # We allow expression to be passed in as a non-string type. Invalid strings
         # will be caught below. It is perfectly fine to give a scalar value as the expression.
         # This can then be evaluated in an empty namespace to the scalar value.
+        self.value = None
+        self.name = name
+
         if isinstance(expression, (int, float)):
-            self.expression = str(expression)
-        else:
-            self.expression = expression
+            expression = str(expression)
+        self.expression = expression
+
+        self.validate()
 
     def __str__(self):
-        print_string = f"{self.name}: {str(self.expression)}"
-        return print_string
+        return f"{self.name}: {self.expression}"
 
     def _evaluate(self, namespace=None):
         """
-        Evaluate the expression and return the (scalar) value.
+        Evaluate the expression and return the (scalar) value in the given
+        namespace.
 
-        :param namespace: A dictionary containing key,value pairings of expressions and evaluable executions.
+        :param namespace: The namespace in which to test evaulation of the parameter,
+            if it involves other parameters, etc.
         :type namespace: dict
+
+        :raises ParameterError: expression is of invalid type.  expression is set to None. \
+                                expression is not evaluable within the given namespace.
         """
-        if namespace is None:
-            namespace = {}
+        if isinstance(self.expression, (int, float)):
+            self.expression = str(self.expression)
+
+        self.validate(coverage="expression")
+
         try:
-            self.value = (float(eval(self.expression, namespace)))
+            if namespace is None:
+                namespace = {}
+            self.value = float(eval(self.expression, namespace))
         except Exception as err:
-            message = f"Could not evaluate expression '{self.expression}': {err}."
-            raise ParameterError(message) from err
+            raise ParameterError(
+                f"Could not evaluate expression: '{self.expression}'. Reason given: {err}."
+            ) from err
+
+    def validate(self, expression=None, coverage="all"):
+        """
+        Validate the parameter.
+
+        :param expression: String for a function calculating parameter values. Should be
+                           evaluable in namespace of Model.
+        :type expression: str
+
+        :param coverage: The scope of attributes to validate.  Set to an attribute name to restrict validation \
+                         to a specific attribute.
+        :type coverage: str
+
+        :raises ParameterError: Attribute is of invalid type.  Required attribute set to None.  \
+                                Attribute value is outside of accepted bounds.
+        """
+        # Check name
+        if coverage in ("all", "name"):
+            if self.name is None:
+                raise ParameterError("name can't be None type.")
+            if not isinstance(self.name, str):
+                raise ParameterError("name must be of type str.")
+            if self.name == "":
+                raise ParameterError("name can't be an empty string.")
+
+        # Check expression
+        if coverage in ("all", "expression"):
+            if expression is None:
+                expression = self.expression
+
+            if expression is None:
+                raise ParameterError("initial_value can't be None type.")
+            if not isinstance(expression, str):
+                raise ParameterError("expression must be of type str, float, or int.")
+            if expression == "":
+                raise ParameterError("expression can't be an empty string.")
