@@ -63,6 +63,12 @@ class TimeSpan(Iterator):
     def __next__(self):
         return self.items.__next__()
 
+    def __str__(self):
+        return self.items.__str__()
+
+    def _ipython_display_(self):
+        print(self)
+
     def _set_timesteps(self, output_interval, num_steps):
         if self.timestep_size is None:
             self.timestep_size = output_interval
