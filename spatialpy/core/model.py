@@ -332,7 +332,7 @@ class Model():
             # If the rate parameter exists in the reaction, confirm that it is a part of the model
             if reaction.marate is not None:
                 name = reaction.marate if isinstance(reaction.marate, str) else reaction.marate.name
-                if not reaction.marate.replace(".", "", 1).isdigit():
+                if isinstance(reaction.marate, str) and not reaction.marate.replace(".", "", 1).isdigit():
                     reaction.marate = self.get_parameter(name)
 
             # Confirm that all species in reactants are part of the model
