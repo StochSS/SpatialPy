@@ -25,4 +25,4 @@ jobs:
         python3 -m pip install coverage
         
     - name: Run tests
-      run: coverage run test/run_unit_tests.py
+      run: coverage run --source=spatialpy test/run_unit_tests.py

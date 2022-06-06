@@ -28,14 +28,16 @@ if __name__ == '__main__':
         print('Running unit tests in develop mode. Appending repository directory to system path.')
         sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-    import test_species
-    import test_parameter
-    import test_reaction
+    from unit_tests import test_species
+    from unit_tests import test_parameter
+    from unit_tests import test_reaction
+    from unit_tests import test_timespan
     
     modules = [
         test_species,
         test_parameter,
-        test_reaction
+        test_reaction,
+        test_timespan
     ]
 
     for module in modules:

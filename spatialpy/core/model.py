@@ -22,6 +22,7 @@ from collections import OrderedDict
 import numpy
 import scipy
 
+from spatialpy.core.timespan import TimeSpan
 from spatialpy.solvers.build_expression import BuildExpression
 
 from spatialpy.core.spatialpyerror import ModelError
@@ -90,10 +91,6 @@ class Model():
 
         ######################
         self.tspan = None
-        self.timestep_size = None
-        self.num_timesteps = None
-        self.output_freq = None
-        self.output_steps = None
 
         ######################
         # Expression utility used by the solver
@@ -149,12 +146,6 @@ class Model():
             self.listOfSpecies == other.listOfSpecies and \
             self.listOfReactions == other.listOfReactions and \
             self.name == other.name
-
-    def __check_if_complete(self):
-        if self.timestep_size is None or self.num_timesteps is None:
-            raise ModelError("The model's timespan is not set.  Use 'timespan()' or 'set_timesteps()'.")
-        if self.domain is None:
-            raise ModelError("The model's domain is not set.  Use 'add_domain()'.")
 
     def __problem_with_name(self, name):
         if name in Model.reserved_names:
@@ -304,13 +295,13 @@ class Model():
 
         :raises ModelError: Timestep size exceeds output frequency or Model is missing a domain
         """
-        if self.timestep_size is None:
-            self.timestep_size = 1e-5
-        if self.output_freq < self.timestep_size:
-            raise ModelError("Timestep size exceeds output frequency.")
+        try:
+            self.tspan.validate(coverage="all")
+        except TimespanError as err:
+            raise ModelError(f"Failed to validate timespan. Reason given: {err}") from err
 
-        self.__check_if_complete()
-
+        if self.domain is None:
+            raise ModelError("The model's domain is not set.  Use 'add_domain()'.")
         self.domain.compile_prep()
         
         self.__update_diffusion_restrictions()
@@ -627,26 +618,10 @@ class Model():
 
         :param timestep_size: Size of each timestep in seconds
         :type timestep_size: float
-
-        :raises ModelError: Incompatible combination of timestep_size and output_interval
         """
-        if timestep_size is not None:
-            self.timestep_size = timestep_size
-        if self.timestep_size is None:
-            self.timestep_size = output_interval
-
-        self.output_freq = output_interval/self.timestep_size
-        if self.output_freq < self.timestep_size:
-            raise ModelError("Timestep size exceeds output frequency.")
-
-        self.num_timesteps = math.ceil(num_steps * self.output_freq)
-
-        # array of step numbers corresponding to the simulation times in the timespan
-        output_steps = numpy.arange(0, self.num_timesteps + self.timestep_size, self.output_freq)
-        self.output_steps = numpy.unique(numpy.round(output_steps).astype(int))
-        self.tspan = numpy.zeros((self.output_steps.size), dtype=float)
-        for i, step in enumerate(self.output_steps):
-            self.tspan[i] = step*self.timestep_size
+        self.tspan = TimeSpan.arange(
+            output_interval, t=num_steps * output_interval, timestep_size=timestep_size
+        )
 
     def timespan(self, time_span, timestep_size=None):
         """
@@ -658,17 +633,14 @@ class Model():
 
         :param timestep_size: Size of each timestep in seconds
         :type timestep_size: float
-
-        :raises ModelError: non-uniform timespan not supported
         """
-        items_diff = numpy.diff(time_span)
-        items = map(lambda x: round(x, 10), items_diff)
-        isuniform = (len(set(items)) == 1)
-
-        if isuniform:
-            self.set_timesteps(items_diff[0], len(items_diff), timestep_size=timestep_size)
+        if isinstance(time_span, TimeSpan) or type(time_span).__name__ == "TimeSpan":
+            self.tspan = time_span
+            if timestep_size is not None:
+                self.tspan.timestep_size = timestep_size
+                self.tspan.validate(coverage="all")
         else:
-            raise ModelError("Only uniform timespans are supported")
+            self.tspan = TimeSpan(time_span, timestep_size=timestep_size)
 
     def add_domain(self, domain):
         """

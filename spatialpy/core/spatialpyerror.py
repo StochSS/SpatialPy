@@ -81,6 +81,11 @@ class SpeciesError(ModelError):
     Class for exceptions in the species module.
     """
 
+class TimespanError(ModelError):
+    """
+    Class for exceptions in the timespan module.
+    """
+
 # Result Exceptions
 
 
