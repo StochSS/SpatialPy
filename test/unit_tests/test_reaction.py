@@ -26,676 +26,1010 @@ class TestReaction(unittest.TestCase):
     Unit tests for spatialpy.Reaction.
     ################################################################################################
     '''
+    def setUp(self):
+        self.valid_ma_reaction = Reaction(
+            name="test_reaction", reactants={"A": 1}, products={"B": 1}, rate="k1"
+        )
+        self.valid_cp_reaction = Reaction(
+            name="test_reaction", reactants={"A": 1}, products={"B": 1},
+            propensity_function="k1 * A"
+        )
+
     def test_constructor__mass_action(self):
         """ Test the Reaction constructor for a mass action reaction. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        reaction = Reaction(name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate)
+        reaction = Reaction(
+            name="test_reaction", reactants={"A": 1}, products={"B": 1}, rate="k1"
+        )
         self.assertEqual(reaction.name, "test_reaction")
-        self.assertEqual(reaction.reactants, test_reactants)
-        self.assertEqual(reaction.products, test_products)
-        self.assertEqual(reaction.rate, test_rate)
-
+        self.assertEqual(reaction.reactants, {"A": 1})
+        self.assertEqual(reaction.products, {"B": 1})
+        self.assertEqual(reaction.marate, "k1")
+        self.assertEqual(reaction.propensity_function, "(k1*A)")
+        self.assertEqual(reaction.ode_propensity_function, "(k1*A)")
 
     def test_constructor__custom_propensity(self):
         """ Test the Reaction constructor for a custom propensity reaction. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = {"C": 1}
-        test_propensity = "k1 * A * B"
         reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, propensity_function=test_propensity
+            name="test_reaction", reactants={"A": 1}, products={"B": 1},
+            propensity_function="k1 * A * B"
         )
         self.assertEqual(reaction.name, "test_reaction")
-        self.assertEqual(reaction.reactants, test_reactants)
-        self.assertEqual(reaction.products, test_products)
-        self.assertEqual(reaction.propensity_function, test_propensity)
+        self.assertEqual(reaction.reactants, {"A": 1})
+        self.assertEqual(reaction.products, {"B": 1})
+        self.assertEqual(reaction.propensity_function, "((k1*A)*B)")
+        self.assertEqual(reaction.ode_propensity_function, "((k1*A)*B)")
 
+    def test_constructor__custom_ode_propensity(self):
+        """ Test the Reaction constructor for a custom ode propensity reaction. """
+        reaction = Reaction(
+            name="test_reaction", reactants={"A": 1}, products={"B": 1},
+            ode_propensity_function="k1 * A * B"
+        )
+        self.assertEqual(reaction.name, "test_reaction")
+        self.assertEqual(reaction.reactants, {"A": 1})
+        self.assertEqual(reaction.products, {"B": 1})
+        self.assertEqual(reaction.propensity_function, "((k1*A)*B)")
+        self.assertEqual(reaction.ode_propensity_function, "((k1*A)*B)")
+
+    def test_constructor__different_custom_propensity(self):
+        """ Test the Reaction constructor for a custom propensity reaction with different propensities. """
+        reaction = Reaction(
+            name="test_reaction", reactants={"A": 1}, products={"B": 1},
+            propensity_function="k1 * A * B",
+            ode_propensity_function="k1 * A * B / vol"
+        )
+        self.assertEqual(reaction.name, "test_reaction")
+        self.assertEqual(reaction.reactants, {"A": 1})
+        self.assertEqual(reaction.products, {"B": 1})
+        self.assertEqual(reaction.propensity_function, "((k1*A)*B)")
+        self.assertEqual(reaction.ode_propensity_function, "(((k1*A)*B)/vol)")
 
     def test_constructor__no_name(self):
         """ Test the Reaction constructor with no name provided. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = {"C": 1}
-        test_propensity = "k1 * A * B"
         reaction = Reaction(
-            reactants=test_reactants, products=test_products, propensity_function=test_propensity
+            reactants={"A": 1}, products={"B": 1}, propensity_function="k1 * A * B"
         )
         self.assertIsNotNone(re.search("rxn.*", reaction.name))
 
+    def test_constructor__name_is_none_or_empty(self):
+        """ Test the Reaction constructor with None or empty string as name. """
+        test_names = [None, ""]
+        for test_name in test_names:
+            with self.subTest(name=test_name):
+                reaction = Reaction(
+                    name=test_name, reactants={"A": 1}, products={"B": 1},
+                    propensity_function="k1 * A * B"
+                )
+                self.assertIsNotNone(re.search("rxn.*", reaction.name))
 
-    def test_constructor__name_is_none(self):
-        """ Test the Reaction constructor with None as name. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = {"C": 1}
-        test_propensity = "k1 * A * B"
-        reaction = Reaction(
-            name=None, reactants=test_reactants, products=test_products, propensity_function=test_propensity
-        )
-        self.assertIsNotNone(re.search("rxn.*", reaction.name))
-
-
-    def test_constructor__name_not_str_or_None(self):
+    def test_constructor__invalid_name(self):
         """ Test the Reaction constructor with non-str name. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = {"C": 1}
-        test_rate = "k1"
         with self.assertRaises(ReactionError):
-            reaction = Reaction(name=0, reactants=test_reactants, products=test_products, rate=test_rate)
+            Reaction(name=0, reactants={"A": 1}, products={"B": 1}, rate="k1")
 
-
-    def test_constructor__reactants_not_dict(self):
-        """ Test the Reaction constructor with non-dict reactants. """
-        test_reactants = [["C", 1]]
-        test_products = {"A": 1, "B": 1}
-        test_rate = "k2"
+    def test_constructor__no_reactants_or_products(self):
+        """ Test the Reaction constructor with reactants and products not set. """
         with self.assertRaises(ReactionError):
-            reaction = Reaction(name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate)
+            Reaction(name="test_reaction", rate="k1")
 
-    def test_constructor__products_not_dict(self):
-        """ Test the Reaction constructor with non-dict products. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = [["C", 1]]
-        test_rate = "k1"
+    def test_constructor__invalid_reactants_and_products(self):
+        """ Test the Reaction constructor with reactants and products both set to None or empty. """
+        test_reacs = [None, {}]
+        test_prods = [None, {}]
+        for test_reac in test_reacs:
+            for test_prod in test_prods:
+                with self.subTest(reactants=test_reac, products=test_prod):
+                    with self.assertRaises(ReactionError):
+                        Reaction(
+                            name="test_reaction", reactants=test_reac,
+                            products=test_prod, rate="k1"
+                        )
+
+    def test_constructor__reactants_is_none(self):
+        """ Test the Reaction constructor with None as reactants. """
+        reaction = Reaction(
+            name="test_reaction", reactants=None, products={"B": 1}, rate="k2"
+        )
+        self.assertEqual(reaction.reactants, {})
+
+    def test_constructor__reactants_keyed_by_species_obj(self):
+        """ Test the Reaction constructor with reactants keyed by species objs. """
+        test_species = Species(name="A", diffusion_coefficient=0.1)
+        reaction = Reaction(
+            name="test_reaction", reactants={test_species: 1}, products={"B": 1},
+            rate="k2"
+        )
+        self.assertEqual(reaction.reactants, {"A": 1})
+
+    def test_constructor__reactants_invalid_keys(self):
+        """ Test the Reaction constructor with reactants keyed with invalid keys. """
         with self.assertRaises(ReactionError):
-            reaction = Reaction(name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate)
-
-
-    def test_constructor__propensity_function_not_accepted_type(self):
-        """ Test the Reaction constructor with a propensity function that is not of the proper type. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = {"C": 1}
-        test_propensity = ["k1 * A * B"]
-        with self.assertRaises(ReactionError):
-            reaction = Reaction(
-                name="test_reaction", reactants=test_reactants, products=test_products, propensity_function=test_propensity
+            Reaction(
+                name="test_reaction", reactants={1: 1}, products={"B": 1},
+                rate="k2"
             )
 
+    def test_constructor__reactants_invalid_values(self):
+        """ Test the Reaction constructor with reactants containing invalid stoichiometry. """
+        with self.assertRaises(ReactionError):
+            Reaction(
+                name="test_reaction", reactants={"A": "1"}, products={"B": 1},
+                rate="k2"
+            )
+
+    def test_constructor__invalid_reactants(self):
+        """ Test the Reaction constructor with non-dict reactants. """
+        with self.assertRaises(ReactionError):
+            Reaction(
+                name="test_reaction", reactants=[["A", 1]], products={"B": 1},
+                rate="k2"
+            )
+
+    def test_constructor__products_is_none(self):
+        """ Test the Reaction constructor with None as products. """
+        reaction = Reaction(
+            name="test_reaction", reactants={"A": 1}, products=None, rate="k2"
+        )
+        self.assertEqual(reaction.products, {})
+
+    def test_constructor__products_keyed_by_species_obj(self):
+        """ Test the Reaction constructor with products keyed by species objs. """
+        test_species = Species(name="B", diffusion_coefficient=0.1)
+        reaction = Reaction(
+            name="test_reaction", reactants={"A": 1}, products={test_species: 1},
+            rate="k2"
+        )
+        self.assertEqual(reaction.products, {"B": 1})
+
+    def test_constructor__products_invalid_keys(self):
+        """ Test the Reaction constructor with products keyed with invalid keys. """
+        with self.assertRaises(ReactionError):
+            Reaction(
+                name="test_reaction", reactants={"A": 1}, products={1: 1},
+                rate="k2"
+            )
+
+    def test_constructor__products_invalid_values(self):
+        """ Test the Reaction constructor with products containing invalid stoichiometry. """
+        with self.assertRaises(ReactionError):
+            Reaction(
+                name="test_reaction", reactants={"A": 1}, products={"B": "1"},
+                rate="k2"
+            )
+
+    def test_constructor__invalid_products(self):
+        """ Test the Reaction constructor with non-dict products. """
+        with self.assertRaises(ReactionError):
+            Reaction(
+                name="test_reaction", reactants={"A": 1}, products=[["B", 1]],
+                rate="k2"
+            )
+
+    def test_constructor__rate_and_propensity_functions_are_none(self):
+        """ Test the Reaction constructor with rate and propensity functions set to None. """
+        with self.assertRaises(ReactionError):
+            Reaction(name="test_reaction", reactants={"A": 1}, products={"B": 1})
+
+    def test_constructor__rate_and_propensity_function_are_not_none(self):
+        """ Test the Reaction constructor with rate and propensity function set. """
+        with self.assertRaises(ReactionError):
+            Reaction(
+                name="test_reaction", reactants={"A": 1}, products={"B": 1},
+                rate="k1", propensity_function="A**2 + B**2"
+            )
 
     def test_constructor__int_propensity_function(self):
         """ Test the Reaction constructor with an int propensity function. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = {"C": 1}
-        test_propensity = 20
         reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, propensity_function=test_propensity
+            name="test_reaction", reactants={"A": 1}, products={"B": 1},
+            propensity_function=20
         )
         self.assertIsInstance(reaction.propensity_function, str)
         self.assertEqual(reaction.propensity_function, "20")
-
+        self.assertIsInstance(reaction.ode_propensity_function, str)
+        self.assertEqual(reaction.ode_propensity_function, "20")
 
     def test_constructor__float_propensity_function(self):
         """ Test the Reaction constructor with a float propensity function. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = {"C": 1}
-        test_propensity = 0.5
         reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, propensity_function=test_propensity
+            name="test_reaction", reactants={"A": 1}, products={"B": 1},
+            propensity_function=0.5
         )
         self.assertIsInstance(reaction.propensity_function, str)
         self.assertEqual(reaction.propensity_function, "0.5")
+        self.assertIsInstance(reaction.ode_propensity_function, str)
+        self.assertEqual(reaction.ode_propensity_function, "0.5")
 
+    def test_constructor__invalid_propensity_function(self):
+        """ Test the Reaction constructor with a propensity function that is not of the proper type. """
+        test_pfs = ["", ["k1 * A * B"]]
+        for test_pf in test_pfs:
+            with self.subTest(propensity_function=test_pf):
+                with self.assertRaises(ReactionError):
+                    Reaction(
+                        name="test_reaction", reactants={"A": 1}, products={"B": 1},
+                        propensity_function=test_pf
+                    )
 
-    def test_constructor__rate_not_accepted_type(self):
-        """ Test the Reaction constructor with a rate that is not of the proper type. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = {"C": 1}
-        test_rate = ["k1"]
+    def test_constructor__rate_and_ode_propensity_function_are_not_none(self):
+        """ Test the Reaction constructor with rate and propensity function set. """
         with self.assertRaises(ReactionError):
-            reaction = Reaction(name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate)
+            Reaction(
+                name="test_reaction", reactants={"A": 1}, products={"B": 1},
+                rate="k1", ode_propensity_function="A**2 + B**2"
+            )
 
+    def test_constructor__int_ode_propensity_function(self):
+        """ Test the Reaction constructor with an int ode propensity function. """
+        reaction = Reaction(
+            name="test_reaction", reactants={"A": 1}, products={"B": 1},
+            ode_propensity_function=20
+        )
+        self.assertIsInstance(reaction.propensity_function, str)
+        self.assertEqual(reaction.propensity_function, "20")
+        self.assertIsInstance(reaction.ode_propensity_function, str)
+        self.assertEqual(reaction.ode_propensity_function, "20")
+
+    def test_constructor__float_ode_propensity_function(self):
+        """ Test the Reaction constructor with a float ode propensity function. """
+        reaction = Reaction(
+            name="test_reaction", reactants={"A": 1}, products={"B": 1},
+            ode_propensity_function=0.5
+        )
+        self.assertIsInstance(reaction.propensity_function, str)
+        self.assertEqual(reaction.propensity_function, "0.5")
+        self.assertIsInstance(reaction.ode_propensity_function, str)
+        self.assertEqual(reaction.ode_propensity_function, "0.5")
+
+    def test_constructor__invalid_ode_propensity_function(self):
+        """ Test the Reaction constructor with a ode propensity function that is not of the proper type. """
+        test_opfs = ["", ["k1 * A * B"]]
+        for test_opf in test_opfs:
+            with self.subTest(ode_propensity_function=test_opf):
+                with self.assertRaises(ReactionError):
+                    Reaction(
+                        name="test_reaction", reactants={"A": 1}, products={"B": 1},
+                        ode_propensity_function=test_opf
+                    )
+
+    def test_constructor__parameter_rate(self):
+        """ Test the Reaction constructor with an parameter object as rate. """
+        k1 = Parameter(name="k1", expression="20")
+        reaction = Reaction(
+            name="test_reaction", reactants={"A": 1}, products={"B": 1}, rate=k1
+        )
+        self.assertIsInstance(reaction.marate, str)
+        self.assertEqual(reaction.marate, "k1")
 
     def test_constructor__int_rate(self):
         """ Test the Reaction constructor with an int rate. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = {"C": 1}
-        test_rate = 20
-        reaction = Reaction(name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate)
-        self.assertIsInstance(reaction.rate, str)
-        self.assertEqual(reaction.rate, "20")
-
+        reaction = Reaction(
+            name="test_reaction", reactants={"A": 1}, products={"B": 1}, rate=20
+        )
+        self.assertIsInstance(reaction.marate, str)
+        self.assertEqual(reaction.marate, "20")
 
     def test_constructor__float_rate(self):
         """ Test the Reaction constructor with a float rate. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = {"C": 1}
-        test_rate = 0.5
-        reaction = Reaction(name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate)
-        self.assertIsInstance(reaction.rate, str)
-        self.assertEqual(reaction.rate, "0.5")
+        reaction = Reaction(
+            name="test_reaction", reactants={"A": 1}, products={"B": 1}, rate=0.5
+        )
+        self.assertIsInstance(reaction.marate, str)
+        self.assertEqual(reaction.marate, "0.5")
 
+    def test_constructor__rate_not_accepted_type(self):
+        """ Test the Reaction constructor with a rate that is an invalid type. """
+        test_rates = ["", ["k1"]]
+        for test_rate in test_rates:
+            with self.subTest(rate=test_rate):
+                with self.assertRaises(ReactionError):
+                    reaction = Reaction(
+                        name="test_reaction", reactants={"A": 1}, products={"B": 1}, rate=test_rate
+                    )
 
-    def test_constructor__restrict_to_not_accepted_type(self):
-        """ Test the Reaction constructor with a restrict_to that is not the proper type. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_restrict_to = 1.5
-        with self.assertRaises(ReactionError):
-            reaction = Reaction(
-                name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate, restrict_to=test_restrict_to
-            )
-
+    def test_constructor__annotation_invalid_type(self):
+        """ Test the Reaction construct with an annotation of invalid type. """
+        test_annotations = [5, 0.1, ["g"]]
+        for test_annotation in test_annotations:
+            with self.subTest(annotation=test_annotation):
+                with self.assertRaises(ReactionError):
+                    reaction = Reaction(
+                        name="test_reaction", reactants={"A": 1}, products={"B": 1}, rate="k1",
+                        annotation=test_annotation
+                    )
 
     def test_constructor__int_restrict_to(self):
         """ Test the Reaction constructor with a int restrict_to. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_restrict_to = 1
         reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate, restrict_to=test_restrict_to
+            name="test_reaction", reactants={"A": 1}, products={"B": 1}, rate="k1", restrict_to=1
         )
         self.assertIsInstance(reaction.restrict_to, list)
         self.assertEqual(reaction.restrict_to, ["type_1"])
 
-
     def test_constructor__str_restrict_to(self):
         """ Test the Reaction constructor with a string restrict_to. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_restrict_to = "Walls"
         reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate, restrict_to=test_restrict_to
+            name="test_reaction", reactants={"A": 1}, products={"B": 1}, rate="k1", restrict_to="Walls"
         )
         self.assertIsInstance(reaction.restrict_to, list)
         self.assertEqual(reaction.restrict_to, ["type_Walls"])
 
+    def test_constructor__list_restrict_to(self):
+        """ Test the Reaction constructor with a list restrict_to. """
+        reaction = Reaction(
+            name="test_reaction", reactants={"A": 1}, products={"B": 1}, rate="k1", restrict_to=["Walls", "Fluid", "Beam"]
+        )
+        self.assertIsInstance(reaction.restrict_to, list)
+        self.assertEqual(reaction.restrict_to, ["type_Walls", "type_Fluid", "type_Beam"])
+
+    def test_constructor__invalid_restrict_to(self):
+        """ Test the Reaction constructor with a restrict_to that is not the proper type. """
+        test_rts = ["", 1.5, {"Walls": 1}, ("Walls", "Fluid")]
+        for test_rt in test_rts:
+            with self.subTest(restrict_to=test_rt):
+                with self.assertRaises(ReactionError):
+                    reaction = Reaction(
+                        name="test_reaction", reactants={"A": 1}, products={"B": 1}, rate="k1", restrict_to=test_rt
+                    )
+
+    def test_constructor__invalid_restrict_to_value(self):
+        """ Test the Reaction constructor with a restrict_to that is not the proper value. """
+        test_rts = [[], [None], [""], [1.5], [[]], ["Walls", None], ["Walls", ""], ["Walls", 1.5], ["Walls", []]]
+        for test_rt in test_rts:
+            with self.subTest(restrict_to=test_rt):
+                with self.assertRaises(ReactionError):
+                    reaction = Reaction(
+                        name="test_reaction", reactants={"A": 1}, products={"B": 1}, rate="k1", restrict_to=test_rt
+                    )
 
     def test___str__(self):
         """ Test Reaction.__str__ method. """
-        test_reactants = {"A": 1, "B": 1}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_restrict_to = 1
-        reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate, restrict_to=test_restrict_to
-        )
-        self.assertIsInstance(str(reaction), str)
-
+        self.assertIsInstance(str(self.valid_ma_reaction), str)
 
     def test__create_mass_action__total_stoch_3(self):
         """ Test Reaction._create_mass_action total stochiometry > 2. """
-        test_reactants = {"A": 1, "B": 2}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
+        self.valid_ma_reaction.reactants = {"A": 1, "B": 2}
+        self.valid_ma_reaction.products = {"C": 1}
         with self.assertRaises(ReactionError):
-            test_reaction._create_mass_action()
-
+            self.valid_ma_reaction._create_mass_action()
 
     def test__create_mass_action__marate_type_as_string(self):
         """ Test Reaction._create_mass_action marate as string. """
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction._create_mass_action()
-        self.assertEqual(test_reaction.propensity_function, "k1 * vol")
-        self.assertEqual(test_reaction.ode_propensity_function, "k1")
-
+        self.valid_ma_reaction.reactants = {}
+        self.valid_ma_reaction.products = {"C": 1}
+        self.valid_ma_reaction._create_mass_action()
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "(k1*vol)")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "k1")
 
     def test__create_mass_action__marate_type_as_int(self):
         """ Test Reaction._create_mass_action marate as int. """
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = 1
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction._create_mass_action()
-        self.assertEqual(test_reaction.propensity_function, "1 * vol")
-        self.assertEqual(test_reaction.ode_propensity_function, "1")
-
+        self.valid_ma_reaction.reactants = {}
+        self.valid_ma_reaction.products = {"C": 1}
+        self.valid_ma_reaction.marate = 1
+        self.valid_ma_reaction._create_mass_action()
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "(1*vol)")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "1")
 
     def test__create_mass_action__marate_type_as_float(self):
         """ Test Reaction._create_mass_action marate as float. """
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = 0.5
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction._create_mass_action()
-        self.assertEqual(test_reaction.propensity_function, "0.5 * vol")
-        self.assertEqual(test_reaction.ode_propensity_function, "0.5")
-
+        self.valid_ma_reaction.reactants = {}
+        self.valid_ma_reaction.products = {"C": 1}
+        self.valid_ma_reaction.marate = 0.5
+        self.valid_ma_reaction._create_mass_action()
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "(0.5*vol)")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "0.5")
 
     def test__create_mass_action__marate_type_as_parameter(self):
         """ Test Reaction._create_mass_action marate as parameter. """
         test_parameter = Parameter("k1", expression=0.1)
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = test_parameter
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction._create_mass_action()
-        self.assertEqual(test_reaction.propensity_function, "k1 * vol")
-        self.assertEqual(test_reaction.ode_propensity_function, "k1")
-
+        self.valid_ma_reaction.reactants = {}
+        self.valid_ma_reaction.products = {"C": 1}
+        self.valid_ma_reaction.marate = test_parameter
+        self.valid_ma_reaction._create_mass_action()
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "(k1*vol)")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "k1")
 
     def test__create_mass_action__X_to_Y(self):
         """ Test Reaction._create_mass_action X -> Y. """
-        test_species_x = Species(name="X", diffusion_coefficient=0.1)
-        test_reactants = {test_species_x: 1}
-        test_products = {"Y": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction._create_mass_action()
-        self.assertEqual(test_reaction.propensity_function, "k1 * X")
-        self.assertEqual(test_reaction.ode_propensity_function, "k1 * X")
-
+        self.valid_ma_reaction.reactants = {"X": 1}
+        self.valid_ma_reaction.products = {"Y": 1}
+        self.valid_ma_reaction._create_mass_action()
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "(k1*X)")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "(k1*X)")
 
     def test__create_mass_action__X_plus_Y_to_Z(self):
         """ Test Reaction._create_mass_action X + Y -> Z. """
-        test_species_x = Species(name="X", diffusion_coefficient=0.1)
-        test_species_y = Species(name="Y", diffusion_coefficient=0.1)
-        test_reactants = {test_species_x: 1, test_species_y: 1}
-        test_products = {"Z": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction._create_mass_action()
-        self.assertEqual(test_reaction.propensity_function, "k1 * X * Y / vol")
-        self.assertEqual(test_reaction.ode_propensity_function, "k1 * X * Y")
-
+        self.valid_ma_reaction.reactants = {"X": 1, "Y": 1}
+        self.valid_ma_reaction.products = {"Z": 1}
+        self.valid_ma_reaction._create_mass_action()
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "(((k1*X)*Y)/vol)")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "((k1*X)*Y)")
 
     def test__create_mass_action__2X_to_Y(self):
         """ Test Reaction._create_mass_action 2X -> Y. """
-        test_species_x = Species(name="X", diffusion_coefficient=0.1)
-        test_reactants = {test_species_x: 2}
-        test_products = {"Y": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction._create_mass_action()
-        self.assertEqual(test_reaction.propensity_function, "0.5 * k1 * X * (X - 1) / vol")
-        self.assertEqual(test_reaction.ode_propensity_function, "k1 * X * X")
+        self.valid_ma_reaction.reactants = {"X": 2}
+        self.valid_ma_reaction.products = {"Y": 1}
+        self.valid_ma_reaction._create_mass_action()
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "((((0.5*k1)*X)*(X-1))/vol)")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "((k1*X)*X)")
 
+    def test__create_mass_action__species_obj_reactant(self):
+        """ Test Reaction._create_mass_action when reactants is keyed by species object. """
+        test_species = Species(name="A", diffusion_coefficient=0.1)
+        self.valid_ma_reaction.reactants = {test_species: 1}
+        self.valid_ma_reaction._create_mass_action()
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "(k1*A)")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "(k1*A)")
 
-    def test_add_product__species_object(self):
-        """ Test Reaction.add_product species is SpatialPy.Species. """
-        test_species = Species(name="X", diffusion_coefficient=0.1)
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction.add_product(test_species, 1)
-        self.assertIn(test_species.name, test_reaction.products)
-        self.assertEqual(test_reaction.products[test_species.name], 1)
+    def test__create_custom_propensity__exponent(self):
+        """ Test Reaction._create_custom_propensity with a propensity containing exponents. """
+        test_propensities = ["1/A^2", "1/A**2"]
+        for test_propensity in test_propensities:
+            with self.subTest(propensity_function=test_propensity):
+                expr = self.valid_cp_reaction._create_custom_propensity(test_propensity)
+                self.assertEqual(expr, "(1/pow(A,2))")
 
+    def test__create_custom_propensity__ln(self):
+        """ Test Reaction._create_custom_propensity with a propensity containing ln. """
+        expr = self.valid_cp_reaction._create_custom_propensity("ln(A)")
+        self.assertEqual(expr, "log(A)")
+
+    def test__create_custom_propensity__e(self):
+        """ Test Reaction._create_custom_propensity with a propensity containing e. """
+        expr = self.valid_cp_reaction._create_custom_propensity("A*e")
+        self.assertEqual(expr, "(A*2.718281828459045)")
+
+    def test__create_custom_propensity__fake_e(self):
+        """ Test Reaction._create_custom_propensity with a propensity containing e. """
+        expr = self.valid_cp_reaction._create_custom_propensity("A*ex")
+        self.assertEqual(expr, "(A*ex)")
+
+    def test__create_custom_propensity__propensity_parsing(self):
+        """ Test Reaction._create_custom_propensity for parsing accuracy. """
+        test_propensities = [
+            "5*x^2+e*b+6", "5*x**2+e*b+6", "1*alpha/2+5^beta", "1*alpha/2+5**beta",
+            "2.78*x+3^(4*x)", "2.78*x+3**(4*x)", "-5*-x^2", "-5*-x**2",
+            "(alpha/beta + delta**gamma)/(atlas-zeta)", "(alpha/beta + delta^gamma)/(atlas-zeta)"
+        ]
+        expected_results = [
+            "(((5*pow(x,2))+(2.718281828459045*b))+6)", "(((5*pow(x,2))+(2.718281828459045*b))+6)",
+            "(((1*alpha)/2)+pow(5,beta))", "(((1*alpha)/2)+pow(5,beta))", "((2.78*x)+pow(3,(4*x)))",
+            "((2.78*x)+pow(3,(4*x)))", "((-5)*(-pow(x,2)))", "((-5)*(-pow(x,2)))",
+            "(((alpha/beta)+pow(delta,gamma))/(atlas-zeta))", "(((alpha/beta)+pow(delta,gamma))/(atlas-zeta))"
+        ]
+        for i, test_propensity in enumerate(test_propensities):
+            expected_result = expected_results[i]
+            with self.subTest(propensity_function=test_propensity, expected_propensity_function=expected_result):
+                expr = self.valid_cp_reaction._create_custom_propensity(test_propensity)
+                self.assertEqual(expr, expected_result)
 
     def test_add_product__species_string(self):
-        """ Test Reaction.add_product species is string. """
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction.add_product("X", 1)
-        self.assertIn("X", test_reaction.products)
-        self.assertEqual(test_reaction.products["X"], 1)
+        """ Test Reaction.add_product when species is string. """
+        self.valid_ma_reaction.add_product("X", 1)
+        self.assertIn("X", self.valid_ma_reaction.products)
+        self.assertEqual(self.valid_ma_reaction.products["X"], 1)
 
-
-    def test_add_product__species_not_accepted_type(self):
-        """ Test Reaction.add_product species not string or SpatialPy.Species. """
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        with self.assertRaises(ReactionError):
-            test_reaction.add_product(["X"], 1)
-
-
-    def test_add_product__stochiometry_not_int(self):
-        """ Test Reaction.add_product stochiometry not integer. """
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        with self.assertRaises(ReactionError):
-            test_reaction.add_product("X", 0.1)
-
-
-    def test_add_product__stochiometry_less_than_zero(self):
-        """ Test Reaction.add_product stochiometry <= 0. """
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        with self.assertRaises(ReactionError):
-            test_reaction.add_product("X", 0)
-
-
-    def test_add_reactant__species_object(self):
-        """ Test Reaction.add_reactant species is SpatialPy.Species. """
+    def test_add_product__species_object(self):
+        """ Test Reaction.add_product when species is SpatialPy.Species. """
         test_species = Species(name="X", diffusion_coefficient=0.1)
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction.add_reactant(test_species, 1)
-        self.assertIn(test_species.name, test_reaction.reactants)
-        self.assertEqual(test_reaction.reactants[test_species.name], 1)
+        self.valid_ma_reaction.add_product(test_species, 1)
+        self.assertIn(test_species.name, self.valid_ma_reaction.products)
+        self.assertEqual(self.valid_ma_reaction.products[test_species.name], 1)
 
+    def test_add_product__invalid_species(self):
+        """ Test Reaction.add_product with an invalid species. """
+        test_species = [None, "", 5, 0.5, ["A"]]
+        for test_spec in test_species:
+            with self.subTest(species=test_spec):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.add_product(test_spec, 1)
 
-    def test_add_reactant__species_string(self):
-        """ Test Reaction.add_reactant species is string. """
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction.add_reactant("X", 1)
-        self.assertIn("X", test_reaction.reactants)
-        self.assertEqual(test_reaction.reactants["X"], 1)
+    def test_add_product__invalid_stochiometry(self):
+        """ Test Reaction.add_product with an invalid stochiometry. """
+        test_stoichs = [None, "1", -5, 0, 0.5, [1]]
+        for test_stoich in test_stoichs:
+            with self.subTest(stoichiometry=test_stoich):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.add_product("X", test_stoich)
 
+    def test_add_reactant__massaction_reaction_species_string(self):
+        """ Test Reaction.add_reactant when reaction is mass-action and species is string. """
+        self.valid_ma_reaction.add_reactant("X", 1)
+        self.assertIn("X", self.valid_ma_reaction.reactants)
+        self.assertEqual(self.valid_ma_reaction.reactants["X"], 1)
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "(((k1*A)*X)/vol)")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "((k1*A)*X)")
 
-    def test_add_reactant__species_not_accepted_type(self):
-        """ Test Reaction.add_reactant species not string or SpatialPy.Species. """
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
+    def test_add_reactant__customized_reaction_species_string(self):
+        """ Test Reaction.add_reactant when reaction is customized and species is string. """
+        self.valid_cp_reaction.add_reactant("X", 1)
+        self.assertIn("X", self.valid_cp_reaction.reactants)
+        self.assertEqual(self.valid_cp_reaction.reactants["X"], 1)
+        self.assertEqual(self.valid_cp_reaction.propensity_function, "(k1*A)")
+        self.assertEqual(self.valid_cp_reaction.ode_propensity_function, "(k1*A)")
+
+    def test_add_reactant__massaction_reaction_species_object(self):
+        """ Test Reaction.add_reactant when reaction is mass-action and species is SpatialPy.Species. """
+        test_species = Species(name="X", diffusion_coefficient=0.1)
+        self.valid_ma_reaction.add_reactant(test_species, 1)
+        self.assertIn(test_species.name, self.valid_ma_reaction.reactants)
+        self.assertEqual(self.valid_ma_reaction.reactants[test_species.name], 1)
+        self.assertEqual(self.valid_ma_reaction.propensity_function, f"(((k1*A)*{test_species.name})/vol)")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, f"((k1*A)*{test_species.name})")
+
+    def test_add_reactant__customized_reaction_species_object(self):
+        """ Test Reaction.add_reactant when reaction is customized and species is SpatialPy.Species. """
+        test_species = Species(name="X", diffusion_coefficient=0.1)
+        self.valid_cp_reaction.add_reactant(test_species, 1)
+        self.assertIn(test_species.name, self.valid_cp_reaction.reactants)
+        self.assertEqual(self.valid_cp_reaction.reactants[test_species.name], 1)
+        self.assertEqual(self.valid_cp_reaction.propensity_function, "(k1*A)")
+        self.assertEqual(self.valid_cp_reaction.ode_propensity_function, "(k1*A)")
+
+    def test_add_reactant__massaction_reaction_stoich_0_to_1(self):
+        """ Test Reaction.add_reactant when reaction is mass-action and stoichiometry goes from 0 to 1. """
+        self.valid_ma_reaction.reactants = {}
+        self.valid_ma_reaction.add_reactant("X", 1)
+        self.assertIn("X", self.valid_ma_reaction.reactants)
+        self.assertEqual(self.valid_ma_reaction.reactants["X"], 1)
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "(k1*X)")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "(k1*X)")
+
+    def test_add_reactant__massaction_reaction_stoich_0_to_2(self):
+        """ Test Reaction.add_reactant when reaction is mass-action and stoichiometry goes from 0 to 2. """
+        self.valid_ma_reaction.reactants = {}
+        self.valid_ma_reaction.add_reactant("X", 2)
+        self.assertIn("X", self.valid_ma_reaction.reactants)
+        self.assertEqual(self.valid_ma_reaction.reactants["X"], 2)
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "((((0.5*k1)*X)*(X-1))/vol)")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "((k1*X)*X)")
+
+    def test_add_reactant__invalid_species(self):
+        """ Test Reaction.add_reactant with an invalid species. """
+        test_species = [None, "", 5, 0.5, {}]
+        for test_spec in test_species:
+            with self.subTest(species=test_spec):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.add_reactant(test_spec, 1)
+
+    def test_add_reactant__invalid_stochiometry(self):
+        """ Test Reaction.add_reactant with an invalid stochiometry. """
+        test_stoichs = [None, "1", -5, 0, 0.5, [1]]
+        for test_stoich in test_stoichs:
+            with self.subTest(stoichiometry=test_stoich):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.add_reactant("X", test_stoich)
+
+    def test_from_json__massaction(self):
+        """ Test Reaction.from_json with a mass-action reaction. """
+        test_json = {
+            'name': 'test_reaction',
+            'reactants': [{'key': 'A', 'value': 1}],
+            'products': [{'key': 'B', 'value': 1}],
+            'marate': 'k1',
+            'annotation': None,
+            'propensity_function': '(k1*A)',
+            'ode_propensity_function': '(k1*A)',
+            'restrict_to': None,
+            'massaction': True,
+            'type': 'mass-action'
+        }
+        reaction = Reaction.from_json(test_json)
+        self.assertIsInstance(reaction, Reaction)
+        self.assertEqual(reaction.name, 'test_reaction')
+        self.assertEqual(reaction.reactants, {'A': 1})
+        self.assertEqual(reaction.products, {'B': 1})
+        self.assertEqual(reaction.propensity_function, '(k1*A)')
+        self.assertEqual(reaction.ode_propensity_function, '(k1*A)')
+        self.assertEqual(reaction.marate, 'k1')
+        self.assertIsNone(reaction.annotation)
+        self.assertTrue(reaction.massaction)
+        self.assertEqual(reaction.type, 'mass-action')
+
+    def test_from_json__customized(self):
+        """ Test Reaction.from_json with a customized reaction. """
+        test_json = {
+            'name': 'test_reaction',
+            'reactants': [{'key': 'A', 'value': 1}],
+            'products': [{'key': 'B', 'value': 1}],
+            'marate': None,
+            'annotation': None,
+            'propensity_function': '(k1*A)',
+            'ode_propensity_function': '(k1*A)',
+            'restrict_to': None,
+            'massaction': False,
+            'type': 'customized'
+        }
+        reaction = Reaction.from_json(test_json)
+        self.assertIsInstance(reaction, Reaction)
+        self.assertEqual(reaction.name, 'test_reaction')
+        self.assertEqual(reaction.reactants, {'A': 1})
+        self.assertEqual(reaction.products, {'B': 1})
+        self.assertEqual(reaction.propensity_function, '(k1*A)')
+        self.assertEqual(reaction.ode_propensity_function, '(k1*A)')
+        self.assertIsNone(reaction.marate)
+        self.assertIsNone(reaction.annotation)
+        self.assertFalse(reaction.massaction)
+        self.assertEqual(reaction.type, 'customized')
+
+    def test_from_json__massaction_json_changed(self):
+        """ Test Reaction.from_json with a mass-action reaction and modified json. Ensure propensities are updated."""
+        test_json = {
+            'name': 'test_reaction',
+            'reactants': [{'key': 'B', 'value': 1}],
+            'products': [{'key': 'A', 'value': 1}],
+            'marate': 'k1',
+            'annotation': None,
+            'propensity_function': '(k1*A)',
+            'ode_propensity_function': '(k1*A)',
+            'restrict_to': None,
+            'massaction': True,
+            'type': 'mass-action'
+        }
+        reaction = Reaction.from_json(test_json)
+        self.assertEqual(reaction.name, 'test_reaction')
+        self.assertEqual(reaction.reactants, {'B': 1})
+        self.assertEqual(reaction.products, {'A': 1})
+        self.assertEqual(reaction.propensity_function, '(k1*B)')
+        self.assertEqual(reaction.ode_propensity_function, '(k1*B)')
+        self.assertEqual(reaction.marate, 'k1')
+        self.assertIsNone(reaction.annotation)
+        self.assertTrue(reaction.massaction)
+        self.assertEqual(reaction.type, 'mass-action')
+
+    def test_from_json__customized_json_changed(self):
+        """ Test Reaction.from_json with a customized reaction and modified json. Ensure propensities don't change. """
+        test_json = {
+            'name': 'test_reaction',
+            'reactants': [{'key': 'B', 'value': 1}],
+            'products': [{'key': 'A', 'value': 1}],
+            'marate': None,
+            'annotation': None,
+            'propensity_function': '(k1*A)',
+            'ode_propensity_function': '(k1*A)',
+            'restrict_to': None,
+            'massaction': False,
+            'type': 'customized'
+        }
+        reaction = Reaction.from_json(test_json)
+        self.assertEqual(reaction.name, 'test_reaction')
+        self.assertEqual(reaction.reactants, {'B': 1})
+        self.assertEqual(reaction.products, {'A': 1})
+        self.assertEqual(reaction.propensity_function, '(k1*A)')
+        self.assertEqual(reaction.ode_propensity_function, '(k1*A)')
+        self.assertIsNone(reaction.marate)
+        self.assertIsNone(reaction.annotation)
+        self.assertFalse(reaction.massaction)
+        self.assertEqual(reaction.type, 'customized')
+
+    def test_from_json__invalid_json(self):
+        """ Test Reaction.from_json with a reaction that fails validation. """
+        test_json = {
+            'name': 'test_reaction',
+            'reactants': [{'key': 'A', 'value': 1}],
+            'products': [{'key': 'B', 'value': 1}],
+            'marate': None,
+            'annotation': None,
+            'propensity_function': '(k1*A)',
+            'ode_propensity_function': '(k1*A)',
+            'restrict_to': None,
+            'massaction': True,
+            'type': 'mass-action'
+        }
         with self.assertRaises(ReactionError):
-            test_reaction.add_reactant(["X"], 1)
+            reaction = Reaction.from_json(test_json)
 
-
-    def test_add_reactant__stochiometry_not_int(self):
-        """ Test Reaction.add_reactant stochiometry not integer. """
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        with self.assertRaises(ReactionError):
-            test_reaction.add_reactant("X", 0.1)
-
-
-    def test_add_reactant__stochiometry_less_than_zero(self):
-        """ Test Reaction.add_reactant stochiometry <= 0. """
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        with self.assertRaises(ReactionError):
-            test_reaction.add_reactant("X", 0)
-
-
-    def test_annotate(self):
-        """ Test Reaction.annotate. """
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
+    def test_set_annotation(self):
+        """ Test Reaction.annotation. """
         test_annotation = "Testing the reaction annotation message."
-        test_reaction.annotate(test_annotation)
-        self.assertEqual(test_reaction.annotation, test_annotation)
+        self.valid_ma_reaction.set_annotation(test_annotation)
+        self.assertEqual(self.valid_ma_reaction.annotation, test_annotation)
 
+    def test_set_annotation__invalid_annotation(self):
+        """ Test Reaction.set_annotation with an invalid annotation. """
+        test_annotations = [None, 5, 0.1, ["g"]]
+        for test_annotation in test_annotations:
+            with self.subTest(annotation=test_annotation):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.set_annotation(test_annotation)
 
-    def test_annotate__annotation_is_None(self):
-        """ Test Reaction.annotate annotation is None. """
-        test_reactants = {}
-        test_products = {"C": 1}
-        test_rate = "k1"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
+    def test_set_propensities__propensity_function_only(self):
+        """ Test Reaction.set_propensities with propensity_function only. """
+        self.valid_ma_reaction.set_propensities(propensity_function="k1*A/2")
+        expected_result = "((k1*A)/2)"
+        self.assertEqual(self.valid_ma_reaction.propensity_function, expected_result)
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, expected_result)
+        self.assertIsNone(self.valid_ma_reaction.marate)
+        self.assertFalse(self.valid_ma_reaction.massaction)
+        self.assertEqual(self.valid_ma_reaction.type, "customized")
+
+    def test_set_propensities__ode_propensity_function_only(self):
+        """ Test Reaction.set_propensities with ode_propensity_function only. """
+        self.valid_ma_reaction.set_propensities(ode_propensity_function="k1*A/2")
+        expected_result = "((k1*A)/2)"
+        self.assertEqual(self.valid_ma_reaction.propensity_function, expected_result)
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, expected_result)
+        self.assertIsNone(self.valid_ma_reaction.marate)
+        self.assertFalse(self.valid_ma_reaction.massaction)
+        self.assertEqual(self.valid_ma_reaction.type, "customized")
+
+    def test_set_propensities__different_propensities(self):
+        """ Test Reaction.set_propensities with different propensity functions. """
+        self.valid_ma_reaction.set_propensities(
+            propensity_function="k1*A/2", ode_propensity_function="k1*A/3"
         )
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "((k1*A)/2)")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "((k1*A)/3)")
+        self.assertIsNone(self.valid_ma_reaction.marate)
+        self.assertFalse(self.valid_ma_reaction.massaction)
+        self.assertEqual(self.valid_ma_reaction.type, "customized")
+
+    def test_set_propensities__int_propensity_function(self):
+        """ Test Reaction.set_propensities with propensity_function of type int. """
+        self.valid_ma_reaction.set_propensities(propensity_function=5)
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "5")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "5")
+
+    def test_set_propensities__float_propensity_function(self):
+        """ Test Reaction.set_propensities with propensity_function of type float. """
+        self.valid_ma_reaction.set_propensities(propensity_function=0.5)
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "0.5")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "0.5")
+
+    def test_set_propensities__int_ode_propensity_function(self):
+        """ Test Reaction.set_propensities with ode_propensity_function of type int. """
+        self.valid_ma_reaction.set_propensities(ode_propensity_function=5)
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "5")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "5")
+
+    def test_set_propensities__float_ode_propensity_function(self):
+        """ Test Reaction.set_propensities with ode_propensity_function of type float. """
+        self.valid_ma_reaction.set_propensities(propensity_function=0.5)
+        self.assertEqual(self.valid_ma_reaction.propensity_function, "0.5")
+        self.assertEqual(self.valid_ma_reaction.ode_propensity_function, "0.5")
+
+    def test_set_propensities__invalid_propensity_function(self):
+        """ Test Reaction.set_propensities with an invalid propensity_function. """
+        test_pfs = ["", ["k1 * A * B"]]
+        for test_pf in test_pfs:
+            with self.subTest(propensity_function=test_pf):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.set_propensities(propensity_function=test_pf)
+
+    def test_set_propensities__invalid_ode_propensity_function(self):
+        """ Test Reaction.set_propensities with an invalid ode_propensity_function. """
+        test_pfs = ["", ["k1 * A * B"]]
+        for test_pf in test_pfs:
+            with self.subTest(ode_propensity_function=test_pf):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.set_propensities(ode_propensity_function=test_pf)
+
+    def test_set_rate(self):
+        """ Test Reaction.set_rate. """
+        self.valid_cp_reaction.set_rate("k2")
+        self.assertEqual(self.valid_cp_reaction.propensity_function, "(k2*A)")
+        self.assertEqual(self.valid_cp_reaction.ode_propensity_function, "(k2*A)")
+        self.assertEqual(self.valid_cp_reaction.marate, "k2")
+        self.assertTrue(self.valid_cp_reaction.massaction)
+        self.assertEqual(self.valid_cp_reaction.type, "mass-action")
+
+    def test_set_rate__parameter_rate(self):
+        """ Test Reaction.set_rate with rate of type SpatialPy.Parameter. """
+        test_parameter = Parameter(name="k2", expression="0.75")
+        self.valid_cp_reaction.set_rate(test_parameter)
+        self.assertEqual(self.valid_cp_reaction.marate, "k2")
+
+    def test_set_rate__int_rate(self):
+        """ Test Reaction.set_rate with rate of type int. """
+        self.valid_cp_reaction.set_rate(5)
+        self.assertEqual(self.valid_cp_reaction.marate, "5")
+
+    def test_set_rate__float_rate(self):
+        """ Test Reaction.set_rate with rate of type float. """
+        self.valid_cp_reaction.set_rate(0.5)
+        self.assertEqual(self.valid_cp_reaction.marate, "0.5")
+
+    def test_set_rate__invalid_rate(self):
+        """ Test Reaction.set_rate with an invalid rate. """
+        test_rates = [None, "", ["k1"]]
+        for test_rate in test_rates:
+            with self.subTest(rate=test_rate):
+                with self.assertRaises(ReactionError):
+                    self.valid_cp_reaction.set_rate(test_rate)
+
+    def test_to_dict__massaction(self):
+        """ Test Reaction.to_dict with a mass-action reaction. """
+        test_json = {
+            'name': 'test_reaction',
+            'reactants': [{'key': 'A', 'value': 1}],
+            'products': [{'key': 'B', 'value': 1}],
+            'marate': 'k1',
+            'annotation': None,
+            'propensity_function': '(k1*A)',
+            'ode_propensity_function': '(k1*A)',
+            'restrict_to': None,
+            'massaction': True,
+            'type': 'mass-action'
+        }
+        test_dict = self.valid_ma_reaction.to_dict()
+        self.assertIsInstance(test_dict, dict)
+        self.assertEqual(test_dict, test_json)
+
+    def test_to_dict__customized(self):
+        """ Test Reaction.to_dict with a customized reaction. """
+        test_json = {
+            'name': 'test_reaction',
+            'reactants': [{'key': 'A', 'value': 1}],
+            'products': [{'key': 'B', 'value': 1}],
+            'marate': None,
+            'annotation': None,
+            'propensity_function': '(k1*A)',
+            'ode_propensity_function': '(k1*A)',
+            'restrict_to': None,
+            'massaction': False,
+            'type': 'customized'
+        }
+        test_dict = self.valid_cp_reaction.to_dict()
+        self.assertIsInstance(test_dict, dict)
+        self.assertEqual(test_dict, test_json)
+
+    def test_validate__mass_action(self):
+        """ Test Reaction.validate for mass-action reactions. """
+        test_types = ["mass-action", "customized"]
+        test_massactions = [True, False]
+        for test_type in test_types:
+            for test_massaction in test_massactions:
+                with self.subTest(reaction_type=test_type, massaction=test_massaction):
+                    if test_type == "mass-action" and test_massaction:
+                        continue
+                    with self.assertRaises(ReactionError):
+                        self.valid_ma_reaction.type = test_type
+                        self.valid_ma_reaction.massaction = test_massaction
+                        self.valid_ma_reaction.validate(coverage="all")
+
+    def test_validate__customized(self):
+        """ Test Reaction.validate for customized reactions. """
+        test_types = ["mass-action", "customized"]
+        test_massactions = [True, False]
+        for test_type in test_types:
+            for test_massaction in test_massactions:
+                with self.subTest(reaction_type=test_type, massaction=test_massaction):
+                    if test_type == "customized" and not test_massaction:
+                        continue
+                    with self.assertRaises(ReactionError):
+                        self.valid_cp_reaction.type = test_type
+                        self.valid_cp_reaction.massaction = test_massaction
+                        self.valid_cp_reaction.validate(coverage="all")
+
+    def test_validate__invalid_name(self):
+        """ Test Reaction.validate with an invalid name. """
+        test_names = [None, "", 0]
+        for test_name in test_names:
+            with self.subTest(name=test_name):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.name = test_name
+                    self.valid_ma_reaction.validate(coverage="all")
+
+    def test_valdiate__invalid_reactants_and_products(self):
+        """ Test Reaction.validate with reactants and products both set to None or empty. """
+        test_reacs = [None, {}]
+        test_prods = [None, {}]
+        for test_reac in test_reacs:
+            for test_prod in test_prods:
+                with self.subTest(reactants=test_reac, products=test_prod):
+                    with self.assertRaises(ReactionError):
+                        self.valid_ma_reaction.reactants = test_reac
+                        self.valid_ma_reaction.products = test_prod
+                        self.valid_ma_reaction.validate(coverage="all")
+
+    def test_validate__reactants_invalid_keys(self):
+        """ Test Reaction.validate with reactants keyed with invalid keys. """
         with self.assertRaises(ReactionError):
-            test_reaction.annotate(None)
+            self.valid_ma_reaction.reactants = {1: 1}
+            self.valid_ma_reaction.validate(coverage="all")
 
-
-    def test_initialize__propensity_function(self):
-        """ Test Reaction.initialize with propensity function only. """
-        test_model = Model(name="test_model")
-        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
-        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
-        test_model.add_species([test_species_x, test_species_y])
-        test_parameter = Parameter(name="test_parameter", expression=0.1)
-        test_model.add_parameter(test_parameter)
-        test_reactants = {"test_species_x": 1}
-        test_products = {"test_species_y": 1}
-        test_propensity = "test_parameter * test_species_x"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, propensity_function=test_propensity
-        )
-        test_reaction.initialize(model=test_model)
-        self.assertFalse(test_reaction.massaction)
-        self.assertEqual(test_reaction.type, "customized")
-        self.assertIsNone(test_reaction.marate)
-        self.assertEqual(test_reaction.ode_propensity_function, test_propensity)
-
-
-    def test_initialize__propensity_function(self):
-        """ Test Reaction.initialize with rate parameter only. """
-        test_model = Model(name="test_model")
-        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
-        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
-        test_model.add_species([test_species_x, test_species_y])
-        test_parameter = Parameter(name="test_parameter", expression=0.1)
-        test_model.add_parameter(test_parameter)
-        test_reactants = {"test_species_x": 1}
-        test_products = {"test_species_y": 1}
-        test_rate = "test_parameter"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction.initialize(model=test_model)
-        self.assertTrue(test_reaction.massaction)
-        self.assertEqual(test_reaction.type, "mass-action")
-        self.assertEqual(test_reaction.marate, "test_parameter")
-        self.assertEqual(test_reaction.ode_propensity_function, "test_parameter * test_species_x")
-
-
-    def test_initialize__no_propensity_or_rate(self):
-        """ Test Reaction.initialize without providing a propensity function or rate parameter. """
-        test_model = Model(name="test_model")
-        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
-        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
-        test_model.add_species([test_species_x, test_species_y])
-        test_parameter = Parameter(name="test_parameter", expression=0.1)
-        test_model.add_parameter(test_parameter)
-        test_reactants = {"test_species_x": 1}
-        test_products = {"test_species_y": 1}
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products
-        )
+    def test_validate__reactants_invalid_values(self):
+        """ Test Reaction.validate with reactants containing invalid stoichiometry. """
         with self.assertRaises(ReactionError):
-            test_reaction.initialize(model=test_model)
+            self.valid_ma_reaction.reactants = {"A": "1"}
+            self.valid_ma_reaction.validate(coverage="all")
 
+    def test_validate__invalid_reactants(self):
+        """ Test Reaction.validate with non-dict reactants. """
+        test_reactants = [None, ["A", 1]]
+        for test_reactant in test_reactants:
+            with self.subTest(reactants=test_reactant):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.reactants = test_reactant
+                    self.valid_ma_reaction.validate(coverage="all")
 
-    def test_initialize__no_propensity_or_rate(self):
-        """ Test Reaction.initialize without providing a propensity function or rate parameter. """
-        test_model = Model(name="test_model")
-        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
-        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
-        test_model.add_species([test_species_x, test_species_y])
-        test_parameter = Parameter(name="test_parameter", expression=0.1)
-        test_model.add_parameter(test_parameter)
-        test_reactants = {"test_species_x": 1}
-        test_products = {"test_species_y": 1}
-        test_rate = "test_parameter"
-        test_propensity = "test_parameter * test_species_x"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate, propensity_function=test_propensity
-        )
+    def test_validate__prodects_invalid_keys(self):
+        """ Test Reaction.validate with products keyed with invalid keys. """
         with self.assertRaises(ReactionError):
-            test_reaction.initialize(model=test_model)
+            self.valid_ma_reaction.products = {1: 1}
+            self.valid_ma_reaction.validate(coverage="all")
 
-
-    def test_initialize__reactant_species_object_not_in_model(self):
-        """ Test Reaction.initialize with reactant species object not in the Model. """
-        test_model = Model(name="test_model")
-        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
-        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
-        test_model.add_species(test_species_y)
-        test_parameter = Parameter(name="test_parameter", expression=0.1)
-        test_model.add_parameter(test_parameter)
-        test_reactants = {test_species_x: 1}
-        test_products = {"test_species_y": 1}
-        test_rate = "test_parameter"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
+    def test_validate__products_invalid_values(self):
+        """ Test Reaction.validate with products containing invalid stoichiometry. """
         with self.assertRaises(ReactionError):
-            test_reaction.initialize(model=test_model)
+            self.valid_ma_reaction.products = {"B": "1"}
+            self.valid_ma_reaction.validate(coverage="all")
 
+    def test_validate__invalid_products(self):
+        """ Test Reaction.validate with non-dict products. """
+        test_products = [None, ["B", 1]]
+        for test_product in test_products:
+            with self.subTest(products=test_product):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.products = test_product
+                    self.valid_ma_reaction.validate(coverage="all")
 
-    def test_initialize__reactant_species_str_not_in_model(self):
-        """ Test Reaction.initialize with reactant species string not in the Model. """
-        test_model = Model(name="test_model")
-        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
-        test_model.add_species(test_species_y)
-        test_parameter = Parameter(name="test_parameter", expression=0.1)
-        test_model.add_parameter(test_parameter)
-        test_reactants = {"test_species_x": 1}
-        test_products = {"test_species_y": 1}
-        test_rate = "test_parameter"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        with self.assertRaises(ReactionError):
-            test_reaction.initialize(model=test_model)
+    def test_validate__invalid_propensity_function(self):
+        """ Test Reaction.validate with an invalid propensity function. """
+        test_pfs = [None, 20, 0.5, "", ["k1 * A * B"]]
+        for test_pf in test_pfs:
+            with self.subTest(propensity_function=test_pf):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.propensity_function = test_pf
+                    self.valid_ma_reaction.validate(coverage="all")
 
+    def test_validate__invalid_ode_propensity_function(self):
+        """ Test Reaction.validate with an invalid ode propensity function. """
+        test_opfs = [None, 20, 0.5, "", ["k1 * A * B"]]
+        for test_opf in test_opfs:
+            with self.subTest(ode_propensity_function=test_opf):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.ode_propensity_function = test_opf
+                    self.valid_ma_reaction.validate(coverage="all")
 
-    def test_initialize__product_species_object_not_in_model(self):
-        """ Test Reaction.initialize with product species object not in the Model. """
-        test_model = Model(name="test_model")
-        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
-        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
-        test_model.add_species(test_species_x)
-        test_parameter = Parameter(name="test_parameter", expression=0.1)
-        test_model.add_parameter(test_parameter)
-        test_reactants = {"test_species_x": 1}
-        test_products = {test_species_y: 1}
-        test_rate = "test_parameter"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        with self.assertRaises(ReactionError):
-            test_reaction.initialize(model=test_model)
+    def test_validate__invalid_rate(self):
+        """ Test Reaction.validate with a rate that is an invalid type. """
+        test_rates = [20, 0.5, "", ["k1"]]
+        for test_rate in test_rates:
+            with self.subTest(rate=test_rate):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.marate = test_rate
+                    self.valid_ma_reaction.validate(coverage="all")
 
+    def test_validate__annotation_invalid_type(self):
+        """ Test Reaction.validate with an annotation of invalid type. """
+        test_annotations = [5, 0.1, ["g"]]
+        for test_annotation in test_annotations:
+            with self.subTest(annotation=test_annotation):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.annotation = test_annotation
+                    self.valid_ma_reaction.validate(coverage="all")
 
-    def test_initialize__product_species_str_not_in_model(self):
-        """ Test Reaction.initialize with product species string not in the Model. """
-        test_model = Model(name="test_model")
-        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
-        test_model.add_species(test_species_x)
-        test_parameter = Parameter(name="test_parameter", expression=0.1)
-        test_model.add_parameter(test_parameter)
-        test_reactants = {"test_species_x": 1}
-        test_products = {"test_species_y": 1}
-        test_rate = "test_parameter"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        with self.assertRaises(ReactionError):
-            test_reaction.initialize(model=test_model)
+    def test_validate__invalid_restrict_to(self):
+        """ Test Reaction.validate with a restrict_to that is not the proper type. """
+        test_rts = ["Walls", 1, 1.5, {"Walls": 1}, ("Walls", "Fluid")]
+        for test_rt in test_rts:
+            with self.subTest(restrict_to=test_rt):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.restrict_to = test_rt
+                    self.valid_ma_reaction.validate(coverage="all")
 
+    def test_validate__invalid_restrict_to_value(self):
+        """ Test Reaction.validate with a restrict_to that is not the proper value. """
+        test_rts = [
+            [], [None], [""], ["Walls"], [1], [1.5], [[]], ["type_1", None],
+            ["type_1", ""], ["type_1", "Walls"], ["type_1", 1], ["type_1", 1.5], ["type_1", []]
+        ]
+        for test_rt in test_rts:
+            with self.subTest(restrict_to=test_rt):
+                with self.assertRaises(ReactionError):
+                    self.valid_ma_reaction.restrict_to = test_rt
+                    self.valid_ma_reaction.validate(coverage="all")
 
-    def test_initialize__reactant_object_as_object(self):
-        """ Test that all species objects in Reaction.reactants are stored correctly after Reaction.initialize call. """
-        test_model = Model(name="test_model")
-        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
-        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
-        test_model.add_species([test_species_x, test_species_y])
-        test_parameter = Parameter(name="test_parameter", expression=0.1)
-        test_model.add_parameter(test_parameter)
-        test_reactants = {test_species_x: 1, test_species_y: 1}
-        test_products = {}
-        test_rate = "test_parameter"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction.initialize(model=test_model)
-        for reactant in test_reaction.reactants:
-            with self.subTest(reactant=str(reactant)):
-                self.assertIsInstance(reactant, Species)
-
-
-    def test_initialize__reactant_string_as_object(self):
-        """ Test that all species strings in Reaction.reactants are stored correctly after Reaction.initialize call. """
-        test_model = Model(name="test_model")
-        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
-        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
-        test_model.add_species([test_species_x, test_species_y])
-        test_parameter = Parameter(name="test_parameter", expression=0.1)
-        test_model.add_parameter(test_parameter)
-        test_reactants = {"test_species_x": 1, "test_species_y": 1}
-        test_products = {}
-        test_rate = "test_parameter"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction.initialize(model=test_model)
-        for reactant in test_reaction.reactants:
-            with self.subTest(reactant=str(reactant)):
-                self.assertIsInstance(reactant, Species)
-
-
-    def test_initialize__product_object_as_object(self):
-        """ Test that all species objects in Reaction.products are stored correctly after Reaction.initialize call. """
-        test_model = Model(name="test_model")
-        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
-        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
-        test_model.add_species([test_species_x, test_species_y])
-        test_parameter = Parameter(name="test_parameter", expression=0.1)
-        test_model.add_parameter(test_parameter)
-        test_reactants = {}
-        test_products = {test_species_x: 1, test_species_y: 1}
-        test_rate = "test_parameter"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction.initialize(model=test_model)
-        for product in test_reaction.products:
-            with self.subTest(product=str(product)):
-                self.assertIsInstance(product, Species)
-
-
-    def test_initialize__reactant_object_as_object(self):
-        """ Test that all species string in Reaction.products are stored correctly after Reaction.initialize call. """
-        test_model = Model(name="test_model")
-        test_species_x = Species(name="test_species_x", diffusion_coefficient=0.5)
-        test_species_y = Species(name="test_species_y", diffusion_coefficient=0.5)
-        test_model.add_species([test_species_x, test_species_y])
-        test_parameter = Parameter(name="test_parameter", expression=0.1)
-        test_model.add_parameter(test_parameter)
-        test_reactants = {}
-        test_products = {"test_species_x": 1, "test_species_y": 1}
-        test_rate = "test_parameter"
-        test_reaction = Reaction(
-            name="test_reaction", reactants=test_reactants, products=test_products, rate=test_rate
-        )
-        test_reaction.initialize(model=test_model)
-        for product in test_reaction.products:
-            with self.subTest(product=str(product)):
-                self.assertIsInstance(product, Species)
+    def test_comp_time_of_validate(self):
+        """ Check the computation time of validate. """
+        import time
+        from datetime import datetime
+        start = time.time()
+        self.valid_ma_reaction.validate(coverage="all")
+        tic = datetime.utcfromtimestamp(time.time() - start)
+        print(f"Total time to run validate on a mass-action reaction: {tic.strftime('%M mins %S secs %f msecs')}")
+        start = time.time()
+        self.valid_cp_reaction.validate(coverage="all")
+        tic = datetime.utcfromtimestamp(time.time() - start)
+        print(f"Total time to run validate on a customized reaction: {tic.strftime('%M mins %S secs %f msecs')}")
