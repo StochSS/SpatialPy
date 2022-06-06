@@ -174,7 +174,7 @@ class TimeSpan(Iterator):
             other_diff = items[2:] - items[1:-1]
             isuniform = np.isclose(other_diff, first_diff).all()
 
-            if not isuniform:
+            if coverage == "build" and not isuniform:
                 raise TimespanError("StochKit only supports uniform timespans.")
             if first_diff == 0 or np.count_nonzero(other_diff) != len(other_diff):
                 raise TimespanError("Timespan can't contain a single repeating value.")
