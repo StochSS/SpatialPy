@@ -222,6 +222,7 @@ class Result():
         if property_name == 'type':
             # Normalize volumes to [0, 1]
             vol = data['mass'] / data['rho']
+            ptp = numpy.ptp(vol)
             if ptp == 0:
                 vols = numpy.array([0.5] * len(vol))
             else:
