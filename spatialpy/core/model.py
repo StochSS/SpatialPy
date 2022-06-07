@@ -17,14 +17,26 @@
 #This module defines a model that simulates a discrete, stoachastic, mixed biochemical reaction network in python.
 
 import math
+from typing import Set, Type
 from collections import OrderedDict
 
 import numpy
 import scipy
 
+from spatialpy.core.domain import Domain
+from spatialpy.core.species import Species
+from spatialpy.core.initialcondition import (
+    InitialCondition,
+    PlaceInitialCondition,
+    ScatterInitialCondition,
+    UniformInitialCondition
+)
+from spatialpy.core.parameter import Parameter
+from spatialpy.core.reaction import Reaction
+from spatialpy.core.boundarycondition import BoundaryCondition
+from spatialpy.core.datafunction import DataFunction
 from spatialpy.core.timespan import TimeSpan
 from spatialpy.solvers.build_expression import BuildExpression
-
 from spatialpy.core.spatialpyerror import ModelError
 
 def export_StochSS(spatialpy_model, filename=None, return_stochss_model=False):
@@ -71,6 +83,15 @@ class Model():
         self.listOfSpecies    = OrderedDict()
         self.listOfReactions  = OrderedDict()
 
+        # Dictionaries with model element objects.
+        # Model element names are used as keys, and values are
+        # sanitized versions of the names/formulas.
+        # These dictionaries contain sanitized values and are for
+        # Internal use only
+        self._listOfParameters = OrderedDict()
+        self._listOfSpecies = OrderedDict()
+        self._listOfReactions = OrderedDict()
+        
         ######################
         # Dict that holds flattended parameters and species for
         # evaluation of expressions in the scope of the model.
@@ -79,8 +100,8 @@ class Model():
 
         ######################
         self.domain = None
-        self.listOfDiffusionRestrictions = {}
-        self.listOfDataFunctions = []
+        self.listOfDiffusionRestrictions = OrderedDict([])
+        self.listOfDataFunctions = OrderedDict([])
         self.listOfInitialConditions = []
         self.listOfBoundaryConditions = []
 
@@ -103,7 +124,7 @@ class Model():
             self.__update_diffusion_restrictions()
         except Exception:
             pass
-        self.__resolve_parameters()
+        self._resolve_all_parameters()
         divider = f"\n{'*'*10}\n"
 
         def decorate(header):
@@ -147,22 +168,12 @@ class Model():
             self.listOfReactions == other.listOfReactions and \
             self.name == other.name
 
-    def __problem_with_name(self, name):
-        if name in Model.reserved_names:
-            errmsg = f'Name "{name}" is unavailable. It is reserved for internal SpatialPy use. '
-            errmsg += f'Reserved Names: ({Model.reserved_names}).'
-            raise ModelError(errmsg)
-        if name in self.listOfSpecies:
-            raise ModelError(f'Name "{name}" is unavailable. A species with that name exists.')
-        if name in self.listOfParameters:
-            raise ModelError(f'Name "{name}" is unavailable. A parameter with that name exists.')
-        if name.isdigit():
-            raise ModelError(f'Name "{name}" is unavailable. Names must not be numeric strings.')
-        for special_character in Model.special_characters:
-            if special_character in name:
-                errmsg = f'Name "{name}" is unavailable. '
-                errmsg += f'Names must not contain special characters: {Model.special_characters}.'
-                raise ModelError(errmsg)
+    def __getitem__(self, key):
+        if isinstance(key, str):
+            return self.get_element(key)
+        if hasattr(self.__class__, "__missing__"):
+            return self.__class__.__missing__(self, key)
+        raise KeyError(f"{key} is an invalid key.")
 
     def __apply_initial_conditions(self):
         # initalize
@@ -266,17 +277,6 @@ class Model():
         }
         self.expr = BuildExpression(namespace=base_namespace, blacklist=["="], sanitize=True)
 
-    def _ipython_display_(self, use_matplotlib=False):
-        if self.domain is None:
-            print(self)
-        else:
-            self.domain.plot_types(width="auto", height="auto", use_matplotlib=use_matplotlib)
-
-    def __resolve_parameters(self):
-        self.update_namespace()
-        for param in self.listOfParameters:
-            self.listOfParameters[param]._evaluate(self.namespace) # pylint: disable=protected-access
-
     def __update_diffusion_restrictions(self):
         for species in self.listOfSpecies.values():
             if isinstance(species.restrict_to, list):
@@ -284,89 +284,263 @@ class Model():
             elif isinstance(species.restrict_to, str):
                 self.listOfDiffusionRestrictions[species] = [species.restrict_to]
 
-    def compile_prep(self):
-        """
-        Make sure all paramters are evaluated to scalars, update the models diffusion restrictions,
-        create the models expression utility, and generate the domain list of type ids in preperation
-        of compiling the simulation files.
-
-        :returns: The stoichiometric and dependency_graph
-        :rtype: tuple
-
-        :raises ModelError: Timestep size exceeds output frequency or Model is missing a domain
-        """
-        try:
-            self.tspan.validate(coverage="all")
-        except TimespanError as err:
-            raise ModelError(f"Failed to validate timespan. Reason given: {err}") from err
-
+    def _ipython_display_(self, use_matplotlib=False):
         if self.domain is None:
-            raise ModelError("The model's domain is not set.  Use 'add_domain()'.")
-        self.domain.compile_prep()
-        
-        self.__update_diffusion_restrictions()
-        self.__apply_initial_conditions()
-        self.__resolve_parameters()
+            print(self)
+        else:
+            self.domain.plot_types(width="auto", height="auto", use_matplotlib=use_matplotlib)
 
-        sanitized_params = self.sanitized_parameter_names()
-        for species in self.listOfSpecies.values():
-            diff_coeff = species.diffusion_coefficient
-            if isinstance(diff_coeff, str):
-                if diff_coeff not in sanitized_params:
-                    raise ModelError(f"Parameterm {diff_coeff} doesn't exist.")
-                species.diffusion_coefficient = sanitized_params[diff_coeff]
+    def _problem_with_name(self, name):
+        names = Model.reserved_names
+        if name in Model.reserved_names:
+            raise ModelError(
+                f'Name "{name}" is unavailable. It is reserved for internal GillesPy use. Reserved Names: ({names}).'
+            )
+        if name in self.listOfSpecies:
+            raise ModelError(f'Name "{name}" is unavailable. A species with that name exists.')
+        if name in self.listOfParameters:
+            raise ModelError(f'Name "{name}" is unavailable. A parameter with that name exists.')
+        if name in self.listOfReactions:
+            raise ModelError(f'Name "{name}" is unavailable. A reaction with that name exists.')
+        if name.isdigit():
+            raise ModelError(f'Name "{name}" is unavailable. Names must not be numeric strings.')
+        for special_character in Model.special_characters:
+            if special_character in name:
+                chars = Model.special_characters
+                raise ModelError(
+                    f'Name "{name}" is unavailable. Names must not contain special characters: {chars}.'
+                )
 
-        self.__get_expression_utility()
-        stoich_matrix = self.__create_stoichiometric_matrix()
-        dep_graph = self.__create_dependency_graph()
+    def _resolve_parameter(self, parameter):
+        try:
+            parameter.validate()
+            self.update_namespace()
+            parameter._evaluate(self.namespace) # pylint: disable=protected-access
+        except ModelError as err:
+            raise ModelError(
+                f"Could not add/resolve parameter: {parameter.name}, Reason given: {err}"
+            ) from err
 
-        return stoich_matrix, dep_graph
+    def _resolve_all_parameters(self):
+        for _, parameter in self.listOfParameters.items():
+            self._resolve_parameter(parameter)
 
-    def add_species(self, obj):
+    def _resolve_reaction(self, reaction):
+        try:
+            reaction.validate()
+
+            # If the rate parameter exists in the reaction, confirm that it is a part of the model
+            if reaction.marate is not None:
+                name = reaction.marate if isinstance(reaction.marate, str) else reaction.marate.name
+                if isinstance(reaction.marate, str) and not reaction.marate.replace(".", "", 1).isdigit():
+                    reaction.marate = self.get_parameter(name)
+
+            # Confirm that all species in reactants are part of the model
+            for species in list(reaction.reactants.keys()):
+                stoichiometry = reaction.reactants[species]
+                name = species if isinstance(species, str) else species.name
+                stoich_spec = self.get_species(name)
+                if stoich_spec not in reaction.reactants:
+                    reaction.reactants[stoich_spec] = stoichiometry
+                    del reaction.reactants[species]
+
+            # Confirm that all species in products are part of the model
+            for species in list(reaction.products.keys()):
+                stoichiometry = reaction.products[species]
+                name = species if isinstance(species, str) else species.name
+                stoich_spec = self.get_species(name)
+                if stoich_spec not in reaction.products:
+                    reaction.products[stoich_spec] = stoichiometry
+                    del reaction.products[species]
+        except ModelError as err:
+            raise ModelError(f"Could not add/resolve reaction: {reaction.name}, Reason given: {err}") from err
+
+    def _resolve_all_reactions(self):
+        for _, reaction in self.listOfReactions.items():
+            self._resolve_reaction(reaction)
+
+    def update_namespace(self):
         """
-        Adds a species, or list of species to the model. Will return the added object upon success.
+        Create a dict with flattened parameter and species objects.
+        """
+        self.namespace = OrderedDict([])
+        for param in self.listOfParameters:
+            self.namespace[param] = self.listOfParameters[param].value
 
-        :param obj: The species or list of species to be added to the model object.
-        :type obj: spatialpy.core.species.Species | list(spatialpy.core.species.Species
+    def add(self, components):
+        """
+        Adds a component, or list of components to the model. If a list is provided, Species
+        and Parameters are added before other components.  Lists may contain any combination
+        of accepted types other than lists and do not need to be in any particular order.
 
-        :returns: Species object which was added to the model.
+        :param components: The component or list of components to be added the the model.
+        :type components: Species, Parameters, Reactions, Domain, Data Function, \
+                          Initial Conditions, Boundary Conditions, and TimeSpan or list
+
+        :returns: The components that were added to the model.
+        :rtype: Species, Parameters, Reactions, Domain, Data Function, \
+                Initial Conditions, Boundary Conditions, TimeSpan, or list
+
+        :raises ModelError: Component is invalid.
+        """
+        initialcondition_names = [
+            PlaceInitialCondition.__name__,
+            ScatterInitialCondition.__name__,
+            UniformInitialCondition.__name__
+        ]
+        if isinstance(components, list):
+            params = []
+            others = []
+            for component in components:
+                if isinstance(component, Species) or type(component).__name__ in Species.__name__:
+                    self.add_species(component)
+                elif isinstance(component, Parameter) or type(component).__name__ in Parameter.__name__:
+                    params.append(component)
+                else:
+                    others.append(component)
+
+            for param in params:
+                self.add_parameter(param)
+            for component in others:
+                self.add(component)
+        elif isinstance(components, BoundaryCondition) or type(components).__name__ == BoundaryCondition.__name__:
+            self.add_boundary_condition(components)
+        elif isinstance(components, DataFunction) or type(components).__name__ == DataFunction.__name__:
+            self.add_data_function(components)
+        elif isinstance(components, Domain) or type(components).__name__ == Domain.__name__:
+            self.add_domain(components)
+        elif isinstance(components, InitialCondition) or type(components).__name__ in initialcondition_names:
+            self.add_initial_condition(components)
+        elif isinstance(components, Parameter) or type(components).__name__ == Parameter.__name__:
+            self.add_parameter(components)
+        elif isinstance(components, Reaction) or type(components).__name__ == Reaction.__name__:
+            self.add_reaction(components)
+        elif isinstance(components, Species) or type(components).__name__ == Species.__name__:
+            self.add_species(components)
+        elif isinstance(components, TimeSpan) or type(components).__name__ == TimeSpan.__name__:
+            self.timespan(components)
+        else:
+            raise ModelError(f"Unsupported component: {type(components)} is not a valid component.")
+        return components
+
+    def get_element(self, name):
+        """
+        Get a model element specified by name.
+
+        :param name: Name of the element to be returned.
+        :type name: str
+
+        :returns: The specified spatialpy.Model element.
+        :rtype: Species, Parameters, Reactions, Domain, Data Function, or TimeSpan
+        """
+        if name in ("tspan", "timespan"):
+            return self.tspan
+        if name == "domain":
+            return self.domain
+        if name in self.listOfSpecies:
+            return self.get_species(name)
+        if name in self.listOfParameters:
+            return self.get_parameter(name)
+        if name in self.listOfReactions:
+            return self.get_reaction(name)
+        if name in self.listOfDataFunctions:
+            return self.get_data_function(name)
+        raise ModelError(f"{self.name} does not contain an element named {name}.")
+
+    def add_domain(self, domain):
+        """
+        Add a spatial domain to the model
+
+        :param domain: The Domain object to be added to the model
+        :type domain: spatialpy.core.domain.Domain
+
+        :raises ModelError: Invalid Domain object
+        """
+        if not isinstance(domain, Domain) and type(domain).__name__ != Domain.__name__:
+            raise ModelError(
+                "Unexpected parameter for add_domain. Parameter must be of type SpatialPy.Domain."
+            )
+
+        self.domain = domain
+        return domain
+
+    def add_species(self, species):
+        """
+        Adds a species, or list of species to the model.
+
+        :param species: The species or list of species to be added to the model object.
+        :type species: spatialpy.core.species.Species | list(spatialpy.core.species.Species
+
+        :returns: The species or list of species that were added to the model.
         :rtype: spatialpy.core.species.Species | list(spatialpy.core.species.Species)
 
-        :raises ModelError: If obj is not a spatialpy.core.species.Species
+        :raises ModelError: If an invalid species is provided or if Species.validate fails.
         """
-        from spatialpy.core.species import Species # pylint: disable=import-outside-toplevel
-        if isinstance(obj, list):
-            for species in obj:
-                self.add_species(species)
-        elif isinstance(obj, Species) or type(obj).__name__ == 'Species':
-            self.__problem_with_name(obj.name)
-            self.species_map[obj] = len(self.listOfSpecies)
-            self.listOfSpecies[obj.name] = obj
+        if isinstance(species, list):
+            for spec in species:
+                self.add_species(spec)
+        elif isinstance(species, Species) or type(species).__name__ == "Species":
+            try:
+                species.validate()
+                self._problem_with_name(species.name)
+                self.species_map[species] = self.get_num_species()
+                self.listOfSpecies[species.name] = species
+                self._listOfSpecies[species.name] = f'S{len(self._listOfSpecies)}'
+            except ModelError as err:
+                errmsg = f"Could not add species: {species.name}, Reason given: {err}"
+                raise ModelError(errmsg) from err
         else:
-            raise ModelError("Unexpected parameter for add_species. Parameter must be Species or list of Species.")
-        return obj
+            errmsg = f"species must be of type Species or list of Species not {type(species)}"
+            raise ModelError(errmsg)
+        return species
+
+    def delete_species(self, name):
+        """
+        Removes a species object by name.
+
+        :param name: Name of the species object to be removed
+        :type name: str
+
+        :raises ModelError: If species is not part of the model.
+        """
+        try:
+            self.listOfSpecies.pop(name)
+            if name in self._listOfSpecies:
+                self._listOfSpecies.pop(name)
+        except KeyError as err:
+            raise ModelError(
+                f"{self.name} does not contain a species named {name}."
+            ) from err
 
     def delete_all_species(self):
         """
-        Remove all species from model.listOfSpecies.
+        Removes all species from the model object.
         """
         self.listOfSpecies.clear()
+        self._listOfSpecies.clear()
 
-    def delete_species(self, obj):
+    def get_species(self, name):
         """
-        Remove a Species from model.listOfSpecies.
+        Returns a species object by name.
 
-        :param obj: Species object to be removed
-        :type obj: spatialpy.core.species.Species
+        :param name: Name of the species object to be returned.
+        :type name: str
+
+        :returns: The specified species object.
+        :rtype: spatialpy.core.species.Species
+
+        :raises ModelError: If the species is not part of the model.
         """
-        self.listOfSpecies.pop(obj) # raises key error if param is missing
+        if name not in self.listOfSpecies:
+            raise ModelError(f"Species {name} could not be found in the model.")
+        return self.listOfSpecies[name]
 
     def get_all_species(self):
         """
         Returns a dictionary of all species in the model using names as keys.
 
-        :returns: A dictionary of all species in the form of {"species_name":Species_object}
-        :rtype: dict
+        :returns: A dict of all species in the model, in the form: {name : species object}.
+        :rtype: OrderedDict
         """
         return self.listOfSpecies
 
@@ -379,103 +553,151 @@ class Model():
         """
         return len(self.listOfSpecies)
 
-    def get_species(self, sname):
-        """
-        Returns target species from model as object.
-
-        :param sname: name of species to be returned.
-        :type sname: str
-
-        :returns: The Species objected represented by given 'sname'
-        :rtype: spatialpy.core.species.Species
-
-        :raises ModelError: if the model does not contain the requested species
-        """
-        try:
-            return self.listOfSpecies[sname]
-        except KeyError as err:
-            raise ModelError(f"No species named {sname}") from err
-
     def sanitized_species_names(self):
         """
         Generate a dictionary mapping user chosen species names to simplified formats which will be used
         later on by SpatialPySolvers evaluating reaction propensity functions.
 
         :returns: the dictionary mapping user species names to their internal SpatialPy notation.
-        :rtype: dict
+        :rtype: OrderedDict
         """
         species_name_mapping = OrderedDict([])
         for i, name in enumerate(self.listOfSpecies.keys()):
             species_name_mapping[name] = f'x[{i}]'
         return species_name_mapping
 
-    def add_parameter(self,params):
+    def add_initial_condition(self, init_cond):
         """
-        Add Parameter(s) to model.listOfParameters. Input can be either a single
-        Parameter object or a list of Parameter objects.
+        Add an initial condition object to the initialization of the model.
 
-        :param params: Parameter object or list of Parameters to be added.
-        :type params: spatialpy.core.parameter.Parameter | list(spatialpy.core.parameter.Parameter)
+        :param init_cond: Initial condition to be added.
+        :type init_cond: spatialpy.core.initialcondition.InitialCondition
 
-        :returns: Parameter object which has been added to the model.
+        :returns: The initial condition or list of initial conditions that were added to the model.
+        :rtype: spatialpy.core.initialcondition.InitialCondition | \
+                list(spatialpy.core.initialcondition.InitialCondition)
+
+        :raises ModelError: If an invalid initial condition is provided.
+        """
+        names = [
+            PlaceInitialCondition.__name__,
+            ScatterInitialCondition.__name__,
+            UniformInitialCondition.__name__
+        ]
+        if isinstance(init_cond, list):
+            for initial_condition in init_cond:
+                self.add_initial_condition(initial_condition)
+        elif isinstance(init_cond, InitialCondition) or type(init_cond).__name__ in names:
+            self.listOfInitialConditions.append(init_cond)
+        else:
+            errmsg = f"init_cond must be of type InitialCondition or list of InitialCondition not {type(init_cond)}"
+            raise ModelError(errmsg)
+        return init_cond
+
+    def delete_initial_condition(self, init_cond):
+        """
+        Removes an initial condition object from the model object.
+
+        :param init_cond: initial condition object to be removed.
+        :type init_cond: spatialpy.core.InitialCondition
+
+        :raises ModelError: If the initial condition is not part of the model.
+        """
+        try:
+            index = self.listOfInitialConditions.index(init_cond)
+            self.listOfInitialConditions.pop(index)
+        except ValueError as err:
+            raise ModelError(
+                f"{self.name} does not contain this initial condition."
+            ) from err
+
+    def delete_all_initial_conditions(self):
+        """
+        Removes all initial conditions from the model object.
+        """
+        self.listOfInitialConditions.clear()
+
+    def get_all_initial_conditions(self):
+        """
+        Returns a list of all initial conditions in the model.
+
+        :returns: A list of all initial conditions in the model.
+        :rtype: list
+        """
+        return self.listOfInitialConditions
+
+    def add_parameter(self, parameters):
+        """
+        Adds a parameter, or list of parameters to the model.
+
+        :param parameters:  The parameter or list of parameters to be added to the model object.
+        :type parameters: spatialpy.core.parameter.Parameter | list(spatialpy.core.parameter.Parameter)
+
+        :returns: A parameter or list of Parameters that were added to the model.
         :rtype: spatialpy.core.parameter.Parameter | list(spatialpy.core.parameter.Parameter)
 
-        :raises ModelError: if obj is not a spatialpy.core.parameter.Parameter
+        :raises ModelError: If an invalid parameter is provided or if Parameter.validate fails.
         """
-        from spatialpy.core.parameter import Parameter # pylint: disable=import-outside-toplevel
-        if isinstance(params,list):
-            for param in params:
+        if isinstance(parameters, list):
+            for param in parameters:
                 self.add_parameter(param)
-        elif isinstance(params, Parameter) or  type(params).__name__ == 'Parameter':
-            self.__problem_with_name(params.name)
-            self.update_namespace()
-            params._evaluate(self.namespace) # pylint: disable=protected-access
-            self.listOfParameters[params.name] = params
+        elif isinstance(parameters, Parameter) or type(parameters).__name__ == 'Parameter':
+            self._problem_with_name(parameters.name)
+            self._resolve_parameter(parameters)
+            self.listOfParameters[parameters.name] = parameters
+            self._listOfParameters[parameters.name] = f'P{len(self._listOfParameters)}'
         else:
-            errmsg = f"Parameter '{params.name}' needs to be of type '{Parameter}', it is of type '{params}'"
+            errmsg = f"parameters must be of type Parameter or list of Parameter not {type(parameters)}"
             raise ModelError(errmsg)
-        return params
+        return parameters
+
+    def delete_parameter(self, name):
+        """
+        Removes a parameter object by name.
+
+        :param name: Name of the parameter object to be removed.
+        :type name: str
+        """
+        try:
+            self.listOfParameters.pop(name)
+            if name in self._listOfParameters:
+                self._listOfParameters.pop(name)
+        except KeyError as err:
+            raise ModelError(
+                f"{self.name} does not contain a parameter named {name}"
+            ) from err
 
     def delete_all_parameters(self):
         """
-        Remove all parameters from model.listOfParameters.
+        Removes all parameters from model object.
         """
         self.listOfParameters.clear()
+        self._listOfParameters.clear()
 
-    def delete_parameter(self, obj):
+    def get_parameter(self, name):
         """
-        Remove a Parameter from model.listOfParameters.
+        Returns a parameter object by name.
 
-        :param obj: Parameter object to be removed
-        :type obj: spatialpy.core.parameter.Parameter
+        :param name: Name of the parameter object to be returned
+        :type name: str
+
+        :returns: The specified parameter object.
+        :rtype: Spatialpy.core.parameter.Parameter
+
+        :raises ModelError: If the parameter is not part of the model.
         """
-        self.listOfParameters.pop(obj)
+        if name not in self.listOfParameters:
+            raise ModelError(f"Parameter {name} could not be found in the model.")
+        return self.listOfParameters[name]
 
     def get_all_parameters(self):
         """
         Return a dictionary of all model parameters, indexed by name.
 
-        :returns: A dictionary of all model parameters in the form {'param_name':param_obj}
-        :rtype: dict
+        :returns: A dict of all parameters in the model, in the form: {name : parameter object}
+        :rtype: OrderedDict
         """
         return self.listOfParameters
-
-    def get_parameter(self, pname):
-        """
-        Return the Parameter object from model associated with 'pname'
-
-        :param pname: Name of parameter to be returned
-        :type pname: str
-
-        :returns: The Parameter object represented in the model by 'pname'
-        :rtype: Spatialpy.core.parameter.Parameter
-
-        :raises ModelError: No parameter named {pname}
-        """
-        try:
-            return self.listOfParameters[pname]
-        except KeyError as err:
-            raise ModelError(f"No parameter named {pname}") from err
 
     def sanitized_parameter_names(self):
         """
@@ -483,7 +705,7 @@ class Model():
         later on by SpatialPySolvers evaluating reaction propensity functions.
 
         :returns: the dictionary mapping user parameter names to their internal SpatialPy notation.
-        :rtype: dict
+        :rtype: OrderedDict
         """
         parameter_name_mapping = OrderedDict()
         for i, name in enumerate(self.listOfParameters.keys()):
@@ -491,52 +713,80 @@ class Model():
                 parameter_name_mapping[name] = f'P{i}'
         return parameter_name_mapping
 
-    def add_reaction(self, reacs):
+    def add_reaction(self, reactions):
         """
-        Add Reaction(s) to the model. Input can be single instance, a list of instances
-        or a dict with name, instance pairs.
+        Adds a reaction, or list of reactions to the model.
 
-        :param reacs: Reaction or list of Reactions to be added.
-        :type reacs: spatialpy.core.reaction.Reaction | list(spatialpy.core.reaction.Reaction)
+        :param reactions: The reaction or list of reactions to be added to the model object
+        :type reactions: spatialpy.core.reaction.Reaction | list(spatialpy.core.reaction.Reaction)
 
-        :returns: The Reaction object(s) added to the model
+        :returns: The reaction or list of reactions that were added to the model.
         :rtype: spatialpy.core.reaction.Reaction | list(spatialpy.core.reaction.Reaction)
 
-        :raises ModelError: if obj is not a spatialpy.core.reaction.Reaction
+        :raises ModelError: If an invalid reaction is provided or if Reaction.validate fails.
         """
-        from spatialpy.core.reaction import Reaction # pylint: disable=import-outside-toplevel
-        if isinstance(reacs, list):
-            for reaction in reacs:
+        if isinstance(reactions, list):
+            for reaction in reactions:
                 self.add_reaction(reaction)
-        elif isinstance(reacs, Reaction) or type(reacs).__name__ == "Reaction":
-            self.__problem_with_name(reacs.name)
-            reacs.initialize(self)
-            self.listOfReactions[reacs.name] = reacs
+        elif isinstance(reactions, Reaction) or type(reactions).__name__ == "Reaction":
+            self._problem_with_name(reactions.name)
+            self._resolve_reaction(reactions)
+            self.listOfReactions[reactions.name] = reactions
+            # Build Sanitized reaction as well
+            sanitized_reaction = reactions._create_sanitized_reaction(
+                len(self.listOfReactions), self._listOfSpecies, self._listOfParameters
+            )
+            self._listOfReactions[reactions.name] = sanitized_reaction
         else:
-            raise ModelError("add_reaction() takes a spatialpy.Reaction object or list of objects")
-        return reacs
+            errmsg = f"reactions must be of type Reaction or list of Reaction not {type(reactions)}"
+            raise ModelError(errmsg)
+        return reactions
+
+    def delete_reaction(self, name):
+        """
+        Removes a reaction object by name.
+
+        :param name: Name of the reaction object to be removed.
+        :type name: str
+        """
+        try:
+            self.listOfReactions.pop(name)
+            if name in self._listOfReactions:
+                self._listOfReactions.pop(name)
+        except KeyError as err:
+            raise ModelError(
+                f"{self.name} does not contain a reaction named {name}"
+            ) from err
 
     def delete_all_reactions(self):
         """
-        Remove all reactions from model.listOfReactions.
+        Removes all reactions from the model object.
         """
         self.listOfReactions.clear()
+        self._listOfReactions.clear()
 
-    def delete_reaction(self, obj):
+    def get_reaction(self, rname):
         """
-        Remove reaction from model.listOfReactions
+        Returns a reaction object by name.
 
-        :param obj: Reaction to be removed.
-        :type obj: spatialpy.core.reaction.Reaction
+        :param name: Name of the reaction object to be returned
+        :type name: str
+
+        :returns: The specified reaction object.
+        :rtype: spatialpy.core.reaction.Reaction
+
+        :raises ModelError: If the reaction is not part of the model.
         """
-        self.listOfReactions.pop(obj)
+        if name not in self.listOfReactions:
+            raise ModelError(f"Reaction {name} could not be found in the model.")
+        return self.listOfReactions[name]
 
     def get_all_reactions(self):
         """
         Returns a dictionary of all model reactions using names as keys.
 
-        :returns: A dictionary of reactions in the form of {'react_name':react_obj}
-        :rtype: dict
+        :returns: A dict of all reaction in the model, in the form: {name : reaction object}.
+        :rtype: OrderedDict
         """
         return self.listOfReactions
 
@@ -549,61 +799,147 @@ class Model():
         """
         return len(self.listOfReactions)
 
-    def get_reaction(self, rname):
+    def add_boundary_condition(self, bound_cond):
         """
-        Retrieve a reaction object from the model by name
+        Add an boundary condition object to the model.
 
-        :param rname: name of the reaction to be returned
-        :type rname: str
+        :param bound_cond: Boundary condition to be added
+        :type bound_cond: spatialpy.core.boundarycondition.BoundaryCondition
 
-        :returns: The Reaction Object in the model represented by 'rname'
-        :rtype: spatialpy.core.reaction.Reaction
+        :returns: The boundary condition or list of boundary conditions that were added to the model.
+        :rtype: spatialpy.core.boundarycondition.BoundaryCondition | \
+                list(spatialpy.core.boundarycondition.BoundaryCondition)
 
-        :raises ModelError: Could not find reaction
+        :raises ModelError: If an invalid boundary conidition is provided.
+        """
+        if isinstance(bound_cond, list):
+            for boundary_condition in bound_cond:
+                self.add_boundary_condition(boundary_condition)
+        elif isinstance(bound_cond, BoundaryCondition) or type(bound_cond).__name__ in "BoundaryCondition":
+            bound_cond.model = self
+            self.listOfBoundaryConditions.append(bound_cond)
+        else:
+            errmsg = f"bound_cond must be of type BoundaryCondition or list of BoundaryCondition not {type(bound_cond)}"
+            raise ModelError(errmsg)
+        return bound_cond
+
+    def delete_boundary_condition(self, bound_cond):
+        """
+        Removes an boundary condition object from the model object.
+
+        :param bound_cond: boundary condition object to be removed.
+        :type bound_cond: spatialpy.core.BoundaryCondition
+
+        :raises ModelError: If the boundary condition is not part of the model.
         """
         try:
-            return self.listOfReactions[rname]
-        except KeyError as err:
-            raise ModelError(f"No reaction named {rname}") from err
+            index = self.listOfBoundaryConditions.index(bound_cond)
+            self.listOfBoundaryConditions.pop(index)
+        except ValueError as err:
+            raise ModelError(
+                f"{self.name} does not contain this boundary condition."
+            ) from err
 
-    def run(self, number_of_trajectories=1, seed=None, timeout=None,
-            number_of_threads=None, debug_level=0, debug=False, profile=False):
+    def delete_all_boundary_conditions(self):
         """
-        Simulate the model. Returns a result object containing simulation results.
-
-        :param number_of_trajectories: How many trajectories should be run.
-        :type number_of_trajectories: int
-
-        :param seed: The random seed given to the solver.
-        :type seed: int
-
-        :param timeout: Number of seconds for simulation to run.  Simulation will be
-                        killed upon reaching timeout.
-        :type timeout: int
-
-        :param number_of_threads: The number threads the solver will use.
-        :type number_of_threads: int
-
-        :param debug_level: Level of output from the solver: 0, 1, or 2. Default: 0.
-        :type debug_level: int
-
-        :param debug: Optional flag to print out additional debug info during simulation.
-        :type debug: bool
-
-        :param profile: Optional flag to print out addtional performance profiling for simulation.
-        :type profile: bool
-
-        :returns: A SpatialPy Result object containing simulation data.
-        :rtype: spatialpy.core.result.Result
+        Removes all boundary conditions from the model object.
         """
-        from spatialpy.solvers.solver import Solver # pylint: disable=import-outside-toplevel
+        self.listOfBoundaryConditions.clear()
 
-        sol = Solver(self, debug_level=debug_level)
+    def get_all_boundary_conditions(self):
+        """
+        Returns a list of all boundary conditions in the model.
 
-        return sol.run(number_of_trajectories=number_of_trajectories, seed=seed, timeout=timeout,
-                       number_of_threads=number_of_threads, debug=debug, profile=profile)
+        :returns: A list of all boundary conditions in the model.
+        :rtype: list
+        """
+        return self.listOfBoundaryConditions
 
+    def add_data_function(self, data_function):
+        """
+        Add a scalar spatial function to the simulation. This is useful if you have a
+        spatially varying input to your model. Argument is a instances of subclass of the
+        spatialpy.DataFunction class. It must implement a function 'map(point)' which takes a
+        the spatial positon 'point' as an array, and it returns a float value.
 
+        :param data_function: Data function to be added.
+        :type data_function: spatialpy.DataFunction
+
+        :returns: DataFunction object(s) added tothe model.
+        :rtype: spatialpy.core.datafunction.DataFunction | list(spatialpy.core.datafunction.DataFunction)
+
+        :raises ModelError: Invalid DataFunction
+        """
+        if isinstance(data_function, list):
+            for data_fn in data_function:
+                self.add_data_function(data_fn)
+        elif isinstance(data_function, DataFunction) or type(data_function).__name__ == 'DataFunction':
+            self._problem_with_name(data_function.name)
+            self.listOfDataFunctions[data_function.name] = data_function
+        else:
+            errmsg = f"data_function must be of type DataFunction or list of DataFunction not {type(data_function)}"
+            raise ModelError(errmsg)
+        return data_function
+
+    def delete_data_function(self, name):
+        """
+        Removes an data function object from the model object.
+
+        :param name: data function object to be removed.
+        :type name: spatialpy.core.DataFunction
+
+        :raises ModelError: If the data function is not part of the model.
+        """
+        try:
+            self.listOfDataFunctions.pop(name)
+        except ValueError as err:
+            raise ModelError(
+                f"{self.name} does not contain a data function named {name}."
+            ) from err
+
+    def delete_all_data_functions(self):
+        """
+        Removes all data functions from the model object.
+        """
+        self.listOfDataFunctions.clear()
+
+    def get_data_function(self, name):
+        """
+        Returns a data function object by name.
+
+        :param name: Name of the data function object to be returned
+        :type name: str
+
+        :returns: The specified data function object.
+        :rtype: spatialpy.core.datafunction.DataFunction
+
+        :raises ModelError: If the data function is not part of the model.
+        """
+        if name not in self.listOfDataFunctions:
+            raise ModelError(f"Data function {name} could not be found in the model.")
+        return self.listOfDataFunctions[name]
+
+    def get_all_data_functions(self):
+        """
+        Returns a dict of all data functions in the model.
+
+        :returns: A dict of all data functions in the model.
+        :rtype: OrderedDict
+        """
+        return self.listOfDataFunctions
+
+    def sanitized_data_function_names(self):
+        """
+        Generate a dictionary mapping user chosen data function names to simplified formats which will be used
+        later on by SpatialPySolvers evaluating reaction propensity functions.
+
+        :returns: the dictionary mapping user data function names to their internal SpatialPy notation.
+        :rtype: OrderedDict
+        """
+        data_fn_name_mapping = OrderedDict([])
+        for i, name in enumerate(self.listOfDataFunctions.keys()):
+            data_fn_name_mapping[name] = f'data_fn[{i}]'
+        return data_fn_name_mapping
 
     def set_timesteps(self, output_interval, num_steps, timestep_size=None):
         """
@@ -642,84 +978,78 @@ class Model():
         else:
             self.tspan = TimeSpan(time_span, timestep_size=timestep_size)
 
-    def add_domain(self, domain):
+    def compile_prep(self):
         """
-        Add a spatial domain to the model
+        Make sure all paramters are evaluated to scalars, update the models diffusion restrictions,
+        create the models expression utility, and generate the domain list of type ids in preperation
+        of compiling the simulation files.
 
-        :param domain: The Domain object to be added to the model
-        :type domain: spatialpy.core.domain.Domain
+        :returns: The stoichiometric and dependency_graph
+        :rtype: tuple
 
-        :raises ModelError: Invalid Domain object
+        :raises ModelError: Timestep size exceeds output frequency or Model is missing a domain
         """
-        from spatialpy.core.domain import Domain # pylint: disable=import-outside-toplevel
-        if not isinstance(domain,Domain) and type(domain).__name__ != 'Domain':
-            raise ModelError("Unexpected parameter for add_domain. Parameter must be a Domain.")
+        try:
+            self.tspan.validate(coverage="all")
+        except TimespanError as err:
+            raise ModelError(f"Failed to validate timespan. Reason given: {err}") from err
 
-        self.domain = domain
+        if self.domain is None:
+            raise ModelError("The model's domain is not set.  Use 'add_domain()'.")
+        self.domain.compile_prep()
+        
+        self.__update_diffusion_restrictions()
+        self.__apply_initial_conditions()
+        self._resolve_all_parameters()
+        self._resolve_all_reactions()
 
-    def add_data_function(self, data_function):
+        sanitized_params = self.sanitized_parameter_names()
+        for species in self.listOfSpecies.values():
+            diff_coeff = species.diffusion_coefficient
+            if isinstance(diff_coeff, str):
+                if diff_coeff not in sanitized_params:
+                    raise ModelError(f"Parameterm {diff_coeff} doesn't exist.")
+                species.diffusion_coefficient = sanitized_params[diff_coeff]
+
+        self.__get_expression_utility()
+        stoich_matrix = self.__create_stoichiometric_matrix()
+        dep_graph = self.__create_dependency_graph()
+
+        return stoich_matrix, dep_graph
+
+    def run(self, number_of_trajectories=1, seed=None, timeout=None,
+            number_of_threads=None, debug_level=0, debug=False, profile=False):
         """
-        Add a scalar spatial function to the simulation. This is useful if you have a
-        spatially varying input to your model. Argument is a instances of subclass of the
-        spatialpy.DataFunction class. It must implement a function 'map(point)' which takes a
-        the spatial positon 'point' as an array, and it returns a float value.
+        Simulate the model. Returns a result object containing simulation results.
 
-        :param data_function: Data function to be added.
-        :type data_function: spatialpy.DataFunction
+        :param number_of_trajectories: How many trajectories should be run.
+        :type number_of_trajectories: int
 
-        :returns: DataFunction object(s) added tothe model.
-        :rtype: spatialpy.core.datafunction.DataFunction | list(spatialpy.core.datafunction.DataFunction)
+        :param seed: The random seed given to the solver.
+        :type seed: int
 
-        :raises ModelError: Invalid DataFunction
+        :param timeout: Number of seconds for simulation to run.  Simulation will be
+                        killed upon reaching timeout.
+        :type timeout: int
+
+        :param number_of_threads: The number threads the solver will use.
+        :type number_of_threads: int
+
+        :param debug_level: Level of output from the solver: 0, 1, or 2. Default: 0.
+        :type debug_level: int
+
+        :param debug: Optional flag to print out additional debug info during simulation.
+        :type debug: bool
+
+        :param profile: Optional flag to print out addtional performance profiling for simulation.
+        :type profile: bool
+
+        :returns: A SpatialPy Result object containing simulation data.
+        :rtype: spatialpy.core.result.Result
         """
-        from spatialpy.core.datafunction import DataFunction # pylint: disable=import-outside-toplevel
-        if isinstance(data_function, list):
-            for data_fn in data_function:
-                self.add_data_function(data_fn)
-        elif isinstance(data_function, DataFunction) or type(data_function).__name__ == 'DataFunction':
-            self.__problem_with_name(data_function.name)
-            self.listOfDataFunctions.append(data_function)
-        else:
-            errmsg = "Unexpected parameter for add_data_function. "
-            errmsg += "Parameter must be DataFunction or list of DataFunctions."
-            raise ModelError(errmsg)
-        return data_function
+        from spatialpy.solvers.solver import Solver # pylint: disable=import-outside-toplevel
 
-    def add_initial_condition(self, init_cond):
-        """
-        Add an initial condition object to the initialization of the model.
+        sol = Solver(self, debug_level=debug_level)
 
-        :param init_cond: Initial condition to be added
-        :type init_cond: spatialpy.core.initialcondition.InitialCondition
-        """
-        self.listOfInitialConditions.append(init_cond)
-
-    def add_boundary_condition(self, bound_cond):
-        """
-        Add an boundary condition object to the model.
-
-        :param bound_cond: Boundary condition to be added
-        :type bound_cond: spatialpy.core.boundarycondition.BoundaryCondition
-        """
-        bound_cond.model = self
-        self.listOfBoundaryConditions.append(bound_cond)
-
-    def update_namespace(self):
-        """
-        Create a dict with flattened parameter and species objects.
-        """
-        for param in self.listOfParameters:
-            self.namespace[param]=self.listOfParameters[param].value
-
-    def sanitized_data_function_names(self):
-        """
-        Generate a dictionary mapping user chosen data function names to simplified formats which will be used
-        later on by SpatialPySolvers evaluating reaction propensity functions.
-
-        :returns: the dictionary mapping user data function names to their internal SpatialPy notation.
-        :rtype: dict
-        """
-        data_fn_name_mapping = OrderedDict([])
-        for i, data_fn in enumerate(self.listOfDataFunctions):
-            data_fn_name_mapping[data_fn.name] = f'data_fn[{i}]'
-        return data_fn_name_mapping
+        return sol.run(number_of_trajectories=number_of_trajectories, seed=seed, timeout=timeout,
+                       number_of_threads=number_of_threads, debug=debug, profile=profile)
