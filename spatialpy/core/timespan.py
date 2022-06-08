@@ -40,7 +40,7 @@ class TimeSpan(Iterator):
         self.validate(items=items, timestep_size=timestep_size)
 
         if timestep_size is None:
-            timestep_size = int(items[1] - items[0])
+            timestep_size = float(items[1] - items[0])
         self.timestep_size = timestep_size
 
         items_diff = np.diff(items)
