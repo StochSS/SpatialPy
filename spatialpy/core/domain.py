@@ -238,7 +238,7 @@ class Domain():
         type_id = f"type_{type_id}"
         for char in type_id:
             if (char in string.punctuation and char != "_") or char == " ":
-                raise DomainError(f"Type_id cannot contain {char}")
+                raise DomainError(f"Type_id cannot contain '{char}'")
         if type_id not in self.typeNdxMapping:
             self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
         # apply the type to all points, set type for any points that match
@@ -590,7 +590,11 @@ class Domain():
 
         types = {}
         # Normalize volumes to [0, 1]
-        vols = (self.vol - numpy.min(self.vol))/numpy.ptp(self.vol)
+        ptp = numpy.ptp(self.vol)
+        if ptp == 0:
+            vols = numpy.array([0.5] * len(self.vol))
+        else:
+            vols = (self.vol - numpy.min(self.vol)) / ptp
         for i, type_id in enumerate(self.type_id):
             name = type_id[5:]
             if included_types_list is None or name in included_types_list:
