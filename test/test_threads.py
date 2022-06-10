@@ -19,7 +19,7 @@
 import threading
 import subprocess
 import time
-from models.cylinder_demo3D import cylinderDemo3D
+from models.cylinder_demo3D import create_cylinder_demo_3D
 
 class Counter(threading.Thread):
     def run(self):
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     handle = subprocess.Popen("sleep 5", shell=True)
     return_code = handle.wait()
     print("main thread assembling pyurdme model")
-    #model = cylinderDemo3D()
+    #model = create_cylinder_demo_3D()
     print("main thread run pyurdme model")
     #result = model.run(5)
     #result = run_ensemble(model, 5, 43242)

@@ -991,7 +991,7 @@ class Model():
         """
         try:
             self.tspan.validate(coverage="all")
-        except TimespanError as err:
+        except ModelError as err:
             raise ModelError(f"Failed to validate timespan. Reason given: {err}") from err
 
         if self.domain is None:
