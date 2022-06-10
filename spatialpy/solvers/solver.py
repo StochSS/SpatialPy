@@ -239,7 +239,7 @@ class Solver:
                     outstr = f"static double input_data_fn[{len(self.model.listOfDataFunctions) * ncells}] = "
                     outstr += "{"
                     coords = self.model.domain.coordinates()
-                    for ndf, data_fn in enumerate(self.model.listOfDataFunctions):
+                    for ndf, data_fn in enumerate(self.model.listOfDataFunctions.values()):
                         for i in range(ncells):
                             if i > 0 and ndf == 0:
                                 outstr += ','
@@ -291,7 +291,7 @@ class Solver:
         output_step = "unsigned int get_next_output(ParticleSystem* system)\n{\n"
         output_step += "static int index = 0;\n"
         output_step += "const std::vector<unsigned int> output_steps = {"
-        output_step += f"{', '.join(self.model.output_steps.astype(str).tolist())}"
+        output_step += f"{', '.join(self.model.tspan.output_steps.astype(str).tolist())}"
         output_step += "};\nunsigned int next_step = output_steps[index];\n"
         output_step += "index++;\n"
         output_step += "return next_step;\n}\n"
@@ -386,8 +386,8 @@ class Solver:
             system_config += "system->stoch_rxn_propensity_functions = ALLOC_propensities();\n"
             system_config += "system->species_names = input_species_names;\n"
 
-        system_config += f"system->dt = {self.model.timestep_size};\n"
-        system_config += f"system->nt = {self.model.num_timesteps};\n"
+        system_config += f"system->dt = {self.model.tspan.timestep_size};\n"
+        system_config += f"system->nt = {self.model.tspan.num_timesteps};\n"
         if self.h is None:
             self.h = self.model.domain.find_h()
         if self.h == 0.0:

@@ -222,7 +222,11 @@ class Result():
         if property_name == 'type':
             # Normalize volumes to [0, 1]
             vol = data['mass'] / data['rho']
-            vols = (vol - numpy.min(vol))/numpy.ptp(vol)
+            ptp = numpy.ptp(vol)
+            if ptp == 0:
+                vols = numpy.array([0.5] * len(vol))
+            else:
+                vols = (vol - numpy.min(vol)) / ptp
             for i, val in enumerate(data['type']):
                 name = self.model.domain.typeNameMapping[val][5:]
 

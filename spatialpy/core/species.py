@@ -31,19 +31,6 @@ class Species():
     :type restrict_to: int, str, list of ints or list of strs
     """
     def __init__(self, name=None, diffusion_coefficient=None, restrict_to=None):
-        if name is None:
-            raise SpeciesError("Species must have a name")
-        if not isinstance(name, str):
-            raise SpeciesError("Species name must be a string")
-
-        if  diffusion_coefficient is None:
-            raise SpeciesError("Species must have a diffusion_coefficient.")
-        if not (isinstance(diffusion_coefficient, (Parameter, str, float, int)) or \
-                    type(diffusion_coefficient).__name__ == 'Parameter'):
-            raise SpeciesError("Diffusion coefficient must be a spatialpy.Parameter, str, float, or int.")
-        if isinstance(diffusion_coefficient, (float, int)) and diffusion_coefficient < 0:
-            raise SpeciesError("Diffusion coefficient must be non-negative.")
-
         if not (restrict_to is None or isinstance(restrict_to, (str, int, list))):
             raise SpeciesError("Restrict_to must be an int, str or list of ints or strs.")
         if restrict_to is not None and isinstance(restrict_to, (int, str)):
@@ -58,6 +45,8 @@ class Species():
             for type_id in restrict_to:
                 self.restrict_to.append(f"type_{type_id}")
 
+        self.validate()
+
     def __str__(self):
         print_string = f"{self.name}: {str(self.diffusion_coefficient)}"
         return print_string
@@ -71,10 +60,48 @@ class Species():
 
         :raises SpeciesError: If diffusion_coefficient is negative or not a valid type.
         """
-        if not (isinstance(diffusion_coefficient, (Parameter, str, float, int)) or \
-                            type(diffusion_coefficient).__name__ == 'Parameter'):
-            raise SpeciesError("Diffusion coefficient must be a spatialpy.Parameter, str, float, or int.")
-        if diffusion_coefficient < 0:
-            raise SpeciesError("Diffusion coefficient must be non-negative.")
+        self.validate(diffusion_coefficient=diffusion_coefficient, coverage="diffusion_coefficient")
 
         self.diffusion_coefficient = diffusion_coefficient
+
+    def validate(self, diffusion_coefficient=None, coverage="all"):
+        """
+        Validate the species.
+
+        :param coverage: The scope of attributes to validate.  Set to an attribute name to restrict validation \
+                         to a specific attribute.
+        :type coverage: str
+
+        :raises SpeciesError: Attribute is of invalid type.  Required attribute set to None.  \
+                              Attribute is value outside of accepted bounds.
+        """
+        # Check name
+        if coverage in ("all", "name"):
+            if self.name is None:
+                raise SpeciesError("name can't be None type.")
+            if not isinstance(self.name, str):
+                raise SpeciesError(f"name must be of type str not {type(self.name)}.")
+            if self.name == "":
+                raise SpeciesError("name can't be an empty str.")
+
+        # Check diffusion coefficient
+        if coverage in ("all", "diffusion_coefficient"):
+            if coverage == "all" and diffusion_coefficient is None:
+                diffusion_coefficient = self.diffusion_coefficient
+
+            if diffusion_coefficient is None:
+                raise SpeciesError("diffusion_coefficient can't be None type.")
+            if not (isinstance(diffusion_coefficient, (Parameter, str, float, int)) or \
+                    type(diffusion_coefficient).__name__ == 'Parameter'):
+                errmsg = "diffusion_coefficient must be of type SpatialPy.Parameter, "
+                errmsg += f"str, int, float not {type(diffusion_coefficient)}"
+                raise SpeciesError(errmsg)
+            if isinstance(diffusion_coefficient, (int, float)) and diffusion_coefficient < 0:
+                raise SpeciesError("diffusion_coefficient must be a positive value.")
+
+        # Check restrict_to
+        if coverage in ("all", "restrict_to"):
+            if not (self.restrict_to is None or isinstance(self.restrict_to, list)):
+                raise SpeciesError("restrict_to must be None or of type int, str, or list")
+            if self.restrict_to is not None and len(self.restrict_to) == 0:
+                raise SpeciesError("restrict_to can't be an empty list.")
