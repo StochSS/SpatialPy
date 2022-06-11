@@ -25,13 +25,11 @@ Table of contents
   - [_Using the source code repository_](#using-the-source-code-repository)
 - [Usage](#usage)
   - [_Simple example to illustrate the use of SpatialPy_](#simple-example-to-illustrate-the-use-of-spatialpy)
-<!--
   - [_Docker environment_](#docker-environment)
-  - [_Debugging_](#debugging)
-  - [_Profiling_](#profiling)
--->
 - [Getting help](#getting-help)
 - [Contributing](#contributing)
+  - [_Debugging_](#debugging)
+  - [_Profiling_](#profiling)
 - [License](#license)
 - [Authors and history](#authors-and-history)
 - [Acknowledgments](#acknowledgments)
@@ -74,7 +72,6 @@ SpatialPy provides simple object-oriented abstractions for defining a model of a
 
 The `run()` method can be customized using keyword arguments to select different solvers, random seed, data return type and more.  For more detailed examples on how to use SpatialPy, please see the Jupyter notebooks contained in the [examples](https://github.com/StochSS/SpatialPy/tree/main/examples) subdirectory.
 
-<!-- 
 ### Docker environment (DOES NOT WORK)
 
 You can use Docker to create a repeatable environment for developing and debugging SpatialPy. The supplied Dockerfile starts a jupyter server with SpatialPy dependencies installed.
@@ -85,7 +82,7 @@ Otherwise:
 
 ```bash
 docker build -t spatialpy:latest .
-docker run -v ./:/home/jovyan/spatialpy -v ./tmp:/tmp -p 8888:8888 -p 5000:5000
+docker run -it spatialpy:latest -v ./:/home/jovyan/spatialpy -v ./tmp:/tmp -p 8888:8888 -p 5000:5000 /bin/bash -c "start-notebook.sh"
 ```
 
 The SpatialPy repo is mounted into /home/jovyan so you can import it in the usual way for development (see examples).
@@ -94,17 +91,6 @@ Any changes you make to your local codebase are reflected in the docker containe
 
 The `/tmp` directory is also mounted for easy access to build and result directories.
 
-### Debugging
-
-In order to compile the solver binary for use by the debugger, run `solver.compile()` with `debug=True`. This will inject the `-g` flag into the `gcc` command that compiles the solver, enabling gdb debug information.
-
-You can invoke `solver.run_debugger()` anytime after you instantiate a solver in Python to start up a new session of gdbgui. The debugger will be available at http://127.0.0.1:5000.
-
-
-### Profiling
-
-To enable profiling, both `solver.compile()` and `solver.run()` need to be invoked with `profile=True`. If you don't run `solver.compile()` explicitly, invoking `solver.run()` with `profile=True` will run `compile()` correctly for you.
--->
 
 Getting help
 ------------
@@ -124,6 +110,16 @@ New developments happen primarily in the [`develop`](https://github.com/StochSS/
 |:---------------:|:--------------:|
 | [![Build Status](https://github.com/StochSS/SpatialPy/actions/workflows/run-tests.yml/badge.svg)](https://github.com/StochSS/SpatialPy/actions/workflows/run-tests.yml) | [![Build Status](https://github.com/StochSS/SpatialPy/actions/workflows/run-tests.yml/badge.svg?branch=develop)](https://github.com/StochSS/SpatialPy/actions/workflows/run-tests.yml)
 
+### Debugging
+
+In order to compile the solver binary for use by the debugger, run `solver.compile()` with `debug=True`. This will inject the `-g` flag into the `gcc` command that compiles the solver, enabling gdb debug information.
+
+You can invoke `solver.run_debugger()` anytime after you instantiate a solver in Python to start up a new session of gdbgui. The debugger will be available at http://127.0.0.1:5000.
+
+
+### Profiling
+
+To enable profiling, both `solver.compile()` and `solver.run()` need to be invoked with `profile=True`. If you don't run `solver.compile()` explicitly, invoking `solver.run()` with `profile=True` will run `compile()` correctly for you.
 License
 -------
 
