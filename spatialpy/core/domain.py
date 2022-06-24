@@ -834,19 +834,25 @@ class Domain():
             obj = Domain(0, tuple(domain['x_lim']), tuple(domain['y_lim']), tuple(domain['z_lim']),
                         rho0=domain['rho_0'], c0=domain['c_0'], P0=domain['p_0'], gravity=domain['gravity'])
 
-            for particle in domain['particles']:
+            for i, particle in enumerate(domain['particles']):
                 try:
                     type_id = list(filter(
                         lambda d_type, t_ndx=particle['type']: d_type['typeID'] == t_ndx, domain['types']
                     ))[0]['name']
                 except IndexError:
                     type_id = particle['type']
+                if type_id == "Un-Assigned" or type_id == 0:
+                    type_id = "UnAssigned"
                 # StochSS backward compatability check for rho
                 rho = None if "rho" not in particle.keys() else particle['rho']
                 # StochSS backward compatability check for c
                 c = 0 if "c" not in particle.keys() else particle['c']
                 obj.add_point(particle['point'], vol=particle['volume'], mass=particle['mass'],
                               type_id=type_id, nu=particle['nu'], fixed=particle['fixed'], rho=rho, c=c)
+                if "UnAssigned" in obj.type_id[-1]:
+                    obj.type_id[-1] = None
+                    if None not in obj.typeNdxMapping:
+                        obj.typeNdxMapping[None] = 0
 
             return obj
         except KeyError as err:
