@@ -68,7 +68,7 @@ class Domain():
 
         self.vol = numpy.zeros((numpoints), dtype=float)
         self.mass = numpy.zeros((numpoints), dtype=float)
-        self.type_id = numpy.array([None] * numpoints, dtype=object)
+        self.type_id = numpy.array(["type_UnAssigned"] * numpoints, dtype=object)
         self.nu = numpy.zeros((numpoints), dtype=float)
         self.c = numpy.zeros((numpoints), dtype=float)
         self.rho = numpy.zeros((numpoints), dtype=float)
@@ -136,7 +136,7 @@ class Domain():
 
         :raises DomainError: If a type_id is not set or rho=0 for a particle.
         """
-        if self.type_id.tolist().count(None) > 0:
+        if self.type_id.tolist().count("type_UnAssigned") > 0:
             raise DomainError(f"Particles must be assigned a type_id.")
         if numpy.count_nonzero(self.rho) < len(self.rho):
             raise DomainError(f"Rho must be a positive value.")
@@ -184,7 +184,10 @@ class Domain():
             if (char in string.punctuation and char != "_") or char == " ":
                 raise DomainError(f"Type_id cannot contain {char}")
         if type_id not in self.typeNdxMapping:
-            self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
+            if "UnAssigned" in type_id:
+                self.typeNdxMapping[type_id] = 0
+            else:
+                self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
 
         if rho is None:
             rho = mass / vol
@@ -240,7 +243,10 @@ class Domain():
             if (char in string.punctuation and char != "_") or char == " ":
                 raise DomainError(f"Type_id cannot contain '{char}'")
         if type_id not in self.typeNdxMapping:
-            self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
+            if "UnAssigned" in type_id:
+                self.typeNdxMapping[type_id] = 0
+            else:
+                self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
         # apply the type to all points, set type for any points that match
         count = 0
         on_boundary = self.find_boundary_points()
@@ -807,7 +813,10 @@ class Domain():
                         if (char in string.punctuation and char != "_") or char == " ":
                             raise DomainError(f"Type_id cannot contain {char}")
                     if type_id not in self.typeNdxMapping:
-                        self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
+                        if "UnAssigned" in type_id:
+                            self.typeNdxMapping[type_id] = 0
+                        else:
+                            self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
 
                     self.type_id[int(ndx)] = type_id
 
@@ -849,10 +858,6 @@ class Domain():
                 c = 0 if "c" not in particle.keys() else particle['c']
                 obj.add_point(particle['point'], vol=particle['volume'], mass=particle['mass'],
                               type_id=type_id, nu=particle['nu'], fixed=particle['fixed'], rho=rho, c=c)
-                if "UnAssigned" in obj.type_id[-1]:
-                    obj.type_id[-1] = None
-                    if None not in obj.typeNdxMapping:
-                        obj.typeNdxMapping[None] = 0
 
             return obj
         except KeyError as err:
