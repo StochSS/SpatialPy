@@ -623,7 +623,7 @@ class Reaction():
                         raise ReactionError("Type ids in restrict_to must be of type int or str.")
                     if type_id == "":
                         raise ReactionError("Type ids in restrict_to can't be an empty string.")
-                    if "UnAssigned" in type_id:
+                    if isinstance(type_id, str) and "UnAssigned" in type_id:
                         raise ReactionError("'UnAssigned' is not a valid type_id.")
                     if coverage in ("all", "initialized"):
                         if not isinstance(type_id, str):
