@@ -87,6 +87,8 @@ class BoundaryCondition():
         if type_id is not None and not isinstance(type_id, (int, str)):
             raise BoundaryConditionError("Type-ID must be of type int.")
         elif type_id is not None:
+            if "UnAssigned" in type_id:
+                raise BoundaryConditionError("'UnAssigned' is not a valid type_id")
             type_id = f"type_{type_id}"
         if target is None or not (isinstance(target, (str, Species)) or
                 type(target).__name__ == 'Species' or property in ('nu', 'rho', 'v')):
