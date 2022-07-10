@@ -74,7 +74,7 @@ class Domain():
         self.rho = numpy.zeros((numpoints), dtype=float)
         self.fixed = numpy.zeros((numpoints), dtype=bool)
         self.listOfTypeIDs = []
-        self.typeNdxMapping = OrderedDict()
+        self.typeNdxMapping = OrderedDict({"type_UnAssigned": 0})
         self.typeNameMapping = None
 
         self.rho0 = rho0
@@ -187,7 +187,7 @@ class Domain():
             if "UnAssigned" in type_id:
                 self.typeNdxMapping[type_id] = 0
             else:
-                self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
+                self.typeNdxMapping[type_id] = len(self.typeNdxMapping)
 
         if rho is None:
             rho = mass / vol
@@ -246,7 +246,7 @@ class Domain():
             if "UnAssigned" in type_id:
                 self.typeNdxMapping[type_id] = 0
             else:
-                self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
+                self.typeNdxMapping[type_id] = len(self.typeNdxMapping)
         # apply the type to all points, set type for any points that match
         count = 0
         on_boundary = self.find_boundary_points()
@@ -816,7 +816,7 @@ class Domain():
                         if "UnAssigned" in type_id:
                             self.typeNdxMapping[type_id] = 0
                         else:
-                            self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
+                            self.typeNdxMapping[type_id] = len(self.typeNdxMapping)
 
                     self.type_id[int(ndx)] = type_id
 
