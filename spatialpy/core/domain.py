@@ -571,6 +571,9 @@ class Domain():
         :returns: Plotly figure of domain types if, use_matplotlib=False and return_plotly_figure=True
         :rtype: None or dict
         '''
+        if len(self.vertices) == 0:
+            raise DomainError("The domain does not contain particles.")
+
         from spatialpy.core.result import _plotly_iterate # pylint: disable=import-outside-toplevel
 
         if not use_matplotlib:
