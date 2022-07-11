@@ -74,6 +74,68 @@ SpatialPy provides simple object-oriented abstractions for defining a model of a
 
 The `run()` method can be customized using keyword arguments to select different solvers, random seed, data return type and more.  For more detailed examples on how to use SpatialPy, please see the Jupyter notebooks contained in the [examples](https://github.com/StochSS/SpatialPy/tree/main/examples) subdirectory.
 
+### _Simple example to illustrate the use of SpatialPy_
+
+In SpatialPy, a model is expressed as an object. Components, such as the domains, reactions, biochemical species, and characteristics such as the time span for simulation, are all defined within the model. The following Python code represents our spatial birth death model using SpatialPy's facility:
+
+```python
+def create_birth_death(parameter_values=None):
+    # First call the gillespy2.Model initializer.
+    model = spatialpy.Model(name='Spatial Birth-Death')
+    
+    # Define Domain Type IDs as constants of the Model
+    model.HABITAT = "Habitat"
+
+    # Define domain points and attributes of a regional space for simulation.
+    domain = spatialpy.Domain.create_2D_domain(
+        xlim=(0, 1), ylim=(0, 1), nx=10, ny=10, type_id=model.HABITAT, fixed=True
+    )
+    model.add_domain(domain)
+
+    # Define variables for the biochemical species representing Rabbits.
+    Rabbits = spatialpy.Species(name='Rabbits', diffusion_coefficient=0.1)
+    model.add_species(Rabbits)
+
+    # Scatter the initial condition for Rabbits randomly over all types.
+    init_rabbit_pop = spatialpy.ScatterInitialCondition(species='Rabbits', count=100)
+    model.add_initial_condition(init_rabbit_pop)
+
+    # Define parameters for the rates of creation and destruction.
+    kb = spatialpy.Parameter(name='k_birth', expression=10)
+    kd = spatialpy.Parameter(name='k_death', expression=0.1)
+    model.add_parameter([kb, kd])
+
+    # Define reactions channels which cause the system to change over time.
+    # The list of reactants and products for a Reaction object are each a
+    # Python dictionary in which the dictionary keys are Species objects
+    # and the values are stoichiometries of the species in the reaction.
+    birth = spatialpy.Reaction(name='birth', reactants={}, products={"Rabbits":1}, rate="k_birth")
+    death = spatialpy.Reaction(name='death', reactants={"Rabbits":1}, products={}, rate="k_death")
+    model.add_reaction([birth, death])
+
+    # Set the timespan of the simulation.
+    tspan = spatialpy.TimeSpan.linspace(t=10, num_points=11, timestep_size=1)
+    model.timespan(tspan)
+    return model
+```
+
+Given the model creation function above, the model can be simulated by first instantiating the model object, and then invoking the run() method on the object. The following code will run the model once to produce a sample trajectory:
+
+```python
+model = create_birth_death()
+results = model.run()
+```
+
+The results are then stored in a class `Results` object for single trajectory or for multiple trajectories.  Results can be plotted with plotly (offline) using `plot_species()` or in matplotlib using `plot_species(use_matplotlib=True)`.  For additional plotting options such as plotting from a selection of species, or statistical plotting, please see the documentation.:
+
+```python
+results.plot_species(species='Rabbits', t_val=10, use_matplotlib=True)
+```
+
+<p align="center">
+<img width="500px" src="https://raw.githubusercontent.com/StochSS/SpatialPy/readme-example/.graphics/dimerization-example-plot.png">
+</p>
+
 <!-- 
 ### Docker environment (DOES NOT WORK)
 
