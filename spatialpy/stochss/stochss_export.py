@@ -173,12 +173,13 @@ def __build_element(stoich_species):
 def __get_particles(domain):
     s_particles = []
     for i, point in enumerate(domain.vertices):
+        type_id = domain.typeNdxMapping[domain.type_id[i]]
         s_particle = {"fixed":bool(domain.fixed[i]),
                       "mass":domain.mass[i],
                       "nu":domain.nu[i],
                       "particle_id":i,
                       "point":list(point),
-                      "type":int(domain.type_id[i]),
+                      "type":type_id,
                       "volume":domain.vol[i]}
 
         s_particles.append(s_particle)
