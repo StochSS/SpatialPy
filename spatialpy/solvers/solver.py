@@ -312,9 +312,9 @@ class Solver:
     def __get_particle_inits(self, num_chem_species):
         init_particles = ""
         if self.model.domain.type_id is None:
-            self.model.domain.type_id = ["type 1"] * self.model.domain.get_num_voxels()
+            self.model.domain.type_id = ["type_1"] * self.model.domain.get_num_voxels()
         for i, type_id in enumerate(self.model.domain.type_id):
-            if type_id is None:
+            if "UnAssigned" in type_id:
                 errmsg = "Not all particles have been defined in a type. Mass and other properties must be defined"
                 raise SimulationError(errmsg)
             x = self.model.domain.coordinates()[i, 0]
