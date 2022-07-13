@@ -68,13 +68,13 @@ class Domain():
 
         self.vol = numpy.zeros((numpoints), dtype=float)
         self.mass = numpy.zeros((numpoints), dtype=float)
-        self.type_id = numpy.array([None] * numpoints, dtype=object)
+        self.type_id = numpy.array(["type_UnAssigned"] * numpoints, dtype=object)
         self.nu = numpy.zeros((numpoints), dtype=float)
         self.c = numpy.zeros((numpoints), dtype=float)
         self.rho = numpy.zeros((numpoints), dtype=float)
         self.fixed = numpy.zeros((numpoints), dtype=bool)
         self.listOfTypeIDs = []
-        self.typeNdxMapping = OrderedDict()
+        self.typeNdxMapping = OrderedDict({"type_UnAssigned": 0})
         self.typeNameMapping = None
 
         self.rho0 = rho0
@@ -136,7 +136,7 @@ class Domain():
 
         :raises DomainError: If a type_id is not set or rho=0 for a particle.
         """
-        if self.type_id.tolist().count(None) > 0:
+        if self.type_id.tolist().count("type_UnAssigned") > 0:
             raise DomainError(f"Particles must be assigned a type_id.")
         if numpy.count_nonzero(self.rho) < len(self.rho):
             raise DomainError(f"Rho must be a positive value.")
@@ -184,7 +184,10 @@ class Domain():
             if (char in string.punctuation and char != "_") or char == " ":
                 raise DomainError(f"Type_id cannot contain {char}")
         if type_id not in self.typeNdxMapping:
-            self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
+            if "UnAssigned" in type_id:
+                self.typeNdxMapping[type_id] = 0
+            else:
+                self.typeNdxMapping[type_id] = len(self.typeNdxMapping)
 
         if rho is None:
             rho = mass / vol
@@ -240,7 +243,10 @@ class Domain():
             if (char in string.punctuation and char != "_") or char == " ":
                 raise DomainError(f"Type_id cannot contain '{char}'")
         if type_id not in self.typeNdxMapping:
-            self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
+            if "UnAssigned" in type_id:
+                self.typeNdxMapping[type_id] = 0
+            else:
+                self.typeNdxMapping[type_id] = len(self.typeNdxMapping)
         # apply the type to all points, set type for any points that match
         count = 0
         on_boundary = self.find_boundary_points()
@@ -810,7 +816,10 @@ class Domain():
                         if (char in string.punctuation and char != "_") or char == " ":
                             raise DomainError(f"Type_id cannot contain {char}")
                     if type_id not in self.typeNdxMapping:
-                        self.typeNdxMapping[type_id] = len(self.typeNdxMapping) + 1
+                        if "UnAssigned" in type_id:
+                            self.typeNdxMapping[type_id] = 0
+                        else:
+                            self.typeNdxMapping[type_id] = len(self.typeNdxMapping)
 
                     self.type_id[int(ndx)] = type_id
 
@@ -837,13 +846,15 @@ class Domain():
             obj = Domain(0, tuple(domain['x_lim']), tuple(domain['y_lim']), tuple(domain['z_lim']),
                         rho0=domain['rho_0'], c0=domain['c_0'], P0=domain['p_0'], gravity=domain['gravity'])
 
-            for particle in domain['particles']:
+            for i, particle in enumerate(domain['particles']):
                 try:
                     type_id = list(filter(
                         lambda d_type, t_ndx=particle['type']: d_type['typeID'] == t_ndx, domain['types']
                     ))[0]['name']
                 except IndexError:
                     type_id = particle['type']
+                if type_id == "Un-Assigned" or type_id == 0:
+                    type_id = "UnAssigned"
                 # StochSS backward compatability check for rho
                 rho = None if "rho" not in particle.keys() else particle['rho']
                 # StochSS backward compatability check for c
