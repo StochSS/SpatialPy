@@ -571,6 +571,9 @@ class Domain():
         :returns: Plotly figure of domain types if, use_matplotlib=False and return_plotly_figure=True
         :rtype: None or dict
         '''
+        if len(self.vertices) == 0:
+            raise DomainError("The domain does not contain particles.")
+
         from spatialpy.core.result import _plotly_iterate # pylint: disable=import-outside-toplevel
 
         if not use_matplotlib:
@@ -906,7 +909,7 @@ class Domain():
         x_list = numpy.linspace(xlim[0], xlim[1], nx)
         y_list = numpy.linspace(ylim[0], ylim[1], ny)
         z_list = numpy.linspace(zlim[0], zlim[1], nz)
-        totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0]) * (zlim[1] - zlim[0])
+        totalvolume = abs(xlim[1] - xlim[0]) * abs(ylim[1] - ylim[0]) * abs(zlim[1] - zlim[0])
         vol = totalvolume / numberparticles
         if vol < 0:
             raise DomainError("Paritcles cannot have 0 volume")
@@ -964,7 +967,7 @@ class Domain():
         # Vertices
         x_list = numpy.linspace(xlim[0], xlim[1], nx)
         y_list = numpy.linspace(ylim[0], ylim[1], ny)
-        totalvolume = (xlim[1] - xlim[0]) * (ylim[1] - ylim[0])
+        totalvolume = abs(xlim[1] - xlim[0]) * abs(ylim[1] - ylim[0])
         vol = totalvolume / numberparticles
         if vol < 0:
             raise DomainError("Paritcles cannot have 0 volume")
