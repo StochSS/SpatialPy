@@ -144,7 +144,7 @@ class Domain():
         self.listOfTypeIDs = list(self.typeNdxMapping.values())
         self._get_type_name_mapping()
 
-    def add_point(self, point, vol=0, mass=0, type_id=1, nu=0, fixed=False, rho=None, c=0):
+    def add_point(self, point, vol=1, mass=1, type_id=1, nu=0, fixed=False, rho=None, c=10):
         """
         Add a single point particle to the domain space.
 
