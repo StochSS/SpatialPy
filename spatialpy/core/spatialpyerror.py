@@ -66,6 +66,11 @@ class InitialConditionError(ModelError):
     Class for exceptions in initailcondition module.
     """
 
+class LatticeError(ModelError):
+    """
+    Class for exceptions in lattice module.
+    """
+
 class ParameterError(ModelError):
     """
     Class for exceptions in parameter module.
