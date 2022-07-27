@@ -13,6 +13,8 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import numpy
+
 from spatialpy.core.spatialpyerror import GeometryError
 
 class CombinatoryGeometry:
@@ -48,7 +50,7 @@ class CombinatoryGeometry:
         namespace = {}
         for name, geometry in self.geo_namespace.items():
             val = geometry.inside(point, on_boundary)
-            if not isinstance(val, bool):
+            if not isinstance(val, (bool, numpy.bool_)):
                 errmsg = f"{name} is not a valid Geometry obj. Reason given: inside() method must return a bool"
                 raise GeometryError(errmsg)
             namespace[name] = val
