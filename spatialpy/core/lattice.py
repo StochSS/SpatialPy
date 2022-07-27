@@ -36,7 +36,7 @@ class Lattice:
     	except ValueError as err:
     		raise LatticeError("Values in center must be of type float.") from err
 
-    def apply(self, domain, geometry, transform=None):
+    def apply(self, domain, geometry, transform=None, **kwargs):
     	"""
     	Fill a domain with particles within the lattice and geometry.
 
@@ -48,6 +48,8 @@ class Lattice:
 
     	:param transform: Transformation function applied to each particle.
     	:type transform: function
+
+    	:param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
     	"""
     	raise LatticeError("Subclasses of spatialpy.Lattice must implement the apply() method")
 
