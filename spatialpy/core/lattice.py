@@ -16,3 +16,46 @@
 import numpy
 
 from spatialpy.core.spatialpyerror import LatticeError
+
+
+class Lattice:
+	"""
+    Lattice class provides a method for creating parts of the spatial domain.
+
+    :param center: The center point of the lattice.
+    :type center: float[3] | float(3)
+
+    :raises LatticeError: if center is not and list, doesn't contain 3 values, or any value is not a float.
+    """
+    def __init__(self, center):
+    	if isinstance(center, tuple):
+    		center = list(center)
+    	try:
+    		self.center = [float(val) for val in center]
+    		self.validate()
+    	except ValueError as err:
+    		raise LatticeError("Values in center must be of type float.") from err
+
+    def apply(self, domain, geometry, transform=None):
+    	"""
+    	Fill a domain with particles within the lattice and geometry.
+
+    	:param domain: Domain particles are to be added to.
+    	:type domain: spatialpy.Domain
+
+    	:param geometry: Geometry defining the region within the lattice for the particles
+    	:type geometry: spatialpy.Geometry | spatialpy.CombinatoryGeometry | spatialpy.Transformation
+
+    	:param transform: Transformation function applied to each particle.
+    	:type transform: function
+    	"""
+    	raise LatticeError("Subclasses of spatialpy.Lattice must implement the apply() method")
+
+    def validate(self):
+    	"""
+    	Validates the center point.
+    	"""
+    	if not isinstance(self.center, list):
+    		raise LatticeError("center must be of type list.")
+    	if len(self.center) < 3 or len(self.center) > 3:
+    		raise LatticeError("center must be of length 3.")
