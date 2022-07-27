@@ -15,6 +15,45 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from spatialpy.core.spatialpyerror import GeometryError
 
+class CombinatoryGeometry:
+    """
+    Combinatory Geometry class uses one or more Geometry class for inclusion or exclusion of
+    multiple geometric shapes.
+
+    :param formula: Boolean logic formula to be evaluated. Example use: "(geo1 or geo2) and not geo3".
+    :type formula: str
+
+    :param geo_namespace: Namespace used when evaluating the formula. Example use:
+        {'geo1': Geometry1(), 'geo2': Geometry2(), 'geo3': Geometry3()} where 'geo1',
+        'geo2', and 'geo3' are found in the formula.
+    :type geo_namespace: dict
+    """
+    def __init__(self, formula, geo_namespace):
+        self.formula = formula
+        self.geo_namespace = geo_namespace
+
+    def inside(self, point, on_boundary):
+        """
+        :param point: X, Y, Z coodinates for the particle.
+        :type point: float[3]
+
+        :param on_boundary: Indicates whether a particle is on the edge of the domain.
+        :type on_boundary: bool
+
+        :returns: True if the particle satisfies boolean condition for all geometies, else False.
+        :rtype: bool
+
+        :raises GeometryError: If any geometries inside method does not return a bool.
+        """
+        namespace = {}
+        for name, geometry in self.geo_namespace.items():
+            val = geometry.inside(point, on_boundary)
+            if not isinstance(val, bool):
+                errmsg = f"{name} is not a valid Geometry obj. Reason given: inside() method must return a bool"
+                raise GeometryError(errmsg)
+            namespace[name] = val
+        return eval(self.formula, {}, namespace)
+
 class Geometry:
     """
     Geometry class provides a method for tagging parts of the spatial domain as separate parts.
