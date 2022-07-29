@@ -138,6 +138,17 @@ class CartesianLattice(Lattice):
 
         self.validate()
 
+    def __add_point(self, domain, geometry, transform, point, count, kwargs):
+        if geometry.inside(point, False):
+            if transform is not None:
+                point = transform(point)
+            domain.add_point(point, **kwargs)
+            count += 1
+
+    def __generate_z(self, domain, geometry, transform, x, y, count, kwargs):
+        for z in numpy.arange(self.zmin, self.zmax + self.deltaz, self.deltaz):
+            self.__add_point(domain, geometry, transform, [x, y, z], count, kwargs)
+
     def apply(self, domain, geometry, transform=None, **kwargs):
         """
         Fill a domain with particles within the cartesian lattice restricted by the geometry.
@@ -167,14 +178,11 @@ class CartesianLattice(Lattice):
         count = 0
         for x in numpy.arange(self.xmin, self.xmax + self.deltax, self.deltax):
             for y in numpy.arange(self.ymin, self.ymax + self.deltay, self.deltay):
-                for z in numpy.arange(self.zmin, self.zmax + self.deltaz, self.deltaz):
-                    if geometry.inside((x, y, z), False):
-                        if transform is None:
-                            point = [x, y, z]
-                        else:
-                            point = transform([x, y, z])
-                        domain.add_point(point, **kwargs)
-                        count += 1
+                if deltaz == 0:
+                    z = self.center[2]
+                    self.__add_point(domain, geometry, transform, [x, y, z], count, kwargs)
+                else:
+                    self.__generate_z(domain, geometry, transform, x, y, count, kwargs)
         return count
 
     def validate(self):
