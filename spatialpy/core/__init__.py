@@ -42,7 +42,8 @@ from .lattice import (
 	CartesianLattice,
 	SphericalLattice,
 	CylindricalLattice,
-	XMLMeshLattice
+	XMLMeshLattice,
+	MeshIOLattice
 )
 from .model import Model, export_StochSS
 from .parameter import Parameter
