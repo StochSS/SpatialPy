@@ -15,6 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import numpy
 
+import xml.etree.ElementTree as ET
+
 from spatialpy.core.domain import Domain
 from spatialpy.core.geometry import Geometry, CombinatoryGeometry
 from spatialpy.core.spatialpyerror import LatticeError
@@ -461,3 +463,139 @@ class CylindricalLattice(Lattice):
             raise LatticeError("deltar must be of type float.")
         if self.deltar <= 0:
             raise LatticeError("deltar must be greater than 0.")
+
+class XMLMeshLattice(Lattice):
+    """
+    XML mesh lattice class provides a method for creating parts of the spatial
+        domain within a mesh defines by a FEniCS/dolfin style XML mesh file.
+    
+    :param center: The center point of the lattice.
+    :type center: float[3] | float(3)
+
+    :param filename: Name of file to read.
+    :type filename: str
+
+    :param subdomain_file: StochSS v1.x subdomain description filename (optional).
+    :type subdomain_file: str
+
+    :param type_ids: Mapping of type indices to type names (optional).
+    :type type_ids: dict{str:str}
+    """
+    def __init__(self, filename, center=None, subdomain_file=None, type_ids=None):
+        super().__init__(center, skip_validate=True)
+
+        self.filename = filename
+        self.subdomain_file = subdomain_file
+        self.type_ids = type_ids
+
+        self.validate()
+
+    def __get_types(self):
+        type_ids = {}
+        with open(self.subdomain_file,'r', encoding="utf-8") as file_obj:
+            for lnum, line in enumerate(file_obj):
+                try:
+                    (ndx, type_id) = line.rstrip().split(',')
+
+                    if self.type_ids is not None:
+                        type_id = self.type_ids[type_id]
+                    type_ids[int(ndx)] = f"type_{type_id}"
+                except ValueError as err:
+                    errmsg = f"Could not read in subdomain file, error on line {lnum}: {line}"
+                    raise LatticeError(errmsg) from err
+        return type_ids
+
+    def apply(self, domain, *args, transform=None, **kwargs):
+        """
+        Fill a domain with particles within the cylindrical lattice restricted by the geometry.
+
+        :param domain: Domain particles are to be added to.
+        :type domain: spatialpy.Domain
+
+        :param transform: Transformation function applied to each particle.
+        :type transform: function
+
+        :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
+        """
+        if self.subdomain_file is not None:
+            type_ids = self.__get_types()
+        else:
+            type_ids = None
+
+        root = ET.parse(self.filename).getroot()
+        if not root.tag == 'dolfin':
+            raise LatticeError(f"{self.filename} is not a FEniCS/dolfin xml mesh.")
+
+        mesh = root[0]
+        if mesh.tag != 'mesh' or mesh.attrib['celltype'] != 'tetrahedron' or mesh.attrib['dim'] != '3':
+            raise LatticeError("XML mesh format error.")
+
+        vertices = mesh[0]
+        cells = mesh[1]
+        #vertices
+        mesh_vertices = numpy.zeros(( len(vertices), 3), dtype=float)
+        for vertex in vertices:
+            mesh_vertices[int(vertex.attrib['index']), 0] = float(vertex.attrib['x'])
+            mesh_vertices[int(vertex.attrib['index']), 1] = float(vertex.attrib['y'])
+            mesh_vertices[int(vertex.attrib['index']), 2] = float(vertex.attrib['z'])
+
+        count = 0
+        for i, vertex in enumerate(mesh_vertices):
+            x = vertex[0] + self.center[0]
+            y = vertex[1] + self.center[1]
+            z = vertex[2] + self.center[2]
+            if transform is None:
+                point = [x, y, z]
+            else:
+                point = transform([x, y, z])
+            if type_ids is not None and i in type_ids.keys():
+                kwargs['type_id'] = type_ids[i]
+            domain.add_point(point, **kwargs)
+            count += 1
+
+        #tetrahedrons
+        if domain.tetrahedrons is None:
+            domain.tetrahedrons = numpy.zeros((len(cells), 4), dtype=int)
+            for cell in cells:
+                domain.tetrahedrons[int(cell.attrib['index']), 0] = int(cell.attrib['v0'])
+                domain.tetrahedrons[int(cell.attrib['index']), 1] = int(cell.attrib['v1'])
+                domain.tetrahedrons[int(cell.attrib['index']), 2] = int(cell.attrib['v2'])
+                domain.tetrahedrons[int(cell.attrib['index']), 3] = int(cell.attrib['v3'])
+        else:
+            for cell in cells:
+                tetrahedron = [
+                    int(cell.attrib['v0']), int(cell.attrib['v1']),
+                    int(cell.attrib['v2']), int(cell.attrib['v3'])
+                ]
+                domain.tetrahedrons = numpy.append(domain.tetrahedrons, [tetrahedron], axis=0)
+
+        # volume
+        domain.vol = None
+        domain.calculate_vol()
+        if not numpy.count_nonzero(domain.vol):
+            raise LatticeError("Paritcles cannot have 0 volume")
+        # set Mass equal to the volume
+        domain.mass = domain.vol
+        # Calculate density
+        domain.rho = domain.mass / domain.vol
+        return count
+
+    def validate(self):
+        """
+        Validate the XML mesh lattice dependencies.
+        """
+        super().validate()
+
+        if not isinstance(self.filename, str):
+            raise LatticeError("filename must be of type str.")
+        if self.subdomain_file is not None and not isinstance(self.subdomain_file, str):
+            raise LatticeError("subdomain_file must be of type str.")
+        if self.type_ids is not None:
+            for ndx, name in self.type_ids.items():
+                if not isinstance(ndx, str):
+                    raise LatticeError("Keys in type_ids must be of type str.")
+                if not isinstance(name, str):
+                    raise LatticeError("Values in type_ids must be of type str.")
+                for char in name:
+                    if (char in string.punctuation and char != "_") or char == " ":
+                        raise LatticeError(f"Values in type_ids cannot contain '{char}'")
