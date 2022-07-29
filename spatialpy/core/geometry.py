@@ -70,7 +70,7 @@ class CombinatoryGeometry:
         for item in keys:
             formula = self.formula.replace(item, "")
         if formula.strip() != "":
-            errmsg = f"formula may only contain boolean operators or geometries in geo_namespace not {formula.split(" ")}"
+            errmsg = f"formula may only contain boolean operators or geometries in geo_namespace not {formula.split(' ')}"
             raise GeometryError(errmsg)
 
 class Geometry:
