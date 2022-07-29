@@ -42,6 +42,15 @@ class Lattice:
         except ValueError as err:
             raise LatticeError("Values in center must be of type float.") from err
 
+    def _update_limits(self, domain):
+        xlim, ylim, zlim = domain.get_bounding_box()
+        if domain.xlim != xlim:
+            domain.xlim = xlim
+        if domain.ylim != ylim:
+            domain.ylim = ylim
+        if domain.zlim != zlim:
+            domain.zlim = zlim
+
     def apply(self, domain, geometry, transform=None, **kwargs):
         """
         Fill a domain with particles within the lattice restricted by the geometry.
@@ -183,6 +192,7 @@ class CartesianLattice(Lattice):
                     self.__add_point(domain, geometry, transform, [x, y, z], count, kwargs)
                 else:
                     self.__generate_z(domain, geometry, transform, x, y, count, kwargs)
+        self._update_limits(domain)
         return count
 
     def validate(self):
@@ -311,6 +321,7 @@ class SphericalLattice(Lattice):
                         domain.add_point(point, **kwargs)
                         count += 1
             radius -= self.deltar
+        self._update_limits(domain)
         return count
 
     def validate(self):
@@ -425,6 +436,7 @@ class CylindricalLattice(Lattice):
                         count += 1
                 x += self.deltas
             radius -= self.deltar
+        self._update_limits(domain)
         return count
 
     def validate(self):
