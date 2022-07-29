@@ -494,6 +494,8 @@ class Domain():
         :returns: Limits of the bounding box.
         :rtype: float | float | float | float | float | float
         """
+        xlo = ylo = zlo = float('inf')
+        xhi = yhi = zhi = float('-inf')
         for i in range(self.vertices.shape[0]):
             if xhi < self.vertices[i, 0]:
                 xhi = self.vertices[i, 0]
@@ -507,7 +509,7 @@ class Domain():
                 zhi = self.vertices[i, 2]
             if zlo > self.vertices[i, 2]:
                 zlo = self.vertices[i, 2]
-        return xhi, xlo, yhi, ylo, zhi, zlo
+        return (xlo, xhi), (ylo, yhi), (zlo, zhi)
 
     def get_vol(self):
         """
