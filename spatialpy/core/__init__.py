@@ -41,7 +41,8 @@ from .initialcondition import (
 from .lattice import (
 	CartesianLattice,
 	SphericalLattice,
-	CylindricalLattice
+	CylindricalLattice,
+	XMLMeshLattice
 )
 from .model import Model, export_StochSS
 from .parameter import Parameter
