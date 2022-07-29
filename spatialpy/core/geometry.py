@@ -34,6 +34,8 @@ class CombinatoryGeometry:
         self.formula = formula
         self.geo_namespace = geo_namespace
 
+        self.validate()
+
     def inside(self, point, on_boundary):
         """
         :param point: X, Y, Z coodinates for the particle.
@@ -55,6 +57,21 @@ class CombinatoryGeometry:
                 raise GeometryError(errmsg)
             namespace[name] = val
         return eval(self.formula, {}, namespace)
+
+    def validate(self):
+        """
+        Validate the combinatory geometry object.
+        """
+        keys = self.geo_namespace.keys()
+        for name in keys:
+            if name not in self.formula:
+                raise GeometryError("geo_namespace entries must be in the formula.")
+        keys.extend(['and', 'or', 'not'])
+        for item in keys:
+            formula = self.formula.replace(item, "")
+        if formula.strip() != "":
+            errmsg = f"formula may only contain boolean operators or geometries in geo_namespace not {formula.split(" ")}"
+            raise GeometryError(errmsg)
 
 class Geometry:
     """
