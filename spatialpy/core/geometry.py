@@ -62,13 +62,14 @@ class CombinatoryGeometry:
         """
         Validate the combinatory geometry object.
         """
-        keys = self.geo_namespace.keys()
+        keys = list(self.geo_namespace.keys())
         for name in keys:
             if name not in self.formula:
                 raise GeometryError("geo_namespace entries must be in the formula.")
-        keys.extend(['and', 'or', 'not'])
+        keys.extend(['and', 'or', 'not', '(', ')'])
+        formula = self.formula
         for item in keys:
-            formula = self.formula.replace(item, "")
+            formula = formula.replace(item, "")
         if formula.strip() != "":
             errmsg = f"formula may only contain boolean operators or geometries in geo_namespace not {formula.split(' ')}"
             raise GeometryError(errmsg)
