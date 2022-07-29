@@ -331,3 +331,121 @@ class SphericalLattice(Lattice):
             raise LatticeError("deltar must be of type float.")
         if self.deltar <= 0:
             raise LatticeError("deltar must be greater than 0.")
+
+class CylindricalLattice(Lattice):
+    """
+    Cylindrical lattice class provides a method for creating parts of the spatial
+        domain within a cylindrical coordinate system.
+
+    :param center: The center point of the lattice.
+    :type center: float[3] | float(3)
+
+    :param length: Length of the cylindrical lattice.
+    :type length: float
+
+    :param radius: Distance between the center and the surface.
+    :type radius: float
+
+    :param deltas: Distance between two particle on the surface.
+    :type deltas: float
+
+    :param deltar: Radial distance between two particles.
+    :type deltar: float
+
+    :raises LatticeError: if center is not and list, doesn't contain 3 values,
+        or any value is not a float.
+    """
+    def __init__(self, radius, length, deltas, center=None, deltar=None):
+        super().__init__(center, skip_validate=True)
+
+        self.radius = radius
+        self.length = length
+
+        if deltar is None:
+            deltar = deltas
+
+        self.deltas = deltas
+        self.deltar = deltar
+
+        self.validate()
+
+    def apply(self, domain, geometry, transform=None, **kwargs):
+        """
+        Fill a domain with particles within the cylindrical lattice restricted by the geometry.
+
+        :param domain: Domain particles are to be added to.
+        :type domain: spatialpy.Domain
+
+        :param geometry: Geometry defining the region within the lattice in
+            which particles are restricted to.
+        :type geometry: spatialpy.Geometry | spatialpy.CombinatoryGeometry
+
+        :param transform: Transformation function applied to each particle.
+        :type transform: function
+
+        :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
+        """
+        if not (isinstance(domain, Domain) or type(domain).__name__ == 'Domain'):
+            raise LatticeError("domain must be of type spatialpy.Domain.")
+        if not (isinstance(geometry, (Geometry, CombinatoryGeometry)) or \
+            type(geometry).__name__ in ('Geometry', 'CombinatoryGeometry')):
+            raise LatticeError(
+                "geometry must be of type spatialpy.Geometry or spatialpy.CombinatoryGeometry."
+            )
+        if transform is not None and not isinstance(transform, 'function'):
+            raise LatticeError("transform must be a function.")
+
+        count = 0
+        h_len = self.length / 2
+        xmin = self.center[0] - h_len
+        xmax = self.center[0] + h_len
+        radius = self.radius
+        while radius >= 0:
+            # Calculate the approximate number of particle with the radius
+            approx_rc = round((2 * radius * self.length) / ((self.deltas / 2) ** 2))
+
+            p_area = 2 * numpy.pi * radius * self.length / approx_rc
+            d_a = numpy.sqrt(p_area)
+            m_theta = round(2 * numpy.pi * radius / d_a)
+            d_theta = 2 * numpy.pi / m_theta
+
+            x = xmin
+            while x <= xmax:
+
+                for mtheta in range(m_theta):
+                    theta = 2 * numpy.pi * (mtheta + 0.5) / m_theta
+                    y = radius * numpy.cos(theta) + self.center[1]
+                    z = radius * numpy.sin(theta) + self.center[2]
+                    if geometry.inside((x, y, z), False):
+                        if transform is None:
+                            point = [x, y, z]
+                        else:
+                            point = transform([x, y, z])
+                        domain.add_point(point, **kwargs)
+                        count += 1
+                x += self.deltas
+            radius -= self.deltar
+        return count
+
+    def validate(self):
+        """
+        Validate the cylindrical lattice dependencies.
+        """
+        super().validate()
+
+        if not isinstance(self.radius, (int, float)):
+            raise LatticeError("radius must be of type float.")
+        if self.radius <= 0:
+            raise LatticeError("radius must be greater than 0.")
+        if not isinstance(self.length, (int, float)):
+            raise LatticeError("length must be of type float.")
+        if self.length <= 0:
+            raise LatticeError("length must be greater than 0.")
+        if not isinstance(self.deltas, (int, float)):
+            raise LatticeError("deltas must be of type float.")
+        if self.deltas <= 0:
+            raise LatticeError("deltas must be greater than 0.")
+        if not isinstance(self.deltar, (int, float)):
+            raise LatticeError("deltar must be of type float.")
+        if self.deltar <= 0:
+            raise LatticeError("deltar must be greater than 0.")
