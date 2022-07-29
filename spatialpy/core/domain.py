@@ -492,24 +492,12 @@ class Domain():
         Get the bounding box of the entire domain.
 
         :returns: Limits of the bounding box.
-        :rtype: float | float | float | float | float | float
+        :rtype: tuple(float(2), float(2), float(2))
         """
-        xlo = ylo = zlo = float('inf')
-        xhi = yhi = zhi = float('-inf')
-        for i in range(self.vertices.shape[0]):
-            if xhi < self.vertices[i, 0]:
-                xhi = self.vertices[i, 0]
-            if xlo > self.vertices[i, 0]:
-                xlo = self.vertices[i, 0]
-            if yhi < self.vertices[i, 1]:
-                yhi = self.vertices[i, 1]
-            if ylo > self.vertices[i, 1]:
-                ylo = self.vertices[i, 1]
-            if zhi < self.vertices[i, 2]:
-                zhi = self.vertices[i, 2]
-            if zlo > self.vertices[i, 2]:
-                zlo = self.vertices[i, 2]
-        return (xlo, xhi), (ylo, yhi), (zlo, zhi)
+        xlim = (min(self.vertices[:, 0]), max(self.vertices[:, 0]))
+        ylim = (min(self.vertices[:, 1]), max(self.vertices[:, 1]))
+        zlim = (min(self.vertices[:, 2]), max(self.vertices[:, 2]))
+        return xlim, ylim, zlim
 
     def get_vol(self):
         """
