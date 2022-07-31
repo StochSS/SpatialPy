@@ -13,6 +13,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import json
 import numpy
 
 import xml.etree.ElementTree as ET
@@ -131,12 +132,12 @@ class CartesianLattice(Lattice):
         if zmax is None:
             zmax = xmax
 
-        self.xmin = xmin
-        self.xmax = xmax
-        self.ymin = ymin
-        self.ymax = ymax
-        self.zmin = zmin
-        self.zmax = zmax
+        self.xmin = xmin + self.center[0]
+        self.xmax = xmax + self.center[0]
+        self.ymin = ymin + self.center[1]
+        self.ymax = ymax + self.center[1]
+        self.zmin = zmin + self.center[2]
+        self.zmax = zmax + self.center[2]
 
         if deltay is None:
             deltay = deltax
@@ -155,10 +156,12 @@ class CartesianLattice(Lattice):
                 point = transform(point)
             domain.add_point(point, **kwargs)
             count += 1
+        return count
 
     def __generate_z(self, domain, geometry, transform, x, y, count, kwargs):
         for z in numpy.arange(self.zmin, self.zmax + self.deltaz, self.deltaz):
-            self.__add_point(domain, geometry, transform, [x, y, z], count, kwargs)
+            count = self.__add_point(domain, geometry, transform, [x, y, z], count, kwargs)
+        return count
 
     def apply(self, domain, geometry, transform=None, **kwargs):
         """
@@ -189,11 +192,11 @@ class CartesianLattice(Lattice):
         count = 0
         for x in numpy.arange(self.xmin, self.xmax + self.deltax, self.deltax):
             for y in numpy.arange(self.ymin, self.ymax + self.deltay, self.deltay):
-                if deltaz == 0:
+                if self.deltaz == 0:
                     z = self.center[2]
-                    self.__add_point(domain, geometry, transform, [x, y, z], count, kwargs)
+                    count = self.__add_point(domain, geometry, transform, [x, y, z], count, kwargs)
                 else:
-                    self.__generate_z(domain, geometry, transform, x, y, count, kwargs)
+                    count = self.__generate_z(domain, geometry, transform, x, y, count, kwargs)
         self._update_limits(domain)
         return count
 
@@ -467,7 +470,7 @@ class CylindricalLattice(Lattice):
 class XMLMeshLattice(Lattice):
     """
     XML mesh lattice class provides a method for creating parts of the spatial
-        domain within a mesh defines by a FEniCS/dolfin style XML mesh file.
+        domain with a mesh defined by a FEniCS/dolfin style XML mesh file.
     
     :param center: The center point of the lattice.
     :type center: float[3] | float(3)
@@ -507,7 +510,7 @@ class XMLMeshLattice(Lattice):
 
     def apply(self, domain, *args, transform=None, **kwargs):
         """
-        Fill a domain with particles within the cylindrical lattice restricted by the geometry.
+        Fill a domain with particles within the xml mesh lattice un-restricted by a geometry.
 
         :param domain: Domain particles are to be added to.
         :type domain: spatialpy.Domain
@@ -569,6 +572,7 @@ class XMLMeshLattice(Lattice):
                 ]
                 domain.tetrahedrons = numpy.append(domain.tetrahedrons, [tetrahedron], axis=0)
 
+        self._update_limits(domain)
         return count
 
     def validate(self):
@@ -594,7 +598,7 @@ class XMLMeshLattice(Lattice):
 class MeshIOLattice(Lattice):
     """
     meshio lattice class provides a method for creating parts of the spatial
-        domain within a mesh defines by a Gmsh style .msh mesh file.
+        domain with a mesh defined by a Gmsh style .msh mesh file.
     
     :param center: The center point of the lattice.
     :type center: float[3] | float(3)
@@ -634,7 +638,7 @@ class MeshIOLattice(Lattice):
 
     def apply(self, domain, *args, transform=None, **kwargs):
         """
-        Fill a domain with particles within the cylindrical lattice restricted by the geometry.
+        Fill a domain with particles within the mesh IO lattice un-restricted by a geometry.
 
         :param domain: Domain particles are to be added to.
         :type domain: spatialpy.Domain
@@ -688,6 +692,7 @@ class MeshIOLattice(Lattice):
             else:
                 for tetra in tetras:
                     domain.tetrahedrons = numpy.append(domain.tetrahedrons, [tetra], axis=0)
+        self._update_limits(domain)
         return count
 
     def validate(self):
@@ -709,3 +714,82 @@ class MeshIOLattice(Lattice):
                 for char in name:
                     if (char in string.punctuation and char != "_") or char == " ":
                         raise LatticeError(f"Values in type_ids cannot contain '{char}'")
+
+class StochSSLattice(Lattice):
+    """
+    stochss lattice class provides a method for creating parts of the spatial domain
+        with a domain defined by a stochss style .domn domain file or .smdl model file.
+    
+    :param center: The center point of the lattice.
+    :type center: float[3] | float(3)
+
+    :param filename: Name of file to read.
+    :type filename: str
+    """
+    def __init__(self, filename, center=None):
+        super().__init__(center, skip_validate=True)
+
+        self.filename = filename
+
+        self.validate()
+
+    def apply(self, domain, *args, transform=None, **kwargs):
+        """
+        Fill a domain with particles within the stochss lattice un-restricted by a geometry.
+
+        :param domain: Domain particles are to be added to.
+        :type domain: spatialpy.Domain
+
+        :param transform: Transformation function applied to each particle.
+        :type transform: function
+        """
+        try:
+            with open(self.filename, "r", encoding="utf-8") as domain_file:
+                s_domain = json.load(domain_file)
+                if "domain" in domain.keys():
+                    s_domain = domain['domain']
+
+            domain.rho0 = s_domain['rho_0']
+            domain.c0 = s_domain['c_0']
+            domain.P0 = s_domain['p_0']
+            domain.gravity = s_domain['gravity']
+            
+            type_ids = {}
+            for s_type in s_domain['types']:
+                type_ids[s_type['typeID']] = d_type['name'].replace('-', '')
+
+            count = 0
+            for particle in domain['particles']:
+                kwargs = {
+                    "type_id": type_ids[particle['type']],
+                    "vol": particle['volume'],
+                    "mass": particle['mass'],
+                    "rho": None if "rho" not in particle.keys() else particle['rho'],
+                    "nu": particle['nu'],
+                    "c": 0 if "c" not in particle.keys() else particle['c'],
+                    "fixed": particle['fixed']
+                }
+
+                x = particle['point'][0] + self.center[0]
+                y = particle['point'][1] + self.center[1]
+                z = particle['point'][2] + self.center[2]
+                if transform is None:
+                    point = [x, y, z]
+                else:
+                    point = transform([x, y, z])
+                domain.add_point(point, **kwargs)
+                count += 1
+
+            self._update_limits(domain)
+            return count
+        except KeyError as err:
+            raise LatticeError("The file is not a StochSS Domain (.domn) or a StochSS Spatial Model (.smdl).") from err
+
+    def validate(self):
+        """
+        Validate the stochss lattice dependencies.
+        """
+        super().validate()
+
+        if not isinstance(self.filename, str):
+            raise LatticeError("filename must be of type str.")
