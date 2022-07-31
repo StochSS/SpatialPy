@@ -43,7 +43,8 @@ from .lattice import (
 	SphericalLattice,
 	CylindricalLattice,
 	XMLMeshLattice,
-	MeshIOLattice
+	MeshIOLattice,
+	StochSSLattice
 )
 from .model import Model, export_StochSS
 from .parameter import Parameter
