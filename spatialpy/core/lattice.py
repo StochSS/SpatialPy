@@ -660,6 +660,7 @@ class MeshIOLattice(Lattice):
 
         mesh = meshio.read(self.filename)
         
+        num_points = len(domain.vertices)
         #vertices
         count = 0
         for i, vertex in enumerate(mesh.points):
@@ -681,7 +682,8 @@ class MeshIOLattice(Lattice):
             if domain.triangles is None:
                 domain.triangles = triangles[0].data
             else:
-                for triangle in triangles:
+                for triangle in triangles[0].data:
+                    triangle = triangle + num_points
                     domain.triangles = numpy.append(domain.triangles, [triangle], axis=0)
         
         #tetrahedrons
@@ -690,7 +692,8 @@ class MeshIOLattice(Lattice):
             if domain.tetrahedrons is None:
                 domain.tetrahedrons = tetras[0].data
             else:
-                for tetra in tetras:
+                for tetra in tetras[0].data:
+                    tetra = tetra + num_points
                     domain.tetrahedrons = numpy.append(domain.tetrahedrons, [tetra], axis=0)
         self._update_limits(domain)
         return count
@@ -746,8 +749,8 @@ class StochSSLattice(Lattice):
         try:
             with open(self.filename, "r", encoding="utf-8") as domain_file:
                 s_domain = json.load(domain_file)
-                if "domain" in domain.keys():
-                    s_domain = domain['domain']
+                if "domain" in s_domain.keys():
+                    s_domain = s_domain['domain']
 
             domain.rho0 = s_domain['rho_0']
             domain.c0 = s_domain['c_0']
@@ -756,10 +759,10 @@ class StochSSLattice(Lattice):
             
             type_ids = {}
             for s_type in s_domain['types']:
-                type_ids[s_type['typeID']] = d_type['name'].replace('-', '')
+                type_ids[s_type['typeID']] = s_type['name'].replace('-', '')
 
             count = 0
-            for particle in domain['particles']:
+            for particle in s_domain['particles']:
                 kwargs = {
                     "type_id": type_ids[particle['type']],
                     "vol": particle['volume'],
