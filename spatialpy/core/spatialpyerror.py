@@ -91,6 +91,11 @@ class TimespanError(ModelError):
     Class for exceptions in the timespan module.
     """
 
+class TransformationError(ModelError):
+    """
+    Class for exceptions in the transformation module.
+    """
+
 # Result Exceptions
 
 
