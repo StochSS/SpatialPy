@@ -186,7 +186,7 @@ class CartesianLattice(Lattice):
             raise LatticeError(
                 "geometry must be of type spatialpy.Geometry or spatialpy.CombinatoryGeometry."
             )
-        if transform is not None and not isinstance(transform, 'function'):
+        if transform is not None and not callable(transform):
             raise LatticeError("transform must be a function.")
 
         count = 0
@@ -234,7 +234,7 @@ class CartesianLattice(Lattice):
             raise LatticeError("deltay must be greater than 0.")
         if not isinstance(self.deltaz, (int, float)):
             raise LatticeError("deltaz must be of type float.")
-        if self.deltaz <= 0:
+        if self.deltaz < 0:
             raise LatticeError("deltaz must be greater than 0.")
 
 class SphericalLattice(Lattice):
@@ -293,7 +293,7 @@ class SphericalLattice(Lattice):
             raise LatticeError(
                 "geometry must be of type spatialpy.Geometry or spatialpy.CombinatoryGeometry."
             )
-        if transform is not None and not isinstance(transform, 'function'):
+        if transform is not None and not callable(transform):
             raise LatticeError("transform must be a function.")
 
         count = 0
@@ -408,7 +408,7 @@ class CylindricalLattice(Lattice):
             raise LatticeError(
                 "geometry must be of type spatialpy.Geometry or spatialpy.CombinatoryGeometry."
             )
-        if transform is not None and not isinstance(transform, 'function'):
+        if transform is not None and not callable(transform):
             raise LatticeError("transform must be a function.")
 
         count = 0
@@ -520,6 +520,11 @@ class XMLMeshLattice(Lattice):
 
         :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
         """
+        if not (isinstance(domain, Domain) or type(domain).__name__ == 'Domain'):
+            raise LatticeError("domain must be of type spatialpy.Domain.")
+        if transform is not None and not callable(transform):
+            raise LatticeError("transform must be a function.")
+
         if self.subdomain_file is not None:
             type_ids = self.__get_types()
         else:
@@ -648,6 +653,11 @@ class MeshIOLattice(Lattice):
 
         :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
         """
+        if not (isinstance(domain, Domain) or type(domain).__name__ == 'Domain'):
+            raise LatticeError("domain must be of type spatialpy.Domain.")
+        if transform is not None and not callable(transform):
+            raise LatticeError("transform must be a function.")
+
         try:
             import meshio # pylint: disable=import-outside-toplevel
         except ImportError as err:
@@ -746,6 +756,11 @@ class StochSSLattice(Lattice):
         :param transform: Transformation function applied to each particle.
         :type transform: function
         """
+        if not (isinstance(domain, Domain) or type(domain).__name__ == 'Domain'):
+            raise LatticeError("domain must be of type spatialpy.Domain.")
+        if transform is not None and not callable(transform):
+            raise LatticeError("transform must be a function.")
+
         try:
             with open(self.filename, "r", encoding="utf-8") as domain_file:
                 s_domain = json.load(domain_file)
