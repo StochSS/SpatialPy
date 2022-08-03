@@ -190,7 +190,12 @@ class TranslationTransformation(Transformation):
 
         self.validate()
 
-    # def __execute(self, point, vector):
+    def __execute(self, point, vector):
+        t_point = []
+        for i, offset in enumerate(vector):
+            t_point.append(point[i] + offset)
+
+        return t_point
     
     def reverse_transform(self, point):
         """
@@ -204,15 +209,14 @@ class TranslationTransformation(Transformation):
         """
         if self.transformation is not None:
             point = self.transformation.reverse_transform(point)
-        
-        sin_t = numpy.sin(-self.theta)
-        cos_t = numpy.cos(-self.theta)
-        
-        return self.__execute(point, sin_t, cos_t)
+
+        vector = [-val for val in self.vector]
+
+        return self.__execute(point, self.vector * -1)
 
     def transform(self, point):
         """
-        Applies the defined rotation transformation to the given point.
+        Applies the defined translation transformation to the given point.
 
         :param point: X, Y, Z coodinates for the particle.
         :type point: float[3]
@@ -220,10 +224,7 @@ class TranslationTransformation(Transformation):
         :returns: The point prior to any transformations.
         :rtype: float[3]
         """
-        sin_t = numpy.sin(self.theta)
-        cos_t = numpy.cos(self.theta)
-        
-        t_point = self.__execute(point, sin_t, cos_t)
+        t_point = self.__execute(point, self.vector)
         
         if self.transformation is not None:
             return self.transformation.transform(t_point)
@@ -235,9 +236,6 @@ class TranslationTransformation(Transformation):
         Validate the rotation transformation attributes.
         """
         super().validate()
-
-        if not isinstance(self.theta, (int, float)):
-            raise TransformationError("angle must be of type float.")
 
 class RotationTransformation(Transformation):
     """
