@@ -55,6 +55,7 @@ from .species import Species
 from .timespan import TimeSpan
 from .transformation import (
 	Transformation,
+	TranslationTransformation,
 	RotationTransformation
 )
 from .visualization import Visualization
