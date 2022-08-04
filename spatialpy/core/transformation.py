@@ -126,9 +126,11 @@ class Transformation:
         """
         Validate the geometry, lattice, and transformation attributes.
         """
-        if self.geometry is not None and \
-            not (isinstance(self.geometry, Geometry) or type(self.geometry).__name__ == "Geometry"):
-            raise TransformationError("geometry must be of type spatialpy.Geometry.")
+        if self.geometry is not None:
+            is_ginstance = isinstance(self.geometry, (Geometry, CombinatoryGeometry))
+            is_gtype = type(self.geometry).__name__ in ("Geometry", "CombinatoryGeometry")
+            if not (is_ginstance or is_gtype):
+                raise TransformationError("geometry must be of type spatialpy.Geometry.")
 
         if self.lattice is not None and \
             not (isinstance(self.lattice, Lattice) or type(self.lattice).__name__ == "Lattice"):
