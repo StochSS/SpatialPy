@@ -59,12 +59,15 @@ class Domain():
     :param gravity: Acceleration of gravity for the system.
     :type gravity: float[3]
     """
-    def __init__(self, numpoints, xlim, ylim, zlim, rho0=1.0, c0=10, P0=None, gravity=None):
+    def __init__(self, numpoints, xlim, ylim, zlim, rho0=1.0, c0=10, P0=None, gravity=None, actions=None):
+        if actions is None:
+            actions = []
+
         self.vertices = numpy.zeros((numpoints, 3), dtype=float)
         self.triangles = None
         self.tetrahedrons = None
 
-        self.actions = []
+        self.actions = actions
         self.on_boundary = None
         self.domain_size = None
         self.tetrahedron_vol = None
@@ -151,11 +154,12 @@ class Domain():
         if end is None:
             end = len(self.actions)
         
+        p_count = 0
         count = end - start
         while count > 0:
             action = self.actions[start]
             if action['type'] == "fill":
-                self.apply_fill_action(action)
+                p_count += self.apply_fill_action(action)
             elif action['type'] == "set":
                 self.apply_set_action(action)
             elif action['type'] == "remove":
@@ -168,6 +172,7 @@ class Domain():
             else:
                 self.actions.pop(start)
             count -= 1
+        return p_count
 
     def apply_fill_action(self, action):
         """
@@ -185,7 +190,7 @@ class Domain():
 
         self.validate_action(action, "fill")
 
-        action['lattice'].apply(self, action['geometry'], **action['props'])
+        return action['lattice'].apply(self, action['geometry'], **action['props'])
 
     def apply_remove_action(self, action):
         """
