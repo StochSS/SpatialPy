@@ -25,6 +25,9 @@ import numpy
 from plotly.offline import init_notebook_mode, iplot
 from scipy.spatial import KDTree
 
+from spatialpy.core.geometry import GeometryAll
+from spatialpy.core.lattice import Lattice
+from spatialpy.core.transformation import Transformation
 from spatialpy.core.visualization import Visualization
 from spatialpy.core.spatialpyerror import DomainError
 
@@ -110,6 +113,60 @@ class Domain():
         self.typeNameMapping = OrderedDict()
         for name, ndx in self.typeNdxMapping.items():
             self.typeNameMapping[ndx] = name
+
+    def apply_fill_action(self, action):
+        """
+        Add particles within a region defined by the actions lattice and geometry to the domain.
+        Particles will have attributes defined in the actions kwargs.
+
+        :param action: Fill action containing a lattice, geometry, and particle properties.
+            Example: {'type': 'fill', 'lattice': lattice_obj, 'geometry':geometry_obj , 'kwargs':{}}
+        :type action: dict
+
+        :raises DomainError: If action is not a fill action or is missing a lattice.
+        """
+        if action['geometry'] is None:
+            action['geometry'] = GeometryAll()
+
+        self.validate_action(action, "fill")
+
+        action['lattice'].apply(self, action['geometry'], **action['kwargs'])
+
+    def validate_action(self, action, coverage):
+        """
+        Validate a domain action.
+
+        :param action: Domain action to be validated.
+        :type action: dict
+
+        :param coverage: Scope of the validation.  Accepted values: 'fill', 'set', 'remove'.
+        :type coverage: str
+
+        :raises DoaminError: If one of the following conditions are met: The action is an invalid type.
+            The action's geometry, lattice or kwargs are not a valid type.
+        """
+        if not isinstance(action, dict):
+            raise DomainError("Actions must be of type dict.")
+
+        if coverage in ("set", "remove"):
+            g_type = type(action['geometry']).__name__
+
+        if coverage in ("fill", "set"):
+            if action['kwargs'] is not None and not isinstance(action['kwargs'], dict):
+                raise DomainError(f"An action's kwargs must be of type dict not {type(action['kwargs'])}")
+
+        if coverage == "fill":
+            if action['type'] != "fill":
+                raise DomainError(f"The action's type must be 'fill' not '{action['type']}'.")
+
+            if action['lattice'] is None:
+                raise DomainError("Fill actions must have a lattice.")
+            l_type = type(action['lattice']).__name__
+            if not (isinstance(action['lattice'], (Lattice, Transformation)) or \
+                                                    l_type in ("Lattice", "Transformation")):
+                raise DomainError(
+                    f"A fill action's lattice must be of type 'Lattice' or 'Transformation' not {l_type}"
+                )
 
     def get_type_def(self, type_id):
         """
