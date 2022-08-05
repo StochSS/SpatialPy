@@ -15,7 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import numpy
 
-from spatialpy.core.domain import Domain
 from spatialpy.core.geometry import Geometry, CombinatoryGeometry
 from spatialpy.core.lattice import Lattice
 from spatialpy.core.spatialpyerror import TransformationError
