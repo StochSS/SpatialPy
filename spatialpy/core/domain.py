@@ -133,6 +133,42 @@ class Domain():
         for name, ndx in self.typeNdxMapping.items():
             self.typeNameMapping[ndx] = name
 
+    def apply_actions(self, start=0, end=None, preserve_actions=False):
+        """
+        Apply domain actions in order from start to end.
+
+        :param start: Starting index for actions (inclusive).
+        :type start: int
+
+        :param end: Ending index for actions (exclusive).
+        :type end: int
+
+        :param preserve_actions: If False, remove the action after its applied.
+        :type preserve_actions: bool
+
+        :raises DomainError: If the action is not supported.
+        """
+        if end is None:
+            end = len(self.actions)
+        
+        count = end - start
+        while count > 0:
+            action = self.actions[start]
+            if action['type'] == "fill":
+                self.apply_fill_action(action)
+            elif action['type'] == "set":
+                self.apply_set_action(action)
+            elif action['type'] == "remove":
+                self.apply_remove_action(action)
+            else:
+                raise DomainError(f"Action of type {action['type']} is not currently supported.")
+
+            if preserve_actions:
+                start += 1
+            else:
+                self.actions.pop(start)
+            count -= 1
+
     def apply_fill_action(self, action):
         """
         Add particles within a region defined by the actions lattice and geometry to the domain.
