@@ -13,7 +13,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+import copy
 import json
 import string
 
@@ -684,6 +684,12 @@ class Domain():
         init_notebook_mode(connected=True)
         iplot(fig)
         return
+
+    def preview_actions(self, start=0, end=None, **kwargs):
+        domain = copy.deepcopy(self)
+        _ = domain.apply_actions(start=start, end=end)
+        domain.plot_types(**kwargs)
+        del domain
 
     def read_stochss_subdomain_file(self, filename, type_ids=None):
         """
