@@ -25,7 +25,7 @@ import numpy
 from plotly.offline import init_notebook_mode, iplot
 from scipy.spatial import KDTree
 
-from spatialpy.core.geometry import GeometryAll
+from spatialpy.core.geometry import Geometry, GeometryAll
 from spatialpy.core.lattice import Lattice
 from spatialpy.core.transformation import Transformation
 from spatialpy.core.visualization import Visualization
@@ -112,7 +112,7 @@ class Domain():
     def __set_particle_properties(self, ndx, type_id=None, vol=None,
                                   mass=None, nu=None, rho=None, c=None, fixed=False):
         try:
-            if type_id is not None
+            if type_id is not None:
                 self.type_id[ndx] = str(type_id)
             if vol is not None:
                 self.vol[ndx] = float(vol)
@@ -185,8 +185,10 @@ class Domain():
 
         :raises DomainError: If action is not a fill action or is missing a lattice.
         """
-        if action['geometry'] is None:
+        if 'geometry' not in action or action['geometry'] is None:
             action['geometry'] = GeometryAll()
+        if 'props' not in action or action['props'] is None:
+            action['props'] = {}
 
         self.validate_action(action, "fill")
 
@@ -203,7 +205,7 @@ class Domain():
         :raises DomainError: If action is not a set action, the actions geometry is an invalid type,
             the action is missing props, or type_id in props contains an invalid character or is an int < 0.
         """
-        if action['geometry'] is None:
+        if 'geometry' not in action or action['geometry'] is None:
             action['geometry'] = GeometryAll()
 
         self.validate_action(action, "remove")
@@ -233,8 +235,10 @@ class Domain():
         :raises DomainError: If action is not a set action, the actions geometry is an invalid type,
             the action is missing props, or type_id in props contains an invalid character or is an int < 0.
         """
-        if action['geometry'] is None:
+        if 'geometry' not in action or action['geometry'] is None:
             action['geometry'] = GeometryAll()
+        if 'props' not in action or action['props'] is None:
+            action['props'] = {}
 
         self.validate_action(action, "set")
 
@@ -255,7 +259,7 @@ class Domain():
         on_boundary = self.find_boundary_points(update=True)
         for v_ndx in range(self.get_num_voxels()):
             if action['geometry'].inside(self.coordinates()[v_ndx, :], on_boundary[v_ndx]):
-                self.__set_particle_properties(ndx, **action['props'])
+                self.__set_particle_properties(v_ndx, **action['props'])
 
     def validate_action(self, action, coverage):
         """
