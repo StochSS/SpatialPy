@@ -136,6 +136,64 @@ class Domain():
         for name, ndx in self.typeNdxMapping.items():
             self.typeNameMapping[ndx] = name
 
+    def add_point(self, point, vol=1, mass=1, type_id=1, nu=0, fixed=False, rho=None, c=10):
+        """
+        Add a single point particle to the domain space.
+
+        :param point: Spatial coordinate vertices of point to be added
+        :type point: float(3)
+
+        :param vol: Default volume of particle to be added
+        :type vol: float
+
+        :param mass: Default mass of particle to be added
+        :type mass: float
+
+        :param type_id: Particle type ID of particle to be craddedeated
+        :type type_id: str | int
+
+        :param nu: Default viscosity of particle to be added
+        :type nu: float
+
+        :param fixed: True if particle is spatially fixed, else False
+        :type fixed: bool
+
+        :param c: Default artificial speed of sound of particle to be added
+        :type c: float
+
+        :param rho: Default density of particle to be added
+        :type rho: float
+
+        :raises DomainError: Type_id is 0 or type_id contains an invalid character.
+        """
+        if vol < 0:
+            raise DomainError("Volume must be a positive value.")
+
+        if isinstance(type_id, int) and type_id <= 0:
+            raise DomainError("Type_id must be a non-zero positive integer or a string.")
+        type_id = f"type_{type_id}"
+        for char in type_id:
+            if (char in string.punctuation and char != "_") or char == " ":
+                raise DomainError(f"Type_id cannot contain {char}")
+        if type_id not in self.typeNdxMapping:
+            if "UnAssigned" in type_id:
+                self.typeNdxMapping[type_id] = 0
+            else:
+                self.typeNdxMapping[type_id] = len(self.typeNdxMapping)
+
+        if rho is None:
+            rho = mass / vol
+
+        self.type_id = numpy.append(self.type_id, type_id)
+        self.vol = numpy.append(self.vol, vol)
+        self.mass = numpy.append(self.mass, mass)
+        self.nu = numpy.append(self.nu, nu)
+        self.c = numpy.append(self.c, c)
+        self.rho = numpy.append(self.rho, rho)
+        self.fixed = numpy.append(self.fixed, fixed)
+
+        self.vertices = numpy.append(self.vertices, [point], axis=0)
+
     def apply_actions(self, start=0, end=None, preserve_actions=False):
         """
         Apply domain actions in order from start to end.
@@ -261,76 +319,44 @@ class Domain():
             if action['geometry'].inside(self.coordinates()[v_ndx, :], on_boundary[v_ndx]):
                 self.__set_particle_properties(v_ndx, **action['props'])
 
-    def validate_action(self, action, coverage):
+    def calculate_vol(self):
         """
-        Validate a domain action.
-
-        :param action: Domain action to be validated.
-        :type action: dict
-
-        :param coverage: Scope of the validation.  Accepted values: 'fill', 'set', 'remove'.
-        :type coverage: str
-
-        :raises DoaminError: If one of the following conditions are met: The action is an invalid type.
-            The action's geometry, lattice or props are not a valid type.
+        Calculate the total volume of the domain.
         """
-        if not isinstance(action, dict):
-            raise DomainError("Actions must be of type dict.")
+        self.vol = numpy.zeros((self.vertices.shape[0]), dtype=float)
+        self.tetrahedron_vol = numpy.zeros((self.tetrahedrons.shape[0]), dtype=float)
+        for t_ndx in range(self.tetrahedrons.shape[0]):
+            v1, v2, v3, v4 = self.tetrahedrons[t_ndx]
+            a = self.vertices[v1, :]
+            b = self.vertices[v2, :]
+            c = self.vertices[v3, :]
+            d = self.vertices[v4, :]
+            #https://en.wikipedia.org/wiki/Tetrahedron#Volume
+            t_vol = numpy.abs(numpy.dot((a - d), numpy.cross((b - d), (c - d))) / 6)
+            self.tetrahedron_vol[t_ndx] = t_vol
+            self.vol[v1] += t_vol / 4
+            self.vol[v2] += t_vol / 4
+            self.vol[v3] += t_vol / 4
+            self.vol[v4] += t_vol / 4
 
-        if coverage in ("set", "remove"):
-            g_type = type(action['geometry']).__name__
-            if not (isinstance(action['geometry'], (Geometry, Transformation)) or \
-                                                    g_type in ("Geometry", "Transformation")):
-                raise DomainError(
-                    f"A {action['type']} action's geometry must be of type 'Geometry' or 'Transformation' not {g_type}"
-                )
-
-        if coverage == "fill":
-            if action['type'] != "fill":
-                raise DomainError(f"The action's type must be 'fill' not '{action['type']}'.")
-
-            if action['lattice'] is None:
-                raise DomainError("Fill actions must have a lattice.")
-            l_type = type(action['lattice']).__name__
-            if not (isinstance(action['lattice'], (Lattice, Transformation)) or \
-                                                    l_type in ("Lattice", "Transformation")):
-                raise DomainError(
-                    f"A fill action's lattice must be of type 'Lattice' or 'Transformation' not {l_type}"
-                )
-
-        if coverage == "set":
-            if action['type'] != "set":
-                raise DomainError(f"The action's type must be 'set' not '{action['type']}'.")
-
-            if action['props'] is None or action['props'] == {}:
-                raise DomainError("Set actions must have a props.")
-
-        if coverage == "remove":
-            if action['type'] != "remove":
-                raise DomainError(f"The action's type must be 'remove' not '{action['type']}'.")
-
-        if coverage in ("fill", "set"):
-            if action['props'] is not None and not isinstance(action['props'], dict):
-                raise DomainError(f"An action's kwargs must be of type dict not {type(action['props'])}")
-
-    def get_type_def(self, type_id):
+    def closest_vertex(self, point):
         """
-        Get the C++ type definition for the given type.
+        Find the nearest vertex of a given point in the domain.
 
-        :param type_id: The type_id within the domain.
-        :type type_id: str
+        :param point: Target source point
+        :type point: float(3)
 
-        :returns: The C++ type definition for the type_id.
-        :rtype: str
-
-        :raises DomainError: If the type is not defined within the domain.
+        :returns: The coordinates of the nearest vertex to the source point.
+        :rtype: float(3)
         """
-        type_id = f"type_{type_id}"
-        if type_id not in self.typeNdxMapping:
-            errmsg = f"Type_id {type_id} could not be found. "
-            errmsg += "Use Domain.set_properties to set the type_id for particles."
-            raise DomainError(errmsg)
-        return type_id
+        min_dist = None
+        min_vtx = None
+        for i in range(self.vertices.shape[0]):
+            d = numpy.linalg.norm(self.vertices[i, :] - point)
+            if d > 0 and (min_dist is None or d < min_dist):
+                min_dist = d
+                min_vtx = i
+        return min_vtx
 
     def compile_prep(self):
         """
@@ -347,205 +373,29 @@ class Domain():
         self.listOfTypeIDs = list(self.typeNdxMapping.values())
         self._get_type_name_mapping()
 
-    def add_point(self, point, vol=1, mass=1, type_id=1, nu=0, fixed=False, rho=None, c=10):
+    def coordinates(self):
         """
-        Add a single point particle to the domain space.
+        Get coordinates within domain.
 
-        :param point: Spatial coordinate vertices of point to be added
-        :type point: float(3)
-
-        :param vol: Default volume of particle to be added
-        :type vol: float
-
-        :param mass: Default mass of particle to be added
-        :type mass: float
-
-        :param type_id: Particle type ID of particle to be craddedeated
-        :type type_id: str | int
-
-        :param nu: Default viscosity of particle to be added
-        :type nu: float
-
-        :param fixed: True if particle is spatially fixed, else False
-        :type fixed: bool
-
-        :param c: Default artificial speed of sound of particle to be added
-        :type c: float
-
-        :param rho: Default density of particle to be added
-        :type rho: float
-
-        :raises DomainError: Type_id is 0 or type_id contains an invalid character.
+        :returns: Spatial coordinate vertices of points.
+        :rtype: numpy.array
         """
-        if vol < 0:
-            raise DomainError("Volume must be a positive value.")
+        return self.vertices
 
-        if isinstance(type_id, int) and type_id <= 0:
-            raise DomainError("Type_id must be a non-zero positive integer or a string.")
-        type_id = f"type_{type_id}"
-        for char in type_id:
-            if (char in string.punctuation and char != "_") or char == " ":
-                raise DomainError(f"Type_id cannot contain {char}")
-        if type_id not in self.typeNdxMapping:
-            if "UnAssigned" in type_id:
-                self.typeNdxMapping[type_id] = 0
-            else:
-                self.typeNdxMapping[type_id] = len(self.typeNdxMapping)
-
-        if rho is None:
-            rho = mass / vol
-
-        self.type_id = numpy.append(self.type_id, type_id)
-        self.vol = numpy.append(self.vol, vol)
-        self.mass = numpy.append(self.mass, mass)
-        self.nu = numpy.append(self.nu, nu)
-        self.c = numpy.append(self.c, c)
-        self.rho = numpy.append(self.rho, rho)
-        self.fixed = numpy.append(self.fixed, fixed)
-
-        self.vertices = numpy.append(self.vertices, [point], axis=0)
-
-    def set_properties(self, geometry_ivar, type_id, vol=None, mass=None, nu=None, rho=None, c=None, fixed=False):
+    def distance_between_2_vertices(self, start, end):
         """
-        Add a type definition to the domain. By default, all regions are set to type 0.
+        Get distance between 2 domain vertices.
 
-        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass. \
-                   The 'inside()' method of this object will be used to assign properties to points.
-        :type geometry_ivar: spatialpy.core.geometry.Geometry
+        :param start: Starting point
+        :type start: float(3)
 
-        :param type_id: The identifier for this type.
-        :type type_id: str | int
+        :param end: Ending point
+        :type end: float(2)
 
-        :param vol: The volume of each particle in the type.
-        :type vol: float
-
-        :param mass: The mass of each particle in the type.
-        :type mass: float
-
-        :param rho: The density of each particle in the type.
-        :type rho: float
-
-        :param nu: The viscosity of each particle in the type.
-        :type nu: float
-
-        :param c: The artificial speed of sound of each particle in the type.
-        :type c: float
-
-        :param fixed: Are the particles in this type immobile.
-        :type fixed: bool
-
-        :returns: The number of particles that were tagged with this type_id.
-        :rtype: int
-
-        :raises DomainError: Type_id is 0 or type_id contains an invalid character.
+        :returns: a distance measurement between start and end point
+        :rtype: float
         """
-        if isinstance(type_id, int) and type_id <= 0:
-            raise DomainError("Type_id must be a non-zero positive integer or a string.")
-        type_id = f"type_{type_id}"
-        for char in type_id:
-            if (char in string.punctuation and char != "_") or char == " ":
-                raise DomainError(f"Type_id cannot contain '{char}'")
-        if type_id not in self.typeNdxMapping:
-            if "UnAssigned" in type_id:
-                self.typeNdxMapping[type_id] = 0
-            else:
-                self.typeNdxMapping[type_id] = len(self.typeNdxMapping)
-        # apply the type to all points, set type for any points that match
-        count = 0
-        on_boundary = self.find_boundary_points()
-        for v_ndx in range(self.get_num_voxels()):
-            if geometry_ivar.inside(self.coordinates()[v_ndx, :], on_boundary[v_ndx]):
-                self.type_id[v_ndx] = type_id
-                if vol is not None:
-                    self.vol[v_ndx] = vol
-                if mass is not None:
-                    self.mass[v_ndx] = mass
-                if rho is not None:
-                    self.rho[v_ndx] = rho
-                if nu is not None:
-                    self.nu[v_ndx] = nu
-                if c is not None:
-                    self.c[v_ndx] = c
-                self.fixed[v_ndx] = fixed
-                count +=1
-        if count == 0:
-            from spatialpy.core import log # pylint: disable=import-outside-toplevel
-            log.warning("Type with type_id={} has zero particles in it", type_id)
-        return count
-
-    def fill_with_particles(self, geometry_ivar, deltax, deltay=None, deltaz=None, xmin=None,
-                            xmax=None, ymin=None, ymax=None, zmin=None, zmax=None, **kwargs):
-        """
-        Fill a geometric shape with particles.
-
-        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass. \
-                   The 'inside()' method of this object will be used to create add the particles.
-        :type geometry_ivar: spatialpy.core.geometry.Geometry
-
-        :param deltax: Distance between particles on the x-axis.
-        :type deltax: float
-
-        :param deltay: Distance between particles on the y-axis (defaults to deltax).
-        :type deltay: float
-
-        :param deltaz: Distance between particles on the z-axis (defaults to deltax).
-        :type deltaz: float
-
-        :param xmin: Minimum x value of the bounding box (defaults to Domain.xlim[0]).
-        :type xmin: float
-
-        :param xmax: Maximum x value of the bounding box (defaults to Domain.xlim[1]).
-        :type xmax: float
-
-        :param ymin: Minimum y value of the bounding box (defaults to Domain.ylim[0]).
-        :type ymin: float
-
-        :param ymax: Maximum y value of the bounding box (defaults to Domain.ylim[1]).
-        :type ymax: float
-
-        :param zmin: Minimum z value of the bounding box (defaults to Domain.zlim[0]).
-        :type zmin: float
-
-        :param zmax: Maximum z value of the bounding box (defaults to Domain.zlim[1]).
-        :type zmax: float
-
-        :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
-
-        :returns: The number of particles that were created within this geometry.
-        :rtype: int
-        """
-        if deltax <= 0:
-            raise DomainError("Deltax must be greater than 0.")
-        if deltay is None:
-            deltay = deltax
-        elif deltay <= 0:
-            raise DomainError("Deltay must be greater than 0.")
-        if deltaz is None:
-            deltaz = deltax
-        elif deltaz <= 0:
-            raise DomainError("Deltaz must be greater than 0.")
-
-        if xmin is None:
-            xmin = self.xlim[0]
-        if xmax is None:
-            xmax = self.xlim[1]
-        if ymin is None:
-            ymin = self.ylim[0]
-        if ymax is None:
-            ymax = self.ylim[1]
-        if zmin is None:
-            zmin = self.zlim[0]
-        if zmax is None:
-            zmax = self.zlim[1]
-
-        count = 0
-        for x in numpy.arange(xmin, xmax + deltax, deltax):
-            for y in numpy.arange(ymin, ymax + deltay, deltay):
-                for z in numpy.arange(zmin, zmax + deltaz, deltaz):
-                    if geometry_ivar.inside((x, y, z), False):
-                        self.add_point([x, y, z], **kwargs)
-                        count += 1
-        return count
+        return numpy.linalg.norm(self.vertices[start, :] - self.vertices[end, :])
 
     def find_boundary_points(self, update=False):
         """
@@ -580,96 +430,6 @@ class Domain():
                 self.on_boundary[vertex] = True
         return self.on_boundary
 
-    def get_domain_size(self):
-        """
-        Estimate of domain size at each vertex as the average of the
-        diameters of the circumradius of the tetrahedrons that vertex
-        is a part of.
-
-        :returns: a numpy array containing the mean for each vertex based on all incident cells
-        :rtype: numpy.array
-        """
-        if self.domain_size is None:
-            _ = self.get_vol()
-
-            # Compute the circumradius of the cells
-            cr = numpy.zeros((self.tetrahedrons.shape[0]), dtype=float)
-            for i, _ in enumerate(cr):
-                t_vtx = self.tetrahedrons[i, :]
-                # https://en.wikipedia.org/wiki/Tetrahedron#Circumradius
-                a = self.distance_between_2_vertices(t_vtx[0], t_vtx[1])
-                A = self.distance_between_2_vertices(t_vtx[2], t_vtx[3])
-                b = self.distance_between_2_vertices(t_vtx[0], t_vtx[2])
-                B = self.distance_between_2_vertices(t_vtx[1], t_vtx[3])
-                c = self.distance_between_2_vertices(t_vtx[0], t_vtx[3])
-                C = self.distance_between_2_vertices(t_vtx[1], t_vtx[2])
-                R = numpy.sqrt((a*A+b*B+c*C)*(a*A+b*B-c*C)*(a*A-b*B+c*C)*(-a*A+b*B+c*C)) / (24*self.tetrahedron_vol[i])
-                cr[i] = R
-
-            # Compute the mean for each vertex based on all incident cells
-            self.domain_size = numpy.zeros((self.vertices.shape[0]), dtype=float)
-            count = numpy.zeros((self.vertices.shape[0]), dtype=float)
-            for tndx in range(self.tetrahedrons.shape[0]):
-                for vndx in self.tetrahedrons[tndx, :]:
-                    self.domain_size[vndx] += cr[tndx]
-                    count[vndx] += 1
-            for vndx, _ in enumerate(self.domain_size):
-                self.domain_size[vndx] = self.domain_size[vndx] / count[vndx]
-
-        return self.domain_size
-
-    def distance_between_2_vertices(self, start, end):
-        """
-        Get distance between 2 domain vertices.
-
-        :param start: Starting point
-        :type start: float(3)
-
-        :param end: Ending point
-        :type end: float(2)
-
-        :returns: a distance measurement between start and end point
-        :rtype: float
-        """
-        return numpy.linalg.norm(self.vertices[start, :] - self.vertices[end, :])
-
-    def closest_vertex(self, point):
-        """
-        Find the nearest vertex of a given point in the domain.
-
-        :param point: Target source point
-        :type point: float(3)
-
-        :returns: The coordinates of the nearest vertex to the source point.
-        :rtype: float(3)
-        """
-        min_dist = None
-        min_vtx = None
-        for i in range(self.vertices.shape[0]):
-            d = numpy.linalg.norm(self.vertices[i, :] - point)
-            if d > 0 and (min_dist is None or d < min_dist):
-                min_dist = d
-                min_vtx = i
-        return min_vtx
-
-    def coordinates(self):
-        """
-        Get coordinates within domain.
-
-        :returns: Spatial coordinate vertices of points.
-        :rtype: numpy.array
-        """
-        return self.vertices
-
-    def get_num_voxels(self):
-        """
-        Get number of voxels in domain.
-
-        :returns: Number of voxels in the domain.
-        :rtype: int
-        """
-        return self.vertices.shape[0]
-
     def find_h(self):
         """
         Find h value of system.  This value is based off of \
@@ -702,6 +462,72 @@ class Domain():
         zlim = (min(self.vertices[:, 2]), max(self.vertices[:, 2]))
         return xlim, ylim, zlim
 
+    def get_domain_size(self, update=False):
+        """
+        Estimate of domain size at each vertex as the average of the
+        diameters of the circumradius of the tetrahedrons that vertex
+        is a part of.
+
+        :returns: a numpy array containing the mean for each vertex based on all incident cells
+        :rtype: numpy.array
+        """
+        if update or self.domain_size is None:
+            _ = self.get_vol()
+
+            # Compute the circumradius of the cells
+            cr = numpy.zeros((self.tetrahedrons.shape[0]), dtype=float)
+            for i, _ in enumerate(cr):
+                t_vtx = self.tetrahedrons[i, :]
+                # https://en.wikipedia.org/wiki/Tetrahedron#Circumradius
+                a = self.distance_between_2_vertices(t_vtx[0], t_vtx[1])
+                A = self.distance_between_2_vertices(t_vtx[2], t_vtx[3])
+                b = self.distance_between_2_vertices(t_vtx[0], t_vtx[2])
+                B = self.distance_between_2_vertices(t_vtx[1], t_vtx[3])
+                c = self.distance_between_2_vertices(t_vtx[0], t_vtx[3])
+                C = self.distance_between_2_vertices(t_vtx[1], t_vtx[2])
+                R = numpy.sqrt((a*A+b*B+c*C)*(a*A+b*B-c*C)*(a*A-b*B+c*C)*(-a*A+b*B+c*C)) / (24*self.tetrahedron_vol[i])
+                cr[i] = R
+
+            # Compute the mean for each vertex based on all incident cells
+            self.domain_size = numpy.zeros((self.vertices.shape[0]), dtype=float)
+            count = numpy.zeros((self.vertices.shape[0]), dtype=float)
+            for tndx in range(self.tetrahedrons.shape[0]):
+                for vndx in self.tetrahedrons[tndx, :]:
+                    self.domain_size[vndx] += cr[tndx]
+                    count[vndx] += 1
+            for vndx, _ in enumerate(self.domain_size):
+                self.domain_size[vndx] = self.domain_size[vndx] / count[vndx]
+
+        return self.domain_size
+
+    def get_num_voxels(self):
+        """
+        Get number of voxels in domain.
+
+        :returns: Number of voxels in the domain.
+        :rtype: int
+        """
+        return self.vertices.shape[0]
+
+    def get_type_def(self, type_id):
+        """
+        Get the C++ type definition for the given type.
+
+        :param type_id: The type_id within the domain.
+        :type type_id: str
+
+        :returns: The C++ type definition for the type_id.
+        :rtype: str
+
+        :raises DomainError: If the type is not defined within the domain.
+        """
+        type_id = f"type_{type_id}"
+        if type_id not in self.typeNdxMapping:
+            errmsg = f"Type_id {type_id} could not be found. "
+            errmsg += "Use Domain.set_properties to set the type_id for particles."
+            raise DomainError(errmsg)
+        return type_id
+
     def get_vol(self):
         """
         Get the total volume of the domain.
@@ -712,26 +538,6 @@ class Domain():
         if self.vol is None:
             self.calculate_vol()
         return self.vol
-
-    def calculate_vol(self):
-        """
-        Calculate the total volume of the domain.
-        """
-        self.vol = numpy.zeros((self.vertices.shape[0]), dtype=float)
-        self.tetrahedron_vol = numpy.zeros((self.tetrahedrons.shape[0]), dtype=float)
-        for t_ndx in range(self.tetrahedrons.shape[0]):
-            v1, v2, v3, v4 = self.tetrahedrons[t_ndx]
-            a = self.vertices[v1, :]
-            b = self.vertices[v2, :]
-            c = self.vertices[v3, :]
-            d = self.vertices[v4, :]
-            #https://en.wikipedia.org/wiki/Tetrahedron#Volume
-            t_vol = numpy.abs(numpy.dot((a - d), numpy.cross((b - d), (c - d))) / 6)
-            self.tetrahedron_vol[t_ndx] = t_vol
-            self.vol[v1] += t_vol / 4
-            self.vol[v2] += t_vol / 4
-            self.vol[v3] += t_vol / 4
-            self.vol[v4] += t_vol / 4
 
     def plot_types(self, width=None, height=None, colormap=None, size=None, title=None,
                    included_types_list=None, use_matplotlib=False, return_plotly_figure=False):
@@ -879,6 +685,232 @@ class Domain():
         iplot(fig)
         return
 
+    def read_stochss_subdomain_file(self, filename, type_ids=None):
+        """
+        Read a .txt file that conains the StochSS v1.x spatial subdomain descriptions.
+
+        :param filename: StochSS v1.x subdomain description filename.
+        :type filename: str
+
+        :param type_ids: Mapping of type indecies to type names.
+        :type type_ids: dict{str:str}
+
+        :raises DomainError: Domain file could not be read or type_id contains an invalid character.
+        """
+        with open(filename,'r', encoding="utf-8") as file_obj:
+            for lnum, line in enumerate(file_obj):
+                try:
+                    (ndx, type_id) = line.rstrip().split(',')
+
+                    type_id = f"type_{type_id if type_ids is None else type_ids[type_id]}"
+                    for char in type_id:
+                        if (char in string.punctuation and char != "_") or char == " ":
+                            raise DomainError(f"Type_id cannot contain {char}")
+                    if type_id not in self.typeNdxMapping:
+                        if "UnAssigned" in type_id:
+                            self.typeNdxMapping[type_id] = 0
+                        else:
+                            self.typeNdxMapping[type_id] = len(self.typeNdxMapping)
+
+                    self.type_id[int(ndx)] = type_id
+
+                except ValueError as err:
+                    raise DomainError(f"Could not read in subdomain file, error on line {lnum}: {line}") from err
+
+    def validate_action(self, action, coverage):
+        """
+        Validate a domain action.
+
+        :param action: Domain action to be validated.
+        :type action: dict
+
+        :param coverage: Scope of the validation.  Accepted values: 'fill', 'set', 'remove'.
+        :type coverage: str
+
+        :raises DoaminError: If one of the following conditions are met: The action is an invalid type.
+            The action's geometry, lattice or props are not a valid type.
+        """
+        if not isinstance(action, dict):
+            raise DomainError("Actions must be of type dict.")
+
+        if coverage in ("set", "remove"):
+            g_type = type(action['geometry']).__name__
+            if not (isinstance(action['geometry'], (Geometry, Transformation)) or \
+                                                    g_type in ("Geometry", "Transformation")):
+                raise DomainError(
+                    f"A {action['type']} action's geometry must be of type 'Geometry' or 'Transformation' not {g_type}"
+                )
+
+        if coverage == "fill":
+            if action['type'] != "fill":
+                raise DomainError(f"The action's type must be 'fill' not '{action['type']}'.")
+
+            if action['lattice'] is None:
+                raise DomainError("Fill actions must have a lattice.")
+            l_type = type(action['lattice']).__name__
+            if not (isinstance(action['lattice'], (Lattice, Transformation)) or \
+                                                    l_type in ("Lattice", "Transformation")):
+                raise DomainError(
+                    f"A fill action's lattice must be of type 'Lattice' or 'Transformation' not {l_type}"
+                )
+
+        if coverage == "set":
+            if action['type'] != "set":
+                raise DomainError(f"The action's type must be 'set' not '{action['type']}'.")
+
+            if action['props'] is None or action['props'] == {}:
+                raise DomainError("Set actions must have a props.")
+
+        if coverage == "remove":
+            if action['type'] != "remove":
+                raise DomainError(f"The action's type must be 'remove' not '{action['type']}'.")
+
+        if coverage in ("fill", "set"):
+            if action['props'] is not None and not isinstance(action['props'], dict):
+                raise DomainError(f"An action's kwargs must be of type dict not {type(action['props'])}")
+
+    def set_properties(self, geometry_ivar, type_id, vol=None, mass=None, nu=None, rho=None, c=None, fixed=False):
+        """
+        Add a type definition to the domain. By default, all regions are set to type 0.
+
+        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass. \
+                   The 'inside()' method of this object will be used to assign properties to points.
+        :type geometry_ivar: spatialpy.core.geometry.Geometry
+
+        :param type_id: The identifier for this type.
+        :type type_id: str | int
+
+        :param vol: The volume of each particle in the type.
+        :type vol: float
+
+        :param mass: The mass of each particle in the type.
+        :type mass: float
+
+        :param rho: The density of each particle in the type.
+        :type rho: float
+
+        :param nu: The viscosity of each particle in the type.
+        :type nu: float
+
+        :param c: The artificial speed of sound of each particle in the type.
+        :type c: float
+
+        :param fixed: Are the particles in this type immobile.
+        :type fixed: bool
+
+        :returns: The number of particles that were tagged with this type_id.
+        :rtype: int
+
+        :raises DomainError: Type_id is 0 or type_id contains an invalid character.
+        """
+        if isinstance(type_id, int) and type_id <= 0:
+            raise DomainError("Type_id must be a non-zero positive integer or a string.")
+        type_id = f"type_{type_id}"
+        for char in type_id:
+            if (char in string.punctuation and char != "_") or char == " ":
+                raise DomainError(f"Type_id cannot contain '{char}'")
+        if type_id not in self.typeNdxMapping:
+            if "UnAssigned" in type_id:
+                self.typeNdxMapping[type_id] = 0
+            else:
+                self.typeNdxMapping[type_id] = len(self.typeNdxMapping)
+        # apply the type to all points, set type for any points that match
+        count = 0
+        on_boundary = self.find_boundary_points()
+        for v_ndx in range(self.get_num_voxels()):
+            if geometry_ivar.inside(self.coordinates()[v_ndx, :], on_boundary[v_ndx]):
+                self.type_id[v_ndx] = type_id
+                if vol is not None:
+                    self.vol[v_ndx] = vol
+                if mass is not None:
+                    self.mass[v_ndx] = mass
+                if rho is not None:
+                    self.rho[v_ndx] = rho
+                if nu is not None:
+                    self.nu[v_ndx] = nu
+                if c is not None:
+                    self.c[v_ndx] = c
+                self.fixed[v_ndx] = fixed
+                count +=1
+        if count == 0:
+            from spatialpy.core import log # pylint: disable=import-outside-toplevel
+            log.warning("Type with type_id={} has zero particles in it", type_id)
+        return count
+
+    def fill_with_particles(self, geometry_ivar, deltax, deltay=None, deltaz=None, xmin=None,
+                            xmax=None, ymin=None, ymax=None, zmin=None, zmax=None, **kwargs):
+        """
+        Fill a geometric shape with particles.
+
+        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass. \
+                   The 'inside()' method of this object will be used to create add the particles.
+        :type geometry_ivar: spatialpy.core.geometry.Geometry
+
+        :param deltax: Distance between particles on the x-axis.
+        :type deltax: float
+
+        :param deltay: Distance between particles on the y-axis (defaults to deltax).
+        :type deltay: float
+
+        :param deltaz: Distance between particles on the z-axis (defaults to deltax).
+        :type deltaz: float
+
+        :param xmin: Minimum x value of the bounding box (defaults to Domain.xlim[0]).
+        :type xmin: float
+
+        :param xmax: Maximum x value of the bounding box (defaults to Domain.xlim[1]).
+        :type xmax: float
+
+        :param ymin: Minimum y value of the bounding box (defaults to Domain.ylim[0]).
+        :type ymin: float
+
+        :param ymax: Maximum y value of the bounding box (defaults to Domain.ylim[1]).
+        :type ymax: float
+
+        :param zmin: Minimum z value of the bounding box (defaults to Domain.zlim[0]).
+        :type zmin: float
+
+        :param zmax: Maximum z value of the bounding box (defaults to Domain.zlim[1]).
+        :type zmax: float
+
+        :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
+
+        :returns: The number of particles that were created within this geometry.
+        :rtype: int
+        """
+        if deltax <= 0:
+            raise DomainError("Deltax must be greater than 0.")
+        if deltay is None:
+            deltay = deltax
+        elif deltay <= 0:
+            raise DomainError("Deltay must be greater than 0.")
+        if deltaz is None:
+            deltaz = deltax
+        elif deltaz <= 0:
+            raise DomainError("Deltaz must be greater than 0.")
+
+        if xmin is None:
+            xmin = self.xlim[0]
+        if xmax is None:
+            xmax = self.xlim[1]
+        if ymin is None:
+            ymin = self.ylim[0]
+        if ymax is None:
+            ymax = self.ylim[1]
+        if zmin is None:
+            zmin = self.zlim[0]
+        if zmax is None:
+            zmax = self.zlim[1]
+
+        count = 0
+        for x in numpy.arange(xmin, xmax + deltax, deltax):
+            for y in numpy.arange(ymin, ymax + deltay, deltay):
+                for z in numpy.arange(zmin, zmax + deltaz, deltaz):
+                    if geometry_ivar.inside((x, y, z), False):
+                        self.add_point([x, y, z], **kwargs)
+                        count += 1
+        return count
+
     @classmethod
     def read_xml_mesh(cls, filename):
         """
@@ -986,38 +1018,6 @@ class Domain():
             raise DomainError("The python package 'meshio' is not installed.") from err
 
         return cls.import_meshio_object(meshio.read(filename))
-
-    def read_stochss_subdomain_file(self, filename, type_ids=None):
-        """
-        Read a .txt file that conains the StochSS v1.x spatial subdomain descriptions.
-
-        :param filename: StochSS v1.x subdomain description filename.
-        :type filename: str
-
-        :param type_ids: Mapping of type indecies to type names.
-        :type type_ids: dict{str:str}
-
-        :raises DomainError: Domain file could not be read or type_id contains an invalid character.
-        """
-        with open(filename,'r', encoding="utf-8") as file_obj:
-            for lnum, line in enumerate(file_obj):
-                try:
-                    (ndx, type_id) = line.rstrip().split(',')
-
-                    type_id = f"type_{type_id if type_ids is None else type_ids[type_id]}"
-                    for char in type_id:
-                        if (char in string.punctuation and char != "_") or char == " ":
-                            raise DomainError(f"Type_id cannot contain {char}")
-                    if type_id not in self.typeNdxMapping:
-                        if "UnAssigned" in type_id:
-                            self.typeNdxMapping[type_id] = 0
-                        else:
-                            self.typeNdxMapping[type_id] = len(self.typeNdxMapping)
-
-                    self.type_id[int(ndx)] = type_id
-
-                except ValueError as err:
-                    raise DomainError(f"Could not read in subdomain file, error on line {lnum}: {line}") from err
 
     @classmethod
     def read_stochss_domain(cls, filename):
