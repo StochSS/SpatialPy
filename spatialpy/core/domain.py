@@ -106,6 +106,25 @@ class Domain():
 
         return ""
 
+    def __set_particle_properties(self, ndx, type_id=None, vol=None,
+                                  mass=None, nu=None, rho=None, c=None, fixed=False):
+        try:
+            if type_id is not None
+                self.type_id[ndx] = str(type_id)
+            if vol is not None:
+                self.vol[ndx] = float(vol)
+            if mass is not None:
+                self.mass[ndx] = float(mass)
+            if rho is not None:
+                self.rho[ndx] = float(rho)
+            if nu is not None:
+                self.nu[ndx] = float(nu)
+            if c is not None:
+                self.c[ndx] = float(c)
+            self.fixed[ndx] = bool(fixed)
+        except ValueError as err:
+            raise DomainError(f"Failed to set all properties. Reaseon given: {err}") from err
+
     def _ipython_display_(self, use_matplotlib=False):
         self.plot_types(width="auto", height="auto", use_matplotlib=use_matplotlib)
 
@@ -117,10 +136,10 @@ class Domain():
     def apply_fill_action(self, action):
         """
         Add particles within a region defined by the actions lattice and geometry to the domain.
-        Particles will have attributes defined in the actions kwargs.
+        Particles will have attributes defined in the actions props.
 
         :param action: Fill action containing a lattice, geometry, and particle properties.
-            Example: {'type': 'fill', 'lattice': lattice_obj, 'geometry':geometry_obj , 'kwargs':{}}
+            Example: {'type': 'fill', 'lattice': lattice_obj, 'geometry':geometry_obj , 'props':{}}
         :type action: dict
 
         :raises DomainError: If action is not a fill action or is missing a lattice.
@@ -130,7 +149,43 @@ class Domain():
 
         self.validate_action(action, "fill")
 
-        action['lattice'].apply(self, action['geometry'], **action['kwargs'])
+        action['lattice'].apply(self, action['geometry'], **action['props'])
+
+    def apply_set_action(self, action):
+        """
+        Set properties of particles within a domain region defined by the actions geometry.
+        Particles will have attributes defined in the actions props.
+
+        :param action: Set action containing a geometry and particle properties.
+            Example: {'type': 'set', 'geometry':geometry_obj , 'props':{}}
+        :type action: dict
+
+        :raises DomainError: If action is not a set action, the actions geometry is an invalid type,
+            the action is missing props, or type_id in props contains an invalid character or is an int < 0.
+        """
+        if action['geometry'] is None:
+            action['geometry'] = GeometryAll()
+
+        self.validate_action(action, "set")
+
+        if "type_id" in action['props']:
+            if isinstance(action['props']['type_id'], int) and action['props']['type_id'] <= 0:
+                raise DomainError("Type_id must be a non-zero positive integer or a string.")
+            action['props']['type_id'] = f"type_{action['props']['type_id']}"
+            for char in action['props']['type_id']:
+                if (char in string.punctuation and char != "_") or char == " ":
+                    raise DomainError(f"Type_id cannot contain '{char}'")
+            if action['props']['type_id'] not in self.typeNdxMapping:
+                if "UnAssigned" in action['props']['type_id']:
+                    self.typeNdxMapping[action['props']['type_id']] = 0
+                else:
+                    self.typeNdxMapping[action['props']['type_id']] = len(self.typeNdxMapping)
+        
+        # apply the type to all points, set type for any points that match
+        on_boundary = self.find_boundary_points(update=True)
+        for v_ndx in range(self.get_num_voxels()):
+            if action['geometry'].inside(self.coordinates()[v_ndx, :], on_boundary[v_ndx]):
+                self.__set_particle_properties(ndx, **action['props'])
 
     def validate_action(self, action, coverage):
         """
@@ -143,17 +198,18 @@ class Domain():
         :type coverage: str
 
         :raises DoaminError: If one of the following conditions are met: The action is an invalid type.
-            The action's geometry, lattice or kwargs are not a valid type.
+            The action's geometry, lattice or props are not a valid type.
         """
         if not isinstance(action, dict):
             raise DomainError("Actions must be of type dict.")
 
         if coverage in ("set", "remove"):
             g_type = type(action['geometry']).__name__
-
-        if coverage in ("fill", "set"):
-            if action['kwargs'] is not None and not isinstance(action['kwargs'], dict):
-                raise DomainError(f"An action's kwargs must be of type dict not {type(action['kwargs'])}")
+            if not (isinstance(action['geometry'], (Geometry, Transformation)) or \
+                                                    g_type in ("Geometry", "Transformation")):
+                raise DomainError(
+                    f"A {action['type']} action's geometry must be of type 'Geometry' or 'Transformation' not {g_type}"
+                )
 
         if coverage == "fill":
             if action['type'] != "fill":
@@ -167,6 +223,17 @@ class Domain():
                 raise DomainError(
                     f"A fill action's lattice must be of type 'Lattice' or 'Transformation' not {l_type}"
                 )
+
+        if coverage == "set":
+            if action['type'] != "set":
+                raise DomainError(f"The action's type must be 'set' not '{action['type']}'.")
+
+            if action['props'] is None or action['props'] == {}:
+                raise DomainError("Set actions must have a props.")
+
+        if coverage in ("fill", "set"):
+            if action['props'] is not None and not isinstance(action['props'], dict):
+                raise DomainError(f"An action's kwargs must be of type dict not {type(action['props'])}")
 
     def get_type_def(self, type_id):
         """
@@ -402,14 +469,14 @@ class Domain():
                         count += 1
         return count
 
-    def find_boundary_points(self):
+    def find_boundary_points(self, update=False):
         """
         Find all vertices that exist on boundary.
 
         :returns: A numpy array indexed by vertices, True for boundary points, else false.
         :rtype: np.ndarray(dtype=bool)
         """
-        if self.on_boundary is None:
+        if update or self.on_boundary is None:
             self.on_boundary = numpy.zeros((self.get_num_voxels()), dtype=bool)
             # exterior triangles are part of one-and-only-one tetrahedron
             if self.triangles is None or len(self.triangles) == 0 or len(self.tetrahedrons) == 0:
