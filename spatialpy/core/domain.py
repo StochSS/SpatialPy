@@ -61,6 +61,7 @@ class Domain():
         self.triangles = None
         self.tetrahedrons = None
 
+        self.actions = []
         self.on_boundary = None
         self.domain_size = None
         self.tetrahedron_vol = None
