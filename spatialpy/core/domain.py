@@ -139,7 +139,7 @@ class Domain():
         Particles will have attributes defined in the actions props.
 
         :param action: Fill action containing a lattice, geometry, and particle properties.
-            Example: {'type': 'fill', 'lattice': lattice_obj, 'geometry':geometry_obj , 'props':{}}
+            Example: {'type': 'fill', 'lattice': lattice_obj, 'geometry':geometry_obj, 'props':{}}
         :type action: dict
 
         :raises DomainError: If action is not a fill action or is missing a lattice.
@@ -150,6 +150,35 @@ class Domain():
         self.validate_action(action, "fill")
 
         action['lattice'].apply(self, action['geometry'], **action['props'])
+
+    def apply_remove_action(self, action):
+        """
+        Remove particles within a domain region defined by the actions geometry.
+
+        :param action: Remove action containing a geometry.
+            Example: {'type': 'remove', 'geometry':geometry_obj}
+        :type action: dict
+
+        :raises DomainError: If action is not a set action, the actions geometry is an invalid type,
+            the action is missing props, or type_id in props contains an invalid character or is an int < 0.
+        """
+        if action['geometry'] is None:
+            action['geometry'] = GeometryAll()
+
+        self.validate_action(action, "remove")
+
+        # remove the particles that fall within the defined region
+        on_boundary = self.find_boundary_points(update=True)
+        for v_ndx in range(self.get_num_voxels()):
+            if action['geometry'].inside(self.coordinates()[v_ndx, :], on_boundary[v_ndx]):
+                self.type_id = numpy.delete(self.type_id, v_ndx, 0)
+                self.vol = numpy.delete(self.vol, v_ndx)
+                self.mass = numpy.delete(self.mass, v_ndx)
+                self.rho = numpy.delete(self.rho, v_ndx)
+                self.nu = numpy.delete(self.nu, v_ndx)
+                self.c = numpy.delete(self.c, v_ndx)
+                self.fixed = numpy.delete(self.fixed, v_ndx)
+                self.on_boundary = numpy.delete(self.on_boundary, v_ndx)
 
     def apply_set_action(self, action):
         """
@@ -181,7 +210,7 @@ class Domain():
                 else:
                     self.typeNdxMapping[action['props']['type_id']] = len(self.typeNdxMapping)
         
-        # apply the type to all points, set type for any points that match
+        # apply the properties to all points that fall within the defined region
         on_boundary = self.find_boundary_points(update=True)
         for v_ndx in range(self.get_num_voxels()):
             if action['geometry'].inside(self.coordinates()[v_ndx, :], on_boundary[v_ndx]):
@@ -230,6 +259,10 @@ class Domain():
 
             if action['props'] is None or action['props'] == {}:
                 raise DomainError("Set actions must have a props.")
+
+        if coverage == "remove":
+            if action['type'] != "remove":
+                raise DomainError(f"The action's type must be 'remove' not '{action['type']}'.")
 
         if coverage in ("fill", "set"):
             if action['props'] is not None and not isinstance(action['props'], dict):
