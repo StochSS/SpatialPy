@@ -18,7 +18,6 @@ import numpy
 
 import xml.etree.ElementTree as ET
 
-from spatialpy.core.domain import Domain
 from spatialpy.core.geometry import Geometry, CombinatoryGeometry
 from spatialpy.core.spatialpyerror import LatticeError
 
@@ -179,6 +178,7 @@ class CartesianLattice(Lattice):
 
         :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
         """
+        from spatialpy.core.domain import Domain # pylint: disable=import-outside-toplevel
         if not (isinstance(domain, Domain) or type(domain).__name__ == 'Domain'):
             raise LatticeError("domain must be of type spatialpy.Domain.")
         if not (isinstance(geometry, (Geometry, CombinatoryGeometry)) or \
@@ -286,6 +286,7 @@ class SphericalLattice(Lattice):
 
         :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
         """
+        from spatialpy.core.domain import Domain # pylint: disable=import-outside-toplevel
         if not (isinstance(domain, Domain) or type(domain).__name__ == 'Domain'):
             raise LatticeError("domain must be of type spatialpy.Domain.")
         if not (isinstance(geometry, (Geometry, CombinatoryGeometry)) or \
@@ -401,6 +402,7 @@ class CylindricalLattice(Lattice):
 
         :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
         """
+        from spatialpy.core.domain import Domain # pylint: disable=import-outside-toplevel
         if not (isinstance(domain, Domain) or type(domain).__name__ == 'Domain'):
             raise LatticeError("domain must be of type spatialpy.Domain.")
         if not (isinstance(geometry, (Geometry, CombinatoryGeometry)) or \
@@ -520,6 +522,7 @@ class XMLMeshLattice(Lattice):
 
         :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
         """
+        from spatialpy.core.domain import Domain # pylint: disable=import-outside-toplevel
         if not (isinstance(domain, Domain) or type(domain).__name__ == 'Domain'):
             raise LatticeError("domain must be of type spatialpy.Domain.")
         if transform is not None and not callable(transform):
@@ -653,6 +656,7 @@ class MeshIOLattice(Lattice):
 
         :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
         """
+        from spatialpy.core.domain import Domain # pylint: disable=import-outside-toplevel
         if not (isinstance(domain, Domain) or type(domain).__name__ == 'Domain'):
             raise LatticeError("domain must be of type spatialpy.Domain.")
         if transform is not None and not callable(transform):
@@ -756,6 +760,7 @@ class StochSSLattice(Lattice):
         :param transform: Transformation function applied to each particle.
         :type transform: function
         """
+        from spatialpy.core.domain import Domain # pylint: disable=import-outside-toplevel
         if not (isinstance(domain, Domain) or type(domain).__name__ == 'Domain'):
             raise LatticeError("domain must be of type spatialpy.Domain.")
         if transform is not None and not callable(transform):
