@@ -250,6 +250,28 @@ class Domain():
 
         self.vertices = numpy.append(self.vertices, [point], axis=0)
 
+    def add_remove_action(self, geometry=None, apply_action=False):
+        """
+        Create a remove action that can be applied to the domain.
+
+        :param geometry: Geometry classed used when applying set actions. Defaults to spatialpy.GeometryAll.
+        :type geometry: spatialpy.Geometry
+
+        :param apply_action: If true, apply the action, else, add the action to Domain.actions
+        :type apply_action: bool
+
+        :returns: The set action if apply_action is false.
+        :rtype: dict
+        """
+        action = {'type': "remove"}
+        if geometry is not None:
+            action['geometry'] = geometry
+
+        if apply_action:
+            return self.apply_remove_action(action)
+        self.actions.append(action)
+        return action
+
     def add_set_action(self, geometry=None, apply_action=False, **props):
         r"""
         Create a set action that can be applied to the domain.
