@@ -26,7 +26,12 @@ from plotly.offline import init_notebook_mode, iplot
 from scipy.spatial import KDTree
 
 from spatialpy.core.geometry import Geometry, GeometryAll
-from spatialpy.core.lattice import Lattice
+from spatialpy.core.lattice import (
+    Lattice,
+    CartesianLattice,
+    SphericalLattice,
+    CylindricalLattice
+)
 from spatialpy.core.transformation import Transformation
 from spatialpy.core.visualization import Visualization
 from spatialpy.core.spatialpyerror import DomainError
@@ -136,6 +141,58 @@ class Domain():
         for name, ndx in self.typeNdxMapping.items():
             self.typeNameMapping[ndx] = name
 
+    def add_fill_action(self, lattice=None, geometry=None, cartesian=None,
+                        spherical=None, cylindrical=None, apply_action=False, **kwargs):
+        r"""
+        Create a fill action that can be applied to the domain.
+
+        :param lattice: Lattice classed used when applying fill actions.
+        :type lattice: spatialpy.Lattice
+
+        :param geometry: Geometry classed used when applying fill actions. Defaults to spatialpy.GeometryAll.
+        :type geometry: spatialpy.Geometry
+
+        :param cartesian: Arguments used to create a cartesian lattice. Ignored if lattice is set.
+        :type cartesian: dict
+
+        :param spherical: Arguments used to create a spherical lattice. Ignored if lattice or cartesian is set.
+        :type spherical: dict
+
+        :param cylindrical: Arguments used to create a spherical lattice. Ignored if lattice, cartesian,
+            or spherical is set.
+        :type cylindrical: dict
+
+        :param apply_action: If true, apply the action, else, add the action to Domain.actions
+        :type apply_action: bool
+
+        :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
+
+        :returns: Number of particles added to the domain if apply_action is true, else the fill action.
+        :rtype: int | dict
+
+        :raises DomainError: If a lattice wasn't provided or could not be constructed.
+        """
+        if lattice is None:
+            if cartesian is not None:
+                lattice = CartesianLattice(**cartesian)
+            elif spherical is not None:
+                lattice = SphericalLattice(**spherical)
+            elif cylindrical is not None:
+                lattice = CylindricalLattice(**cylindrical)
+            else:
+                raise DomainError("Fill actions require a lattice.")
+
+        action = {'type': "fill", 'lattice': lattice}
+        if geometry is not None:
+            action['geometry'] = geometry
+        if len(kwargs) > 0:
+            action['props'] = kwargs
+
+        if apply_action:
+            return self.apply_fill_action(action)
+        self.actions.append(action)
+        return action
+
     def add_point(self, point, vol=1, mass=1, type_id=1, nu=0, fixed=False, rho=None, c=10):
         """
         Add a single point particle to the domain space.
@@ -211,7 +268,7 @@ class Domain():
         """
         if end is None:
             end = len(self.actions)
-        
+
         p_count = 0
         count = end - start
         while count > 0:
@@ -312,7 +369,7 @@ class Domain():
                     self.typeNdxMapping[action['props']['type_id']] = 0
                 else:
                     self.typeNdxMapping[action['props']['type_id']] = len(self.typeNdxMapping)
-        
+
         # apply the properties to all points that fall within the defined region
         on_boundary = self.find_boundary_points(update=True)
         for v_ndx in range(self.get_num_voxels()):
@@ -366,9 +423,9 @@ class Domain():
         :raises DomainError: If a type_id is not set or rho=0 for a particle.
         """
         if self.type_id.tolist().count("type_UnAssigned") > 0:
-            raise DomainError(f"Particles must be assigned a type_id.")
+            raise DomainError("Particles must be assigned a type_id.")
         if numpy.count_nonzero(self.rho) < len(self.rho):
-            raise DomainError(f"Rho must be a positive value.")
+            raise DomainError("Rho must be a positive value.")
 
         self.listOfTypeIDs = list(self.typeNdxMapping.values())
         self._get_type_name_mapping()
@@ -396,6 +453,53 @@ class Domain():
         :rtype: float
         """
         return numpy.linalg.norm(self.vertices[start, :] - self.vertices[end, :])
+
+    def fill_with_particles(self, geometry_ivar, deltax, deltay=None, deltaz=None, xmin=None,
+                            xmax=None, ymin=None, ymax=None, zmin=None, zmax=None, **kwargs):
+        r"""
+        Fill a region defined by a cartesian lattice and geometric shape with particles.
+
+        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass. \
+                   The 'inside()' method of this object will be used to create add the particles.
+        :type geometry_ivar: spatialpy.core.geometry.Geometry
+
+        :param deltax: Distance between particles on the x-axis in a cartesian lattice.
+        :type deltax: float
+
+        :param deltay: Distance between particles on the y-axis in a cartesian lattice.
+        :type deltay: float
+
+        :param deltaz: Distance between particles on the z-axis in a cartesian lattice.
+        :type deltaz: float
+
+        :param xmin: Minimum x value of the bounding box in a cartesian lattice.
+        :type xmin: float
+
+        :param xmax: Maximum x value of the bounding box in a cartesian lattice.
+        :type xmax: float
+
+        :param ymin: Minimum y value of the bounding box in a cartesian lattice.
+        :type ymin: float
+
+        :param ymax: Maximum y value of the bounding box in a cartesian lattice.
+        :type ymax: float
+
+        :param zmin: Minimum z value of the bounding box in a cartesian lattice.
+        :type zmin: float
+
+        :param zmax: Maximum z value of the bounding box in a cartesian lattice.
+        :type zmax: float
+
+        :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
+
+        :returns: The number of particles that were created within this lattice and geometry.
+        :rtype: int
+        """
+        cartesian = {
+            "xmin": xmin, "xmax": xmax, "ymin": ymin, "ymax": ymax, "zmin": zmin,
+            "zmax": zmax, "deltax": deltax, "deltay": deltay, "deltaz": deltaz,
+        }
+        return self.add_fill_action(geometry=geometry_ivar, cartesian=cartesian, apply_action=True, **kwargs)
 
     def find_boundary_points(self, update=False):
         """
@@ -686,6 +790,17 @@ class Domain():
         return
 
     def preview_actions(self, start=0, end=None, **kwargs):
+        r"""
+        Preview effects of actions to the domain.
+
+        :param start: Starting index for actions (inclusive).
+        :type start: int
+
+        :param end: Ending index for actions (exclusive).
+        :type end: int
+
+        :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.plot_types`.
+        """
         domain = copy.deepcopy(self)
         _ = domain.apply_actions(start=start, end=end)
         domain.plot_types(**kwargs)
@@ -841,80 +956,6 @@ class Domain():
         if count == 0:
             from spatialpy.core import log # pylint: disable=import-outside-toplevel
             log.warning("Type with type_id={} has zero particles in it", type_id)
-        return count
-
-    def fill_with_particles(self, geometry_ivar, deltax, deltay=None, deltaz=None, xmin=None,
-                            xmax=None, ymin=None, ymax=None, zmin=None, zmax=None, **kwargs):
-        """
-        Fill a geometric shape with particles.
-
-        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass. \
-                   The 'inside()' method of this object will be used to create add the particles.
-        :type geometry_ivar: spatialpy.core.geometry.Geometry
-
-        :param deltax: Distance between particles on the x-axis.
-        :type deltax: float
-
-        :param deltay: Distance between particles on the y-axis (defaults to deltax).
-        :type deltay: float
-
-        :param deltaz: Distance between particles on the z-axis (defaults to deltax).
-        :type deltaz: float
-
-        :param xmin: Minimum x value of the bounding box (defaults to Domain.xlim[0]).
-        :type xmin: float
-
-        :param xmax: Maximum x value of the bounding box (defaults to Domain.xlim[1]).
-        :type xmax: float
-
-        :param ymin: Minimum y value of the bounding box (defaults to Domain.ylim[0]).
-        :type ymin: float
-
-        :param ymax: Maximum y value of the bounding box (defaults to Domain.ylim[1]).
-        :type ymax: float
-
-        :param zmin: Minimum z value of the bounding box (defaults to Domain.zlim[0]).
-        :type zmin: float
-
-        :param zmax: Maximum z value of the bounding box (defaults to Domain.zlim[1]).
-        :type zmax: float
-
-        :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
-
-        :returns: The number of particles that were created within this geometry.
-        :rtype: int
-        """
-        if deltax <= 0:
-            raise DomainError("Deltax must be greater than 0.")
-        if deltay is None:
-            deltay = deltax
-        elif deltay <= 0:
-            raise DomainError("Deltay must be greater than 0.")
-        if deltaz is None:
-            deltaz = deltax
-        elif deltaz <= 0:
-            raise DomainError("Deltaz must be greater than 0.")
-
-        if xmin is None:
-            xmin = self.xlim[0]
-        if xmax is None:
-            xmax = self.xlim[1]
-        if ymin is None:
-            ymin = self.ylim[0]
-        if ymax is None:
-            ymax = self.ylim[1]
-        if zmin is None:
-            zmin = self.zlim[0]
-        if zmax is None:
-            zmax = self.zlim[1]
-
-        count = 0
-        for x in numpy.arange(xmin, xmax + deltax, deltax):
-            for y in numpy.arange(ymin, ymax + deltay, deltay):
-                for z in numpy.arange(zmin, zmax + deltaz, deltaz):
-                    if geometry_ivar.inside((x, y, z), False):
-                        self.add_point([x, y, z], **kwargs)
-                        count += 1
         return count
 
     @classmethod
