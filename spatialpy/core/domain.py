@@ -25,12 +25,11 @@ import numpy
 from plotly.offline import init_notebook_mode, iplot
 from scipy.spatial import KDTree
 
-from spatialpy.core.geometry import Geometry, GeometryAll
+from spatialpy.core.geometry import (
+    CombinatoryGeometry, Geometry, GeometryAll
+)
 from spatialpy.core.lattice import (
-    Lattice,
-    CartesianLattice,
-    SphericalLattice,
-    CylindricalLattice
+    Lattice, CartesianLattice, SphericalLattice, CylindricalLattice
 )
 from spatialpy.core.transformation import Transformation
 from spatialpy.core.visualization import Visualization
@@ -142,7 +141,7 @@ class Domain():
             self.typeNameMapping[ndx] = name
 
     def add_fill_action(self, lattice=None, geometry=None, cartesian=None,
-                        spherical=None, cylindrical=None, apply_action=False, **kwargs):
+                        spherical=None, cylindrical=None, apply_action=False, **props):
         r"""
         Create a fill action that can be applied to the domain.
 
@@ -165,7 +164,7 @@ class Domain():
         :param apply_action: If true, apply the action, else, add the action to Domain.actions
         :type apply_action: bool
 
-        :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
+        :param \**props: Additional particle properties passed to :py:meth:`Domain.add_point`.
 
         :returns: Number of particles added to the domain if apply_action is true, else the fill action.
         :rtype: int | dict
@@ -185,8 +184,8 @@ class Domain():
         action = {'type': "fill", 'lattice': lattice}
         if geometry is not None:
             action['geometry'] = geometry
-        if len(kwargs) > 0:
-            action['props'] = kwargs
+        if len(props) > 0:
+            action['props'] = props
 
         if apply_action:
             return self.apply_fill_action(action)
@@ -250,6 +249,35 @@ class Domain():
         self.fixed = numpy.append(self.fixed, fixed)
 
         self.vertices = numpy.append(self.vertices, [point], axis=0)
+
+    def add_set_action(self, geometry=None, apply_action=False, **props):
+        r"""
+        Create a set action that can be applied to the domain.
+
+        :param geometry: Geometry classed used when applying set actions. Defaults to spatialpy.GeometryAll.
+        :type geometry: spatialpy.Geometry
+
+        :param apply_action: If true, apply the action, else, add the action to Domain.actions
+        :type apply_action: bool
+
+        :param \**props: Additional particle properties passed to :py:meth:`Domain.add_point`.
+
+        :returns: The set action if apply_action is false.
+        :rtype: dict
+
+        :raises DomainError: If no additional properties are provided.
+        """
+        if len(props) <= 0:
+            raise DomainError("Set actions require particle properties to set")
+
+        action = {'type': "set", 'props': props}
+        if geometry is not None:
+            action['geometry'] = geometry
+
+        if apply_action:
+            return self.apply_set_action(action)
+        self.actions.append(action)
+        return action
 
     def apply_actions(self, start=0, end=None, preserve_actions=False):
         """
@@ -454,8 +482,8 @@ class Domain():
         """
         return numpy.linalg.norm(self.vertices[start, :] - self.vertices[end, :])
 
-    def fill_with_particles(self, geometry_ivar, deltax, deltay=None, deltaz=None, xmin=None,
-                            xmax=None, ymin=None, ymax=None, zmin=None, zmax=None, **kwargs):
+    def fill_with_particles(self, geometry_ivar, deltax, deltay=None, deltaz=None, xmin=None, xmax=None,
+                            ymin=None, ymax=None, zmin=None, zmax=None, apply_action=True, **kwargs):
         r"""
         Fill a region defined by a cartesian lattice and geometric shape with particles.
 
@@ -490,6 +518,9 @@ class Domain():
         :param zmax: Maximum z value of the bounding box in a cartesian lattice.
         :type zmax: float
 
+        :param apply_action: If true, apply the action, else, add the action to Domain.actions
+        :type apply_action: bool
+
         :param \**kwargs: Additional keyword arguments passed to :py:meth:`Domain.add_point`.
 
         :returns: The number of particles that were created within this lattice and geometry.
@@ -499,7 +530,8 @@ class Domain():
             "xmin": xmin, "xmax": xmax, "ymin": ymin, "ymax": ymax, "zmin": zmin,
             "zmax": zmax, "deltax": deltax, "deltay": deltay, "deltaz": deltaz,
         }
-        return self.add_fill_action(geometry=geometry_ivar, cartesian=cartesian, apply_action=True, **kwargs)
+        print(cartesian)
+        return self.add_fill_action(geometry=geometry_ivar, cartesian=cartesian, apply_action=apply_action, **kwargs)
 
     def find_boundary_points(self, update=False):
         """
@@ -838,6 +870,46 @@ class Domain():
                 except ValueError as err:
                     raise DomainError(f"Could not read in subdomain file, error on line {lnum}: {line}") from err
 
+    def set_properties(self, geometry_ivar, type_id, vol=None,
+                       mass=None, nu=None, rho=None, c=None, fixed=False, apply_action=True):
+        """
+        Add a type definition to the domain. By default, all regions are set to type 0.
+
+        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass. \
+                   The 'inside()' method of this object will be used to assign properties to points.
+        :type geometry_ivar: spatialpy.core.geometry.Geometry
+
+        :param type_id: The identifier for this type.
+        :type type_id: str | int
+
+        :param vol: The volume of each particle in the type.
+        :type vol: float
+
+        :param mass: The mass of each particle in the type.
+        :type mass: float
+
+        :param rho: The density of each particle in the type.
+        :type rho: float
+
+        :param nu: The viscosity of each particle in the type.
+        :type nu: float
+
+        :param c: The artificial speed of sound of each particle in the type.
+        :type c: float
+
+        :param fixed: Are the particles in this type immobile.
+        :type fixed: bool
+
+        :param apply_action: If true, apply the action, else, add the action to Domain.actions
+        :type apply_action: bool
+
+        :raises DomainError: Type_id is 0 or type_id contains an invalid character.
+        """
+        props = {
+            'type_id': type_id, 'vol': vol, 'mass': mass, 'nu': nu, 'rho': rho, 'c': c, 'fixed': fixed
+        }
+        self.add_set_action(geometry=geometry_ivar, apply_action=apply_action, **props)
+
     def validate_action(self, action, coverage):
         """
         Validate a domain action.
@@ -856,8 +928,8 @@ class Domain():
 
         if coverage in ("set", "remove"):
             g_type = type(action['geometry']).__name__
-            if not (isinstance(action['geometry'], (Geometry, Transformation)) or \
-                                                    g_type in ("Geometry", "Transformation")):
+            if not (isinstance(action['geometry'], (Geometry, CombinatoryGeometry, Transformation)) or \
+                                            g_type in ("Geometry", "CombinatoryGeometry", "Transformation")):
                 raise DomainError(
                     f"A {action['type']} action's geometry must be of type 'Geometry' or 'Transformation' not {g_type}"
                 )
@@ -889,74 +961,6 @@ class Domain():
         if coverage in ("fill", "set"):
             if action['props'] is not None and not isinstance(action['props'], dict):
                 raise DomainError(f"An action's kwargs must be of type dict not {type(action['props'])}")
-
-    def set_properties(self, geometry_ivar, type_id, vol=None, mass=None, nu=None, rho=None, c=None, fixed=False):
-        """
-        Add a type definition to the domain. By default, all regions are set to type 0.
-
-        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass. \
-                   The 'inside()' method of this object will be used to assign properties to points.
-        :type geometry_ivar: spatialpy.core.geometry.Geometry
-
-        :param type_id: The identifier for this type.
-        :type type_id: str | int
-
-        :param vol: The volume of each particle in the type.
-        :type vol: float
-
-        :param mass: The mass of each particle in the type.
-        :type mass: float
-
-        :param rho: The density of each particle in the type.
-        :type rho: float
-
-        :param nu: The viscosity of each particle in the type.
-        :type nu: float
-
-        :param c: The artificial speed of sound of each particle in the type.
-        :type c: float
-
-        :param fixed: Are the particles in this type immobile.
-        :type fixed: bool
-
-        :returns: The number of particles that were tagged with this type_id.
-        :rtype: int
-
-        :raises DomainError: Type_id is 0 or type_id contains an invalid character.
-        """
-        if isinstance(type_id, int) and type_id <= 0:
-            raise DomainError("Type_id must be a non-zero positive integer or a string.")
-        type_id = f"type_{type_id}"
-        for char in type_id:
-            if (char in string.punctuation and char != "_") or char == " ":
-                raise DomainError(f"Type_id cannot contain '{char}'")
-        if type_id not in self.typeNdxMapping:
-            if "UnAssigned" in type_id:
-                self.typeNdxMapping[type_id] = 0
-            else:
-                self.typeNdxMapping[type_id] = len(self.typeNdxMapping)
-        # apply the type to all points, set type for any points that match
-        count = 0
-        on_boundary = self.find_boundary_points()
-        for v_ndx in range(self.get_num_voxels()):
-            if geometry_ivar.inside(self.coordinates()[v_ndx, :], on_boundary[v_ndx]):
-                self.type_id[v_ndx] = type_id
-                if vol is not None:
-                    self.vol[v_ndx] = vol
-                if mass is not None:
-                    self.mass[v_ndx] = mass
-                if rho is not None:
-                    self.rho[v_ndx] = rho
-                if nu is not None:
-                    self.nu[v_ndx] = nu
-                if c is not None:
-                    self.c[v_ndx] = c
-                self.fixed[v_ndx] = fixed
-                count +=1
-        if count == 0:
-            from spatialpy.core import log # pylint: disable=import-outside-toplevel
-            log.warning("Type with type_id={} has zero particles in it", type_id)
-        return count
 
     @classmethod
     def read_xml_mesh(cls, filename):
