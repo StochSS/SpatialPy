@@ -142,7 +142,7 @@ class Domain():
     def add_fill_action(self, lattice=None, geometry=None, cartesian=None,
                         spherical=None, cylindrical=None, apply_action=False, **props):
         r"""
-        Create a fill action that can be applied to the domain.
+        Create an action that can add particles to the domain.
 
         :param lattice: Lattice classed used when applying fill actions.
         :type lattice: spatialpy.Lattice
@@ -251,7 +251,7 @@ class Domain():
 
     def add_remove_action(self, geometry=None, apply_action=False):
         """
-        Create a remove action that can be applied to the domain.
+        Create an action that can remove particles from the domain.
 
         :param geometry: Geometry classed used when applying set actions. Defaults to spatialpy.GeometryAll.
         :type geometry: spatialpy.Geometry
@@ -273,7 +273,7 @@ class Domain():
 
     def add_set_action(self, geometry=None, apply_action=False, **props):
         r"""
-        Create a set action that can be applied to the domain.
+        Create an action that can set particle properties for particles in the domain.
 
         :param geometry: Geometry classed used when applying set actions. Defaults to spatialpy.GeometryAll.
         :type geometry: spatialpy.Geometry
@@ -535,9 +535,9 @@ class Domain():
         """
         x_list = numpy.linspace(xlim[0], xlim[1], numx)
         y_list = numpy.linspace(ylim[0], ylim[1], numy)
-        lattice = CartesianLattice(
-            xlim[0], xlim[1], x_list[1] - x_list[0], ymin=ylim[0], ymax=ylim[1], deltay=y_list[1] - y_list[0], deltaz=0
-        )
+        deltax = xlim[1] - xlim[0] if len(x_list) <= 1 else x_list[1] - x_list[0]
+        deltay = ylim[1] - ylim[0] if len(y_list) <= 1 else y_list[1] - y_list[0]
+        lattice = CartesianLattice(xlim[0], xlim[1], deltax, ymin=ylim[0], ymax=ylim[1], deltay=deltay, deltaz=0)
 
         numberparticles = numx * numy
         totalvolume = abs(xlim[1] - xlim[0]) * abs(ylim[1] - ylim[0])
@@ -686,7 +686,6 @@ class Domain():
             "xmin": xmin, "xmax": xmax, "ymin": ymin, "ymax": ymax, "zmin": zmin,
             "zmax": zmax, "deltax": deltax, "deltay": deltay, "deltaz": deltaz,
         }
-        print(cartesian)
         return self.add_fill_action(geometry=geometry_ivar, cartesian=cartesian, apply_action=apply_action, **kwargs)
 
     def find_boundary_points(self, update=False):
