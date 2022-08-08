@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import copy
-import json
 import string
 
 import xml.etree.ElementTree as ET
@@ -30,7 +29,7 @@ from spatialpy.core.geometry import (
 )
 from spatialpy.core.lattice import (
     Lattice, CartesianLattice, SphericalLattice, CylindricalLattice,
-    MeshIOLattice
+    MeshIOLattice, StochSSLattice
 )
 from spatialpy.core.transformation import Transformation
 from spatialpy.core.visualization import Visualization
@@ -1053,6 +1052,26 @@ class Domain():
             obj.rho = obj.mass / obj.vol
         return obj
 
+    @classmethod
+    def read_stochss_domain(cls, filename, apply_action=True):
+        """
+        Read a StochSS Domain (.domn) file or pull a StochSS Domain from a StochSS Spatial Model (.smdl) file.
+
+        :param filename: Name of file to read.
+        :type filename: str
+
+        :param apply_action: If true, apply the action, else, add the action to Domain.actions
+        :type apply_action: bool
+
+        :returns: SpatialPy Domain object created from StochSS domain.
+        :rtype: spatialpy.core.domain.Domain
+        """
+        action = {'type': "fill", 'lattice': StochSSLattice(filename)}
+        obj = Domain(0, (0, 0), (0, 0), (0, 0), actions=[action])
+        if apply_action:
+            obj.apply_actions()
+        return obj
+
     def read_stochss_subdomain_file(self, filename, type_ids=None):
         """
         Read a .txt file that conains the StochSS v1.x spatial subdomain descriptions.
@@ -1229,43 +1248,3 @@ class Domain():
         obj.rho = obj.mass / obj.vol
         # return model ref
         return obj
-
-    @classmethod
-    def read_stochss_domain(cls, filename):
-        """
-        Read a StochSS Domain (.domn) file or pull a StochSS Domain from a StochSS Spatial Model (.smdl) file.
-
-        :param filename: Name of file to read.
-        :type filename: str
-
-        :returns: SpatialPy Domain object created from StochSS domain.
-        :rtype: spatialpy.core.domain.Domain
-        """
-        try:
-            with open(filename, "r", encoding="utf-8") as domain_file:
-                domain = json.load(domain_file)
-                if "domain" in domain.keys():
-                    domain = domain['domain']
-
-            obj = Domain(0, tuple(domain['x_lim']), tuple(domain['y_lim']), tuple(domain['z_lim']),
-                        rho0=domain['rho_0'], c0=domain['c_0'], P0=domain['p_0'], gravity=domain['gravity'])
-
-            for i, particle in enumerate(domain['particles']):
-                try:
-                    type_id = list(filter(
-                        lambda d_type, t_ndx=particle['type']: d_type['typeID'] == t_ndx, domain['types']
-                    ))[0]['name']
-                except IndexError:
-                    type_id = particle['type']
-                if type_id == "Un-Assigned" or type_id == 0:
-                    type_id = "UnAssigned"
-                # StochSS backward compatability check for rho
-                rho = None if "rho" not in particle.keys() else particle['rho']
-                # StochSS backward compatability check for c
-                c = 0 if "c" not in particle.keys() else particle['c']
-                obj.add_point(particle['point'], vol=particle['volume'], mass=particle['mass'],
-                              type_id=type_id, nu=particle['nu'], fixed=particle['fixed'], rho=rho, c=c)
-
-            return obj
-        except KeyError as err:
-            raise DomainError("The file is not a StochSS Domain (.domn) or a StochSS Spatial Model (.smdl).") from err
