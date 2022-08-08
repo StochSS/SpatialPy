@@ -489,6 +489,69 @@ class Domain():
         """
         return self.vertices
 
+    @classmethod
+    def create_2D_domain(cls, xlim, ylim, numx, numy, type_id=1, mass=1.0, nu=1.0,
+                         rho=None, c=0, fixed=False, apply_action=True, **kwargs):
+        r"""
+        Create a filled 2D domain
+
+        :param xlim: highest and lowest coordinate in the x dimension
+        :type xlim: float(2)
+
+        :param ylim: highest and lowest coordinate in the y dimension
+        :type ylim: float(2)
+
+        :param numx: number of particle spacing in the x dimension
+        :type numx: int
+
+        :param numy: number of particle spacing in the y dimension
+        :type numy: int
+
+        :param type_id: default type ID of particles to be created. Defaults to 1
+        :type type_id: int
+
+        :param mass: default mass of particles to be created. Defaults to 1.0
+        :type mass: float
+
+        :param nu: default viscosity of particles to be created. Defaults to 1.0
+        :type nu: float
+
+        :param c: default artificial speed of sound of particles to be created. Defaults to 0.0.
+        :type c: float
+
+        :param rho: default density of particles to be created.
+        :type rho: float
+
+        :param fixed: spatially fixed flag of particles to be created. Defaults to false.
+        :type fixed: bool
+
+        :param apply_action: If true, apply the action, else, add the action to Domain.actions
+        :type apply_action: bool
+
+        :param \**kwargs: Additional keyword arguments passed to :py:class:`Domain`.
+
+        :returns: Uniform 2D SpatialPy Domain object.
+        :rtype: spatialpy.core.domain.Domain
+        """
+        x_list = numpy.linspace(xlim[0], xlim[1], numx)
+        y_list = numpy.linspace(ylim[0], ylim[1], numy)
+        lattice = CartesianLattice(
+            xlim[0], xlim[1], x_list[1] - x_list[0], ymin=ylim[0], ymax=ylim[1], deltay=y_list[1] - y_list[0], deltaz=0
+        )
+
+        numberparticles = numx * numy
+        totalvolume = abs(xlim[1] - xlim[0]) * abs(ylim[1] - ylim[0])
+        vol = totalvolume / numberparticles
+        if vol < 0:
+            raise DomainError("Paritcles cannot have 0 volume")
+        props = {'type_id': type_id, 'vol': vol, 'mass': mass, 'rho': rho, 'nu': nu, 'c': c, 'fixed': fixed}
+
+        action = {'type': "fill", 'lattice': lattice, 'props': props}
+        obj = Domain(0, xlim, ylim, (0, 0), actions=[action], **kwargs)
+        if apply_action:
+            obj.apply_actions()
+        return obj
+
     def distance_between_2_vertices(self, start, end):
         """
         Get distance between 2 domain vertices.
@@ -1195,61 +1258,4 @@ class Domain():
                 for z in z_list:
                     obj.add_point([x, y, z], vol=vol, mass=mass, rho=rho,
                                   type_id=type_id, nu=nu, c=c, fixed=fixed)
-        return obj
-
-    @classmethod
-    def create_2D_domain(cls, xlim, ylim, nx, ny, type_id=1, mass=1.0,
-                         nu=1.0, rho=None, c=0, fixed=False, **kwargs):
-        """
-        Create a filled 2D domain
-
-        :param xlim: highest and lowest coordinate in the x dimension
-        :type xlim: float(2)
-
-        :param ylim: highest and lowest coordinate in the y dimension
-        :type ylim: float(2)
-
-        :param nx: number of particle spacing in the x dimension
-        :type nx: int
-
-        :param ny: number of particle spacing in the y dimension
-        :type ny: int
-
-        :param type_id: default type ID of particles to be created. Defaults to 1
-        :type type_id: int
-
-        :param mass: default mass of particles to be created. Defaults to 1.0
-        :type mass: float
-
-        :param nu: default viscosity of particles to be created. Defaults to 1.0
-        :type nu: float
-
-        :param c: default artificial speed of sound of particles to be created. Defaults to 0.0.
-        :type c: float
-
-        :param rho: default density of particles to be created.
-        :type rho: float
-
-        :param fixed: spatially fixed flag of particles to be created. Defaults to false.
-        :type fixed: bool
-
-        :param \**kwargs: Additional keyword arguments passed to :py:class:`Domain`.
-
-        :returns: Uniform 2D SpatialPy Domain object.
-        :rtype: spatialpy.core.domain.Domain
-        """
-        # Create domain object
-        numberparticles = nx * ny
-        obj = Domain(0, xlim, ylim, (0, 0), **kwargs)
-        # Vertices
-        x_list = numpy.linspace(xlim[0], xlim[1], nx)
-        y_list = numpy.linspace(ylim[0], ylim[1], ny)
-        totalvolume = abs(xlim[1] - xlim[0]) * abs(ylim[1] - ylim[0])
-        vol = totalvolume / numberparticles
-        if vol < 0:
-            raise DomainError("Paritcles cannot have 0 volume")
-        for x in x_list:
-            for y in y_list:
-                obj.add_point([x, y, 0], vol=vol, mass=mass, rho=rho,
-                              type_id=type_id, nu=nu, c=c, fixed=fixed)
         return obj
