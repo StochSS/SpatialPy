@@ -29,7 +29,8 @@ from spatialpy.core.geometry import (
     CombinatoryGeometry, Geometry, GeometryAll
 )
 from spatialpy.core.lattice import (
-    Lattice, CartesianLattice, SphericalLattice, CylindricalLattice
+    Lattice, CartesianLattice, SphericalLattice, CylindricalLattice,
+    MeshIOLattice
 )
 from spatialpy.core.transformation import Transformation
 from spatialpy.core.visualization import Visualization
@@ -831,6 +832,35 @@ class Domain():
             self.calculate_vol()
         return self.vol
 
+    @classmethod
+    def import_meshio_object(cls, mesh_obj, subdomain_file=None, apply_action=True):
+        """
+        Import a python meshio mesh object.
+
+        :param mesh_obj: MeshIO object to import
+        :type mesh_obj: meshio.Mesh
+
+        :param subdomain_file: StochSS v1.x subdomain description filename.
+        :type subdomain_file: str
+
+        :param apply_action: If true, apply the action, else, add the action to Domain.actions
+        :type apply_action: bool
+
+        :returns: SpatialPy Domain object created from the meshio object
+        :rtype: spatialpy.core.domain.Domain
+        """
+        lattice = MeshIOLattice(mesh=mesh_obj, subdomain_file=subdomain_file)
+        action = {'type': "fill", 'lattice': lattice}
+        obj = Domain(0, (0, 0), (0, 0), (0, 0), actions=[action])
+        if apply_action:
+            obj.apply_actions()
+            obj.calculate_vol()
+            if not numpy.count_nonzero(obj.vol):
+                raise DomainError("Paritcles cannot have 0 volume")
+            obj.mass = obj.vol
+            obj.rho = obj.mass / obj.vol
+        return obj
+
     def plot_types(self, width=None, height=None, colormap=None, size=None, title=None,
                    included_types_list=None, use_matplotlib=False, return_plotly_figure=False):
         '''
@@ -1160,43 +1190,6 @@ class Domain():
             obj.tetrahedrons[int(cell.attrib['index']), 1] = int(cell.attrib['v1'])
             obj.tetrahedrons[int(cell.attrib['index']), 2] = int(cell.attrib['v2'])
             obj.tetrahedrons[int(cell.attrib['index']), 3] = int(cell.attrib['v3'])
-        # volume
-        obj.calculate_vol()
-        if not numpy.count_nonzero(obj.vol):
-            raise DomainError("Paritcles cannot have 0 volume")
-        # set Mass equal to the volume
-        obj.mass = obj.vol
-        # Calculate density
-        obj.rho = obj.mass / obj.vol
-        # return model ref
-        return obj
-
-    @classmethod
-    def import_meshio_object(cls, mesh_obj):
-        """
-        Import a python meshio mesh object.
-
-        :param mesh_obj: MeshIO object to import
-        :type mesh_obj: meshio.Mesh
-
-        :returns: SpatialPy Domain object created from the meshio object
-        :rtype: spatialpy.core.domain.Domain
-        """
-        # create domain object
-        xlim = (min(mesh_obj.points[:, 0]), max(mesh_obj.points[:, 0]))
-        ylim = (min(mesh_obj.points[:, 1]), max(mesh_obj.points[:, 1]))
-        zlim = (min(mesh_obj.points[:, 2]), max(mesh_obj.points[:, 2]))
-        obj = Domain(len(mesh_obj.points), xlim, ylim, zlim)
-        #vertices
-        obj.vertices = mesh_obj.points
-        # triangles
-        triangles = list(filter(lambda cell: cell.type == "triangle", mesh_obj.cells))
-        if triangles:
-            obj.triangles = triangles[0].data
-        #tetrahedrons
-        tetras = list(filter(lambda cell: cell.type == "tetra", mesh_obj.cells))
-        if tetras:
-            obj.tetrahedrons = tetras[0].data
         # volume
         obj.calculate_vol()
         if not numpy.count_nonzero(obj.vol):
