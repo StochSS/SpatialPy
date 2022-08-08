@@ -34,7 +34,7 @@ def create_diffusion_debug(model_name="diffusion_debug_test", parameter_values=N
     model.add_species([A])
 
     domain = spatialpy.Domain.create_2D_domain(
-        xlim=[-1, 1], ylim=[-1, 1], nx=50, ny=50, type_id=1,
+        xlim=[-1, 1], ylim=[-1, 1], numx=50, numy=50, type_id=1,
         mass=1.0, nu=1.0, fixed=True,  rho0=1.0, c0=1.0, P0=1.0
     )
     model.add_domain(domain)
