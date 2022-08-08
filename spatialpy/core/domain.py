@@ -1024,6 +1024,35 @@ class Domain():
         domain.plot_types(**kwargs)
         del domain
 
+    @classmethod
+    def read_msh_file(cls, filename, subdomain_file=None, apply_action=True):
+        """
+        Read a Gmsh style .msh file
+
+        :param filename: Filename of gmsh file
+        :type filename: str
+
+        :param subdomain_file: StochSS v1.x subdomain description filename.
+        :type subdomain_file: str
+
+        :param apply_action: If true, apply the action, else, add the action to Domain.actions
+        :type apply_action: bool
+
+        :returns: SpatialPy Domain object created from the mesh file.
+        :rtype: spatialpy.core.domain.Domain
+        """
+        lattice = MeshIOLattice(filename=filename, subdomain_file=subdomain_file)
+        action = {'type': "fill", 'lattice': lattice}
+        obj = Domain(0, (0, 0), (0, 0), (0, 0), actions=[action])
+        if apply_action:
+            obj.apply_actions()
+            obj.calculate_vol()
+            if not numpy.count_nonzero(obj.vol):
+                raise DomainError("Paritcles cannot have 0 volume")
+            obj.mass = obj.vol
+            obj.rho = obj.mass / obj.vol
+        return obj
+
     def read_stochss_subdomain_file(self, filename, type_ids=None):
         """
         Read a .txt file that conains the StochSS v1.x spatial subdomain descriptions.
@@ -1200,24 +1229,6 @@ class Domain():
         obj.rho = obj.mass / obj.vol
         # return model ref
         return obj
-
-    @classmethod
-    def read_msh_file(cls, filename):
-        """
-        Read a Gmsh style .msh file
-
-        :param filename: Filename of gmsh file
-        :type filename: str
-
-        :returns: SpatialPy Domain object created from the mesh file.
-        :rtype: spatialpy.core.domain.Domain
-        """
-        try:
-            import meshio # pylint: disable=import-outside-toplevel
-        except ImportError as err:
-            raise DomainError("The python package 'meshio' is not installed.") from err
-
-        return cls.import_meshio_object(meshio.read(filename))
 
     @classmethod
     def read_stochss_domain(cls, filename):
