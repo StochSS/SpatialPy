@@ -16,7 +16,6 @@
 import copy
 import string
 
-import xml.etree.ElementTree as ET
 from itertools import combinations
 from collections import OrderedDict
 
@@ -29,7 +28,7 @@ from spatialpy.core.geometry import (
 )
 from spatialpy.core.lattice import (
     Lattice, CartesianLattice, SphericalLattice, CylindricalLattice,
-    MeshIOLattice, StochSSLattice
+    XMLMeshLattice, MeshIOLattice, StochSSLattice
 )
 from spatialpy.core.transformation import Transformation
 from spatialpy.core.visualization import Visualization
@@ -431,20 +430,21 @@ class Domain():
         Calculate the total volume of the domain.
         """
         self.vol = numpy.zeros((self.vertices.shape[0]), dtype=float)
-        self.tetrahedron_vol = numpy.zeros((self.tetrahedrons.shape[0]), dtype=float)
-        for t_ndx in range(self.tetrahedrons.shape[0]):
-            v1, v2, v3, v4 = self.tetrahedrons[t_ndx]
-            a = self.vertices[v1, :]
-            b = self.vertices[v2, :]
-            c = self.vertices[v3, :]
-            d = self.vertices[v4, :]
-            #https://en.wikipedia.org/wiki/Tetrahedron#Volume
-            t_vol = numpy.abs(numpy.dot((a - d), numpy.cross((b - d), (c - d))) / 6)
-            self.tetrahedron_vol[t_ndx] = t_vol
-            self.vol[v1] += t_vol / 4
-            self.vol[v2] += t_vol / 4
-            self.vol[v3] += t_vol / 4
-            self.vol[v4] += t_vol / 4
+        if self.tetrahedrons is not None:
+            self.tetrahedron_vol = numpy.zeros((self.tetrahedrons.shape[0]), dtype=float)
+            for t_ndx in range(self.tetrahedrons.shape[0]):
+                v1, v2, v3, v4 = self.tetrahedrons[t_ndx]
+                a = self.vertices[v1, :]
+                b = self.vertices[v2, :]
+                c = self.vertices[v3, :]
+                d = self.vertices[v4, :]
+                #https://en.wikipedia.org/wiki/Tetrahedron#Volume
+                t_vol = numpy.abs(numpy.dot((a - d), numpy.cross((b - d), (c - d))) / 6)
+                self.tetrahedron_vol[t_ndx] = t_vol
+                self.vol[v1] += t_vol / 4
+                self.vol[v2] += t_vol / 4
+                self.vol[v3] += t_vol / 4
+                self.vol[v4] += t_vol / 4
 
     def closest_vertex(self, point):
         """
@@ -699,7 +699,8 @@ class Domain():
         if update or self.on_boundary is None:
             self.on_boundary = numpy.zeros((self.get_num_voxels()), dtype=bool)
             # exterior triangles are part of one-and-only-one tetrahedron
-            if self.triangles is None or len(self.triangles) == 0 or len(self.tetrahedrons) == 0:
+            if self.triangles is None or self.tetrahedrons is None or \
+                    len(self.triangles) == 0 or len(self.tetrahedrons) == 0:
                 return self.on_boundary
             triangle_in_tetrahedrons_count = {}
             for i in range(self.tetrahedrons.shape[0]):
@@ -766,6 +767,8 @@ class Domain():
         if update or self.domain_size is None:
             _ = self.get_vol()
 
+            if self.tetrahedrons is None:
+                return self.domain_size
             # Compute the circumradius of the cells
             cr = numpy.zeros((self.tetrahedrons.shape[0]), dtype=float)
             for i, _ in enumerate(cr):
@@ -832,7 +835,7 @@ class Domain():
         return self.vol
 
     @classmethod
-    def import_meshio_object(cls, mesh_obj, subdomain_file=None, apply_action=True):
+    def import_meshio_object(cls, mesh_obj, subdomain_file=None, type_ids=None, apply_action=True):
         """
         Import a python meshio mesh object.
 
@@ -842,13 +845,16 @@ class Domain():
         :param subdomain_file: StochSS v1.x subdomain description filename.
         :type subdomain_file: str
 
+        :param type_ids: Mapping of type indecies to type names.
+        :type type_ids: dict{str:str}
+
         :param apply_action: If true, apply the action, else, add the action to Domain.actions
         :type apply_action: bool
 
         :returns: SpatialPy Domain object created from the meshio object
         :rtype: spatialpy.core.domain.Domain
         """
-        lattice = MeshIOLattice(mesh=mesh_obj, subdomain_file=subdomain_file)
+        lattice = MeshIOLattice(mesh=mesh_obj, subdomain_file=subdomain_file, type_ids=type_ids)
         action = {'type': "fill", 'lattice': lattice}
         obj = Domain(0, (0, 0), (0, 0), (0, 0), actions=[action])
         if apply_action:
@@ -1024,7 +1030,7 @@ class Domain():
         del domain
 
     @classmethod
-    def read_msh_file(cls, filename, subdomain_file=None, apply_action=True):
+    def read_msh_file(cls, filename, subdomain_file=None, type_ids=None, apply_action=True):
         """
         Read a Gmsh style .msh file
 
@@ -1034,13 +1040,16 @@ class Domain():
         :param subdomain_file: StochSS v1.x subdomain description filename.
         :type subdomain_file: str
 
+        :param type_ids: Mapping of type indecies to type names.
+        :type type_ids: dict{str:str}
+
         :param apply_action: If true, apply the action, else, add the action to Domain.actions
         :type apply_action: bool
 
         :returns: SpatialPy Domain object created from the mesh file.
         :rtype: spatialpy.core.domain.Domain
         """
-        lattice = MeshIOLattice(filename=filename, subdomain_file=subdomain_file)
+        lattice = MeshIOLattice(filename=filename, subdomain_file=subdomain_file, type_ids=type_ids)
         action = {'type': "fill", 'lattice': lattice}
         obj = Domain(0, (0, 0), (0, 0), (0, 0), actions=[action])
         if apply_action:
@@ -1103,6 +1112,38 @@ class Domain():
 
                 except ValueError as err:
                     raise DomainError(f"Could not read in subdomain file, error on line {lnum}: {line}") from err
+
+    @classmethod
+    def read_xml_mesh(cls, filename, subdomain_file=None, type_ids=None, apply_action=True):
+        """
+        Read a FEniCS/dolfin style XML mesh file
+
+        :param filename: Name of file to read.
+        :type filename: str
+
+        :param subdomain_file: StochSS v1.x subdomain description filename.
+        :type subdomain_file: str
+
+        :param type_ids: Mapping of type indecies to type names.
+        :type type_ids: dict{str:str}
+
+        :param apply_action: If true, apply the action, else, add the action to Domain.actions
+        :type apply_action: bool
+
+        :returns: SpatialPy Domain object created from xml mesh.
+        :rtype: spatialpy.core.domain.Domain
+        """
+        lattice = XMLMeshLattice(filename, subdomain_file=subdomain_file, type_ids=type_ids)
+        action = {'type': "fill", 'lattice': lattice}
+        obj = Domain(0, (0, 0), (0, 0), (0, 0), actions=[action])
+        if apply_action:
+            obj.apply_actions()
+            obj.calculate_vol()
+            if not numpy.count_nonzero(obj.vol):
+                raise DomainError("Paritcles cannot have 0 volume")
+            obj.mass = obj.vol
+            obj.rho = obj.mass / obj.vol
+        return obj
 
     def set_properties(self, geometry_ivar, type_id, vol=None,
                        mass=None, nu=None, rho=None, c=None, fixed=False, apply_action=True):
@@ -1195,56 +1236,3 @@ class Domain():
         if coverage in ("fill", "set"):
             if action['props'] is not None and not isinstance(action['props'], dict):
                 raise DomainError(f"An action's kwargs must be of type dict not {type(action['props'])}")
-
-    @classmethod
-    def read_xml_mesh(cls, filename):
-        """
-        Read a FEniCS/dolfin style XML mesh file
-
-        :param filename: Name of file to read.
-        :type filename: str
-
-        :returns: SpatialPy Domain object created from xml mesh.
-        :rtype: spatialpy.core.domain.Domain
-        """
-        root = ET.parse(filename).getroot()
-        if not root.tag == 'dolfin':
-            raise DomainError("Not a FEniCS/dolfin xml mesh.")
-        mesh = root[0]
-        if mesh.tag != 'mesh' or \
-           mesh.attrib['celltype'] != 'tetrahedron' or \
-           mesh.attrib['dim'] != '3':
-            raise DomainError("XML mesh format error")
-        vertices = mesh[0]
-        cells = mesh[1]
-        #vertices
-        mesh_vertices = numpy.zeros(( len(vertices), 3), dtype=float)
-        for vertex in vertices:
-            mesh_vertices[int(vertex.attrib['index']), 0] = float(vertex.attrib['x'])
-            mesh_vertices[int(vertex.attrib['index']), 1] = float(vertex.attrib['y'])
-            mesh_vertices[int(vertex.attrib['index']), 2] = float(vertex.attrib['z'])
-
-        # create domain object
-        xlim = (min(mesh_vertices[:, 0]), max(mesh_vertices[:, 0]) )
-        ylim = (min(mesh_vertices[:, 1]), max(mesh_vertices[:, 1]) )
-        zlim = (min(mesh_vertices[:, 2]), max(mesh_vertices[:, 2]) )
-        obj = Domain(len(vertices), xlim, ylim, zlim)
-        obj.vertices = mesh_vertices
-
-        #tetrahedrons
-        obj.tetrahedrons = numpy.zeros((len(cells), 4), dtype=int)
-        for cell in cells:
-            obj.tetrahedrons[int(cell.attrib['index']), 0] = int(cell.attrib['v0'])
-            obj.tetrahedrons[int(cell.attrib['index']), 1] = int(cell.attrib['v1'])
-            obj.tetrahedrons[int(cell.attrib['index']), 2] = int(cell.attrib['v2'])
-            obj.tetrahedrons[int(cell.attrib['index']), 3] = int(cell.attrib['v3'])
-        # volume
-        obj.calculate_vol()
-        if not numpy.count_nonzero(obj.vol):
-            raise DomainError("Paritcles cannot have 0 volume")
-        # set Mass equal to the volume
-        obj.mass = obj.vol
-        # Calculate density
-        obj.rho = obj.mass / obj.vol
-        # return model ref
-        return obj
