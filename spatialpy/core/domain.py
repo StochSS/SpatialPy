@@ -142,7 +142,7 @@ class Domain():
     def add_fill_action(self, lattice=None, geometry=None, cartesian=None,
                         spherical=None, cylindrical=None, apply_action=False, **props):
         r"""
-        Create a fill action that can be applied to the domain.
+        Create an action that can add particles to the domain.
 
         :param lattice: Lattice classed used when applying fill actions.
         :type lattice: spatialpy.Lattice
@@ -251,7 +251,7 @@ class Domain():
 
     def add_remove_action(self, geometry=None, apply_action=False):
         """
-        Create a remove action that can be applied to the domain.
+        Create an action that can remove particles from the domain.
 
         :param geometry: Geometry classed used when applying set actions. Defaults to spatialpy.GeometryAll.
         :type geometry: spatialpy.Geometry
@@ -273,7 +273,7 @@ class Domain():
 
     def add_set_action(self, geometry=None, apply_action=False, **props):
         r"""
-        Create a set action that can be applied to the domain.
+        Create an action that can set particle properties for particles in the domain.
 
         :param geometry: Geometry classed used when applying set actions. Defaults to spatialpy.GeometryAll.
         :type geometry: spatialpy.Geometry
