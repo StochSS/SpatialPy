@@ -620,10 +620,11 @@ class MeshIOLattice(Lattice):
     :param type_ids: Mapping of type indices to type names (optional).
     :type type_ids: dict{str:str}
     """
-    def __init__(self, filename, center=None, subdomain_file=None, type_ids=None):
+    def __init__(self, filename=None, center=None, mesh=None, subdomain_file=None, type_ids=None):
         super().__init__(center, skip_validate=True)
 
         self.filename = filename
+        self.mesh = mesh
         self.subdomain_file = subdomain_file
         self.type_ids = type_ids
 
@@ -662,18 +663,21 @@ class MeshIOLattice(Lattice):
         if transform is not None and not callable(transform):
             raise LatticeError("transform must be a function.")
 
-        try:
-            import meshio # pylint: disable=import-outside-toplevel
-        except ImportError as err:
-            raise LatticeError("The python package 'meshio' is not installed.") from err
+        if self.mesh is None:
+            try:
+                import meshio # pylint: disable=import-outside-toplevel
+            except ImportError as err:
+                raise LatticeError("The python package 'meshio' is not installed.") from err
 
+            mesh = meshio.read(self.filename)
+        else:
+            mesh = self.mesh
+        
         if self.subdomain_file is not None:
             type_ids = self.__get_types()
         else:
             type_ids = None
 
-        mesh = meshio.read(self.filename)
-        
         num_points = len(domain.vertices)
         #vertices
         count = 0
@@ -718,7 +722,9 @@ class MeshIOLattice(Lattice):
         """
         super().validate()
 
-        if not isinstance(self.filename, str):
+        if self.filename is None and self.mesh is None:
+            raise LatticeError("MeshIOLattice requires a msh filename or meshio object.")
+        if self.filename is not None and not isinstance(self.filename, str):
             raise LatticeError("filename must be of type str.")
         if self.subdomain_file is not None and not isinstance(self.subdomain_file, str):
             raise LatticeError("subdomain_file must be of type str.")
