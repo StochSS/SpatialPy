@@ -552,6 +552,77 @@ class Domain():
             obj.apply_actions()
         return obj
 
+    @classmethod
+    def create_3D_domain(cls, xlim, ylim, zlim, numx, numy, numz, type_id=1, mass=1.0,
+                         nu=1.0, rho=None, c=0, fixed=False, apply_action=True, **kwargs):
+        r"""
+        Create a filled 3D domain
+
+        :param xlim: highest and lowest coordinate in the x dimension
+        :type xlim: float(2)
+
+        :param ylim: highest and lowest coordinate in the y dimension
+        :type ylim: float(2)
+
+        :param zlim: highest and lowest coordinate in the z dimension
+        :type zlim: float(2)
+
+        :param numx: number of particle spacing in the x dimension
+        :type numx: int
+
+        :param numy: number of particle spacing in the y dimension
+        :type numy: int
+
+        :param numz: number of particle spacing in the z dimension
+        :type numz: int
+
+        :param type_id: default type ID of particles to be created. Defaults to 1
+        :type type_id: int
+
+        :param mass: default mass of particles to be created. Defaults to 1.0
+        :type mass: float
+
+        :param nu: default viscosity of particles to be created. Defaults to 1.0
+        :type nu: float
+
+        :param c: default artificial speed of sound of particles to be created. Defaults to 0.0.
+        :type c: float
+
+        :param rho: default density of particles to be created.
+        :type rho: float
+
+        :param fixed: spatially fixed flag of particles to be created. Defaults to false.
+        :type fixed: bool
+
+        :param apply_action: If true, apply the action, else, add the action to Domain.actions
+        :type apply_action: bool
+
+        :param \**kwargs: Additional keyword arguments passed to :py:class:`Domain`.
+
+        :returns: Uniform 3D SpatialPy Domain object.
+        :rtype: spatialpy.core.domain.Domain
+        """
+        x_list = numpy.linspace(xlim[0], xlim[1], numx)
+        y_list = numpy.linspace(ylim[0], ylim[1], numy)
+        z_list = numpy.linspace(zlim[0], zlim[1], numz)
+        lattice = CartesianLattice(
+            xlim[0], xlim[1], x_list[1] - x_list[0], ymin=ylim[0], ymax=ylim[1], zmin=zlim[0],
+            zmax=zlim[1], deltay=y_list[1] - y_list[0], deltaz=z_list[1] - z_list[0]
+        )
+
+        numberparticles = numx * numy * numz
+        totalvolume = abs(xlim[1] - xlim[0]) * abs(ylim[1] - ylim[0]) * abs(zlim[1] - zlim[0])
+        vol = totalvolume / numberparticles
+        if vol < 0:
+            raise DomainError("Paritcles cannot have 0 volume")
+        props = {'type_id': type_id, 'vol': vol, 'mass': mass, 'rho': rho, 'nu': nu, 'c': c, 'fixed': fixed}
+
+        action = {'type': "fill", 'lattice': lattice, 'props': props}
+        obj = Domain(0, xlim, ylim, zlim, actions=[action], **kwargs)
+        if apply_action:
+            obj.apply_actions()
+        return obj
+
     def distance_between_2_vertices(self, start, end):
         """
         Get distance between 2 domain vertices.
@@ -1194,74 +1265,3 @@ class Domain():
             return obj
         except KeyError as err:
             raise DomainError("The file is not a StochSS Domain (.domn) or a StochSS Spatial Model (.smdl).") from err
-
-    @classmethod
-    def create_3D_domain(cls, xlim, ylim, zlim, numx, numy, numz, type_id=1, mass=1.0,
-                         nu=1.0, rho=None, c=0, fixed=False, apply_action=True, **kwargs):
-        r"""
-        Create a filled 3D domain
-
-        :param xlim: highest and lowest coordinate in the x dimension
-        :type xlim: float(2)
-
-        :param ylim: highest and lowest coordinate in the y dimension
-        :type ylim: float(2)
-
-        :param zlim: highest and lowest coordinate in the z dimension
-        :type zlim: float(2)
-
-        :param numx: number of particle spacing in the x dimension
-        :type numx: int
-
-        :param numy: number of particle spacing in the y dimension
-        :type numy: int
-
-        :param numz: number of particle spacing in the z dimension
-        :type numz: int
-
-        :param type_id: default type ID of particles to be created. Defaults to 1
-        :type type_id: int
-
-        :param mass: default mass of particles to be created. Defaults to 1.0
-        :type mass: float
-
-        :param nu: default viscosity of particles to be created. Defaults to 1.0
-        :type nu: float
-
-        :param c: default artificial speed of sound of particles to be created. Defaults to 0.0.
-        :type c: float
-
-        :param rho: default density of particles to be created.
-        :type rho: float
-
-        :param fixed: spatially fixed flag of particles to be created. Defaults to false.
-        :type fixed: bool
-
-        :param apply_action: If true, apply the action, else, add the action to Domain.actions
-        :type apply_action: bool
-
-        :param \**kwargs: Additional keyword arguments passed to :py:class:`Domain`.
-
-        :returns: Uniform 3D SpatialPy Domain object.
-        :rtype: spatialpy.core.domain.Domain
-        """
-        x_list = numpy.linspace(xlim[0], xlim[1], numx)
-        y_list = numpy.linspace(ylim[0], ylim[1], numy)
-        z_list = numpy.linspace(zlim[0], zlim[1], numz)
-        lattice = CartesianLattice(
-            xlim[0], xlim[1], x_list[1] - x_list[0], ymin=ylim[0], ymax=ylim[1], zmin=zlim[0],
-            zmax=zlim[1], deltay=y_list[1] - y_list[0], deltaz=z_list[1] - z_list[0]
-        )
-
-        numberparticles = numx * numy * numz
-        totalvolume = abs(xlim[1] - xlim[0]) * abs(ylim[1] - ylim[0]) * abs(zlim[1] - zlim[0])
-        vol = totalvolume / numberparticles
-        if vol < 0:
-            raise DomainError("Paritcles cannot have 0 volume")
-        props = {'type_id': type_id, 'vol': vol, 'mass': mass, 'rho': rho, 'nu': nu, 'c': c, 'fixed': fixed}
-
-        action = {'type': "fill", 'lattice': lattice, 'props': props}
-        obj = Domain(0, xlim, ylim, zlim, actions=[action], **kwargs)
-        if apply_action:
-            obj.apply_actions()
-        return obj
