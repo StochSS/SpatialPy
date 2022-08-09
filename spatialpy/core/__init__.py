@@ -57,7 +57,8 @@ from .transformation import (
 	Transformation,
 	TranslationTransformation,
 	RotationTransformation,
-	ReflectionTransformation
+	ReflectionTransformation,
+	ScalingTransformation
 )
 from .visualization import Visualization
 from .vtkreader import *
