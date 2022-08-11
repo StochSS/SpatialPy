@@ -4,9 +4,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
-    <title>spatialpy.solvers package &#8212; SpatialPy 1.0.2 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>spatialpy.solvers package &#8212; SpatialPy 1.1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/css/spatialpy_alabaster_customizations.css" />
@@ -104,12 +103,12 @@
 
           <div class="body" role="main">
             
-  <section id="spatialpy-solvers-package">
+  <div class="section" id="spatialpy-solvers-package">
 <h1>spatialpy.solvers package<a class="headerlink" href="#spatialpy-solvers-package" title="Permalink to this headline">¶</a></h1>
-<section id="submodules">
+<div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</section>
-<section id="module-spatialpy.solvers.build_expression">
+</div>
+<div class="section" id="module-spatialpy.solvers.build_expression">
 <span id="spatialpy-solvers-build-expression-module"></span><h2>spatialpy.solvers.build_expression module<a class="headerlink" href="#module-spatialpy.solvers.build_expression" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="spatialpy.solvers.build_expression.BuildExpression">
@@ -161,7 +160,7 @@ corresponding namespace values in the namespace dict when getexpr_* methods are 
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.solvers.build_expression.BuildExpression.ValidationVisitor.visit_Assign">
-<span class="sig-name descname"><span class="pre">visit_Assign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ast.Assign</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/solvers/build_expression.html#BuildExpression.ValidationVisitor.visit_Assign"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.solvers.build_expression.BuildExpression.ValidationVisitor.visit_Assign" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">visit_Assign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_ast.Assign</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/solvers/build_expression.html#BuildExpression.ValidationVisitor.visit_Assign"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.solvers.build_expression.BuildExpression.ValidationVisitor.visit_Assign" title="Permalink to this definition">¶</a></dt>
 <dd><p>Visitor function for ast.Assign nodes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -334,7 +333,7 @@ Raises a SyntaxError if conversion to a C++ string is impossible.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="spatialpy.solvers.build_expression.BuildExpression.operator_map">
-<span class="sig-name descname"><span class="pre">operator_map</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'!':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.Not'&gt;,</span> <span class="pre">'!=':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.NotEq'&gt;,</span> <span class="pre">'%':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.Mod'&gt;,</span> <span class="pre">'&amp;':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.BitAnd'&gt;,</span> <span class="pre">'*':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.Mult'&gt;,</span> <span class="pre">'**':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.Pow'&gt;,</span> <span class="pre">'+':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.Add'&gt;,</span> <span class="pre">'-':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.Sub'&gt;,</span> <span class="pre">'/':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.Div'&gt;,</span> <span class="pre">'//':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.FloorDiv'&gt;,</span> <span class="pre">':=':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.Assign'&gt;,</span> <span class="pre">'&lt;':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.Lt'&gt;,</span> <span class="pre">'&lt;&lt;':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.LShift'&gt;,</span> <span class="pre">'&lt;=':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.LtE'&gt;,</span> <span class="pre">'=':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.Assign'&gt;,</span> <span class="pre">'==':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.Eq'&gt;,</span> <span class="pre">'&gt;':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.Gt'&gt;,</span> <span class="pre">'&gt;=':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.GtE'&gt;,</span> <span class="pre">'&gt;&gt;':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.RShift'&gt;,</span> <span class="pre">'&#64;':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.MatMult'&gt;,</span> <span class="pre">'^':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.BitXor'&gt;,</span> <span class="pre">'and':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.And'&gt;,</span> <span class="pre">'or':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.Or'&gt;,</span> <span class="pre">'|':</span> <span class="pre">&lt;class</span> <span class="pre">'ast.BitOr'&gt;}</span></em><a class="headerlink" href="#spatialpy.solvers.build_expression.BuildExpression.operator_map" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">operator_map</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'!':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Not'&gt;,</span> <span class="pre">'!=':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.NotEq'&gt;,</span> <span class="pre">'%':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Mod'&gt;,</span> <span class="pre">'&amp;':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.BitAnd'&gt;,</span> <span class="pre">'*':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Mult'&gt;,</span> <span class="pre">'**':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Pow'&gt;,</span> <span class="pre">'+':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Add'&gt;,</span> <span class="pre">'-':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Sub'&gt;,</span> <span class="pre">'/':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Div'&gt;,</span> <span class="pre">'//':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.FloorDiv'&gt;,</span> <span class="pre">':=':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Assign'&gt;,</span> <span class="pre">'&lt;':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Lt'&gt;,</span> <span class="pre">'&lt;&lt;':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.LShift'&gt;,</span> <span class="pre">'&lt;=':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.LtE'&gt;,</span> <span class="pre">'=':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Assign'&gt;,</span> <span class="pre">'==':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Eq'&gt;,</span> <span class="pre">'&gt;':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Gt'&gt;,</span> <span class="pre">'&gt;=':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.GtE'&gt;,</span> <span class="pre">'&gt;&gt;':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.RShift'&gt;,</span> <span class="pre">'&#64;':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.MatMult'&gt;,</span> <span class="pre">'^':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.BitXor'&gt;,</span> <span class="pre">'and':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.And'&gt;,</span> <span class="pre">'or':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.Or'&gt;,</span> <span class="pre">'|':</span> <span class="pre">&lt;class</span> <span class="pre">'_ast.BitOr'&gt;}</span></em><a class="headerlink" href="#spatialpy.solvers.build_expression.BuildExpression.operator_map" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -414,7 +413,7 @@ The values of the namespace are what the keys map to during sanitization, if use
 <p>A subclass of ast.NodeTransformer used to convert ast.AST expresions to C++ expressions.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.solvers.build_expression.CppConverter.CppExpressionTransformer.visit_BinOp">
-<span class="sig-name descname"><span class="pre">visit_BinOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ast.BinOp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/solvers/build_expression.html#CppConverter.CppExpressionTransformer.visit_BinOp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.solvers.build_expression.CppConverter.CppExpressionTransformer.visit_BinOp" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">visit_BinOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_ast.BinOp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/solvers/build_expression.html#CppConverter.CppExpressionTransformer.visit_BinOp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.solvers.build_expression.CppConverter.CppExpressionTransformer.visit_BinOp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Visitor function for ast.BinOp nodes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -857,8 +856,8 @@ Empty lists indicate that the expression is valid.</p>
 
 </dd></dl>
 
-</section>
-<section id="module-spatialpy.solvers.solver">
+</div>
+<div class="section" id="module-spatialpy.solvers.solver">
 <span id="spatialpy-solvers-solver-module"></span><h2>spatialpy.solvers.solver module<a class="headerlink" href="#module-spatialpy.solvers.solver" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="spatialpy.solvers.solver.Solver">
@@ -923,11 +922,11 @@ Empty lists indicate that the expression is valid.</p>
 
 </dd></dl>
 
-</section>
-<section id="module-spatialpy.solvers">
+</div>
+<div class="section" id="module-spatialpy.solvers">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-spatialpy.solvers" title="Permalink to this headline">¶</a></h2>
-</section>
-</section>
+</div>
+</div>
 
 
           </div>
