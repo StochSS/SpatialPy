@@ -66,6 +66,11 @@ class InitialConditionError(ModelError):
     Class for exceptions in initailcondition module.
     """
 
+class LatticeError(ModelError):
+    """
+    Class for exceptions in lattice module.
+    """
+
 class ParameterError(ModelError):
     """
     Class for exceptions in parameter module.
@@ -84,6 +89,11 @@ class SpeciesError(ModelError):
 class TimespanError(ModelError):
     """
     Class for exceptions in the timespan module.
+    """
+
+class TransformationError(ModelError):
+    """
+    Class for exceptions in the transformation module.
     """
 
 # Result Exceptions
