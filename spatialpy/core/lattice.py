@@ -198,6 +198,16 @@ class CartesianLattice(Lattice):
                 else:
                     count = self.__generate_z(domain, geometry, transform, x, y, count, kwargs)
         self._update_limits(domain)
+        if 'vol' not in kwargs:
+            offset = len(domain.vertices) - count
+            if self.deltaz > 0:
+                vol = 4 / 3 * numpy.pi * (deltax / 2) * (deltay / 2) * (deltaz / 2)
+            else:
+                vol = numpy.pi * (deltax / 2) * (deltay / 2)
+            for i in range(offset, offset + count):
+                domain.vol[i] = vol
+                if 'rho' not in kwargs:
+                    domain.rho[i] = domain.mass[i] / vol
         return count
 
     def validate(self):
@@ -330,6 +340,13 @@ class SphericalLattice(Lattice):
                         count += 1
             radius -= self.deltar
         self._update_limits(domain)
+        if 'vol' not in kwargs:
+            offset = len(domain.vertices) - count
+            vol = 4 / 3 * numpy.pi * (deltas / 2)**2 * (deltar / 2)
+            for i in range(offset, offset + count):
+                domain.vol[i] = vol
+                if 'rho' not in kwargs:
+                    domain.rho[i] = domain.mass[i] / vol
         return count
 
     def validate(self):
@@ -448,6 +465,13 @@ class CylindricalLattice(Lattice):
                 x += self.deltas
             radius -= self.deltar
         self._update_limits(domain)
+        if 'vol' not in kwargs:
+            offset = len(domain.vertices) - count
+            vol = 4 / 3 * numpy.pi * (deltas / 2)**2 * (deltar / 2)
+            for i in range(offset, offset + count):
+                domain.vol[i] = vol
+                if 'rho' not in kwargs:
+                    domain.rho[i] = domain.mass[i] / vol
         return count
 
     def validate(self):
