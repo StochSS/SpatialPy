@@ -311,18 +311,18 @@ class SphericalLattice(Lattice):
         radius = self.radius
         while radius >= 0:
             # Calculate the approximate number of particle with the radius
-            approx_rc = round((4 * radius ** 2) / ((self.deltas / 2) ** 2))
+            approx_rc = int(round((4 * radius ** 2) / ((self.deltas / 2) ** 2)))
 
             # Set constants for the radius
             p_area = 4 * numpy.pi * radius ** 2 / approx_rc
             d_a = numpy.sqrt(p_area)
-            m_phi = round(numpy.pi * radius / d_a)
+            m_phi = int(round(numpy.pi * radius / d_a))
             d_phi = numpy.pi / m_phi
             d_theta = p_area / d_phi
             
             for mphi in range(m_phi):
                 phi = numpy.pi * (mphi + 0.5) / m_phi
-                m_theta = round(2 * numpy.pi * numpy.sin(phi) / d_phi)
+                m_theta = int(round(2 * numpy.pi * numpy.sin(phi) / d_phi))
             
                 for mtheta in range(m_theta):
                     theta = 2 * numpy.pi * mtheta / m_theta
@@ -439,11 +439,11 @@ class CylindricalLattice(Lattice):
         radius = self.radius
         while radius >= 0:
             # Calculate the approximate number of particle with the radius
-            approx_rc = round((2 * radius * self.length) / ((self.deltas / 2) ** 2))
+            approx_rc = int(round((2 * radius * self.length) / ((self.deltas / 2) ** 2)))
 
             p_area = 2 * numpy.pi * radius * self.length / approx_rc
             d_a = numpy.sqrt(p_area)
-            m_theta = round(2 * numpy.pi * radius / d_a)
+            m_theta = int(round(2 * numpy.pi * radius / d_a))
             d_theta = 2 * numpy.pi / m_theta
 
             x = xmin
