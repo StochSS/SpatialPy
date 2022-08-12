@@ -84,7 +84,7 @@ class Domain():
         self.rho = numpy.zeros((numpoints), dtype=float)
         self.fixed = numpy.zeros((numpoints), dtype=bool)
         self.listOfTypeIDs = []
-        self.typeNdxMapping = OrderedDict({"type_UnAssigned": 0})
+        self.typeNdxMapping = None
         self.typeNameMapping = None
 
         self.rho0 = rho0
@@ -134,10 +134,16 @@ class Domain():
     def _ipython_display_(self, use_matplotlib=False):
         self.plot_types(width="auto", height="auto", use_matplotlib=use_matplotlib)
 
-    def _get_type_name_mapping(self):
-        self.typeNameMapping = OrderedDict()
-        for name, ndx in self.typeNdxMapping.items():
-            self.typeNameMapping[ndx] = name
+    def _get_type_mappings(self):
+        self.typeNdxMapping = OrderedDict({"type_UnAssigned": 0})
+        self.typeNameMapping = OrderedDict({0: "type_UnAssigned"})
+
+        unique_ids = set(self.type_id)
+        for type_id in unique_ids:
+            if type_id != "type_UnAssigned":
+                index = len(self.typeNdxMapping)
+                self.typeNdxMapping[type_id] = index
+                self.typeNameMapping[index] = type_id
 
     def add_fill_action(self, lattice=None, geometry=None, cartesian=None, spherical=None,
                         cylindrical=None, enable=True, apply_action=False, **props):
@@ -194,7 +200,7 @@ class Domain():
         self.actions.append(action)
         return action
 
-    def add_point(self, point, vol=1, mass=1, type_id=1, nu=0, fixed=False, rho=None, c=10):
+    def add_point(self, point, vol=1, mass=1, type_id="UnAssigned", nu=0, fixed=False, rho=None, c=10):
         """
         Add a single point particle to the domain space.
 
@@ -229,15 +235,10 @@ class Domain():
 
         if isinstance(type_id, int) and type_id <= 0:
             raise DomainError("Type_id must be a non-zero positive integer or a string.")
-        type_id = f"type_{type_id}"
         for char in type_id:
             if (char in string.punctuation and char != "_") or char == " ":
                 raise DomainError(f"Type_id cannot contain {char}")
-        if type_id not in self.typeNdxMapping:
-            if "UnAssigned" in type_id:
-                self.typeNdxMapping[type_id] = 0
-            else:
-                self.typeNdxMapping[type_id] = len(self.typeNdxMapping)
+        type_id = f"type_{type_id}"
 
         if rho is None:
             rho = mass / vol
@@ -419,15 +420,10 @@ class Domain():
         if "type_id" in action['props']:
             if isinstance(action['props']['type_id'], int) and action['props']['type_id'] <= 0:
                 raise DomainError("Type_id must be a non-zero positive integer or a string.")
-            action['props']['type_id'] = f"type_{action['props']['type_id']}"
             for char in action['props']['type_id']:
                 if (char in string.punctuation and char != "_") or char == " ":
                     raise DomainError(f"Type_id cannot contain '{char}'")
-            if action['props']['type_id'] not in self.typeNdxMapping:
-                if "UnAssigned" in action['props']['type_id']:
-                    self.typeNdxMapping[action['props']['type_id']] = 0
-                else:
-                    self.typeNdxMapping[action['props']['type_id']] = len(self.typeNdxMapping)
+            action['props']['type_id'] = f"type_{action['props']['type_id']}"
 
         # apply the properties to all points that fall within the defined region
         on_boundary = self.find_boundary_points(update=True)
@@ -489,8 +485,9 @@ class Domain():
         if numpy.count_nonzero(self.rho) < len(self.rho):
             raise DomainError("Rho must be a positive value.")
 
+
+        self._get_type_mappings()
         self.listOfTypeIDs = list(self.typeNdxMapping.values())
-        self._get_type_name_mapping()
 
     def coordinates(self):
         """
@@ -932,7 +929,7 @@ class Domain():
         else:
             self.dimensions = 3
 
-        self._get_type_name_mapping()
+        self._get_type_mappings()
 
         types = {}
         # Normalize volumes to [0, 1]
@@ -1113,11 +1110,6 @@ class Domain():
                     for char in type_id:
                         if (char in string.punctuation and char != "_") or char == " ":
                             raise DomainError(f"Type_id cannot contain {char}")
-                    if type_id not in self.typeNdxMapping:
-                        if "UnAssigned" in type_id:
-                            self.typeNdxMapping[type_id] = 0
-                        else:
-                            self.typeNdxMapping[type_id] = len(self.typeNdxMapping)
 
                     self.type_id[int(ndx)] = type_id
 
