@@ -237,7 +237,7 @@ class Domain():
             raise DomainError("Type_id must be a non-zero positive integer or a string.")
         for char in type_id:
             if (char in string.punctuation and char != "_") or char == " ":
-                raise DomainError(f"Type_id cannot contain {char}")
+                raise DomainError(f"Type_id cannot contain '{char}'")
         type_id = f"type_{type_id}"
 
         if rho is None:
@@ -1129,7 +1129,7 @@ class Domain():
                     type_id = f"type_{type_id if type_ids is None else type_ids[type_id]}"
                     for char in type_id:
                         if (char in string.punctuation and char != "_") or char == " ":
-                            raise DomainError(f"Type_id cannot contain {char}")
+                            raise DomainError(f"Type_id cannot contain '{char}'")
 
                     self.type_id[int(ndx)] = type_id
 
