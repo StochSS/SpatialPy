@@ -133,7 +133,7 @@ results.plot_species(species='Rabbits', t_val=10, use_matplotlib=True)
 ```
 
 <p align="center">
-<img width="500px" src="https://raw.githubusercontent.com/StochSS/SpatialPy/readme-example/.graphics/birth-death-example-plot.png">
+<img width="500px" src="https://raw.githubusercontent.com/StochSS/SpatialPy/main/.graphics/birth-death-example-plot.png">
 </p>
 
 <!-- 
