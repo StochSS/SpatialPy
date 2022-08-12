@@ -229,7 +229,7 @@ class Domain():
         type_id = f"type_{type_id}"
         for char in type_id:
             if (char in string.punctuation and char != "_") or char == " ":
-                raise DomainError(f"Type_id cannot contain {char}")
+                raise DomainError(f"Type_id cannot contain '{char}'")
         if type_id not in self.typeNdxMapping:
             if "UnAssigned" in type_id:
                 self.typeNdxMapping[type_id] = 0

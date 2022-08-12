@@ -262,27 +262,26 @@ class Solver:
             input_constants += outstr
 
         num_types = len(self.model.domain.listOfTypeIDs)
-        outstr = f"const int input_num_subdomain = {num_types};\n"
+        outstr = f"const int input_num_subdomain = {num_types-1};\n" # the backend ignores type_id=0 (a.k.a. unassigned)
         input_constants += outstr
 
-        outstr = f"const double input_subdomain_diffusion_matrix[{len(self.model.listOfSpecies) * num_types}] = "
-        outstr += "{"
+        outstr = f"const double input_subdomain_diffusion_matrix[{len(self.model.listOfSpecies) * (num_types-1)}] = "
+        outvec = []
         for i, species in enumerate(self.model.listOfSpecies.values()):
             for j, type_id in enumerate(self.model.domain.typeNdxMapping.keys()):
-                if i + j > 0:
-                    outstr += ','
+                if j==0: continue  # do not process type_id=0 in diffusion
                 try:
                     if species not in self.model.listOfDiffusionRestrictions or \
                        type_id in self.model.listOfDiffusionRestrictions[species]:
-                        outstr += f"{species.diffusion_coefficient}"
+                        outvec.append(f"{species.diffusion_coefficient}")
                     else:
-                        outstr += "0.0"
+                        outvec.append("0.0")
                 except KeyError as err:
                     print(f"error: {err}")
                     print(self.model.listOfDiffusionRestrictions)
                     raise SimulationError(f"error: {self.model.listOfDiffusionRestrictions}") from err
 
-        outstr += "};\n"
+        outstr += "{"+",".join(outvec)+"};\n"
         input_constants += outstr
 
         return input_constants
@@ -376,7 +375,7 @@ class Solver:
                             num_stoch_species, num_stoch_rxns, num_data_fn):
         system_config = f"debug_flag = {self.debug_level};\n"
         system_config += "ParticleSystem *system = new ParticleSystem("
-        system_config += f"{num_types},{num_chem_species},{num_chem_rxns},"
+        system_config += f"{num_types-1},{num_chem_species},{num_chem_rxns},"
         system_config += f"{num_stoch_species},{num_stoch_rxns},{num_data_fn});\n"
         system_config += f"system->static_domain = {int(self.model.staticDomain)};\n"
         if len(self.model.listOfSpecies) > 0:
