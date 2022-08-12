@@ -35,8 +35,8 @@ class Lattice:
     def __init__(self, center=None, skip_validate=False):
         if center is None:
             center = [0] * 3
-        elif isinstance(center, tuple):
-            center = list(center)
+        elif isinstance(center, (list, tuple)):
+            center = numpy.array(center)
         try:
             self.center = [float(val) for val in center]
             if not skip_validate:
@@ -198,6 +198,16 @@ class CartesianLattice(Lattice):
                 else:
                     count = self.__generate_z(domain, geometry, transform, x, y, count, kwargs)
         self._update_limits(domain)
+        if 'vol' not in kwargs:
+            offset = len(domain.vertices) - count
+            if self.deltaz > 0:
+                vol = 4 / 3 * numpy.pi * (deltax / 2) * (deltay / 2) * (deltaz / 2)
+            else:
+                vol = numpy.pi * (deltax / 2) * (deltay / 2)
+            for i in range(offset, offset + count):
+                domain.vol[i] = vol
+                if 'rho' not in kwargs:
+                    domain.rho[i] = domain.mass[i] / vol
         return count
 
     def validate(self):
@@ -316,18 +326,27 @@ class SphericalLattice(Lattice):
             
                 for mtheta in range(m_theta):
                     theta = 2 * numpy.pi * mtheta / m_theta
-                    x = radius * numpy.cos(theta) * numpy.sin(phi) + self.center[0]
-                    y = radius * numpy.sin(theta) * numpy.sin(phi) + self.center[1]
-                    z = radius * numpy.cos(phi) + self.center[2]
+                    x = radius * numpy.cos(theta) * numpy.sin(phi)
+                    y = radius * numpy.sin(theta) * numpy.sin(phi)
+                    z = radius * numpy.cos(phi)
                     if geometry.inside((x, y, z), False):
                         if transform is None:
                             point = [x, y, z]
                         else:
                             point = transform([x, y, z])
-                        domain.add_point(point, **kwargs)
+                        if not isinstance(point, numpy.ndarray):
+                            point = numpy.array(point)
+                        domain.add_point(point + self.center, **kwargs)
                         count += 1
             radius -= self.deltar
         self._update_limits(domain)
+        if 'vol' not in kwargs:
+            offset = len(domain.vertices) - count
+            vol = 4 / 3 * numpy.pi * (deltas / 2)**2 * (deltar / 2)
+            for i in range(offset, offset + count):
+                domain.vol[i] = vol
+                if 'rho' not in kwargs:
+                    domain.rho[i] = domain.mass[i] / vol
         return count
 
     def validate(self):
@@ -415,8 +434,8 @@ class CylindricalLattice(Lattice):
 
         count = 0
         h_len = self.length / 2
-        xmin = self.center[0] - h_len
-        xmax = self.center[0] + h_len
+        xmin = -h_len
+        xmax = h_len
         radius = self.radius
         while radius >= 0:
             # Calculate the approximate number of particle with the radius
@@ -432,18 +451,27 @@ class CylindricalLattice(Lattice):
 
                 for mtheta in range(m_theta):
                     theta = 2 * numpy.pi * (mtheta + 0.5) / m_theta
-                    y = radius * numpy.cos(theta) + self.center[1]
-                    z = radius * numpy.sin(theta) + self.center[2]
+                    y = radius * numpy.cos(theta)
+                    z = radius * numpy.sin(theta)
                     if geometry.inside((x, y, z), False):
                         if transform is None:
                             point = [x, y, z]
                         else:
                             point = transform([x, y, z])
-                        domain.add_point(point, **kwargs)
+                        if not isinstance(point, numpy.ndarray):
+                            point = numpy.array(point)
+                        domain.add_point(point + self.center, **kwargs)
                         count += 1
                 x += self.deltas
             radius -= self.deltar
         self._update_limits(domain)
+        if 'vol' not in kwargs:
+            offset = len(domain.vertices) - count
+            vol = 4 / 3 * numpy.pi * (deltas / 2)**2 * (deltar / 2)
+            for i in range(offset, offset + count):
+                domain.vol[i] = vol
+                if 'rho' not in kwargs:
+                    domain.rho[i] = domain.mass[i] / vol
         return count
 
     def validate(self):
@@ -552,16 +580,18 @@ class XMLMeshLattice(Lattice):
 
         count = 0
         for i, vertex in enumerate(mesh_vertices):
-            x = vertex[0] + self.center[0]
-            y = vertex[1] + self.center[1]
-            z = vertex[2] + self.center[2]
+            x = vertex[0]
+            y = vertex[1]
+            z = vertex[2]
             if transform is None:
                 point = [x, y, z]
             else:
                 point = transform([x, y, z])
             if type_ids is not None and i in type_ids.keys():
                 kwargs['type_id'] = type_ids[i]
-            domain.add_point(point, **kwargs)
+            if not isinstance(point, numpy.ndarray):
+                point = numpy.array(point)
+            domain.add_point(point + self.center, **kwargs)
             count += 1
 
         #tetrahedrons
@@ -682,16 +712,18 @@ class MeshIOLattice(Lattice):
         #vertices
         count = 0
         for i, vertex in enumerate(mesh.points):
-            x = vertex[0] + self.center[0]
-            y = vertex[1] + self.center[1]
-            z = vertex[2] + self.center[2]
+            x = vertex[0]
+            y = vertex[1]
+            z = vertex[2]
             if transform is None:
                 point = [x, y, z]
             else:
                 point = transform([x, y, z])
             if type_ids is not None and i in type_ids.keys():
                 kwargs['type_id'] = type_ids[i]
-            domain.add_point(point, **kwargs)
+            if not isinstance(point, numpy.ndarray):
+                point = numpy.array(point)
+            domain.add_point(point + self.center, **kwargs)
             count += 1
 
         # triangles
@@ -799,14 +831,16 @@ class StochSSLattice(Lattice):
                     "fixed": particle['fixed']
                 }
 
-                x = particle['point'][0] + self.center[0]
-                y = particle['point'][1] + self.center[1]
-                z = particle['point'][2] + self.center[2]
+                x = particle['point'][0]
+                y = particle['point'][1]
+                z = particle['point'][2]
                 if transform is None:
                     point = [x, y, z]
                 else:
                     point = transform([x, y, z])
-                domain.add_point(point, **kwargs)
+                if not isinstance(point, numpy.ndarray):
+                    point = numpy.array(point)
+                domain.add_point(point + self.center, **kwargs)
                 count += 1
 
             self._update_limits(domain)
