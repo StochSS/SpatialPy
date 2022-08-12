@@ -139,8 +139,8 @@ class Domain():
         for name, ndx in self.typeNdxMapping.items():
             self.typeNameMapping[ndx] = name
 
-    def add_fill_action(self, lattice=None, geometry=None, cartesian=None,
-                        spherical=None, cylindrical=None, apply_action=False, **props):
+    def add_fill_action(self, lattice=None, geometry=None, cartesian=None, spherical=None,
+                        cylindrical=None, enable=True, apply_action=False, **props):
         r"""
         Create an action that can add particles to the domain.
 
@@ -159,6 +159,9 @@ class Domain():
         :param cylindrical: Arguments used to create a spherical lattice. Ignored if lattice, cartesian,
             or spherical is set.
         :type cylindrical: dict
+
+        :param enable: Indicates that the action is to be applied by Domain.apply_actions.
+        :type enable: bool
 
         :param apply_action: If true, apply the action, else, add the action to Domain.actions
         :type apply_action: bool
@@ -180,7 +183,7 @@ class Domain():
             else:
                 raise DomainError("Fill actions require a lattice.")
 
-        action = {'type': "fill", 'lattice': lattice}
+        action = {'type': "fill", 'lattice': lattice, 'enable': enable}
         if geometry is not None:
             action['geometry'] = geometry
         if len(props) > 0:
@@ -249,12 +252,15 @@ class Domain():
 
         self.vertices = numpy.append(self.vertices, [point], axis=0)
 
-    def add_remove_action(self, geometry=None, apply_action=False):
+    def add_remove_action(self, geometry=None, enable=True, apply_action=False):
         """
         Create an action that can remove particles from the domain.
 
         :param geometry: Geometry classed used when applying set actions. Defaults to spatialpy.GeometryAll.
         :type geometry: spatialpy.Geometry
+
+        :param enable: Indicates that the action is to be applied by Domain.apply_actions.
+        :type enable: bool
 
         :param apply_action: If true, apply the action, else, add the action to Domain.actions
         :type apply_action: bool
@@ -262,7 +268,7 @@ class Domain():
         :returns: The set action if apply_action is false.
         :rtype: dict
         """
-        action = {'type': "remove"}
+        action = {'type': "remove", 'enable': enable}
         if geometry is not None:
             action['geometry'] = geometry
 
@@ -271,12 +277,15 @@ class Domain():
         self.actions.append(action)
         return action
 
-    def add_set_action(self, geometry=None, apply_action=False, **props):
+    def add_set_action(self, geometry=None, enable=True, apply_action=False, **props):
         r"""
         Create an action that can set particle properties for particles in the domain.
 
         :param geometry: Geometry classed used when applying set actions. Defaults to spatialpy.GeometryAll.
         :type geometry: spatialpy.Geometry
+
+        :param enable: Indicates that the action is to be applied by Domain.apply_actions.
+        :type enable: bool
 
         :param apply_action: If true, apply the action, else, add the action to Domain.actions
         :type apply_action: bool
@@ -291,7 +300,7 @@ class Domain():
         if len(props) <= 0:
             raise DomainError("Set actions require particle properties to set")
 
-        action = {'type': "set", 'props': props}
+        action = {'type': "set", 'props': props, 'enable': enable}
         if geometry is not None:
             action['geometry'] = geometry
 
@@ -322,16 +331,17 @@ class Domain():
         count = end - start
         while count > 0:
             action = self.actions[start]
-            if action['type'] == "fill":
-                p_count += self.apply_fill_action(action)
-            elif action['type'] == "set":
-                self.apply_set_action(action)
-            elif action['type'] == "remove":
-                self.apply_remove_action(action)
-            else:
-                raise DomainError(f"Action of type {action['type']} is not currently supported.")
+            if action['enable']:
+                if action['type'] == "fill":
+                    p_count += self.apply_fill_action(action)
+                elif action['type'] == "set":
+                    self.apply_set_action(action)
+                elif action['type'] == "remove":
+                    self.apply_remove_action(action)
+                else:
+                    raise DomainError(f"Action of type {action['type']} is not currently supported.")
 
-            if preserve_actions:
+            if preserve_actions or not action['enable']:
                 start += 1
             else:
                 self.actions.pop(start)
@@ -472,6 +482,8 @@ class Domain():
 
         :raises DomainError: If a type_id is not set or rho=0 for a particle.
         """
+        self.apply_actions()
+
         if self.type_id.tolist().count("type_UnAssigned") > 0:
             raise DomainError("Particles must be assigned a type_id.")
         if numpy.count_nonzero(self.rho) < len(self.rho):
