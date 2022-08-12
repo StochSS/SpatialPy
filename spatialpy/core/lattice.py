@@ -201,9 +201,9 @@ class CartesianLattice(Lattice):
         if 'vol' not in kwargs:
             offset = len(domain.vertices) - count
             if self.deltaz > 0:
-                vol = 4 / 3 * numpy.pi * (deltax / 2) * (deltay / 2) * (deltaz / 2)
+                vol = 4 / 3 * numpy.pi * (self.deltax / 2) * (self.deltay / 2) * (self.deltaz / 2)
             else:
-                vol = numpy.pi * (deltax / 2) * (deltay / 2)
+                vol = numpy.pi * (self.deltax / 2) * (self.deltay / 2)
             for i in range(offset, offset + count):
                 domain.vol[i] = vol
                 if 'rho' not in kwargs:
@@ -342,7 +342,7 @@ class SphericalLattice(Lattice):
         self._update_limits(domain)
         if 'vol' not in kwargs:
             offset = len(domain.vertices) - count
-            vol = 4 / 3 * numpy.pi * (deltas / 2)**2 * (deltar / 2)
+            vol = 4 / 3 * numpy.pi * (self.deltas / 2)**2 * (self.deltar / 2)
             for i in range(offset, offset + count):
                 domain.vol[i] = vol
                 if 'rho' not in kwargs:
@@ -467,7 +467,7 @@ class CylindricalLattice(Lattice):
         self._update_limits(domain)
         if 'vol' not in kwargs:
             offset = len(domain.vertices) - count
-            vol = 4 / 3 * numpy.pi * (deltas / 2)**2 * (deltar / 2)
+            vol = 4 / 3 * numpy.pi * (self.deltas / 2)**2 * (self.deltar / 2)
             for i in range(offset, offset + count):
                 domain.vol[i] = vol
                 if 'rho' not in kwargs:
