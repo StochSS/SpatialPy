@@ -461,6 +461,7 @@ class Model():
                 "Unexpected parameter for add_domain. Parameter must be of type SpatialPy.Domain."
             )
 
+        domain.compile_prep()
         self.domain = domain
         return domain
 
