@@ -499,8 +499,8 @@ class Domain():
         return self.vertices
 
     @classmethod
-    def create_2D_domain(cls, xlim, ylim, numx, numy, type_id=1, mass=1.0, nu=1.0,
-                         rho=None, c=0, fixed=False, apply_action=True, **kwargs):
+    def create_2D_domain(cls, xlim, ylim, numx, numy, type_id=1, mass=1.0, nu=1.0, rho=None,
+                         c=0, fixed=False, enable=True, apply_action=True, **kwargs):
         r"""
         Create a filled 2D domain
 
@@ -534,6 +534,9 @@ class Domain():
         :param fixed: spatially fixed flag of particles to be created. Defaults to false.
         :type fixed: bool
 
+        :param enable: Indicates that the action is to be applied by Domain.apply_actions.
+        :type enable: bool
+
         :param apply_action: If true, apply the action, else, add the action to Domain.actions
         :type apply_action: bool
 
@@ -555,15 +558,15 @@ class Domain():
             raise DomainError("Paritcles cannot have 0 volume")
         props = {'type_id': type_id, 'vol': vol, 'mass': mass, 'rho': rho, 'nu': nu, 'c': c, 'fixed': fixed}
 
-        action = {'type': "fill", 'lattice': lattice, 'props': props}
+        action = {'type': "fill", 'lattice': lattice, 'props': props, 'enable': enable}
         obj = Domain(0, xlim, ylim, (0, 0), actions=[action], **kwargs)
         if apply_action:
             obj.apply_actions()
         return obj
 
     @classmethod
-    def create_3D_domain(cls, xlim, ylim, zlim, numx, numy, numz, type_id=1, mass=1.0,
-                         nu=1.0, rho=None, c=0, fixed=False, apply_action=True, **kwargs):
+    def create_3D_domain(cls, xlim, ylim, zlim, numx, numy, numz, type_id=1, mass=1.0, nu=1.0,
+                         rho=None, c=0, fixed=False, enable=True, apply_action=True, **kwargs):
         r"""
         Create a filled 3D domain
 
@@ -603,6 +606,9 @@ class Domain():
         :param fixed: spatially fixed flag of particles to be created. Defaults to false.
         :type fixed: bool
 
+        :param enable: Indicates that the action is to be applied by Domain.apply_actions.
+        :type enable: bool
+
         :param apply_action: If true, apply the action, else, add the action to Domain.actions
         :type apply_action: bool
 
@@ -626,7 +632,7 @@ class Domain():
             raise DomainError("Paritcles cannot have 0 volume")
         props = {'type_id': type_id, 'vol': vol, 'mass': mass, 'rho': rho, 'nu': nu, 'c': c, 'fixed': fixed}
 
-        action = {'type': "fill", 'lattice': lattice, 'props': props}
+        action = {'type': "fill", 'lattice': lattice, 'props': props, 'enable': enable}
         obj = Domain(0, xlim, ylim, zlim, actions=[action], **kwargs)
         if apply_action:
             obj.apply_actions()
@@ -648,7 +654,7 @@ class Domain():
         return numpy.linalg.norm(self.vertices[start, :] - self.vertices[end, :])
 
     def fill_with_particles(self, geometry_ivar, deltax, deltay=None, deltaz=None, xmin=None, xmax=None,
-                            ymin=None, ymax=None, zmin=None, zmax=None, apply_action=True, **kwargs):
+                            ymin=None, ymax=None, zmin=None, zmax=None, enable=True, apply_action=True, **kwargs):
         r"""
         Fill a region defined by a cartesian lattice and geometric shape with particles.
 
@@ -683,6 +689,9 @@ class Domain():
         :param zmax: Maximum z value of the bounding box in a cartesian lattice.
         :type zmax: float
 
+        :param enable: Indicates that the action is to be applied by Domain.apply_actions.
+        :type enable: bool
+
         :param apply_action: If true, apply the action, else, add the action to Domain.actions
         :type apply_action: bool
 
@@ -695,7 +704,9 @@ class Domain():
             "xmin": xmin, "xmax": xmax, "ymin": ymin, "ymax": ymax, "zmin": zmin,
             "zmax": zmax, "deltax": deltax, "deltay": deltay, "deltaz": deltaz,
         }
-        return self.add_fill_action(geometry=geometry_ivar, cartesian=cartesian, apply_action=apply_action, **kwargs)
+        return self.add_fill_action(
+            geometry=geometry_ivar, cartesian=cartesian, enable=enable, apply_action=apply_action, **kwargs
+        )
 
     def find_boundary_points(self, update=False):
         """
@@ -843,7 +854,7 @@ class Domain():
         return self.vol
 
     @classmethod
-    def import_meshio_object(cls, mesh_obj, subdomain_file=None, type_ids=None, apply_action=True):
+    def import_meshio_object(cls, mesh_obj, subdomain_file=None, type_ids=None, enable=True, apply_action=True):
         """
         Import a python meshio mesh object.
 
@@ -856,6 +867,9 @@ class Domain():
         :param type_ids: Mapping of type indecies to type names.
         :type type_ids: dict{str:str}
 
+        :param enable: Indicates that the action is to be applied by Domain.apply_actions.
+        :type enable: bool
+
         :param apply_action: If true, apply the action, else, add the action to Domain.actions
         :type apply_action: bool
 
@@ -863,7 +877,7 @@ class Domain():
         :rtype: spatialpy.core.domain.Domain
         """
         lattice = MeshIOLattice(mesh=mesh_obj, subdomain_file=subdomain_file, type_ids=type_ids)
-        action = {'type': "fill", 'lattice': lattice}
+        action = {'type': "fill", 'lattice': lattice, 'enable': enable}
         obj = Domain(0, (0, 0), (0, 0), (0, 0), actions=[action])
         if apply_action:
             obj.apply_actions()
@@ -1038,7 +1052,7 @@ class Domain():
         del domain
 
     @classmethod
-    def read_msh_file(cls, filename, subdomain_file=None, type_ids=None, apply_action=True):
+    def read_msh_file(cls, filename, subdomain_file=None, type_ids=None, enable=True, apply_action=True):
         """
         Read a Gmsh style .msh file
 
@@ -1051,6 +1065,9 @@ class Domain():
         :param type_ids: Mapping of type indecies to type names.
         :type type_ids: dict{str:str}
 
+        :param enable: Indicates that the action is to be applied by Domain.apply_actions.
+        :type enable: bool
+
         :param apply_action: If true, apply the action, else, add the action to Domain.actions
         :type apply_action: bool
 
@@ -1058,7 +1075,7 @@ class Domain():
         :rtype: spatialpy.core.domain.Domain
         """
         lattice = MeshIOLattice(filename=filename, subdomain_file=subdomain_file, type_ids=type_ids)
-        action = {'type': "fill", 'lattice': lattice}
+        action = {'type': "fill", 'lattice': lattice, 'enable': enable}
         obj = Domain(0, (0, 0), (0, 0), (0, 0), actions=[action])
         if apply_action:
             obj.apply_actions()
@@ -1070,12 +1087,15 @@ class Domain():
         return obj
 
     @classmethod
-    def read_stochss_domain(cls, filename, apply_action=True):
+    def read_stochss_domain(cls, filename, enable=True, apply_action=True):
         """
         Read a StochSS Domain (.domn) file or pull a StochSS Domain from a StochSS Spatial Model (.smdl) file.
 
         :param filename: Name of file to read.
         :type filename: str
+
+        :param enable: Indicates that the action is to be applied by Domain.apply_actions.
+        :type enable: bool
 
         :param apply_action: If true, apply the action, else, add the action to Domain.actions
         :type apply_action: bool
@@ -1083,7 +1103,7 @@ class Domain():
         :returns: SpatialPy Domain object created from StochSS domain.
         :rtype: spatialpy.core.domain.Domain
         """
-        action = {'type': "fill", 'lattice': StochSSLattice(filename)}
+        action = {'type': "fill", 'lattice': StochSSLattice(filename), 'enable': enable}
         obj = Domain(0, (0, 0), (0, 0), (0, 0), actions=[action])
         if apply_action:
             obj.apply_actions()
@@ -1117,7 +1137,7 @@ class Domain():
                     raise DomainError(f"Could not read in subdomain file, error on line {lnum}: {line}") from err
 
     @classmethod
-    def read_xml_mesh(cls, filename, subdomain_file=None, type_ids=None, apply_action=True):
+    def read_xml_mesh(cls, filename, subdomain_file=None, type_ids=None, enable=True, apply_action=True):
         """
         Read a FEniCS/dolfin style XML mesh file
 
@@ -1130,6 +1150,9 @@ class Domain():
         :param type_ids: Mapping of type indecies to type names.
         :type type_ids: dict{str:str}
 
+        :param enable: Indicates that the action is to be applied by Domain.apply_actions.
+        :type enable: bool
+
         :param apply_action: If true, apply the action, else, add the action to Domain.actions
         :type apply_action: bool
 
@@ -1137,7 +1160,7 @@ class Domain():
         :rtype: spatialpy.core.domain.Domain
         """
         lattice = XMLMeshLattice(filename, subdomain_file=subdomain_file, type_ids=type_ids)
-        action = {'type': "fill", 'lattice': lattice}
+        action = {'type': "fill", 'lattice': lattice, 'enable': enable}
         obj = Domain(0, (0, 0), (0, 0), (0, 0), actions=[action])
         if apply_action:
             obj.apply_actions()
@@ -1148,8 +1171,8 @@ class Domain():
             obj.rho = obj.mass / obj.vol
         return obj
 
-    def set_properties(self, geometry_ivar, type_id, vol=None,
-                       mass=None, nu=None, rho=None, c=None, fixed=False, apply_action=True):
+    def set_properties(self, geometry_ivar, type_id, vol=None, mass=None, nu=None,
+                       rho=None, c=None, fixed=False, enable=True, apply_action=True):
         """
         Add a type definition to the domain. By default, all regions are set to type 0.
 
@@ -1178,6 +1201,9 @@ class Domain():
         :param fixed: Are the particles in this type immobile.
         :type fixed: bool
 
+        :param enable: Indicates that the action is to be applied by Domain.apply_actions.
+        :type enable: bool
+
         :param apply_action: If true, apply the action, else, add the action to Domain.actions
         :type apply_action: bool
 
@@ -1186,7 +1212,7 @@ class Domain():
         props = {
             'type_id': type_id, 'vol': vol, 'mass': mass, 'nu': nu, 'rho': rho, 'c': c, 'fixed': fixed
         }
-        self.add_set_action(geometry=geometry_ivar, apply_action=apply_action, **props)
+        self.add_set_action(geometry=geometry_ivar, enable=enable, apply_action=apply_action, **props)
 
     def validate_action(self, action, coverage):
         """
