@@ -474,3 +474,98 @@ class ReflectionTransformation(Transformation):
             return self.transformation.transform(t_point)
         
         return t_point
+
+class ScalingTransformation(Transformation):
+    """
+    Scaling transformation class provides a methods for applying and reversing
+        scaling transformations around an arbitrary plane to parts the spatial
+        domain.
+
+    :param factor: Scaling factor.
+    :type factor: float
+
+    :param center: Center of the space to be scaled.
+    :type center: float[3]
+
+    :param geometry: Geometry classed used once the transformation is reversed.
+        Transformation.inside wraps Geometry.inside.
+    :type geometry: spatialpy.Geometry
+
+    :param lattice: Lattice classed used when applying transformations.
+        Transformation.apply wraps Lattice.apply.
+    :type lattice: spatialpy.Lattice
+
+    :param transformation: Transformation to be applied after applying this
+        transformation.
+    :type transformation: spatialpy.Transformation
+
+    :raises TransformationError: if the provided Geometry, Lattice, or
+        Transformation are invalid.
+    """
+    def __init__(self, factor, center=None, geometry=None, lattice=None, transformation=None):
+        super().__init__(
+            geometry=geometry, lattice=lattice, transformation=transformation, skip_validate=True
+        )
+
+        if center is None:
+            if lattice is not None:
+                center = lattice.center
+            elif geometry is not None and hasattr(geometry, "center"):
+                center = geometry.center
+            else:
+                center = numpy.array([0] * 3)
+
+        self.center = center
+        self.factor = factor
+
+        self.validate()
+
+    def __execute(self, point, factor):
+        t_point = []
+        for i, offset in enumerate(self.center):
+            t_point.append((point[i] - offset) * factor + offset)
+        
+        return t_point
+
+    def reverse_transform(self, point):
+        """
+        Reverses the defined scaling transformation for the given point.
+
+        :param point: X, Y, Z coodinates for the particle.
+        :type point: float[3]
+
+        :returns: The point prior to any transformations.
+        :rtype: float[3]
+        """
+        if self.transformation is not None:
+            point = self.transformation.reverse_transform(point)
+
+        return self.__execute(point, 1 / self.factor)
+
+    def transform(self, point):
+        """
+        Applies the defined scaling transformation to the given point.
+
+        :param point: X, Y, Z coodinates for the particle.
+        :type point: float[3]
+
+        :returns: The point prior to any transformations.
+        :rtype: float[3]
+        """
+        t_point = self.__execute(point, self.factor)
+        
+        if self.transformation is not None:
+            return self.transformation.transform(t_point)
+        
+        return t_point
+
+    def validate(self):
+        """
+        Validate the scaling transformation attributes.
+        """
+        super().validate()
+
+        if not isinstance(self.factor, (int, float)):
+            raise TransformationError(f"factor must be of type float not {type(self.factor)}")
+        if self.factor <= 0:
+            raise TransformationError(f"factor must be positive.")
