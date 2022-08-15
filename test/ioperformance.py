@@ -1,20 +1,18 @@
-'''
-SpatialPy is a Python 3 package for simulation of
-spatial deterministic/stochastic reaction-diffusion-advection problems
-Copyright (C) 2021 SpatialPy developers.
+# SpatialPy is a Python 3 package for simulation of
+# spatial deterministic/stochastic reaction-diffusion-advection problems
+# Copyright (C) 2019 - 2022 SpatialPy developers.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
-published by the Free Software Foundation.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+# published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #!/usr/bin/env python3
 """ PyURDME model with one species diffusing in the unit circle and one
@@ -44,52 +42,52 @@ class Cytosol(dolfin.SubDomain):
         return not on_boundary
 
 
-class simple_diffusion2(URDMEModel):
-    """ One species diffusing on the boundary of a sphere and one species
-        diffusing inside the sphere. """
+def create_simple_diffusion2(parameter_values=None):
+    """
+    One species diffusing on the boundary of a sphere and one species
+    diffusing inside the sphere.
+    """
+    model = URDMEModel(name="simple_diffusion2")
 
-    def __init__(self):
-        URDMEModel.__init__(self,name="simple_diffusion2")
+    A = Species(name="A", diffusion_coefficient=1.0, dimension=2)
+    B = Species(name="B", diffusion_coefficient=0.1, dimension=1)
+    model.add_species([A, B])
 
-        A = Species(name="A",diffusion_coefficient=1.0,dimension=2)
-        B = Species(name="B",diffusion_coefficient=0.1,dimension=1)
+    # A circle
+    #c1 = dolfin.Circle(0,0,1)
+    c1 = mshr.Circle(dolfin.Point(0, 0), 1)
+    model.mesh = URDMEMesh(mesh=mshr.generate_mesh(c1, 20))
 
-        self.add_species([A,B])
+    # A mesh function for the cells
+    cell_function = dolfin.CellFunction("size_t", model.mesh)
+    cell_function.set_all(1)
 
-        # A circle
-        #c1 = dolfin.Circle(0,0,1)
-        c1 = mshr.Circle(dolfin.Point(0,0),1)
-        self.mesh = URDMEMesh(mesh=mshr.generate_mesh(c1,20))
+    # Create a mesh function over then edges of the mesh
+    facet_function = dolfin.FacetFunction("size_t", model.mesh)
+    facet_function.set_all(0)
 
-        # A mesh function for the cells
-        cell_function = dolfin.CellFunction("size_t",self.mesh)
-        cell_function.set_all(1)
+    # Mark the boundary points
+    membrane = Membrane()
+    membrane.mark(facet_function, 2)
 
-        # Create a mesh function over then edges of the mesh
-        facet_function = dolfin.FacetFunction("size_t",self.mesh)
-        facet_function.set_all(0)
+    membrane_patch = MembranePatch()
+    membrane_patch.mark(facet_function, 3)
 
-        # Mark the boundary points
-        membrane = Membrane()
-        membrane.mark(facet_function,2)
+    model.add_subdomain(cell_function)
+    model.add_subdomain(facet_function)
 
-        membrane_patch = MembranePatch()
-        membrane_patch.mark(facet_function,3)
+    k1 = Parameter(name="k1", expression=1000.0)
+    model.add_parameter([k1])
+    R1 = Reaction(name="R1", reactants={A: 1}, products={B: 1}, massaction=True, rate=k1, restrict_to=3)
+    model.add_reaction([R1])
 
-        self.add_subdomain(cell_function)
-        self.add_subdomain(facet_function)
+    # Restrict species B to the membrane subdomain
+    model.restrict(species=B, subdomains=[2, 3])
+    model.timespan(numpy.linspace(0, 1, 10))
 
-        k1 = Parameter(name="k1",expression=1000.0)
-        self.add_parameter([k1])
-        R1 = Reaction(name="R1",reactants={A:1},products={B:1},massaction=True,rate=k1,restrict_to=3)
-        self.add_reaction([R1])
-
-        # Restrict species B to the membrane subdomain
-        self.restrict(species=B,subdomains=[2,3])
-        self.timespan(numpy.linspace(0,1,10))
-
-        # Place the A molecules in the voxel nearest to the center of the square
-        self.set_initial_condition_place_near({A:1000},point=[0,0])
+    # Place the A molecules in the voxel nearest to the center of the square
+    model.set_initial_condition_place_near({A: 1000}, point=[0, 0])
+    return model
 
 if __name__ == '__main__':
     import time
@@ -97,7 +95,7 @@ if __name__ == '__main__':
     """ This model is constructed to be non-stiff but with denser and denser output so that
         we can measure the peroformace as we become IO/Memory bound. """
 
-    model = simple_diffusion2()
+    model = create_simple_diffusion2()
     num_dofs = 2*model.mesh.num_vertices()
     print "Output data set size:", str(4*num_dofs*500/1.048e6) + " MB"
     model.timespan(numpy.linspace(0,1,500))
