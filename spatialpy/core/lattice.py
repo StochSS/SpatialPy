@@ -198,6 +198,16 @@ class CartesianLattice(Lattice):
                 else:
                     count = self.__generate_z(domain, geometry, transform, x, y, count, kwargs)
         self._update_limits(domain)
+        if 'vol' not in kwargs:
+            offset = len(domain.vertices) - count
+            if self.deltaz > 0:
+                vol = 4 / 3 * numpy.pi * (self.deltax / 2) * (self.deltay / 2) * (self.deltaz / 2)
+            else:
+                vol = numpy.pi * (self.deltax / 2) * (self.deltay / 2)
+            for i in range(offset, offset + count):
+                domain.vol[i] = vol
+                if 'rho' not in kwargs:
+                    domain.rho[i] = domain.mass[i] / vol
         return count
 
     def validate(self):
@@ -301,18 +311,18 @@ class SphericalLattice(Lattice):
         radius = self.radius
         while radius >= 0:
             # Calculate the approximate number of particle with the radius
-            approx_rc = round((4 * radius ** 2) / ((self.deltas / 2) ** 2))
+            approx_rc = int(round((4 * radius ** 2) / ((self.deltas / 2) ** 2)))
 
             # Set constants for the radius
             p_area = 4 * numpy.pi * radius ** 2 / approx_rc
             d_a = numpy.sqrt(p_area)
-            m_phi = round(numpy.pi * radius / d_a)
+            m_phi = int(round(numpy.pi * radius / d_a))
             d_phi = numpy.pi / m_phi
             d_theta = p_area / d_phi
             
             for mphi in range(m_phi):
                 phi = numpy.pi * (mphi + 0.5) / m_phi
-                m_theta = round(2 * numpy.pi * numpy.sin(phi) / d_phi)
+                m_theta = int(round(2 * numpy.pi * numpy.sin(phi) / d_phi))
             
                 for mtheta in range(m_theta):
                     theta = 2 * numpy.pi * mtheta / m_theta
@@ -330,6 +340,13 @@ class SphericalLattice(Lattice):
                         count += 1
             radius -= self.deltar
         self._update_limits(domain)
+        if 'vol' not in kwargs:
+            offset = len(domain.vertices) - count
+            vol = 4 / 3 * numpy.pi * (self.deltas / 2)**2 * (self.deltar / 2)
+            for i in range(offset, offset + count):
+                domain.vol[i] = vol
+                if 'rho' not in kwargs:
+                    domain.rho[i] = domain.mass[i] / vol
         return count
 
     def validate(self):
@@ -422,11 +439,11 @@ class CylindricalLattice(Lattice):
         radius = self.radius
         while radius >= 0:
             # Calculate the approximate number of particle with the radius
-            approx_rc = round((2 * radius * self.length) / ((self.deltas / 2) ** 2))
+            approx_rc = int(round((2 * radius * self.length) / ((self.deltas / 2) ** 2)))
 
             p_area = 2 * numpy.pi * radius * self.length / approx_rc
             d_a = numpy.sqrt(p_area)
-            m_theta = round(2 * numpy.pi * radius / d_a)
+            m_theta = int(round(2 * numpy.pi * radius / d_a))
             d_theta = 2 * numpy.pi / m_theta
 
             x = xmin
@@ -448,6 +465,13 @@ class CylindricalLattice(Lattice):
                 x += self.deltas
             radius -= self.deltar
         self._update_limits(domain)
+        if 'vol' not in kwargs:
+            offset = len(domain.vertices) - count
+            vol = 4 / 3 * numpy.pi * (self.deltas / 2)**2 * (self.deltar / 2)
+            for i in range(offset, offset + count):
+                domain.vol[i] = vol
+                if 'rho' not in kwargs:
+                    domain.rho[i] = domain.mass[i] / vol
         return count
 
     def validate(self):
