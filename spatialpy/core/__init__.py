@@ -26,6 +26,7 @@ from .cleanup import (
 from .datafunction import DataFunction
 from .domain import Domain
 from .geometry import (
+	CombinatoryGeometry,
 	Geometry,
 	GeometryAll,
 	GeometryExterior,
@@ -37,6 +38,14 @@ from .initialcondition import (
 	UniformInitialCondition,
 	ScatterInitialCondition
 )
+from .lattice import (
+	CartesianLattice,
+	SphericalLattice,
+	CylindricalLattice,
+	XMLMeshLattice,
+	MeshIOLattice,
+	StochSSLattice
+)
 from .model import Model, export_StochSS
 from .parameter import Parameter
 from .reaction import Reaction
@@ -44,6 +53,13 @@ from .result import Result
 from .spatialpyerror import *
 from .species import Species
 from .timespan import TimeSpan
+from .transformation import (
+	Transformation,
+	TranslationTransformation,
+	RotationTransformation,
+	ReflectionTransformation,
+	ScalingTransformation
+)
 from .visualization import Visualization
 from .vtkreader import *
 

@@ -88,7 +88,7 @@ def create_birth_death(parameter_values=None):
 
     # Define domain points and attributes of a regional space for simulation.
     domain = spatialpy.Domain.create_2D_domain(
-        xlim=(0, 1), ylim=(0, 1), nx=10, ny=10, type_id=model.HABITAT, fixed=True
+        xlim=(0, 1), ylim=(0, 1), numx=10, numy=10, type_id=model.HABITAT, fixed=True
     )
     model.add_domain(domain)
 
@@ -133,7 +133,7 @@ results.plot_species(species='Rabbits', t_val=10, use_matplotlib=True)
 ```
 
 <p align="center">
-<img width="500px" src="https://raw.githubusercontent.com/StochSS/SpatialPy/readme-example/.graphics/birth-death-example-plot.png">
+<img width="500px" src="https://raw.githubusercontent.com/StochSS/SpatialPy/main/.graphics/birth-death-example-plot.png">
 </p>
 
 <!-- 
