@@ -26,6 +26,7 @@ from .cleanup import (
 from .datafunction import DataFunction
 from .domain import Domain
 from .geometry import (
+	CombinatoryGeometry,
 	Geometry,
 	GeometryAll,
 	GeometryExterior,
