@@ -53,6 +53,11 @@ from .result import Result
 from .spatialpyerror import *
 from .species import Species
 from .timespan import TimeSpan
+from .transformation import (
+	Transformation,
+	TranslationTransformation,
+	RotationTransformation
+)
 from .visualization import Visualization
 from .vtkreader import *
 
