@@ -13,6 +13,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import copy
 import numpy
 
 from spatialpy.core.geometry import Geometry, CombinatoryGeometry
@@ -362,3 +363,114 @@ class RotationTransformation(Transformation):
 
         if not isinstance(self.theta, (int, float)):
             raise TransformationError("angle must be of type float.")
+
+class ReflectionTransformation(Transformation):
+    """
+    Reflection transformation class provides a methods for applying and reversing
+        reflection transformations around an arbitrary plane to parts the spatial
+        domain.
+
+    :param normal: The normal of the arbitrary plane.
+    :type normal: float[3]
+
+    :param point1: Point 1 on an arbitrary plane. Serves as the base for the normal
+    :type point1: float[3]
+
+    :param point2: Point 2 on an arbitrary plane. Used with point 1 to create a vector on the plane.
+    :type point2: float[3]
+
+    :param point3: Point 3 on an arbitrary plane. Used with point 1 to create a vector on the plane.
+    :type point3: float[3]
+
+    :param geometry: Geometry classed used once the transformation is reversed.
+        Transformation.inside wraps Geometry.inside.
+    :type geometry: spatialpy.Geometry
+
+    :param lattice: Lattice classed used when applying transformations.
+        Transformation.apply wraps Lattice.apply.
+    :type lattice: spatialpy.Lattice
+
+    :param transformation: Transformation to be applied after applying this
+        transformation.
+    :type transformation: spatialpy.Transformation
+
+    :raises TransformationError: if the provided Geometry, Lattice, or
+        Transformation are invalid.
+    """
+    def __init__(self, point1, normal=None, point2=None,
+                 point3=None, geometry=None, lattice=None, transformation=None):
+        super().__init__(
+            geometry=geometry, lattice=lattice, transformation=transformation, skip_validate=True
+        )
+
+        if not isinstance(point1, numpy.ndarray):
+            point1 = numpy.array(point1)
+
+        if normal is None:
+            if point2 is None or point3 is None:
+                raise TransformationError(
+                    "Reflection transformations require a point and a normal or three points."
+                )
+            
+            if not isinstance(point2, numpy.ndarray):
+                point2 = numpy.array(point2)
+            if not isinstance(point3, numpy.ndarray):
+                point3 = numpy.array(point3)
+            normal = numpy.cross(point2 - point1, point3 - point1)
+
+        magnitude = numpy.sqrt(
+            (normal[0] - point1[0])**2 + (normal[1] - point1[1])**2 + (normal[2] - point1[2])**2
+        )
+
+        self.point = point1
+        self.normal = (normal - point1) / magnitude# + point1
+        self.d = numpy.matmul(self.normal, point1)
+
+        self.validate()
+
+    def __execute(self, point):
+        p_vector = point - self.point
+
+        x_y = -2 * self.normal[0] * self.normal[1]
+        x_z = -2 * self.normal[0] * self.normal[2]
+        y_z = -2 * self.normal[1] * self.normal[2]
+
+        matrix = numpy.array([
+            [1 - 2 * self.normal[0]**2, x_y, x_z],
+            [x_y, 1 - 2 * self.normal[1]**2, y_z],
+            [x_z, y_z, 1 - 2 * self.normal[2]**2]
+        ])
+        
+        return numpy.matmul(matrix, p_vector) + self.point
+
+    def reverse_transform(self, point):
+        """
+        Reverses the defined reflection transformation for the given point.
+
+        :param point: X, Y, Z coodinates for the particle.
+        :type point: float[3]
+
+        :returns: The point prior to any transformations.
+        :rtype: float[3]
+        """
+        if self.transformation is not None:
+            point = self.transformation.reverse_transform(point)
+
+        return self.__execute(point)
+
+    def transform(self, point):
+        """
+        Applies the defined reflection transformation to the given point.
+
+        :param point: X, Y, Z coodinates for the particle.
+        :type point: float[3]
+
+        :returns: The point prior to any transformations.
+        :rtype: float[3]
+        """
+        t_point = self.__execute(point)
+        
+        if self.transformation is not None:
+            return self.transformation.transform(t_point)
+        
+        return t_point

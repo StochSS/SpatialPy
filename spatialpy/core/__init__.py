@@ -56,7 +56,8 @@ from .timespan import TimeSpan
 from .transformation import (
 	Transformation,
 	TranslationTransformation,
-	RotationTransformation
+	RotationTransformation,
+	ReflectionTransformation
 )
 from .visualization import Visualization
 from .vtkreader import *
