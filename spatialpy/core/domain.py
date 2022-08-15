@@ -235,9 +235,10 @@ class Domain():
 
         if isinstance(type_id, int) and type_id <= 0:
             raise DomainError("Type_id must be a non-zero positive integer or a string.")
-        for char in type_id:
-            if (char in string.punctuation and char != "_") or char == " ":
-                raise DomainError(f"Type_id cannot contain '{char}'")
+        if isinstance(type_id, str):
+            for char in type_id:
+                if (char in string.punctuation and char != "_") or char == " ":
+                    raise DomainError(f"Type_id cannot contain '{char}'")
         type_id = f"type_{type_id}"
 
         if rho is None:
@@ -420,9 +421,10 @@ class Domain():
         if "type_id" in action['props']:
             if isinstance(action['props']['type_id'], int) and action['props']['type_id'] <= 0:
                 raise DomainError("Type_id must be a non-zero positive integer or a string.")
-            for char in action['props']['type_id']:
-                if (char in string.punctuation and char != "_") or char == " ":
-                    raise DomainError(f"Type_id cannot contain '{char}'")
+            if isinstance(action['props']['type_id'], str):
+                for char in action['props']['type_id']:
+                    if (char in string.punctuation and char != "_") or char == " ":
+                        raise DomainError(f"Type_id cannot contain '{char}'")
             action['props']['type_id'] = f"type_{action['props']['type_id']}"
 
         # apply the properties to all points that fall within the defined region
