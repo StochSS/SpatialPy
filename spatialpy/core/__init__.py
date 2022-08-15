@@ -38,6 +38,14 @@ from .initialcondition import (
 	UniformInitialCondition,
 	ScatterInitialCondition
 )
+from .lattice import (
+	CartesianLattice,
+	SphericalLattice,
+	CylindricalLattice,
+	XMLMeshLattice,
+	MeshIOLattice,
+	StochSSLattice
+)
 from .model import Model, export_StochSS
 from .parameter import Parameter
 from .reaction import Reaction
