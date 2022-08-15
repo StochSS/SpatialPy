@@ -52,6 +52,14 @@ spatialpy.core.initialcondition module
    :undoc-members:
    :show-inheritance:
 
+spatialpy.core.lattice module
+-----------------------------
+
+.. automodule:: spatialpy.core.lattice
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 spatialpy.core.model module
 ---------------------------
 
@@ -96,6 +104,22 @@ spatialpy.core.species module
 -----------------------------
 
 .. automodule:: spatialpy.core.species
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spatialpy.core.timespan module
+------------------------------
+
+.. automodule:: spatialpy.core.timespan
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spatialpy.core.transformation module
+------------------------------------
+
+.. automodule:: spatialpy.core.transformation
    :members:
    :undoc-members:
    :show-inheritance:

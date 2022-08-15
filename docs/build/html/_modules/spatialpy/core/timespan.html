@@ -1,0 +1,338 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>spatialpy.core.timespan &#8212; SpatialPy 1.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/spatialpy_alabaster_customizations.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+    <link rel="apple-touch-icon" href="../../../_static/img/SpatialPy_logo.svg" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../../index.html">
+    <img class="logo" src="../../../_static/img/SpatialPy_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=StochSS&repo=SpatialPy&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../classes/spatialpy.html">spatialpy package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for spatialpy.core.timespan</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SpatialPy is a Python 3 package for simulation of</span>
+<span class="c1"># spatial deterministic/stochastic reaction-diffusion-advection problems</span>
+<span class="c1"># Copyright (C) 2019 - 2022 SpatialPy developers.</span>
+
+<span class="c1"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as</span>
+<span class="c1"># published by the Free Software Foundation.</span>
+
+<span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU GENERAL PUBLIC LICENSE Version 3 for more details.</span>
+
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="k">import</span> <span class="n">Iterator</span>
+
+<span class="kn">from</span> <span class="nn">.spatialpyerror</span> <span class="k">import</span> <span class="n">TimespanError</span>
+
+<div class="viewcode-block" id="TimeSpan"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.timespan.TimeSpan">[docs]</a><span class="k">class</span> <span class="nc">TimeSpan</span><span class="p">(</span><span class="n">Iterator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Model timespan that describes the duration to run the simulation and at which timepoint to sample</span>
+<span class="sd">    the species populations during the simulation.</span>
+
+<span class="sd">    :param items: Evenly-spaced list of times at which to sample the species populations during the simulation. </span>
+<span class="sd">            Best to use the form np.linspace(&lt;start time&gt;, &lt;end time&gt;, &lt;number of time-points, inclusive&gt;)</span>
+<span class="sd">    :type items: list, tuple, range, or numpy.ndarray</span>
+<span class="sd">    </span>
+<span class="sd">    :param timestep_size: Size of each timestep in seconds</span>
+<span class="sd">    :type timestep_size: int | float</span>
+
+<span class="sd">    :raises TimespanError: items is an invalid type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">timestep_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">range</span><span class="p">)):</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">timestep_size</span><span class="o">=</span><span class="n">timestep_size</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">timestep_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">timestep_size</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestep_size</span> <span class="o">=</span> <span class="n">timestep_size</span>
+
+        <span class="n">items_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_timesteps</span><span class="p">(</span><span class="n">items_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">items_diff</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">coverage</span><span class="o">=</span><span class="s2">&quot;initialized&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">o</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="fm">__iter__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_ipython_display_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_timesteps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_interval</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timestep_size</span> <span class="o">=</span> <span class="n">output_interval</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_freq</span> <span class="o">=</span> <span class="n">output_interval</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_timesteps</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_steps</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_freq</span><span class="p">)</span>
+
+        <span class="n">output_steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_timesteps</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_freq</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">output_steps</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">output_steps</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_steps</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep_size</span>
+
+<div class="viewcode-block" id="TimeSpan.linspace"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.timespan.TimeSpan.linspace">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">linspace</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">num_points</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timestep_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a timespan using the form np.linspace(0, &lt;t&gt;, &lt;num_points, inclusive&gt;).</span>
+
+<span class="sd">        :param t: End time for the simulation.</span>
+<span class="sd">        :type t: float | int</span>
+
+<span class="sd">        :param num_points: Number of sample points for the species populations during the simulation.</span>
+<span class="sd">        :type num_points: int</span>
+
+<span class="sd">        :param timestep_size: Size of each timestep in seconds</span>
+<span class="sd">        :type timestep_size: int | float</span>
+
+<span class="sd">        :returns: Timespan for the model.</span>
+<span class="sd">        :rtype: spatialpy.TimeSpan</span>
+
+<span class="sd">        :raises TimespanError: t or num_points are None, &lt;= 0, or invalid type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">or</span> <span class="n">t</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;t must be a positive float or int.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">num_points</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">num_points</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">num_points</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;num_points must be a positive int.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">num_points</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_points</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">t</span> <span class="o">/</span> <span class="mf">0.05</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">num_points</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">timestep_size</span><span class="o">=</span><span class="n">timestep_size</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TimeSpan.arange"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.timespan.TimeSpan.arange">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">arange</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">increment</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">timestep_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a timespan using the form np.arange(0, &lt;t, inclusive&gt;, &lt;increment&gt;).</span>
+
+<span class="sd">        :param increment: Distance between sample points for the species populations during the simulation.</span>
+<span class="sd">        :type increment: float | int</span>
+
+<span class="sd">        :param t: End time for the simulation.</span>
+<span class="sd">        :type t: float | int</span>
+
+<span class="sd">        :param timestep_size: Size of each timestep in seconds</span>
+<span class="sd">        :type timestep_size: int | float</span>
+
+<span class="sd">        :returns: Timespan for the model.</span>
+<span class="sd">        :rtype: spatialpy.TimeSpan</span>
+
+<span class="sd">        :raises TimespanError: t or increment are None, &lt;= 0, or invalid type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">or</span> <span class="n">t</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;t must be a positive floar or int.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">increment</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span> <span class="ow">or</span> <span class="n">increment</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;increment must be a positive float or int.&quot;</span><span class="p">)</span>
+
+        <span class="n">items</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">t</span> <span class="o">+</span> <span class="n">increment</span><span class="p">,</span> <span class="n">increment</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">timestep_size</span><span class="o">=</span><span class="n">timestep_size</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TimeSpan.validate"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.timespan.TimeSpan.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timestep_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coverage</span><span class="o">=</span><span class="s2">&quot;build&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate the models time span</span>
+
+<span class="sd">        :param timestep_size: Size of each timestep in seconds</span>
+<span class="sd">        :type timestep_size: int | float</span>
+
+<span class="sd">        :param coverage: The scope of attributes to validate.  Set to an attribute name to restrict validation \</span>
+<span class="sd">                         to a specific attribute.</span>
+<span class="sd">        :type coverage: str</span>
+
+<span class="sd">        :raises TimespanError: Timespan is an invalid type, empty, not uniform, contains a single \</span>
+<span class="sd">                               repeated value, or contains a negative initial time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">coverage</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;build&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;items&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">range</span><span class="p">)):</span>
+                    <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;Timespan must be of type: list, tuple, range, or numpy.ndarray.&quot;</span><span class="p">)</span>
+                <span class="n">items</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="n">items</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;Timespans must contain values.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;Simulation must run from t=0 to end time (t must always be positive).&quot;</span><span class="p">)</span>
+            
+            <span class="n">first_diff</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">other_diff</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">items</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">isuniform</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">other_diff</span><span class="p">,</span> <span class="n">first_diff</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">coverage</span> <span class="o">==</span> <span class="s2">&quot;build&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isuniform</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;SpatialPy only supports uniform timespans.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">first_diff</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">other_diff</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">other_diff</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;Timespan can&#39;t contain a single repeating value.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">coverage</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;build&quot;</span><span class="p">,</span> <span class="s2">&quot;timestep_size&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;timestep_size&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">timestep_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">timestep_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep_size</span>
+
+            <span class="k">if</span> <span class="n">timestep_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timestep_size</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+                    <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;timestep_size must be of type int or float.&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">timestep_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;timestep_size must be a positive value.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">coverage</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;initialized&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;timestep_size can&#39;t be None type.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_freq</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;output_freq can&#39;t be None type.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_freq</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;output_freq must be of type int or float.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_freq</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep_size</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;timestep_size exceeds output_frequency.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_timesteps</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;num_timesteps can&#39;t be None type.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_timesteps</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;num_timesteps must be of type int.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_timesteps</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;num_timesteps must be a positive int.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_steps</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;output_steps can&#39;t be None type.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_steps</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;output_steps must be of type numpy.ndarray.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_steps</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">TimespanError</span><span class="p">(</span><span class="s2">&quot;output_steps must be the same size as items.&quot;</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;Copyright (C) 2019-2022.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/StochSS/SpatialPy" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
