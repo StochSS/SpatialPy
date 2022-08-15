@@ -769,6 +769,8 @@ class Domain():
         :returns: Limits of the bounding box.
         :rtype: tuple(float(2), float(2), float(2))
         """
+        if len(self.vertices) == 0:
+            return (0, 0), (0, 0), (0, 0)
         xlim = (min(self.vertices[:, 0]), max(self.vertices[:, 0]))
         ylim = (min(self.vertices[:, 1]), max(self.vertices[:, 1]))
         zlim = (min(self.vertices[:, 2]), max(self.vertices[:, 2]))
