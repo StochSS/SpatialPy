@@ -88,7 +88,7 @@ def create_birth_death(parameter_values=None):
 
     # Define domain points and attributes of a regional space for simulation.
     domain = spatialpy.Domain.create_2D_domain(
-        xlim=(0, 1), ylim=(0, 1), nx=10, ny=10, type_id=model.HABITAT, fixed=True
+        xlim=(0, 1), ylim=(0, 1), numx=10, numy=10, type_id=model.HABITAT, fixed=True
     )
     model.add_domain(domain)
 
