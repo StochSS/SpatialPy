@@ -470,41 +470,50 @@ class Solver:
         self.__create_propensity_file(stoich_matrix, dep_graph, file_name=self.prop_file_name)
 
         # Build the solver
+        for make_exe_location in ["make", "mingw-make"]:
+            make_exe = shutil.which("make")
+            if make_exe is not None:
+                break
+        if make_exe is None:
+            raise SimulationError("Make executable could not be found")
         makefile = self.spatialpy_rootdir+'/build/Makefile'
         makefile_ann = self.spatialpy_rootdir+'/external/ANN/src/Makefile.spatialpy'
-        cmd_list = ['cd', self.core_dir, '&&',
-            'make', '-f' , makefile_ann, 
-            'ROOTINC="' + self.spatialpy_rootinc+'"',
-            '&&',
-            'make', 'CORE', '-f',  makefile,
-            'ROOT="' + self.spatialpy_rootparam+'"',
-            'ROOTINC="' + self.spatialpy_rootinc+'"',
-            'BUILD='+self.core_dir, '&&'
-            'cd', self.build_dir, '&&', 'make', '-I', self.core_dir, '-f', makefile,
-            'ROOT="' + self.spatialpy_rootparam+'"',
-            'ROOTINC="' + self.spatialpy_rootinc+'"',
-            'COREDIR="' + self.core_dir + '"',
-            'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir]
+
+        cmd_ann = [
+            make_exe, '-d', '-C', self.core_dir, '-f', makefile_ann,
+            f'ROOTINC={self.spatialpy_rootinc}',
+        ]
+        cmd_core = [
+            make_exe, '-d', '-C', self.core_dir, 'CORE', '-f',  makefile,
+            f'ROOT={self.spatialpy_rootparam}',
+            f'ROOTINC={self.spatialpy_rootinc}',
+            f'BUILD={self.core_dir}',
+        ]
+        cmd_build = [
+            make_exe, '-d', '-C', self.build_dir, '-I', self.core_dir, '-f', makefile,
+            'ROOT=' + self.spatialpy_rootparam,
+            'ROOTINC=' + self.spatialpy_rootinc,
+            'COREDIR=' + self.core_dir,
+            'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir
+        ]
         if profile:
-            cmd_list.append('GPROFFLAG=-pg')
+            cmd_build.append('GPROFFLAG=-pg')
         if profile or debug:
-            cmd_list.append('GDB_FLAG=-g')
-        cmd = " ".join(cmd_list)
+            cmd_build.append('GDB_FLAG=-g')
         if self.debug_level > 1:
+            cmd = " && ".join([*cmd_ann, *cmd_core, *cmd_build])
             print(f"cmd: {cmd}\n")
         try:
-            with subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True) as handle:
-                stdout, _ = handle.communicate()
-                return_code = handle.wait()
-                if return_code != 0:
-                    try:
-                        print(stdout.decode("utf-8"))
-                    except Exception:
-                        pass
-                    raise SimulationError(f"Compilation of solver failed, return_code={return_code}")
-
+            for cmd_target in [cmd_ann, cmd_core, cmd_build]:
+                result = subprocess.check_output(cmd_target, stderr=subprocess.STDOUT)
                 if self.debug_level > 1:
-                    print(stdout.decode("utf-8"))
+                    print(result.stdout.decode("utf-8"))
+        except subprocess.CalledProcessError as err:
+            try:
+                print(err.stdout.decode("utf-8"))
+            except Exception:
+                pass
+            raise SimulationError(f"Compilation of solver failed, return_code={result.return_code}")
         except OSError as err:
             print(f"Error, execution of compilation raised an exception: {err}")
             print(f"cmd = {cmd}")
@@ -559,7 +568,7 @@ class Solver:
             result = Result(self.model, outfile)
             if self.debug_level >= 1:
                 print(f"Running simulation. Result dir: {outfile}")
-            solver_cmd = f'cd {outfile};{os.path.join(self.build_dir, self.executable_name)}'
+            solver_cmd = os.path.join(self.build_dir, self.executable_name)
 
             if number_of_threads is not None:
                 solver_cmd += " -t " + str(number_of_threads)
@@ -573,7 +582,7 @@ class Solver:
             start = time.monotonic()
             return_code = None
             try:
-                with subprocess.Popen(solver_cmd, shell=True,
+                with subprocess.Popen(solver_cmd, cwd=outfile, shell=True,
                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                         start_new_session=True) as process:
                     try:
