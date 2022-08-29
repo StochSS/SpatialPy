@@ -470,7 +470,7 @@ class Solver:
         self.__create_propensity_file(stoich_matrix, dep_graph, file_name=self.prop_file_name)
 
         # Build the solver
-        for make_exe_location in ["make", "mingw-make"]:
+        for make_exe_location in ["make", "mingw32-make"]:
             make_exe = shutil.which("make")
             if make_exe is not None:
                 break
