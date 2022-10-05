@@ -26,7 +26,10 @@ See the file LICENSE.txt for details.
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
+#if defined(WIN32) || defined(_WIN32) || defined(__MINGW32__)
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
 #include <cstdlib>
 #include <vector>
 #include <queue>
@@ -84,13 +87,13 @@ namespace Spatialpy{
 
     void Particle::check_particle_nan(){
         if(
-            isnan(x[0]) || !isfinite(x[0]) ||
-            isnan(x[1]) || !isfinite(x[1]) ||
-            isnan(x[2]) || !isfinite(x[2]) ||
-            isnan(v[0]) || !isfinite(v[0]) ||
-            isnan(v[1]) || !isfinite(v[1]) ||
-            isnan(v[2]) || !isfinite(v[2]) ||
-            isnan(rho)  || !isfinite(rho) ){
+            std::isnan(x[0]) || !std::isfinite(x[0]) ||
+            std::isnan(x[1]) || !std::isfinite(x[1]) ||
+            std::isnan(x[2]) || !std::isfinite(x[2]) ||
+            std::isnan(v[0]) || !std::isfinite(v[0]) ||
+            std::isnan(v[1]) || !std::isfinite(v[1]) ||
+            std::isnan(v[2]) || !std::isfinite(v[2]) ||
+            std::isnan(rho)  || !std::isfinite(rho) ){
             printf("ERROR: nan/inf detected!!!\n");
             printf("number of neighbors: %li\n", neighbors.size()) ;
             printf("id=%i\n",id);
@@ -183,7 +186,7 @@ namespace Spatialpy{
     	// Eq 28 of Drawert et al 2019, Tartakovsky et. al., 2007, JCP
     	double D_i_j = -2.0*(mass*neighbor->mass)/(mass+neighbor->mass)*(rho+neighbor->rho)/(rho*neighbor->rho) * r2 * wfd / (r2+0.01*h*h);
 
-    	if(isnan(D_i_j)){
+    	if(std::isnan(D_i_j)){
     	    printf("Got NaN calculating D_i_j for me=%i, neighbor=%i\n",id, neighbor->id);
     	    printf("system->dimension=%i ",system->dimension);
     	    printf("r2=%e ",r2);

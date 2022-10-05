@@ -25,7 +25,10 @@ Based on a Matlab program by Bruno Jacob (UCSB)
 This program is distributed under the terms of the GNU GENERAL PUBLIC LICENSE Version 3.
 See the file LICENSE.txt for details.
 ***************************************************************************************** */
-#include <math.h>
+#if defined(WIN32) || defined(_WIN32) || defined(__MINGW32__)
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
 
