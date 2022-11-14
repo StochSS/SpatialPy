@@ -1,0 +1,20 @@
+model = ARGUMENTS.get('MODEL')
+core_dir = ARGUMENTS.get('CORE_DIR')
+output_root = ARGUMENTS.get('OUTPUT')
+
+env = Environment(
+    tools=['default', 'mingw'],
+    CPPPATH=[
+        Dir(f'{core_dir}/include'),
+        Dir(f'{core_dir}/external/ANN/include'),
+    ],
+)
+
+VariantDir(output_root, f'{core_dir}/src', duplicate=False)
+VariantDir(f'{output_root}/external', f'{core_dir}/external', duplicate=False)
+
+Export('env')
+SConscript(f'{core_dir}/external/ANN/src/SConscript')
+SConscript(f'{core_dir}/src/SConscript')
+
+env.Program('ssa_sdpd', model, LIBS=['spatialpy-core', 'ANN'])
