@@ -100,7 +100,7 @@ publish:
 	git checkout @{-2}
 	git stash pop
 
-publish-release: publish
+publish-release:
 	make clean
 	git stash
 	git checkout main
