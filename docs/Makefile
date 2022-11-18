@@ -88,7 +88,7 @@ build-docs:
 	git pull
 	make clean
 	git stash
-	git checkout develop-clone
+	git checkout main
 	make html
 
 commit-docs:

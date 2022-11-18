@@ -2,7 +2,7 @@ name: Publish SpatialPy Docs
 
 on:
   push:
-    branches: [develop-clone]
+    branches: [main]
 
 jobs:
   publish:
@@ -12,7 +12,7 @@ jobs:
     - name: Initialize environment
       uses: actions/checkout@v2
       with:
-        ref: develop-clone
+        ref: main
         fetch-depth: 0
       
     - name: Install Python
@@ -43,8 +43,4 @@ jobs:
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: develop-clone
-
-    # - name: Update and Publish docs
-    #   working-directory: docs
-    #   run: make publish-release
+        branch: main
