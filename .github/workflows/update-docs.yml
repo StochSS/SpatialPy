@@ -1,5 +1,6 @@
 name: Publish SpatialPy Docs
 
+
 on:
   push:
     branches: [testing_auto_deploy_docs]
@@ -29,9 +30,5 @@ jobs:
     - name: Update and Publish docs
       working-directory: docs
       with:
-        repo-token: ${{secrets.GITHUB_TOKEN }}
-      #env:
-      #  # user: __token__
-      #  # password: ${{ secrets.GITHUB_TOKEN }}
-      #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
       run: make publish-release
