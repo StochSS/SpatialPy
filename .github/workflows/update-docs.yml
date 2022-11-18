@@ -13,6 +13,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: develop-clone
+        fetch-depth: 0
       
     - name: Install Python
       uses: actions/setup-python@v2
@@ -26,10 +27,24 @@ jobs:
         python3 -m pip install numpy
         python3 -m pip install -r requirements.txt
 
-    - name: Update and Publish docs
+    - name: Update the Docs
       working-directory: docs
-      env:
-        # user: __token__
-        # password: ${{ secrets.GITHUB_TOKEN }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: make publish-release
+      run: |
+        make build-docs
+
+    - name: Commit Changes
+      working-directory: docs
+      run: |
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        make commit-docs
+
+    - name: Push Changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: develop-clone
+
+    # - name: Update and Publish docs
+    #   working-directory: docs
+    #   run: make publish-release
