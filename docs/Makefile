@@ -103,6 +103,7 @@ publish:
 publish-release:
 	make clean
 	git stash
+	git pull
 	git checkout main
 	make html
 	-git add -f "$(BUILDDIR)"
