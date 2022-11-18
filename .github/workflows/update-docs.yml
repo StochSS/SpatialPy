@@ -28,6 +28,7 @@ jobs:
 
     - name: Update and Publish docs
       working-directory: docs
-      run: |
-        ls ../.github/workflows/
-        make publish-release
+      with:
+        user: __token__
+        password: ${{ secrets.GITHUB_TOKEN }}
+      run: make publish-release
