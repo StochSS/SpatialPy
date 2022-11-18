@@ -1,20 +1,18 @@
-'''
-SpatialPy is a Python 3 package for simulation of
-spatial deterministic/stochastic reaction-diffusion-advection problems
-Copyright (C) 2019 - 2022 SpatialPy developers.
+# SpatialPy is a Python 3 package for simulation of
+# spatial deterministic/stochastic reaction-diffusion-advection problems
+# Copyright (C) 2019 - 2022 SpatialPy developers.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
-published by the Free Software Foundation.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+# published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
 import shutil
@@ -49,7 +47,7 @@ class Solver:
     SpatialPy solver object.
 
     :param model: Target model of solver simulation.
-    :type model: spatialpy.Model.Model
+    :type model: spatialpy.core.model.Model
 
     :param debug_level: Target level of debugging.
     :type debug_level: int
@@ -241,7 +239,7 @@ class Solver:
                     outstr = f"static double input_data_fn[{len(self.model.listOfDataFunctions) * ncells}] = "
                     outstr += "{"
                     coords = self.model.domain.coordinates()
-                    for ndf, data_fn in enumerate(self.model.listOfDataFunctions):
+                    for ndf, data_fn in enumerate(self.model.listOfDataFunctions.values()):
                         for i in range(ncells):
                             if i > 0 and ndf == 0:
                                 outstr += ','
@@ -264,27 +262,26 @@ class Solver:
             input_constants += outstr
 
         num_types = len(self.model.domain.listOfTypeIDs)
-        outstr = f"const int input_num_subdomain = {num_types};\n"
+        outstr = f"const int input_num_subdomain = {num_types-1};\n" # the backend ignores type_id=0 (a.k.a. unassigned)
         input_constants += outstr
 
-        outstr = f"const double input_subdomain_diffusion_matrix[{len(self.model.listOfSpecies) * num_types}] = "
-        outstr += "{"
+        outstr = f"const double input_subdomain_diffusion_matrix[{len(self.model.listOfSpecies) * (num_types-1)}] = "
+        outvec = []
         for i, species in enumerate(self.model.listOfSpecies.values()):
             for j, type_id in enumerate(self.model.domain.typeNdxMapping.keys()):
-                if i + j > 0:
-                    outstr += ','
+                if j==0: continue  # do not process type_id=0 in diffusion
                 try:
                     if species not in self.model.listOfDiffusionRestrictions or \
                        type_id in self.model.listOfDiffusionRestrictions[species]:
-                        outstr += f"{species.diffusion_coefficient}"
+                        outvec.append(f"{species.diffusion_coefficient}")
                     else:
-                        outstr += "0.0"
+                        outvec.append("0.0")
                 except KeyError as err:
                     print(f"error: {err}")
                     print(self.model.listOfDiffusionRestrictions)
                     raise SimulationError(f"error: {self.model.listOfDiffusionRestrictions}") from err
 
-        outstr += "};\n"
+        outstr += "{"+",".join(outvec)+"};\n"
         input_constants += outstr
 
         return input_constants
@@ -293,7 +290,7 @@ class Solver:
         output_step = "unsigned int get_next_output(ParticleSystem* system)\n{\n"
         output_step += "static int index = 0;\n"
         output_step += "const std::vector<unsigned int> output_steps = {"
-        output_step += f"{', '.join(self.model.output_steps.astype(str).tolist())}"
+        output_step += f"{', '.join(self.model.tspan.output_steps.astype(str).tolist())}"
         output_step += "};\nunsigned int next_step = output_steps[index];\n"
         output_step += "index++;\n"
         output_step += "return next_step;\n}\n"
@@ -314,9 +311,9 @@ class Solver:
     def __get_particle_inits(self, num_chem_species):
         init_particles = ""
         if self.model.domain.type_id is None:
-            self.model.domain.type_id = ["type 1"] * self.model.domain.get_num_voxels()
+            self.model.domain.type_id = ["type_1"] * self.model.domain.get_num_voxels()
         for i, type_id in enumerate(self.model.domain.type_id):
-            if type_id is None:
+            if "UnAssigned" in type_id:
                 errmsg = "Not all particles have been defined in a type. Mass and other properties must be defined"
                 raise SimulationError(errmsg)
             x = self.model.domain.coordinates()[i, 0]
@@ -378,7 +375,7 @@ class Solver:
                             num_stoch_species, num_stoch_rxns, num_data_fn):
         system_config = f"debug_flag = {self.debug_level};\n"
         system_config += "ParticleSystem *system = new ParticleSystem("
-        system_config += f"{num_types},{num_chem_species},{num_chem_rxns},"
+        system_config += f"{num_types-1},{num_chem_species},{num_chem_rxns},"
         system_config += f"{num_stoch_species},{num_stoch_rxns},{num_data_fn});\n"
         system_config += f"system->static_domain = {int(self.model.staticDomain)};\n"
         if len(self.model.listOfSpecies) > 0:
@@ -388,8 +385,8 @@ class Solver:
             system_config += "system->stoch_rxn_propensity_functions = ALLOC_propensities();\n"
             system_config += "system->species_names = input_species_names;\n"
 
-        system_config += f"system->dt = {self.model.timestep_size};\n"
-        system_config += f"system->nt = {self.model.num_timesteps};\n"
+        system_config += f"system->dt = {self.model.tspan.timestep_size};\n"
+        system_config += f"system->nt = {self.model.tspan.num_timesteps};\n"
         if self.h is None:
             self.h = self.model.domain.find_h()
         if self.h == 0.0:
@@ -473,36 +470,50 @@ class Solver:
         self.__create_propensity_file(stoich_matrix, dep_graph, file_name=self.prop_file_name)
 
         # Build the solver
+        for make_exe_location in ["make", "mingw32-make"]:
+            make_exe = shutil.which("make")
+            if make_exe is not None:
+                break
+        if make_exe is None:
+            raise SimulationError("Make executable could not be found")
         makefile = self.spatialpy_rootdir+'/build/Makefile'
-        cmd_list = ['cd', self.core_dir, '&&', 'make', 'CORE', '-f',  makefile,
-            'ROOT="' + self.spatialpy_rootparam+'"',
-            'ROOTINC="' + self.spatialpy_rootinc+'"',
-            'BUILD='+self.core_dir, '&&'
-            'cd', self.build_dir, '&&', 'make', '-I', self.core_dir, '-f', makefile,
-            'ROOT="' + self.spatialpy_rootparam+'"',
-            'ROOTINC="' + self.spatialpy_rootinc+'"',
-            'COREDIR="' + self.core_dir + '"',
-            'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir]
+        makefile_ann = self.spatialpy_rootdir+'/external/ANN/src/Makefile.spatialpy'
+
+        cmd_ann = [
+            make_exe, '-d', '-C', self.core_dir, '-f', makefile_ann,
+            f'ROOTINC={self.spatialpy_rootinc}',
+        ]
+        cmd_core = [
+            make_exe, '-d', '-C', self.core_dir, 'CORE', '-f',  makefile,
+            f'ROOT={self.spatialpy_rootparam}',
+            f'ROOTINC={self.spatialpy_rootinc}',
+            f'BUILD={self.core_dir}',
+        ]
+        cmd_build = [
+            make_exe, '-d', '-C', self.build_dir, '-I', self.core_dir, '-f', makefile,
+            'ROOT=' + self.spatialpy_rootparam,
+            'ROOTINC=' + self.spatialpy_rootinc,
+            'COREDIR=' + self.core_dir,
+            'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir
+        ]
         if profile:
-            cmd_list.append('GPROFFLAG=-pg')
+            cmd_build.append('GPROFFLAG=-pg')
         if profile or debug:
-            cmd_list.append('GDB_FLAG=-g')
-        cmd = " ".join(cmd_list)
+            cmd_build.append('GDB_FLAG=-g')
         if self.debug_level > 1:
+            cmd = " && ".join([*cmd_ann, *cmd_core, *cmd_build])
             print(f"cmd: {cmd}\n")
         try:
-            with subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True) as handle:
-                stdout, _ = handle.communicate()
-                return_code = handle.wait()
-                if return_code != 0:
-                    try:
-                        print(stdout.decode("utf-8"))
-                    except Exception:
-                        pass
-                    raise SimulationError(f"Compilation of solver failed, return_code={return_code}")
-
+            for cmd_target in [cmd_ann, cmd_core, cmd_build]:
+                result = subprocess.check_output(cmd_target, stderr=subprocess.STDOUT)
                 if self.debug_level > 1:
-                    print(stdout.decode("utf-8"))
+                    print(result.stdout.decode("utf-8"))
+        except subprocess.CalledProcessError as err:
+            try:
+                print(err.stdout.decode("utf-8"))
+            except Exception:
+                pass
+            raise SimulationError(f"Compilation of solver failed, return_code={result.return_code}")
         except OSError as err:
             print(f"Error, execution of compilation raised an exception: {err}")
             print(f"cmd = {cmd}")
@@ -557,7 +568,7 @@ class Solver:
             result = Result(self.model, outfile)
             if self.debug_level >= 1:
                 print(f"Running simulation. Result dir: {outfile}")
-            solver_cmd = f'cd {outfile};{os.path.join(self.build_dir, self.executable_name)}'
+            solver_cmd = os.path.join(self.build_dir, self.executable_name)
 
             if number_of_threads is not None:
                 solver_cmd += " -t " + str(number_of_threads)
@@ -571,7 +582,7 @@ class Solver:
             start = time.monotonic()
             return_code = None
             try:
-                with subprocess.Popen(solver_cmd, shell=True,
+                with subprocess.Popen(solver_cmd, cwd=outfile, shell=True,
                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                         start_new_session=True) as process:
                     try:

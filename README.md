@@ -1,5 +1,5 @@
 <p align="left">
-<img src="https://raw.githubusercontent.com/StochSS/SpatialPy/main/logo/SpatialPy_logo.png">
+<img src="https://raw.githubusercontent.com/StochSS/SpatialPy/main/.graphics/SpatialPy_logo.png">
 </p>
 
 SpatialPy is a Python 3 package for simulation of spatial deterministic/stochastic reaction-diffusion-advection problems embedded in Lagrangian reference frame particle based fluid dynamics domain
@@ -7,7 +7,7 @@ SpatialPy is a Python 3 package for simulation of spatial deterministic/stochast
 This package is intended to replace the PyURDME software https://github.com/pyurdme/pyurdme and will feature both a NSM solver for RDME simulation on static domains and a sSSA-SDPD particle based fluid dynamics solver as described in the publication "A hybrid smoothed dissipative particle dynamics (SDPD) spatial stochastic simulation algorithm (sSSA) for advection–diffusion–reaction problems" by Drawert, Jacob, Li, Yi, Petzold https://www.sciencedirect.com/science/article/pii/S0021999118307101
 
 <table><tr><td><b>
-<img width="20%" align="right" src="https://raw.githubusercontent.com/SpatialPy/SpatialPy/develop/.graphics/stochss-logo.png">
+<img width="20%" align="right" src="https://raw.githubusercontent.com/SpatialPy/SpatialPy/main/.graphics/stochss-logo.png">
 <a href="https://docs.google.com/forms/d/12tAH4f8CJ-3F-lK44Q9uQHFio_mGoK0oY829q5lD7i4/viewform">PLEASE REGISTER AS A USER</a>, so that we can prove SpatialPy has many users when we seek funding to support development. SpatialPy is part of the <a href="http://www.stochss.org">StochSS</a> project.
 </td></tr></table>
 
@@ -25,9 +25,11 @@ Table of contents
   - [_Using the source code repository_](#using-the-source-code-repository)
 - [Usage](#usage)
   - [_Simple example to illustrate the use of SpatialPy_](#simple-example-to-illustrate-the-use-of-spatialpy)
+<!--
   - [_Docker environment_](#docker-environment)
   - [_Debugging_](#debugging)
   - [_Profiling_](#profiling)
+-->
 - [Getting help](#getting-help)
 - [Contributing](#contributing)
 - [License](#license)
@@ -72,8 +74,70 @@ SpatialPy provides simple object-oriented abstractions for defining a model of a
 
 The `run()` method can be customized using keyword arguments to select different solvers, random seed, data return type and more.  For more detailed examples on how to use SpatialPy, please see the Jupyter notebooks contained in the [examples](https://github.com/StochSS/SpatialPy/tree/main/examples) subdirectory.
 
+### _Simple example to illustrate the use of SpatialPy_
 
-### Docker environment
+In SpatialPy, a model is expressed as an object. Components, such as the domains, reactions, biochemical species, and characteristics such as the time span for simulation, are all defined within the model. The following Python code represents our spatial birth death model using SpatialPy's facility:
+
+```python
+def create_birth_death(parameter_values=None):
+    # First call the gillespy2.Model initializer.
+    model = spatialpy.Model(name='Spatial Birth-Death')
+    
+    # Define Domain Type IDs as constants of the Model
+    model.HABITAT = "Habitat"
+
+    # Define domain points and attributes of a regional space for simulation.
+    domain = spatialpy.Domain.create_2D_domain(
+        xlim=(0, 1), ylim=(0, 1), numx=10, numy=10, type_id=model.HABITAT, fixed=True
+    )
+    model.add_domain(domain)
+
+    # Define variables for the biochemical species representing Rabbits.
+    Rabbits = spatialpy.Species(name='Rabbits', diffusion_coefficient=0.1)
+    model.add_species(Rabbits)
+
+    # Scatter the initial condition for Rabbits randomly over all types.
+    init_rabbit_pop = spatialpy.ScatterInitialCondition(species='Rabbits', count=100)
+    model.add_initial_condition(init_rabbit_pop)
+
+    # Define parameters for the rates of creation and destruction.
+    kb = spatialpy.Parameter(name='k_birth', expression=10)
+    kd = spatialpy.Parameter(name='k_death', expression=0.1)
+    model.add_parameter([kb, kd])
+
+    # Define reactions channels which cause the system to change over time.
+    # The list of reactants and products for a Reaction object are each a
+    # Python dictionary in which the dictionary keys are Species objects
+    # and the values are stoichiometries of the species in the reaction.
+    birth = spatialpy.Reaction(name='birth', reactants={}, products={"Rabbits":1}, rate="k_birth")
+    death = spatialpy.Reaction(name='death', reactants={"Rabbits":1}, products={}, rate="k_death")
+    model.add_reaction([birth, death])
+
+    # Set the timespan of the simulation.
+    tspan = spatialpy.TimeSpan.linspace(t=10, num_points=11, timestep_size=1)
+    model.timespan(tspan)
+    return model
+```
+
+Given the model creation function above, the model can be simulated by first instantiating the model object, and then invoking the run() method on the object. The following code will run the model once to produce a sample trajectory:
+
+```python
+model = create_birth_death()
+results = model.run()
+```
+
+The results are then stored in a class `Results` object for single trajectory or for multiple trajectories.  Results can be plotted with plotly (offline) using `plot_species()` or in matplotlib using `plot_species(use_matplotlib=True)`.  For additional plotting options such as plotting from a selection of species, or statistical plotting, please see the documentation.:
+
+```python
+results.plot_species(species='Rabbits', t_val=10, use_matplotlib=True)
+```
+
+<p align="center">
+<img width="500px" src="https://raw.githubusercontent.com/StochSS/SpatialPy/main/.graphics/birth-death-example-plot.png">
+</p>
+
+<!-- 
+### Docker environment (DOES NOT WORK)
 
 You can use Docker to create a repeatable environment for developing and debugging SpatialPy. The supplied Dockerfile starts a jupyter server with SpatialPy dependencies installed.
 
@@ -102,6 +166,7 @@ You can invoke `solver.run_debugger()` anytime after you instantiate a solver in
 ### Profiling
 
 To enable profiling, both `solver.compile()` and `solver.run()` need to be invoked with `profile=True`. If you don't run `solver.compile()` explicitly, invoking `solver.run()` with `profile=True` will run `compile()` correctly for you.
+-->
 
 Getting help
 ------------

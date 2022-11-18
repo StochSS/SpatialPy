@@ -1,20 +1,18 @@
-'''
-SpatialPy is a Python 3 package for simulation of
-spatial deterministic/stochastic reaction-diffusion-advection problems
-Copyright (C) 2019 - 2022 SpatialPy developers.
+# SpatialPy is a Python 3 package for simulation of
+# spatial deterministic/stochastic reaction-diffusion-advection problems
+# Copyright (C) 2019 - 2022 SpatialPy developers.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
-published by the Free Software Foundation.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+# published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from spatialpy.core.spatialpyerror import BoundaryConditionError
 
@@ -31,7 +29,7 @@ class BoundaryCondition():
          - type_id: type (subdomain) of the partciles
     Targets (one of the following must be set):
         property: (str), 'nu', 'rho','v'
-        species: (str) name of a chemical species.
+        species: (str) name of a chemical species. \
                    Must also set deterministic=True/False flag.
 
     :param xmin: x-axis coordinate lower bound of **condition**
@@ -59,7 +57,7 @@ class BoundaryCondition():
     and applies to deterministic simulation. **BoundaryCondition not yet implemeneted for Stochastic Species**.
     :type deterministic: bool
 
-    :param target: Set **target** to properties, can be 'nu' 'rho' or 'v' or species name
+    :param target: Set **target** to properties, can be 'nu' 'rho' or 'v' or species name \
     If species name, determinstic must also be set to True/False.
     :type target: str
 
@@ -67,7 +65,7 @@ class BoundaryCondition():
     :type value: float or float[3]
 
     :param model: Target model of boundary condition
-    :type model: spatialpy.Model.Model
+    :type model: spatialpy.core.model.Model
     """
 
     def __init__(self, xmin=None, xmax=None, ymin=None, ymax=None, zmin=None, zmax=None,
@@ -89,6 +87,8 @@ class BoundaryCondition():
         if type_id is not None and not isinstance(type_id, (int, str)):
             raise BoundaryConditionError("Type-ID must be of type int.")
         elif type_id is not None:
+            if "UnAssigned" in type_id:
+                raise BoundaryConditionError("'UnAssigned' is not a valid type_id")
             type_id = f"type_{type_id}"
         if target is None or not (isinstance(target, (str, Species)) or
                 type(target).__name__ == 'Species' or property in ('nu', 'rho', 'v')):

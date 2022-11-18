@@ -1,20 +1,18 @@
-'''
-SpatialPy is a Python 3 package for simulation of
-spatial deterministic/stochastic reaction-diffusion-advection problems
-Copyright (C) 2019 - 2022 SpatialPy developers.
+# SpatialPy is a Python 3 package for simulation of
+# spatial deterministic/stochastic reaction-diffusion-advection problems
+# Copyright (C) 2019 - 2022 SpatialPy developers.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
-published by the Free Software Foundation.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+# published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import csv
 import filecmp
@@ -29,6 +27,7 @@ import plotly.graph_objs as go
 from plotly.offline import init_notebook_mode, iplot
 
 # from spatialpy.core.model import *
+from spatialpy.core.visualization import Visualization
 from spatialpy.core.vtkreader import VTKReader
 from spatialpy.core.spatialpyerror import ResultError
 
@@ -221,6 +220,13 @@ class Result():
     def __map_property_to_type(self, property_name, data, included_types_list, points, p_ndx):
         types = {}
         if property_name == 'type':
+            # Normalize volumes to [0, 1]
+            vol = data['mass'] / data['rho']
+            ptp = numpy.ptp(vol)
+            if ptp == 0:
+                vols = numpy.array([0.5] * len(vol))
+            else:
+                vols = (vol - numpy.min(vol)) / ptp
             for i, val in enumerate(data['type']):
                 name = self.model.domain.typeNameMapping[val][5:]
 
@@ -228,9 +234,15 @@ class Result():
                     if name in types:
                         types[name]['points'].append(points[i])
                         types[name]['data'].append(data[property_name][i])
+                        types[name]['size_scale'] = numpy.append(types[name]['size_scale'], vols[i])
                     else:
-                        types[name] = {"points":[points[i]], "data":[data[property_name][i]]}
-        elif property_name == 'v':
+                        types[name] = {
+                            "points": [points[i]],
+                            "data": [data[property_name][i]],
+                            "size_scale": numpy.array([vols[i]])
+                        }
+            return types
+        if property_name == 'v':
             types[property_name] = {
                 "points": points,
                 "data" : [data[property_name][i][p_ndx] for i in range(0,len(data[property_name]))]
@@ -312,25 +324,26 @@ class Result():
         one or all timepoints. Returns a numpy array containing the species population/concentration values.
 
         :param species: A species in string or dictionary form to retreive information about
-        :type species: str | dict
+        :type species: str | spatialpy.core.species.Species
 
         :param timepoints: A time point where the information should be retreived from.
             If 'timepoints' is None (default), a matrix of dimension:
             (number of timepoints) x (number of voxels) is returned.
             If an integer value is given, that value is used to index into the timespan, and that time point is returned
-            as a 1D array with size (number of voxel).
-        :type timepoints: int (default None)
+            as a 1D array with size (number of voxel).  Defaults to None
+        :type timepoints: int
 
         :param concentration: Whether or not the species is a concentration (True) or population (False)
             If concentration is False (default), the integer, raw, trajectory data is returned.
-            If set to True, the concentration (=copy_number/volume) is returned.
-        :type concentration: bool (default False)
+            If set to True, the concentration (=copy_number/volume) is returned.  Defaults to False
+        :type concentration: bool
 
-        :param deterministic: Whether or not the species is deterministic (True) or stochastic (False)
-        :type deterministic: bool (default False)
+        :param deterministic: Whether or not the species is deterministic (True) or stochastic (False). \
+                Defaults to False
+        :type deterministic: bool
 
-        :param debug: Whether or not debug information should be printed
-        :type debug: bool (default False)
+        :param debug: Whether or not debug information should be printed. Defaults to False
+        :type debug: bool
 
         :returns: A numpy array containing population/concentration values for target species across specified
                     timepoints.  Defaults to all timepoints.
@@ -340,7 +353,7 @@ class Result():
         """
         num_voxel = self.model.domain.get_num_voxels()
 
-        if isinstance(species,str):
+        if isinstance(species, str):
             spec_name = species
         else:
             spec_name = species.name
@@ -404,11 +417,13 @@ class Result():
         :param deterministic: Whether or not to plot the data as deterministic
         :type deterministic: bool
 
-        :param width: Width in pixels of output plot box
-        :type width: int (default 500)
+        :param width: Width in pixels of output plot box or for matplotlib inches of output plot box. \
+        Defaults to 500 (Plotly) or 6.4 (MatPlotLib)
+        :type width: int
 
-        :param height: Height in pixels of output plot box
-        :type height: int (default 500)
+        :param height: Height in pixels of output plot box or for matplotlib inches of output plot box. \
+        Defaults to 500 (Plotly) or 4.8 (MatPlotLib)
+        :type height: int
 
         :param colormap: colormap to use.  Plotly specification, valid values: "Plotly3","Jet","Blues","YlOrRd",
                 "PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu", "PuBu","GnBu","YlGn","Greens","Reds",
@@ -450,7 +465,7 @@ class Result():
         :returns: A dictionary containing data for a plotly figure of species output trajectory
         :rtype: dict
 
-        :raises ResultsError: unable to plot species for given time
+        :raises ResultError: unable to plot species for given time
         """
         time_index_list = self.get_timespan()
 
@@ -578,7 +593,14 @@ class Result():
         given, that value is used to index into the timespan, and that time point is returned \
         as a 1D array with size (number of voxel).
 
-        :param property_name: A string describing the property to be returned.
+        :param property_name: A string describing the property to be returned.  Can be one of: {
+            'v' : velocity,
+            'rho': density,
+            'mass': mass,
+            'id': type_id,
+            'type': type as str,
+            'bvf_phi': boundary volume fraction,
+            'nu': viscosity}
         :type property_name: str
 
         :param timepoints: timespan index to be returned.  Default is None
@@ -587,7 +609,7 @@ class Result():
         :returns: a numpy array of target property values across timepoints, defaults to all timepoints.
         :rtype: numpy.ndarray
 
-        :raises ResultsError: Could not get data for given timepoints.
+        :raises ResultError: Could not get data for given timepoints.
         """
 
         l_time = len(self.get_timespan()) - 1
@@ -605,7 +627,6 @@ class Result():
             t_index_arr = [t_index_arr]
             num_timepoints = 1
 
-        
         if property_name == "v":
             ret = numpy.zeros((num_timepoints, num_voxel, 3))
         else:
@@ -621,7 +642,7 @@ class Result():
         return ret
 
     def plot_property(self, property_name, t_ndx=None, t_val=None, p_ndx=0, width=None, height=None,
-                      colormap=None, size=5, title=None, animated=False, t_ndx_list=None, speed=1,
+                      colormap=None, size=None, title=None, animated=False, t_ndx_list=None, speed=1,
                       f_duration=500, t_duration=300, included_types_list=None, return_plotly_figure=False,
                       use_matplotlib=False, debug=False):
         """
@@ -639,11 +660,13 @@ class Result():
         :param p_ndx: The property index of the results to be plotted
         :type p_ndx: int
 
-        :param width: Width in pixels of output plot box or for matplotlib inches of output plot box
-        :type width: int (default 500)
+        :param width: Width in pixels of output plot box or for matplotlib inches of output plot box. \
+        Defaults to 500 (Plotly) or 6.4 (MatPlotLib)
+        :type width: int
 
-        :param height: Height in pixels of output plot box or for matplotlib inches of output plot box
-        :type height: int (default 500)
+        :param height: Height in pixels of output plot box or for matplotlib inches of output plot box. \
+        Defaults to 500 (Plotly) or 4.8 (MatPlotLib)
+        :type height: int
 
         :param colormap: colormap to use.  Plotly specification, valid values: "Plotly3","Jet","Blues","YlOrRd",
                 "PuRd","BuGn","YlOrBr","PuBuGn","BuPu","YlGnBu", "PuBu","GnBu","YlGn","Greens","Reds",
@@ -732,17 +755,47 @@ class Result():
         if use_matplotlib:
             import matplotlib.pyplot as plt # pylint: disable=import-outside-toplevel
 
-            if property_name == "type":
-                fig, ax = plt.subplots(figsize=(width, height))
-                for name, data in types.items():
-                    x_coords = list(map(lambda point: point[0], data["points"]))
-                    y_coords = list(map(lambda point: point[1], data["points"]))
+            if not isinstance(use_matplotlib, dict):
+                use_matplotlib = {}
+            use_matplotlib['limits'] = (
+                (self.model.domain.xlim[0] - 0.25, self.model.domain.xlim[1] + 0.25),
+                (self.model.domain.ylim[0] - 0.25, self.model.domain.ylim[1] + 0.25)
+            )
 
-                    ax.scatter(x_coords, y_coords, label=name)
-                    ax.grid(linestyle='--', linewidth=1)
-                    ax.legend(loc='upper right', fontsize=12)
-                    if title is not None:
-                        ax.set_title(title)
+            # Support for width, height, and title args
+            if width not in (None, "auto") and height not in (None, "auto"):
+                # TODO: Deprecation warning for width and height
+                plot_args = {"figsize": (width, height)}
+
+                if "plot_args" in use_matplotlib:
+                    for name, val in use_matplotlib['plot_args'].items():
+                        plot_args[name] = val
+                use_matplotlib['plot_args'] = plot_args
+
+            base_group_args = {}
+            if colormap is not None:
+                base_group_args['cmap'] = colormap
+                base_group_args['vmin'] = 1 # minimum number of defined types
+                base_group_args['vmax'] = len(self.model.domain.typeNdxMapping) # number of defined types
+            if size is not None:
+                base_group_args['s'] = size
+
+            if "scatter_args" not in use_matplotlib:
+                use_matplotlib['scatter_args'] = {}
+            for type_id in self.model.domain.typeNdxMapping.keys():
+                type_id = type_id[5:]
+                group_args = base_group_args.copy()
+                if type_id in use_matplotlib['scatter_args']:
+                    for name, val in use_matplotlib['scatter_args'][type_id].items():
+                        group_args[name] = val
+                use_matplotlib['scatter_args'][type_id] = group_args
+
+            if title is not None:
+                use_matplotlib['title'] = title
+
+            if property_name == "type":
+                vis_obj = Visualization(data=types)
+                vis_obj.plot_scatter(**use_matplotlib)
             else:
                 if property_name == 'v':
                     p_data = data[property_name]
@@ -758,8 +811,11 @@ class Result():
                 if title is not None:
                     plt.title(title)
                 plt.grid(linestyle='--', linewidth=1)
-            plt.axis('scaled')
+                plt.axis('scaled')
             return
+
+        if size is None:
+            size = 5
 
         is_2d = self.model.domain.dimensions == 2
         trace_list = _plotly_iterate(types, size=size, property_name=property_name,
@@ -835,9 +891,9 @@ class Result():
         The columns of modelname_mesh.csv are: 'Voxel ID', 'X', 'Y', 'Z', 'Type', 'Volume', 'Mass', 'Viscosity'
         The columns of modelname_species_S.csv: 'Time', 'Voxel 0', Voxel 1', ... 'Voxel N'.
 
-        :type folder_name: str (default current working directory)
-        :param folder_name: A path where the vtk files will be written, created if non-existant.
-        If no path is provided current working directory is used.
+        :type folder_name: str
+        :param folder_name: A path where the vtk files will be written, created if non-existant. \
+        Defaults current working directory
         """
         if not folder_name:
             folder_name = os.path.abspath(os.getcwd())
@@ -866,7 +922,7 @@ class Result():
                 for voxel in range(num_vox):
                     writer.writerow([voxel] + data[:,voxel].tolist())
 
-    def export_to_vtk(self, timespan, folder_name=None):
+    def __export_to_vtk(self, timespan, folder_name=None):
         """
         Write the trajectory to a collection of vtk files.
         The exported data is #molecules/volume, where the volume unit is implicit from the mesh dimension.

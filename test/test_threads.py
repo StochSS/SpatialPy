@@ -1,27 +1,25 @@
-'''
-SpatialPy is a Python 3 package for simulation of
-spatial deterministic/stochastic reaction-diffusion-advection problems
-Copyright (C) 2019 - 2022 SpatialPy developers.
+# SpatialPy is a Python 3 package for simulation of
+# spatial deterministic/stochastic reaction-diffusion-advection problems
+# Copyright (C) 2019 - 2022 SpatialPy developers.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
-published by the Free Software Foundation.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+# published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #!/usr/bin/env python3
 
 import threading
 import subprocess
 import time
-from models.cylinder_demo3D import cylinderDemo3D
+from models.cylinder_demo3D import create_cylinder_demo_3D
 
 class Counter(threading.Thread):
     def run(self):
@@ -74,7 +72,7 @@ if __name__ == '__main__':
     handle = subprocess.Popen("sleep 5", shell=True)
     return_code = handle.wait()
     print("main thread assembling pyurdme model")
-    #model = cylinderDemo3D()
+    #model = create_cylinder_demo_3D()
     print("main thread run pyurdme model")
     #result = model.run(5)
     #result = run_ensemble(model, 5, 43242)

@@ -1,20 +1,18 @@
-'''
-SpatialPy is a Python 3 package for simulation of
-spatial deterministic/stochastic reaction-diffusion-advection problems
-Copyright (C) 2019 - 2022 SpatialPy developers.
+# SpatialPy is a Python 3 package for simulation of
+# spatial deterministic/stochastic reaction-diffusion-advection problems
+# Copyright (C) 2019 - 2022 SpatialPy developers.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
-published by the Free Software Foundation.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+# published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #!/usr/bin/env python3
 
@@ -23,101 +21,87 @@ import numpy
 import os.path
 import spatialpy
 
-class Membrane(spatialpy.Geometry):
-    def inside(self,x,on_boundary):
-        return on_boundary
-
-
-class Cytosol(spatialpy.Geometry):
-    def inside(self,x,on_boundary):
-        return not on_boundary
-
-
-class MeshSize(spatialpy.DataFunction):
-    def __init__(self,mesh):
-        spatialpy.DataFunction.__init__(self, name="MeshSize")
-        self.mesh = mesh
-        self.h = mesh.get_mesh_size()
-
-    def map(self, x):
-        ret = self.h[self.mesh.closest_vertex(x)]
+class DomainSize(spatialpy.DataFunction):
+    def __init__(self, domain):
+        spatialpy.DataFunction.__init__(self, name="DomainSize")
+        self.domain = domain
+        self.h = domain.get_domain_size()
+    
+    def map(self, point):
+        ret = self.h[self.domain.closest_vertex(point)]
         return ret
 
-class mincde(spatialpy.Model):
+def create_mincde(model_name="mincde", parameter_values=None):
     """ Model of MinD oscillations in E. Coli, based on the model by Huang. et. al. in """
+    model = spatialpy.Model(model_name)
 
-    def __init__(self, model_name="mincde"):
-        spatialpy.Model.__init__(self,model_name)
+    # Set domain type ids
+    model.CYTOSOL = "Cytosol"
+    model.MEMBRANE = "Membrane"
 
-        # Species
-        MinD_m     = spatialpy.Species(name="MinD_m", diffusion_coefficient=1e-14)
-        MinD_c_atp = spatialpy.Species(name="MinD_c_atp", diffusion_coefficient=2.5e-12)
-        MinD_c_adp = spatialpy.Species(name="MinD_c_adp", diffusion_coefficient=2.5e-12)
-        MinD_e     = spatialpy.Species(name="MinD_e", diffusion_coefficient=2.5e-12)
-        MinDE      = spatialpy.Species(name="MinDE", diffusion_coefficient=1e-14)
+    # System constants
+    D_m = 1e-14
+    D_c = 2.5e-12
 
-        self.add_species([MinD_m,MinD_c_atp,MinD_c_adp,MinD_e,MinDE])
+    # Make sure that we have the correct path to the mesh file even if we are not executing from the basedir.
+    basedir = os.path.dirname(os.path.abspath(__file__))
+    domain = spatialpy.Domain.read_xml_mesh(f"{basedir}/data/coli.xml")
 
-        # Make sure that we have the correct path to the mesh file even if we are not executing from the basedir.
-        basedir = os.path.dirname(os.path.abspath(__file__))
-        self.mesh = spatialpy.Mesh.read_xml_mesh(basedir+"/data/coli.xml")
+    # Set types
+    domain.set_properties(spatialpy.GeometryInterior(), model.CYTOSOL)
+    domain.set_properties(spatialpy.GeometryExterior(), model.MEMBRATE)
 
-        interior = dolfin.CellFunction("size_t",self.mesh)
-        interior.set_all(1)
-        boundary = dolfin.FacetFunction("size_t",self.mesh)
-        boundary.set_all(0)
+    model.add_domain(domain)
 
-        # Mark the boundary points
-        membrane = Membrane()
-        membrane.mark(boundary,2)
+    # Species
+    # Restrict to membrane protiens to membrane domain (2)
+    MinD_m = spatialpy.Species(name="MinD_m", diffusion_coefficient=D_m, restrict_to=model.MEMBRANE)
+    MinD_c_atp = spatialpy.Species(name="MinD_c_atp", diffusion_coefficient=D_c)
+    MinD_c_adp = spatialpy.Species(name="MinD_c_adp", diffusion_coefficient=D_c)
+    MinD_e = spatialpy.Species(name="MinD_e", diffusion_coefficient=D_c)
+    MinDE = spatialpy.Species(name="MinDE", diffusion_coefficient=D_m, restrict_to=model.MEMBRANE)
+    model.add_species([MinD_m, MinD_c_atp, MinD_c_adp, MinD_e, MinDE])
 
-        self.add_subdomain(interior)
-        self.add_subdomain(boundary)
+    # Parameters
+    sigma_d = spatialpy.Parameter(name="sigma_d", expression=2.5e-8)
+    sigma_dD = spatialpy.Parameter(name="sigma_dD", expression=0.0016e-18)
+    sigma_e = spatialpy.Parameter(name="sigma_e", expression=0.093e-18)
+    sigma_de = spatialpy.Parameter(name="sigma_de", expression=0.7)
+    sigma_dt = spatialpy.Parameter(name="sigma_dt", expression=1.0)
+    model.add_parameter([sigma_d, sigma_dD, sigma_e, sigma_de, sigma_dt])
 
-        # Average mesh size to feed into the propensity functions
-        h = self.mesh.get_mesh_size()
-        self.add_data_function(MeshSize(self.mesh))
+    # Data function (spatially varying constant)
+    model.add_data_function(DomainSize(model.domain))
 
-        # Parameters
-        NA = spatialpy.Parameter(name="NA", expression=6.022e23)
-        sigma_d  = spatialpy.Parameter(name="sigma_d", expression=2.5e-8)
-        sigma_dD = spatialpy.Parameter(name="sigma_dD", expression=0.0016e-18)
-        sigma_e  = spatialpy.Parameter(name="sigma_e", expression=0.093e-18)
-        sigma_de = spatialpy.Parameter(name="sigma_de", expression=0.7)
-        sigma_dt = spatialpy.Parameter(name="sigma_dt", expression=1.0)
+    # Reactions
+    R1 = spatialpy.Reaction(propensity_function="MinD_c_atp * sigma_d / DomainSize", 
+                            restrict_to=model.MEMBRANE,
+                            reactants={MinD_c_atp: 1}, products={MinD_m: 1})
+    R2 = spatialpy.Reaction(rate=sigma_dD,
+                            reactants={MinD_c_atp: 1, MinD_m: 1}, products={MinD_m: 2})
+    R3 = spatialpy.Reaction(rate=sigma_e,
+                            reactants={MinD_m: 1, MinD_e: 1}, products={MinDE: 1})
+    R4 = spatialpy.Reaction(rate=sigma_de,
+                            reactants={MinDE: 1}, products={MinD_c_adp: 1, MinD_e: 1})
+    R5 = spatialpy.Reaction(rate=sigma_dt,
+                            reactants={MinD_c_adp: 1}, products={MinD_c_atp: 1})
+    R6 = spatialpy.Reaction(rate=sigma_dD,
+                            reactants={MinDE: 1, MinD_c_atp: 1}, products={MinD_m: 1, MinDE: 1})
+    model.add_reaction([R1, R2, R3, R4, R5, R6])
 
-        self.add_parameter([NA,sigma_d,sigma_dD,sigma_e,sigma_de,sigma_dt])
+    # Initial Conditions
+    model.add_initial_condition(spatialpy.ScatterInitialCondition(MinD_c_adp, 4500))
+    model.add_initial_condition(spatialpy.ScatterInitialCondition(MinD_e, 1575))
 
-        # List of Physical domain markers that match those in the  Gmsh .geo file.
-        interior = [1]
-        boundary = [2]
-
-        # Reactions
-        R1 = spatialpy.Reaction(name="R1", reactants={MinD_c_atp:1}, products={MinD_m:1}, propensity_function="MinD_c_atp*sigma_d/MeshSize", restrict_to=boundary)
-        R2 = spatialpy.Reaction(name="R2", reactants={MinD_c_atp:1,MinD_m:1}, products={MinD_m:2}, massaction=True, rate=sigma_dD)
-        R3 = spatialpy.Reaction(name="R3", reactants={MinD_m:1,MinD_e:1}, products={MinDE:1}, massaction=True, rate=sigma_e)
-        R4 = spatialpy.Reaction(name="R4", reactants={MinDE:1}, products={MinD_c_adp:1,MinD_e:1}, massaction=True, rate=sigma_de)
-        R5 = spatialpy.Reaction(name="R5", reactants={MinD_c_adp:1}, products={MinD_c_atp:1}, massaction=True, rate=sigma_dt)
-        R6 = spatialpy.Reaction(name="R6", reactants={MinDE:1,MinD_c_atp:1}, products={MinD_m:1,MinDE:1}, massaction=True, rate=sigma_dD)
-
-        self.add_reaction([R1,R2,R3,R4,R5,R6])
-
-        # Restrict to boundary
-        self.restrict(MinD_m,boundary)
-        self.restrict(MinDE,boundary)
-
-        # Distribute molecules over the mesh according to their initial values
-
-        self.add_initial_condition(spatialpy.ScatterInitialCondition(MinD_c_adp, 4500))
-        self.add_initial_condition(spatialpy.ScatterInitialCondition(MinD_e, 1575))
-
-        self.timespan(range(500))
+    # tspan = spatialpy.TimeSpan(range(200), timestep_size=1)
+    tspan = spatialpy.TimeSpan(range(500), timestep_size=1)
+    model.timespan(tspan)
 
 
 if __name__=="__main__":
     """ Dump model to a file. """
 
-    model = mincde(model_name="mincde")
+    model = create_mincde()
     result = model.run(report_level=1)
 
     try:

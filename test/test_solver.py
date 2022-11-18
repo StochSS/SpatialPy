@@ -1,20 +1,18 @@
-'''
-SpatialPy is a Python 3 package for simulation of
-spatial deterministic/stochastic reaction-diffusion-advection problems
-Copyright (C) 2019 - 2022 SpatialPy developers.
+# SpatialPy is a Python 3 package for simulation of
+# spatial deterministic/stochastic reaction-diffusion-advection problems
+# Copyright (C) 2019 - 2022 SpatialPy developers.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
-published by the Free Software Foundation.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+# published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #!/usr/bin/env python3
 
@@ -27,26 +25,40 @@ import numpy
 import spatialpy
 from spatialpy.solvers.build_expression import BuildExpression, ExpressionConverter
 
+def create_diffusion_debug(model_name="diffusion_debug_test", parameter_values=None):
+    model = spatialpy.Model(model_name)
 
-class diffusion_debug(spatialpy.Model):
+    D_const = 0.01
 
-    def __init__(self, model_name="diffusion_debug_test"):
-        spatialpy.Model.__init__(self, model_name)
+    A = spatialpy.Species(name="A", diffusion_coefficient=D_const)
+    model.add_species([A])
 
-        D_const = 0.01
+    domain = spatialpy.Domain.create_2D_domain(
+        xlim=[-1, 1], ylim=[-1, 1], numx=50, numy=50, type_id=1,
+        mass=1.0, nu=1.0, fixed=True,  rho0=1.0, c0=1.0, P0=1.0
+    )
+    model.add_domain(domain)
 
-        A = spatialpy.Species(name="A", diffusion_coefficient=D_const)
-        self.add_species([A])
+    model.add_initial_condition(spatialpy.PlaceInitialCondition(A, 100000, [0,0,0]))
 
-        self.domain = spatialpy.Domain.create_2D_domain(
-            xlim=[-1, 1], ylim=[-1, 1], nx=50, ny=50, type_id=1,
-            mass=1.0, nu=1.0, fixed=True,  rho0=1.0, c0=1.0, P0=1.0
-        )
+    tspan = spatialpy.TimeSpan.linspace(t=10, num_points=11, timestep_size=0.1)
+    model.timespan(tspan)
+    return model
 
-        self.add_initial_condition(spatialpy.PlaceInitialCondition(A, 100000, [0,0,0]))
+def create_periodic_diffusion(model_name="test1D", parameter_values=None):
+    model = spatialpy.Model(model_name)
 
-        self.timespan(numpy.linspace(0,10,11),timestep_size=0.1)
+    X = spatialpy.Species(name="X",  diffusion_coefficient=0.001)
+    model.add_species(X)
 
+    domain = spatialpy.Domain.generate_unit_interval_mesh(nx=100, periodic=True)
+    model.add_domain(domain)
+
+    model.add_initial_condition(spatialpy.PlaceInitialCondition(X, 1000))
+
+    tspan = spatialpy.TimeSpan(range(10))
+    model.timespan(tspan)
+    return model
 
 class ExpressionTestCase:
     """
@@ -57,17 +69,6 @@ class ExpressionTestCase:
         self.args = args
         self.expression = expression
         self.values = values
-
-
-# class testPeriodicDiffusion(spatialpy.Model):
-#     def __init__(self, model_name="test1D"):
-#         spatialpy.Model.__init__(self, model_name)
-#         X = self.add_species(spatialpy.Species(name="X",  diffusion_coefficient=0.001))
-#         self.domain = spatialpy.Domain.generate_unit_interval_mesh(nx=100, periodic=True)
-#         self.add_initial_condition(spatialpy.PlaceInitialCondition(X, 1000))
-#         #self.set_initial_condition_place_near({X:1000}, 0.1)
-#         self.timespan(range(10))
-
 
 class TestSolverFunctionality(unittest.TestCase):
 
@@ -120,22 +121,21 @@ class TestSolverFunctionality(unittest.TestCase):
     ]
 
     def setUp(self):
-        self.model = diffusion_debug()
-        #self.periodic_model = testPeriodicDiffusion()
+        self.model = create_diffusion_debug()
+        # self.periodic_model = create_periodic_diffusion()
 
     def test_solver_io(self):
         """ Test that the initial value in the solver output file is the same as the input initial value. """
-        model = diffusion_debug()
-        result = model.run()
+        result = self.model.run()
         A = result.get_species("A", 0)
-        self.assertFalse((A-model.u0).any())
+        self.assertFalse((A - self.model.u0).any())
 
     # def test_zero_diffusion(self):
     #     """ Test that nothing happens if the diffusion is set to zero. """
-    #     model = diffusion_debug(diffusion_coefficient=0.0)
-    #     result = model.run()
+    #     self.model.listOfSpecies['A'].diffusion_coefficient = 0.0
+    #     result = self.model.run()
     #     A = result.get_species("A", -1)
-    #     self.assertFalse((A - model.u0).any())
+    #     self.assertFalse((A - self.model.u0).any())
 
     def test_same_seed(self):
         """ Test that the output is the same if the same seed is used, explicit solver creation  """

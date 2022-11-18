@@ -1,20 +1,18 @@
-'''
-SpatialPy is a Python 3 package for simulation of
-spatial deterministic/stochastic reaction-diffusion-advection problems
-Copyright (C) 2019 - 2022 SpatialPy developers.
+# SpatialPy is a Python 3 package for simulation of
+# spatial deterministic/stochastic reaction-diffusion-advection problems
+# Copyright (C) 2019 - 2022 SpatialPy developers.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
-published by the Free Software Foundation.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
+# published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU GENERAL PUBLIC LICENSE Version 3 for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU GENERAL PUBLIC LICENSE Version 3 for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import ast
 import json
@@ -175,12 +173,13 @@ def __build_element(stoich_species):
 def __get_particles(domain):
     s_particles = []
     for i, point in enumerate(domain.vertices):
+        type_id = domain.typeNdxMapping[domain.type_id[i]]
         s_particle = {"fixed":bool(domain.fixed[i]),
                       "mass":domain.mass[i],
                       "nu":domain.nu[i],
                       "particle_id":i,
                       "point":list(point),
-                      "type":int(domain.type_id[i]),
+                      "type":type_id,
                       "volume":domain.vol[i]}
 
         s_particles.append(s_particle)
@@ -200,20 +199,24 @@ def export(model, path=None, return_stochss_model=False):
     """
     SpatialPy model to StochSS converter
 
-    Args:
-        spatialpy_model : spatialpy.Model
-            SpatialPy model to be converted to StochSS
-        filename : str
-            Path to the exported stochss model
-        return_stochss_model : bool
-            Whether or not to return the model
+    :param model: SpatialPy model to be converted to StochSS.
+    :type model: spatialpy.core.model.Model
+
+    :param filename: Path to the exported stochss model.
+    :type filename: str
+
+    :param return_stochss_model: Whether or not to return the model.
+    :type return_stochss_model: bool
+
+    :returns: StochSS model dict if return_stochss_model is True else path to StochSS model file.
+    :rtype: dict | str
     """
     _ = model.compile_prep()
     if path is None:
         path = f"{model.name}.smdl"
 
-    end_sim = model.num_timesteps * model.timestep_size
-    time_step = model.output_freq * model.timestep_size
+    end_sim = model.tspan.num_timesteps * model.tspan.timestep_size
+    time_step = model.tspan.output_freq * model.tspan.timestep_size
 
     s_model = {"is_spatial": True,
                "defaultID": 1,
@@ -223,7 +226,7 @@ def export(model, path=None, return_stochss_model=False):
                "modelSettings": {
                    "endSim": end_sim,
                    "timeStep": time_step,
-                   "timestepSize": model.timestep_size
+                   "timestepSize": model.tspan.timestep_size
                },
                "species": [],
                "initialConditions": [],
