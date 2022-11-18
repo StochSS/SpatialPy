@@ -28,7 +28,7 @@ jobs:
 
     - name: Update and Publish docs
       working-directory: docs
-      run: make publish-release
+      uses: make publish-release
       with:
         user: __token__
         password: ${{ secrets.GITHUB_TOKEN }}
