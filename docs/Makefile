@@ -84,25 +84,34 @@ autobuild: $(FORMAT)
 clean:
 	rm -rf "$(BUILDDIR)"
 
-publish:
-	make clean
-	git stash
-	git checkout gh-pages
-	make html
-	-git add -f "$(BUILDDIR)"
-	-git commit -m "Latest build." "$(BUILDDIR)"
-	git push origin gh-pages -f
-	make clean
-	git checkout @{-1}
-	git stash pop
-
-publish-release: publish
+build-docs:
+	git pull
 	make clean
 	git stash
 	git checkout main
 	make html
+
+commit-docs:
 	-git add -f "$(BUILDDIR)"
 	-git commit -m "Latest docs build." "$(BUILDDIR)"
+
+publish:
+	make clean
+	git stash
+	git pull
+	git checkout staging
+	make html
+	-git add -f "$(BUILDDIR)"
+	-git commit -m "Latest docs build." "$(BUILDDIR)"
+	git push origin staging -f
+	make clean
+	git checkout gh-pages
+	git pull origin staging
+	git push origin gh-pages -f
+	git checkout @{-2}
+	git stash pop
+
+publish-release: build-docs commit-docs
 	git push origin main -f
 	make clean
 	git checkout @{-1}
