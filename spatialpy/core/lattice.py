@@ -309,7 +309,7 @@ class SphericalLattice(Lattice):
 
         count = 0
         radius = self.radius
-        while radius >= 0:
+        while radius > 0:
             # Calculate the approximate number of particle with the radius
             approx_rc = int(round((4 * radius ** 2) / ((self.deltas / 2) ** 2)))
 
@@ -339,6 +339,12 @@ class SphericalLattice(Lattice):
                         domain.add_point(point + self.center, **kwargs)
                         count += 1
             radius -= self.deltar
+        if radius == 0 and geometry.inside((0, 0, 0), False):
+            point = [0, 0, 0] if transform is None else transform([0, 0, 0])
+            if not isinstance(point, numpy.ndarray):
+                point = numpy.array(point)
+            domain.add_point(point + self.center, **kwargs)
+            count += 1
         self._update_limits(domain)
         if 'vol' not in kwargs:
             offset = len(domain.vertices) - count
