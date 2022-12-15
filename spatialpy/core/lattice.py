@@ -443,7 +443,7 @@ class CylindricalLattice(Lattice):
         xmin = -h_len
         xmax = h_len
         radius = self.radius
-        while radius >= 0:
+        while radius > 0:
             # Calculate the approximate number of particle with the radius
             approx_rc = int(round((2 * radius * self.length) / ((self.deltas / 2) ** 2)))
 
@@ -454,7 +454,6 @@ class CylindricalLattice(Lattice):
 
             x = xmin
             while x <= xmax:
-
                 for mtheta in range(m_theta):
                     theta = 2 * numpy.pi * (mtheta + 0.5) / m_theta
                     y = radius * numpy.cos(theta)
@@ -470,6 +469,16 @@ class CylindricalLattice(Lattice):
                         count += 1
                 x += self.deltas
             radius -= self.deltar
+        if radius == 0:
+            x = xmin
+            while x <= xmax:
+                if geometry.inside((x, 0, 0), False):
+                    point = [x, 0, 0] if transform is None else transform([x, 0, 0])
+                    if not isinstance(point, numpy.ndarray):
+                        point = numpy.array(point)
+                    domain.add_point(point + self.center, **kwargs)
+                    count += 1
+                x += self.deltas
         self._update_limits(domain)
         if 'vol' not in kwargs:
             offset = len(domain.vertices) - count
