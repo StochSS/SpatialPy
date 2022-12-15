@@ -14,13 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import json
-import numpy
+import string
 
 import xml.etree.ElementTree as ET
 
+import numpy
+
 from spatialpy.core.geometry import Geometry, CombinatoryGeometry
 from spatialpy.core.spatialpyerror import LatticeError
-
 
 class Lattice:
     """
@@ -102,7 +103,7 @@ class CartesianLattice(Lattice):
 
     :param zmin: Minimum z value of the lattice (optional, defaults to xmin).
     :type zmin: float
-    
+
     :param zmax: Maximum z value of the lattice (optional, defaults to xmax).
     :type zmax: float
 
@@ -319,11 +320,11 @@ class SphericalLattice(Lattice):
             m_phi = int(round(numpy.pi * radius / d_a))
             d_phi = numpy.pi / m_phi
             d_theta = p_area / d_phi
-            
+
             for mphi in range(m_phi):
                 phi = numpy.pi * (mphi + 0.5) / m_phi
                 m_theta = int(round(2 * numpy.pi * numpy.sin(phi) / d_phi))
-            
+
                 for mtheta in range(m_theta):
                     theta = 2 * numpy.pi * mtheta / m_theta
                     x = radius * numpy.cos(theta) * numpy.sin(phi)
@@ -516,7 +517,7 @@ class XMLMeshLattice(Lattice):
     """
     XML mesh lattice class provides a method for creating parts of the spatial
         domain with a mesh defined by a FEniCS/dolfin style XML mesh file.
-    
+
     :param center: The center point of the lattice.
     :type center: float[3] | float(3)
 
@@ -602,7 +603,7 @@ class XMLMeshLattice(Lattice):
                 point = [x, y, z]
             else:
                 point = transform([x, y, z])
-            if type_ids is not None and i in type_ids.keys():
+            if type_ids is not None and i in type_ids:
                 kwargs['type_id'] = type_ids[i]
             if not isinstance(point, numpy.ndarray):
                 point = numpy.array(point)
@@ -652,7 +653,7 @@ class MeshIOLattice(Lattice):
     """
     meshio lattice class provides a method for creating parts of the spatial
         domain with a mesh defined by a Gmsh style .msh mesh file.
-    
+
     :param center: The center point of the lattice.
     :type center: float[3] | float(3)
 
@@ -717,7 +718,7 @@ class MeshIOLattice(Lattice):
             mesh = meshio.read(self.filename)
         else:
             mesh = self.mesh
-        
+
         if self.subdomain_file is not None:
             type_ids = self.__get_types()
         else:
@@ -734,7 +735,7 @@ class MeshIOLattice(Lattice):
                 point = [x, y, z]
             else:
                 point = transform([x, y, z])
-            if type_ids is not None and i in type_ids.keys():
+            if type_ids is not None and i in type_ids:
                 kwargs['type_id'] = type_ids[i]
             if not isinstance(point, numpy.ndarray):
                 point = numpy.array(point)
@@ -750,7 +751,7 @@ class MeshIOLattice(Lattice):
                 for triangle in triangles[0].data:
                     triangle = triangle + num_points
                     domain.triangles = numpy.append(domain.triangles, [triangle], axis=0)
-        
+
         #tetrahedrons
         tetras = list(filter(lambda cell: cell.type == "tetra", mesh.cells))
         if tetras:
@@ -789,7 +790,7 @@ class StochSSLattice(Lattice):
     """
     stochss lattice class provides a method for creating parts of the spatial domain
         with a domain defined by a stochss style .domn domain file or .smdl model file.
-    
+
     :param center: The center point of the lattice.
     :type center: float[3] | float(3)
 
@@ -829,7 +830,7 @@ class StochSSLattice(Lattice):
             domain.c0 = s_domain['c_0']
             domain.P0 = s_domain['p_0']
             domain.gravity = s_domain['gravity']
-            
+
             type_ids = {}
             for s_type in s_domain['types']:
                 type_ids[s_type['typeID']] = s_type['name'].replace('-', '')
