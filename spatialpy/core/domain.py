@@ -390,7 +390,7 @@ class Domain():
         on_boundary = self.find_boundary_points(update=True)
         for v_ndx, vertex in enumerate(self.vertices):
             if action['geometry'].inside(vertex, on_boundary[v_ndx]):
-                self.vertices = numpy.delete(self.vertices, v_ndx)
+                self.vertices = numpy.delete(self.vertices, v_ndx, 0)
                 self.type_id = numpy.delete(self.type_id, v_ndx, 0)
                 self.vol = numpy.delete(self.vol, v_ndx)
                 self.mass = numpy.delete(self.mass, v_ndx)
