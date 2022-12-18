@@ -1,4 +1,5 @@
-CC = g++
+CC = gcc
+C++ = g++
 CFLAGS = -c -std=c++14 -Wall -O3
 SIMFLAGS = -l. -std=c++14 -Wall -O3
 LFLAGS = -pthread -lm
@@ -22,14 +23,14 @@ CORE: $(OBJ)
 #	make -d -f $(ROOTINC_ESC)/external/ANN/src/Makefile.spatialpy ROOTINC=$(ROOTINC_ESC)
 
 main.o:
-	$(CC) -c $(GPROFFLAG) $(GDB_FLAG) -o main.o $(MODEL) $(INCDIRPARAMS) $(CFLAGS)
+	$(C++) -c $(GPROFFLAG) $(GDB_FLAG) -o main.o $(MODEL) $(INCDIRPARAMS) $(CFLAGS)
 
 %.o: $(ROOT)/src/%.cpp
-	$(CC) -c $(GPROFFLAG) $(GDB_FLAG) -o $@ "$<" $(INCDIRPARAMS) $(CFLAGS)
+	$(C++) -c $(GPROFFLAG) $(GDB_FLAG) -o $@ "$<" $(INCDIRPARAMS) $(CFLAGS)
 
 %.o: $(ROOT)/src/%.c
 	$(CC) -c $(GPROFFLAG) $(GDB_FLAG) -o $@ "$<" $(INCDIRPARAMS) $(CFLAGS)
 
 ssa_sdpd: main.o 
-	$(CC) $(GPROFFLAG) $(GDB_FLAG) -o ssa_sdpd $(addprefix $(COREDIR)/,$(OBJ))  main.o $(addprefix $(COREDIR)/,$(ANNOBJECTS)) $(LFLAGS)
+	$(C++) $(GPROFFLAG) $(GDB_FLAG) -o ssa_sdpd $(addprefix $(COREDIR)/,$(OBJ))  main.o $(addprefix $(COREDIR)/,$(ANNOBJECTS)) $(LFLAGS)
 

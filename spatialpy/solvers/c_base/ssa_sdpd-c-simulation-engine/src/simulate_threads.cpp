@@ -32,12 +32,12 @@ See the file LICENSE.txt for details.
 
 // Include ANN KD Tree
 #include "ANN/ANN.h"
-#include "model.h"
-#include "output.h"
+#include "model.hpp"
+#include "output.hpp"
 #include "particle_system.hpp"
 #include "simulate.hpp"
 #include "simulate_rdme.hpp"
-#include "pthread_barrier.h"
+#include "pthread_barrier.hpp"
 
 namespace Spatialpy{
     struct arg {

@@ -27,7 +27,7 @@ See the file LICENSE.txt for details.
 #include <stdlib.h>
 #include <string.h>
 
-#include "output.h"
+#include "output.hpp"
 #include "particle_system.hpp"
 
 namespace Spatialpy{

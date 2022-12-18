@@ -22,10 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "model.h"
-#include "output.h"
+#include "model.hpp"
+#include "output.hpp"
 #include "particle_system.hpp"
-#include "pthread_barrier.h"
+#include "pthread_barrier.hpp"
 #include "simulate.hpp"
 #include "simulate_rdme.hpp"
 

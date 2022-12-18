@@ -460,7 +460,7 @@ class Solver:
         # Match except word characters \w = ([a-zA-Z0-9_]) and \_ = _ replace with ''
         propfilename = re.sub(r'[^\w\_]', '', self.model_name)
         self.propfilename = f"{propfilename}_generated_model"
-        self.prop_file_name = os.path.join(self.build_dir, f'{self.propfilename}.c')
+        self.prop_file_name = os.path.join(self.build_dir, f'{self.propfilename}.cpp')
 
         if self.debug_level >= 1:
             print(f"Compiling Solver.  Build dir: {self.build_dir}")
