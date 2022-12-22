@@ -388,8 +388,9 @@ class Domain():
 
         # remove the particles that fall within the defined region
         on_boundary = self.find_boundary_points(update=True)
-        for v_ndx in range(self.get_num_voxels()):
-            if action['geometry'].inside(self.coordinates()[v_ndx, :], on_boundary[v_ndx]):
+        for v_ndx, vertex in enumerate(self.vertices):
+            if action['geometry'].inside(vertex, on_boundary[v_ndx]):
+                self.vertices = numpy.delete(self.vertices, v_ndx, 0)
                 self.type_id = numpy.delete(self.type_id, v_ndx, 0)
                 self.vol = numpy.delete(self.vol, v_ndx)
                 self.mass = numpy.delete(self.mass, v_ndx)
