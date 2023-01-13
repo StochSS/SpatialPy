@@ -1,2 +1,13 @@
 Import('env')
-env.StaticLibrary('spatialpy-core') # TODO
+env.StaticLibrary('spatialpy-core', [
+    'count_cores.c',
+    'model.c',
+    'NRMConstant_v5.cpp',
+    'output.c',
+    'particle.cpp',
+    'pthread_barrier.c',
+    'read_lammps_input_file.c',
+    'simulate.cpp',
+    'simulate_rdme.cpp',
+    'simulate_threads.c'
+])

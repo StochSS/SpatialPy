@@ -1,3 +1,5 @@
+import os
+
 model = ARGUMENTS.get('MODEL')
 core_dir = ARGUMENTS.get('CORE_DIR')
 output_root = ARGUMENTS.get('OUTPUT')
@@ -8,13 +10,17 @@ env = Environment(
         Dir(f'{core_dir}/include'),
         Dir(f'{core_dir}/external/ANN/include'),
     ],
+    LIBPATH=[
+        Dir(f'{output_root}/external/ANN/src'),
+        Dir(f'{output_root}/src'),
+    ],
+    ENV=os.environ,
+    # When MSVC (or any other compilers) are supported, update this to be a compiler-specific flag
+    CXXFLAGS=['-std=c++14'],
 )
 
-VariantDir(output_root, f'{core_dir}/src', duplicate=False)
-VariantDir(f'{output_root}/external', f'{core_dir}/external', duplicate=False)
-
 Export('env')
-SConscript(f'{core_dir}/external/ANN/src/SConscript')
-SConscript(f'{core_dir}/src/SConscript')
+SConscript(f'{core_dir}/external/ANN/src/SConscript', variant_dir=f'{output_root}/external/ANN/src', duplicate=False)
+SConscript(f'{core_dir}/src/SConscript', variant_dir=f'{output_root}/src', duplicate=False)
 
 env.Program('ssa_sdpd', model, LIBS=['spatialpy-core', 'ANN'])
