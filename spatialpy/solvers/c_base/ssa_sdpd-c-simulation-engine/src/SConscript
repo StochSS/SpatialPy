@@ -1,5 +1,5 @@
 Import('env')
-env.StaticLibrary('spatialpy-core', [
+libspatialpy_core = env.Object([
     'count_cores.c',
     'model.c',
     'NRMConstant_v5.cpp',
@@ -11,3 +11,4 @@ env.StaticLibrary('spatialpy-core', [
     'simulate_rdme.cpp',
     'simulate_threads.c'
 ])
+Return('libspatialpy_core')

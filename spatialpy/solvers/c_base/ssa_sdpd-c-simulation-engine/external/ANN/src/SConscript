@@ -1,5 +1,5 @@
 Import('env')
-env.StaticLibrary('ANN', [
+libANN = env.Object([
     'ANN.cpp',
     'brute.cpp',
     'kd_tree.cpp',
@@ -15,3 +15,4 @@ env.StaticLibrary('ANN', [
     'bd_fix_rad_search.cpp',
     'perf.cpp'
 ])
+Return('libANN')
