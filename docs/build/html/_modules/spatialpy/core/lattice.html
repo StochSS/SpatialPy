@@ -643,7 +643,7 @@
 
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">type_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_ids</span><span class="p">[</span><span class="n">type_id</span><span class="p">]</span>
-                    <span class="n">type_ids</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">ndx</span><span class="p">)]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;type_</span><span class="si">{</span><span class="n">type_id</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">type_ids</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">ndx</span><span class="p">)]</span> <span class="o">=</span> <span class="n">type_id</span>
                 <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="n">errmsg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Could not read in subdomain file, error on line </span><span class="si">{</span><span class="n">lnum</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="k">raise</span> <span class="n">LatticeError</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
@@ -780,7 +780,7 @@
 
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">type_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_ids</span><span class="p">[</span><span class="n">type_id</span><span class="p">]</span>
-                    <span class="n">type_ids</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">ndx</span><span class="p">)]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;type_</span><span class="si">{</span><span class="n">type_id</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">type_ids</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">ndx</span><span class="p">)]</span> <span class="o">=</span> <span class="n">type_id</span>
                 <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="n">errmsg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Could not read in subdomain file, error on line </span><span class="si">{</span><span class="n">lnum</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="k">raise</span> <span class="n">LatticeError</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
@@ -987,7 +987,7 @@
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>
 
