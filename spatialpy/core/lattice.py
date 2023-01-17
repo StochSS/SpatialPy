@@ -548,7 +548,7 @@ class XMLMeshLattice(Lattice):
 
                     if self.type_ids is not None:
                         type_id = self.type_ids[type_id]
-                    type_ids[int(ndx)] = f"type_{type_id}"
+                    type_ids[int(ndx)] = type_id
                 except ValueError as err:
                     errmsg = f"Could not read in subdomain file, error on line {lnum}: {line}"
                     raise LatticeError(errmsg) from err
@@ -685,7 +685,7 @@ class MeshIOLattice(Lattice):
 
                     if self.type_ids is not None:
                         type_id = self.type_ids[type_id]
-                    type_ids[int(ndx)] = f"type_{type_id}"
+                    type_ids[int(ndx)] = type_id
                 except ValueError as err:
                     errmsg = f"Could not read in subdomain file, error on line {lnum}: {line}"
                     raise LatticeError(errmsg) from err
