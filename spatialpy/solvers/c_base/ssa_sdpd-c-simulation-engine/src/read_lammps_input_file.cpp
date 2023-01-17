@@ -26,10 +26,10 @@ See the file LICENSE.txt for details.
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "read_lammps_input_file.h"
+#include "read_lammps_input_file.hpp"
 
 
-void read_lammps_input_file(const char*filename, ParticleSystem*system){
+void read_lammps_input_file(const char*filename, Spatialpy::ParticleSystem*system){
     char* s;
     FILE* fp = fopen(filename, "r");
     if(fp == NULL){
@@ -73,7 +73,7 @@ void read_lammps_input_file(const char*filename, ParticleSystem*system){
     s=fgets(buffer,1024,fp);
     //printf("Is this 'Masses': '%s'\n",buffer);
     s=fgets(buffer,1024,fp);
-    double *masses_of_types = malloc(sizeof(double)*ntypes);
+    double *masses_of_types = (double*) std::malloc(sizeof(double)*ntypes);
     int i,j;
     double tmp_d;
     for(i=0;i<ntypes;i++){
@@ -89,7 +89,7 @@ void read_lammps_input_file(const char*filename, ParticleSystem*system){
     s=fgets(buffer,1024,fp);
     int id,type,is_solid;
     double rho,x,y,z;
-    Particle*me;
+    Spatialpy::Particle*me;
     for(i=0;i<natoms;i++){
         s=fgets(buffer,1024,fp);
         r = sscanf(buffer, "%d 0 %d %lf %lf %lf %lf %d",&id,&type,&rho,&x,&y,&z,&is_solid);

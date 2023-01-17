@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <time.h>
 #include <unistd.h>
 
-#include "count_cores.h"
+#include "count_cores.hpp"
 #include "particle_system.hpp"
 #include "propensities.hpp"
 #include "simulate.hpp"
