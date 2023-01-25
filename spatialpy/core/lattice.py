@@ -318,31 +318,37 @@ class SphericalLattice(Lattice):
             # Calculate the approximate number of particle with the radius
             approx_rc = int(round((4 * radius ** 2) / ((self.deltas / 2) ** 2)))
 
-            # Set constants for the radius
-            p_area = 4 * numpy.pi * radius ** 2 / approx_rc
-            d_a = numpy.sqrt(p_area)
-            m_phi = int(round(numpy.pi * radius / d_a))
-            d_phi = numpy.pi / m_phi
-            d_theta = p_area / d_phi
+            if approx_rc == 0:
+                from spatialpy.core import log # pylint: disable=import-outside-toplevel
+                msg = f"Approximation of particles for the layer at radius {radius} is 0."
+                msg += "Consider increasing the radius or increasing the radial spacing (deltas)"
+                log.warning(msg)
+            else:
+                # Set constants for the radius
+                p_area = 4 * numpy.pi * radius ** 2 / approx_rc
+                d_a = numpy.sqrt(p_area)
+                m_phi = int(round(numpy.pi * radius / d_a))
+                d_phi = numpy.pi / m_phi
+                d_theta = p_area / d_phi
 
-            for mphi in range(m_phi):
-                phi = numpy.pi * (mphi + 0.5) / m_phi
-                m_theta = int(round(2 * numpy.pi * numpy.sin(phi) / d_phi))
+                for mphi in range(m_phi):
+                    phi = numpy.pi * (mphi + 0.5) / m_phi
+                    m_theta = int(round(2 * numpy.pi * numpy.sin(phi) / d_phi))
 
-                for mtheta in range(m_theta):
-                    theta = 2 * numpy.pi * mtheta / m_theta
-                    x = radius * numpy.cos(theta) * numpy.sin(phi)
-                    y = radius * numpy.sin(theta) * numpy.sin(phi)
-                    z = radius * numpy.cos(phi)
-                    if geometry.inside((x, y, z), False):
-                        if transform is None:
-                            point = [x, y, z]
-                        else:
-                            point = transform([x, y, z])
-                        if not isinstance(point, numpy.ndarray):
-                            point = numpy.array(point)
-                        domain.add_point(point + self.center, **kwargs)
-                        count += 1
+                    for mtheta in range(m_theta):
+                        theta = 2 * numpy.pi * mtheta / m_theta
+                        x = radius * numpy.cos(theta) * numpy.sin(phi)
+                        y = radius * numpy.sin(theta) * numpy.sin(phi)
+                        z = radius * numpy.cos(phi)
+                        if geometry.inside((x, y, z), False):
+                            if transform is None:
+                                point = [x, y, z]
+                            else:
+                                point = transform([x, y, z])
+                            if not isinstance(point, numpy.ndarray):
+                                point = numpy.array(point)
+                            domain.add_point(point + self.center, **kwargs)
+                            count += 1
             radius = round(radius - self.deltar, digits)
         if radius == 0 and geometry.inside((0, 0, 0), False):
             point = [0, 0, 0] if transform is None else transform([0, 0, 0])
@@ -456,27 +462,33 @@ class CylindricalLattice(Lattice):
             # Calculate the approximate number of particle with the radius
             approx_rc = int(round((2 * radius * self.length) / ((self.deltas / 2) ** 2)))
 
-            p_area = 2 * numpy.pi * radius * self.length / approx_rc
-            d_a = numpy.sqrt(p_area)
-            m_theta = int(round(2 * numpy.pi * radius / d_a))
-            d_theta = 2 * numpy.pi / m_theta
+            if approx_rc == 0:
+                from spatialpy.core import log # pylint: disable=import-outside-toplevel
+                msg = f"Approximation of particles for the layer at radius {radius} is 0."
+                msg += "Consider increasing the radius or increasing the radial spacing (deltas)"
+                log.warning(msg)
+            else:
+                p_area = 2 * numpy.pi * radius * self.length / approx_rc
+                d_a = numpy.sqrt(p_area)
+                m_theta = int(round(2 * numpy.pi * radius / d_a))
+                d_theta = 2 * numpy.pi / m_theta
 
-            x = xmin
-            while x <= xmax:
-                for mtheta in range(m_theta):
-                    theta = 2 * numpy.pi * (mtheta + 0.5) / m_theta
-                    y = radius * numpy.cos(theta)
-                    z = radius * numpy.sin(theta)
-                    if geometry.inside((x, y, z), False):
-                        if transform is None:
-                            point = [x, y, z]
-                        else:
-                            point = transform([x, y, z])
-                        if not isinstance(point, numpy.ndarray):
-                            point = numpy.array(point)
-                        domain.add_point(point + self.center, **kwargs)
-                        count += 1
-                x += self.deltas
+                x = xmin
+                while x <= xmax:
+                    for mtheta in range(m_theta):
+                        theta = 2 * numpy.pi * (mtheta + 0.5) / m_theta
+                        y = radius * numpy.cos(theta)
+                        z = radius * numpy.sin(theta)
+                        if geometry.inside((x, y, z), False):
+                            if transform is None:
+                                point = [x, y, z]
+                            else:
+                                point = transform([x, y, z])
+                            if not isinstance(point, numpy.ndarray):
+                                point = numpy.array(point)
+                            domain.add_point(point + self.center, **kwargs)
+                            count += 1
+                    x += self.deltas
             radius = round(radius - self.deltar, digits)
         if radius == 0:
             x = xmin
