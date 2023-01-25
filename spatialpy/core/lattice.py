@@ -327,7 +327,7 @@ class SphericalLattice(Lattice):
 
             for mphi in range(m_phi):
                 phi = numpy.pi * (mphi + 0.5) / m_phi
-                m_theta = int(round(2 * numpy.pi * numpy.sin(phi) / m_theta))
+                m_theta = int(round(2 * numpy.pi * numpy.sin(phi) / d_phi))
 
                 for mtheta in range(m_theta):
                     theta = 2 * numpy.pi * mtheta / m_theta
