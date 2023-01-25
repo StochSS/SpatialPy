@@ -327,7 +327,7 @@ class SphericalLattice(Lattice):
 
             for mphi in range(m_phi):
                 phi = numpy.pi * (mphi + 0.5) / m_phi
-                m_theta = int(round(2 * numpy.pi * numpy.sin(phi) / d_theta))
+                m_theta = int(round(2 * numpy.pi * numpy.sin(phi) / m_theta))
 
                 for mtheta in range(m_theta):
                     theta = 2 * numpy.pi * mtheta / m_theta
@@ -464,7 +464,7 @@ class CylindricalLattice(Lattice):
             x = xmin
             while x <= xmax:
                 for mtheta in range(m_theta):
-                    theta = 2 * numpy.pi * (mtheta + 0.5) / d_theta
+                    theta = 2 * numpy.pi * (mtheta + 0.5) / m_theta
                     y = radius * numpy.cos(theta)
                     z = radius * numpy.sin(theta)
                     if geometry.inside((x, y, z), False):
