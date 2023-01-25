@@ -308,6 +308,10 @@ class SphericalLattice(Lattice):
         if transform is not None and not callable(transform):
             raise LatticeError("transform must be a function.")
 
+        digits = max(
+            len(str(self.deltar).split(".")[1]) if "." in str(self.deltar) else 0,
+            len(str(self.radius).split(".")[1]) if "." in str(self.radius) else 0
+        )
         count = 0
         radius = self.radius
         while radius > 0:
@@ -323,7 +327,7 @@ class SphericalLattice(Lattice):
 
             for mphi in range(m_phi):
                 phi = numpy.pi * (mphi + 0.5) / m_phi
-                m_theta = int(round(2 * numpy.pi * numpy.sin(phi) / d_phi))
+                m_theta = int(round(2 * numpy.pi * numpy.sin(phi) / d_theta))
 
                 for mtheta in range(m_theta):
                     theta = 2 * numpy.pi * mtheta / m_theta
@@ -339,7 +343,7 @@ class SphericalLattice(Lattice):
                             point = numpy.array(point)
                         domain.add_point(point + self.center, **kwargs)
                         count += 1
-            radius -= self.deltar
+            radius = round(radius - self.deltar, digits)
         if radius == 0 and geometry.inside((0, 0, 0), False):
             point = [0, 0, 0] if transform is None else transform([0, 0, 0])
             if not isinstance(point, numpy.ndarray):
@@ -439,6 +443,10 @@ class CylindricalLattice(Lattice):
         if transform is not None and not callable(transform):
             raise LatticeError("transform must be a function.")
 
+        digits = max(
+            len(str(self.deltar).split(".")[1]) if "." in str(self.deltar) else 0,
+            len(str(self.radius).split(".")[1]) if "." in str(self.radius) else 0
+        )
         count = 0
         h_len = self.length / 2
         xmin = -h_len
@@ -456,7 +464,7 @@ class CylindricalLattice(Lattice):
             x = xmin
             while x <= xmax:
                 for mtheta in range(m_theta):
-                    theta = 2 * numpy.pi * (mtheta + 0.5) / m_theta
+                    theta = 2 * numpy.pi * (mtheta + 0.5) / d_theta
                     y = radius * numpy.cos(theta)
                     z = radius * numpy.sin(theta)
                     if geometry.inside((x, y, z), False):
@@ -469,7 +477,7 @@ class CylindricalLattice(Lattice):
                         domain.add_point(point + self.center, **kwargs)
                         count += 1
                 x += self.deltas
-            radius -= self.deltar
+            radius = round(radius - self.deltar, digits)
         if radius == 0:
             x = xmin
             while x <= xmax:
