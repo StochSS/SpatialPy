@@ -320,7 +320,7 @@ class SphericalLattice(Lattice):
 
             if approx_rc == 0:
                 from spatialpy.core import log # pylint: disable=import-outside-toplevel
-                msg = f"Approximation of particles for the layer at radius {radius} is 0."
+                msg = f"Approximation of particles for the layer at radius {radius} is 0. "
                 msg += "Consider increasing the radius or increasing the radial spacing (deltas)"
                 log.warning(msg)
             else:
@@ -464,7 +464,7 @@ class CylindricalLattice(Lattice):
 
             if approx_rc == 0:
                 from spatialpy.core import log # pylint: disable=import-outside-toplevel
-                msg = f"Approximation of particles for the layer at radius {radius} is 0."
+                msg = f"Approximation of particles for the layer at radius {radius} is 0. "
                 msg += "Consider increasing the radius or increasing the radial spacing (deltas)"
                 log.warning(msg)
             else:
