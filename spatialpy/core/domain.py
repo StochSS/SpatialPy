@@ -474,7 +474,7 @@ class Domain():
                 min_vtx = i
         return min_vtx
 
-    def compile_prep(self):
+    def compile_prep(self, allow_all_types=False):
         """
         Generate the domains list of type ids and check for invalid type_ids and rho values
         in preperation of compiling the simulation files.
@@ -483,8 +483,9 @@ class Domain():
         """
         self.apply_actions()
 
-        if self.type_id.tolist().count("type_UnAssigned") > 0:
-            raise DomainError("Particles must be assigned a type_id.")
+        if not allow_all_types:
+            if self.type_id.tolist().count("type_UnAssigned") > 0:
+                raise DomainError("Particles must be assigned a type_id.")
         if numpy.count_nonzero(self.rho) < len(self.rho):
             raise DomainError("Rho must be a positive value.")
 
