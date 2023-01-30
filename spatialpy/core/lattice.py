@@ -158,8 +158,9 @@ class CartesianLattice(Lattice):
             count += 1
         return count
 
-    def __generate_z(self, domain, geometry, transform, x, y, count, kwargs):
+    def __generate_z(self, domain, geometry, transform, x, y, count, z_digits, kwargs):
         for z in numpy.arange(self.zmin, self.zmax + self.deltaz, self.deltaz):
+            z = round(z, z_digits)
             count = self.__add_point(domain, geometry, transform, [x, y, z], count, kwargs)
         return count
 
@@ -190,14 +191,31 @@ class CartesianLattice(Lattice):
         if transform is not None and not callable(transform):
             raise LatticeError("transform must be a function.")
 
+        x_digits = max(
+            len(str(self.deltax).split(".")[1]) if "." in str(self.deltax) else 0,
+            len(str(self.xmin).split(".")[1]) if "." in str(self.xmin) else 0,
+            len(str(self.xmax).split(".")[1]) if "." in str(self.xmax) else 0
+        )
+        y_digits = max(
+            len(str(self.deltay).split(".")[1]) if "." in str(self.deltay) else 0,
+            len(str(self.ymin).split(".")[1]) if "." in str(self.ymin) else 0,
+            len(str(self.ymax).split(".")[1]) if "." in str(self.ymax) else 0
+        )
+        z_digits = max(
+            len(str(self.deltaz).split(".")[1]) if "." in str(self.deltaz) else 0,
+            len(str(self.zmin).split(".")[1]) if "." in str(self.zmin) else 0,
+            len(str(self.zmax).split(".")[1]) if "." in str(self.zmax) else 0
+        )
         count = 0
         for x in numpy.arange(self.xmin, self.xmax + self.deltax, self.deltax):
+            x = round(x, x_digits)
             for y in numpy.arange(self.ymin, self.ymax + self.deltay, self.deltay):
+                y = round(y, y_digits)
                 if self.deltaz == 0:
                     z = self.center[2]
                     count = self.__add_point(domain, geometry, transform, [x, y, z], count, kwargs)
                 else:
-                    count = self.__generate_z(domain, geometry, transform, x, y, count, kwargs)
+                    count = self.__generate_z(domain, geometry, transform, x, y, count, z_digits, kwargs)
         self._update_limits(domain)
         if 'vol' not in kwargs:
             offset = len(domain.vertices) - count
