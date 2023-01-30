@@ -18,33 +18,33 @@ import logging
 from spatialpy.__version__ import __version__
 from .boundarycondition import BoundaryCondition
 from .cleanup import (
-	cleanup_tempfiles,
-	cleanup_core_files,
-	cleanup_build_files,
-	cleanup_result_files
+    cleanup_tempfiles,
+    cleanup_core_files,
+    cleanup_build_files,
+    cleanup_result_files
 )
 from .datafunction import DataFunction
 from .domain import Domain
 from .geometry import (
-	CombinatoryGeometry,
-	Geometry,
-	GeometryAll,
-	GeometryExterior,
-	GeometryInterior
+    CombinatoryGeometry,
+    Geometry,
+    GeometryAll,
+    GeometryExterior,
+    GeometryInterior
 )
 from .initialcondition import (
-	InitialCondition,
-	PlaceInitialCondition,
-	UniformInitialCondition,
-	ScatterInitialCondition
+    InitialCondition,
+    PlaceInitialCondition,
+    UniformInitialCondition,
+    ScatterInitialCondition
 )
 from .lattice import (
-	CartesianLattice,
-	SphericalLattice,
-	CylindricalLattice,
-	XMLMeshLattice,
-	MeshIOLattice,
-	StochSSLattice
+    CartesianLattice,
+    SphericalLattice,
+    CylindricalLattice,
+    XMLMeshLattice,
+    MeshIOLattice,
+    StochSSLattice
 )
 from .model import Model, export_StochSS
 from .parameter import Parameter
@@ -54,21 +54,27 @@ from .spatialpyerror import *
 from .species import Species
 from .timespan import TimeSpan
 from .transformation import (
-	Transformation,
-	TranslationTransformation,
-	RotationTransformation,
-	ReflectionTransformation,
-	ScalingTransformation
+    Transformation,
+    TranslationTransformation,
+    RotationTransformation,
+    ReflectionTransformation,
+    ScalingTransformation
 )
 from .visualization import Visualization
 from .vtkreader import *
 
-_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-_handler = logging.StreamHandler()
-_handler.setFormatter(_formatter)
 version = __version__
-log = logging.getLogger()
+
+log = logging.getLogger("SpatialPy")
 log.setLevel(logging.WARNING)
-log.addHandler(_handler)
+log.propagate = False
+
+if not log.handlers:
+    _formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    _handler = logging.StreamHandler()
+    _handler.setFormatter(_formatter)
+
+    log.addHandler(_handler)
 
 __all__ = [s for s in dir() if not s.startswith('_')]
