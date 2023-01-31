@@ -388,17 +388,19 @@ class Domain():
 
         # remove the particles that fall within the defined region
         on_boundary = self.find_boundary_points(update=True)
-        for v_ndx, vertex in enumerate(self.vertices):
-            if action['geometry'].inside(vertex, on_boundary[v_ndx]):
-                self.vertices = numpy.delete(self.vertices, v_ndx, 0)
-                self.type_id = numpy.delete(self.type_id, v_ndx, 0)
-                self.vol = numpy.delete(self.vol, v_ndx)
-                self.mass = numpy.delete(self.mass, v_ndx)
-                self.rho = numpy.delete(self.rho, v_ndx)
-                self.nu = numpy.delete(self.nu, v_ndx)
-                self.c = numpy.delete(self.c, v_ndx)
-                self.fixed = numpy.delete(self.fixed, v_ndx)
-                self.on_boundary = numpy.delete(self.on_boundary, v_ndx)
+        geometry = action['geometry']
+        indices = [v_ndx for v_ndx, vertex in enumerate(self.vertices) if geometry.inside(vertex, on_boundary[v_ndx])]
+        indices.reverse()
+        for v_ndx in indices:
+            self.vertices = numpy.delete(self.vertices, v_ndx, 0)
+            self.type_id = numpy.delete(self.type_id, v_ndx, 0)
+            self.vol = numpy.delete(self.vol, v_ndx)
+            self.mass = numpy.delete(self.mass, v_ndx)
+            self.rho = numpy.delete(self.rho, v_ndx)
+            self.nu = numpy.delete(self.nu, v_ndx)
+            self.c = numpy.delete(self.c, v_ndx)
+            self.fixed = numpy.delete(self.fixed, v_ndx)
+            self.on_boundary = numpy.delete(self.on_boundary, v_ndx)
 
     def apply_set_action(self, action):
         """
