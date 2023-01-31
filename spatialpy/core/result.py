@@ -582,7 +582,7 @@ class Result():
 
         if return_plotly_figure:
             return fig
-        init_notebook_mode(connected=True)
+        init_notebook_mode()
         iplot(fig)
 
     def get_property(self, property_name, timepoints=None):
@@ -881,7 +881,7 @@ class Result():
 
         if return_plotly_figure:
             return fig
-        init_notebook_mode(connected=True)
+        init_notebook_mode()
         iplot(fig)
 
     def export_to_csv(self, folder_name=None):

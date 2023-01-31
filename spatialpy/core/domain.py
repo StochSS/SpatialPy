@@ -1035,7 +1035,6 @@ class Domain():
 
         if return_plotly_figure:
             return fig
-        # init_notebook_mode(connected=True)
         init_notebook_mode()
         iplot(fig)
         return
