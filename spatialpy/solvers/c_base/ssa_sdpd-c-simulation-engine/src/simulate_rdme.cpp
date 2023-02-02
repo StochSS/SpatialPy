@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 
 //#include "binheap.h"
-#include "output.h"
+#include "output.hpp"
 #include "particle_system.hpp"
 #include "propensities.hpp"
 #include "simulate_rdme.hpp"

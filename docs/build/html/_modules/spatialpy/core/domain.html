@@ -5,14 +5,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>spatialpy.core.domain &#8212; SpatialPy 1.1.0 documentation</title>
+    <title>spatialpy.core.domain &#8212; SpatialPy 1.2.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/spatialpy_alabaster_customizations.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
    
@@ -73,7 +75,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -109,26 +111,26 @@
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">string</span>
 
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">combinations</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span>
-<span class="kn">from</span> <span class="nn">plotly.offline</span> <span class="k">import</span> <span class="n">init_notebook_mode</span><span class="p">,</span> <span class="n">iplot</span>
-<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="k">import</span> <span class="n">KDTree</span>
+<span class="kn">from</span> <span class="nn">plotly.offline</span> <span class="kn">import</span> <span class="n">init_notebook_mode</span><span class="p">,</span> <span class="n">iplot</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">KDTree</span>
 
-<span class="kn">from</span> <span class="nn">spatialpy.core.geometry</span> <span class="k">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">spatialpy.core.geometry</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">CombinatoryGeometry</span><span class="p">,</span> <span class="n">Geometry</span><span class="p">,</span> <span class="n">GeometryAll</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">spatialpy.core.lattice</span> <span class="k">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">spatialpy.core.lattice</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Lattice</span><span class="p">,</span> <span class="n">CartesianLattice</span><span class="p">,</span> <span class="n">SphericalLattice</span><span class="p">,</span> <span class="n">CylindricalLattice</span><span class="p">,</span>
     <span class="n">XMLMeshLattice</span><span class="p">,</span> <span class="n">MeshIOLattice</span><span class="p">,</span> <span class="n">StochSSLattice</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">spatialpy.core.transformation</span> <span class="k">import</span> <span class="n">Transformation</span>
-<span class="kn">from</span> <span class="nn">spatialpy.core.visualization</span> <span class="k">import</span> <span class="n">Visualization</span>
-<span class="kn">from</span> <span class="nn">spatialpy.core.spatialpyerror</span> <span class="k">import</span> <span class="n">DomainError</span>
+<span class="kn">from</span> <span class="nn">spatialpy.core.transformation</span> <span class="kn">import</span> <span class="n">Transformation</span>
+<span class="kn">from</span> <span class="nn">spatialpy.core.visualization</span> <span class="kn">import</span> <span class="n">Visualization</span>
+<span class="kn">from</span> <span class="nn">spatialpy.core.spatialpyerror</span> <span class="kn">import</span> <span class="n">DomainError</span>
 
 <div class="viewcode-block" id="Domain"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain">[docs]</a><span class="k">class</span> <span class="nc">Domain</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Domain class for SpatialPy.  A domain defines points and attributes of a regional space for simulation.</span>
 
 <span class="sd">    :param numpoints: Total number of spatial domain points</span>
@@ -155,7 +157,7 @@
 <span class="sd">    :param gravity: Acceleration of gravity for the system.</span>
 <span class="sd">    :type gravity: float[3]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numpoints</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span><span class="p">,</span> <span class="n">rho0</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">c0</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">P0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gravity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numpoints</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span><span class="p">,</span> <span class="n">rho0</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">c0</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">P0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gravity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">actions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -192,12 +194,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ylim</span> <span class="o">=</span> <span class="n">ylim</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">zlim</span> <span class="o">=</span> <span class="n">zlim</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">pad</span> <span class="o">=</span> <span class="s2">&quot;    &quot;</span>
-        <span class="n">domain_strs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Domain Attributes&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{pad}</span><span class="s2">On Boundary: </span><span class="si">{self.on_boundary}</span><span class="s2">&quot;</span><span class="p">,</span>
-                     <span class="n">f</span><span class="s2">&quot;</span><span class="si">{pad}</span><span class="s2">Domain Size: </span><span class="si">{self.domain_size}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{pad}</span><span class="s2">RHO_0: </span><span class="si">{self.rho0}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{pad}</span><span class="s2">C_0: </span><span class="si">{self.c0}</span><span class="s2">&quot;</span><span class="p">,</span>
-                     <span class="n">f</span><span class="s2">&quot;</span><span class="si">{pad}</span><span class="s2">P_0: </span><span class="si">{self.P0}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{pad}</span><span class="s2">Gravity: </span><span class="si">{self.gravity}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{pad}</span><span class="s2">X Limit: </span><span class="si">{self.xlim}</span><span class="s2">&quot;</span><span class="p">,</span>
-                     <span class="n">f</span><span class="s2">&quot;</span><span class="si">{pad}</span><span class="s2">Y Limit: </span><span class="si">{self.ylim}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{pad}</span><span class="s2">Z Limit: </span><span class="si">{self.zlim}</span><span class="s2">&quot;</span><span class="p">]</span>
+        <span class="n">domain_strs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Domain Attributes&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pad</span><span class="si">}</span><span class="s2">On Boundary: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">on_boundary</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pad</span><span class="si">}</span><span class="s2">Domain Size: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">domain_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pad</span><span class="si">}</span><span class="s2">RHO_0: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rho0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pad</span><span class="si">}</span><span class="s2">C_0: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">c0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pad</span><span class="si">}</span><span class="s2">P_0: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">P0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pad</span><span class="si">}</span><span class="s2">Gravity: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gravity</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pad</span><span class="si">}</span><span class="s2">X Limit: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">xlim</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pad</span><span class="si">}</span><span class="s2">Y Limit: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ylim</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pad</span><span class="si">}</span><span class="s2">Z Limit: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">zlim</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">domain_strs</span><span class="p">))</span>
 
@@ -222,7 +224,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="p">[</span><span class="n">ndx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fixed</span><span class="p">[</span><span class="n">ndx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">fixed</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Failed to set all properties. Reaseon given: </span><span class="si">{err}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+            <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to set all properties. Reaseon given: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
 
     <span class="k">def</span> <span class="nf">_ipython_display_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_matplotlib</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_types</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">use_matplotlib</span><span class="o">=</span><span class="n">use_matplotlib</span><span class="p">)</span>
@@ -240,7 +242,7 @@
 
 <div class="viewcode-block" id="Domain.add_fill_action"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.add_fill_action">[docs]</a>    <span class="k">def</span> <span class="nf">add_fill_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cartesian</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">spherical</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">cylindrical</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">apply_action</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">props</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an action that can add particles to the domain.</span>
 
 <span class="sd">        :param lattice: Lattice classed used when applying fill actions.</span>
@@ -294,7 +296,7 @@
         <span class="k">return</span> <span class="n">action</span></div>
 
 <div class="viewcode-block" id="Domain.add_point"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.add_point">[docs]</a>    <span class="k">def</span> <span class="nf">add_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">vol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">type_id</span><span class="o">=</span><span class="s2">&quot;UnAssigned&quot;</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a single point particle to the domain space.</span>
 
 <span class="sd">        :param point: Spatial coordinate vertices of point to be added</span>
@@ -328,10 +330,11 @@
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">type_id</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="s2">&quot;Type_id must be a non-zero positive integer or a string.&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">type_id</span><span class="p">:</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">char</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">punctuation</span> <span class="ow">and</span> <span class="n">char</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">char</span> <span class="o">==</span> <span class="s2">&quot; &quot;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Type_id cannot contain &#39;</span><span class="si">{char}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-        <span class="n">type_id</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;type_</span><span class="si">{type_id}</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">type_id</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">char</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">punctuation</span> <span class="ow">and</span> <span class="n">char</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">char</span> <span class="o">==</span> <span class="s2">&quot; &quot;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Type_id cannot contain &#39;</span><span class="si">{</span><span class="n">char</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="n">type_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;type_</span><span class="si">{</span><span class="n">type_id</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="k">if</span> <span class="n">rho</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">rho</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">/</span> <span class="n">vol</span>
@@ -347,7 +350,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="p">[</span><span class="n">point</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Domain.add_remove_action"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.add_remove_action">[docs]</a>    <span class="k">def</span> <span class="nf">add_remove_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">apply_action</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an action that can remove particles from the domain.</span>
 
 <span class="sd">        :param geometry: Geometry classed used when applying set actions. Defaults to spatialpy.GeometryAll.</span>
@@ -372,7 +375,7 @@
         <span class="k">return</span> <span class="n">action</span></div>
 
 <div class="viewcode-block" id="Domain.add_set_action"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.add_set_action">[docs]</a>    <span class="k">def</span> <span class="nf">add_set_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">apply_action</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">props</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an action that can set particle properties for particles in the domain.</span>
 
 <span class="sd">        :param geometry: Geometry classed used when applying set actions. Defaults to spatialpy.GeometryAll.</span>
@@ -404,7 +407,7 @@
         <span class="k">return</span> <span class="n">action</span></div>
 
 <div class="viewcode-block" id="Domain.apply_actions"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.apply_actions">[docs]</a>    <span class="k">def</span> <span class="nf">apply_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">preserve_actions</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply domain actions in order from start to end.</span>
 
 <span class="sd">        :param start: Starting index for actions (inclusive).</span>
@@ -433,7 +436,7 @@
                 <span class="k">elif</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;remove&quot;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">apply_remove_action</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Action of type </span><span class="si">{action[&#39;type&#39;]}</span><span class="s2"> is not currently supported.&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Action of type </span><span class="si">{</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not currently supported.&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">preserve_actions</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;enable&#39;</span><span class="p">]:</span>
                 <span class="n">start</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -443,7 +446,7 @@
         <span class="k">return</span> <span class="n">p_count</span></div>
 
 <div class="viewcode-block" id="Domain.apply_fill_action"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.apply_fill_action">[docs]</a>    <span class="k">def</span> <span class="nf">apply_fill_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add particles within a region defined by the actions lattice and geometry to the domain.</span>
 <span class="sd">        Particles will have attributes defined in the actions props.</span>
 
@@ -463,7 +466,7 @@
         <span class="k">return</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;lattice&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="Domain.apply_remove_action"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.apply_remove_action">[docs]</a>    <span class="k">def</span> <span class="nf">apply_remove_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove particles within a domain region defined by the actions geometry.</span>
 
 <span class="sd">        :param action: Remove action containing a geometry.</span>
@@ -480,8 +483,9 @@
 
         <span class="c1"># remove the particles that fall within the defined region</span>
         <span class="n">on_boundary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_boundary_points</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">v_ndx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_num_voxels</span><span class="p">()):</span>
-            <span class="k">if</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">inside</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">()[</span><span class="n">v_ndx</span><span class="p">,</span> <span class="p">:],</span> <span class="n">on_boundary</span><span class="p">[</span><span class="n">v_ndx</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">v_ndx</span><span class="p">,</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">inside</span><span class="p">(</span><span class="n">vertex</span><span class="p">,</span> <span class="n">on_boundary</span><span class="p">[</span><span class="n">v_ndx</span><span class="p">]):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="n">v_ndx</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">type_id</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_id</span><span class="p">,</span> <span class="n">v_ndx</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">vol</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol</span><span class="p">,</span> <span class="n">v_ndx</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span> <span class="n">v_ndx</span><span class="p">)</span>
@@ -492,7 +496,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">on_boundary</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_boundary</span><span class="p">,</span> <span class="n">v_ndx</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Domain.apply_set_action"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.apply_set_action">[docs]</a>    <span class="k">def</span> <span class="nf">apply_set_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set properties of particles within a domain region defined by the actions geometry.</span>
 <span class="sd">        Particles will have attributes defined in the actions props.</span>
 
@@ -513,10 +517,11 @@
         <span class="k">if</span> <span class="s2">&quot;type_id&quot;</span> <span class="ow">in</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">][</span><span class="s1">&#39;type_id&#39;</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">][</span><span class="s1">&#39;type_id&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="s2">&quot;Type_id must be a non-zero positive integer or a string.&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">][</span><span class="s1">&#39;type_id&#39;</span><span class="p">]:</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">char</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">punctuation</span> <span class="ow">and</span> <span class="n">char</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">char</span> <span class="o">==</span> <span class="s2">&quot; &quot;</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Type_id cannot contain &#39;</span><span class="si">{char}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-            <span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">][</span><span class="s1">&#39;type_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;type_</span><span class="si">{action[&#39;props&#39;][&#39;type_id&#39;]}</span><span class="s2">&quot;</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">][</span><span class="s1">&#39;type_id&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">][</span><span class="s1">&#39;type_id&#39;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">char</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">punctuation</span> <span class="ow">and</span> <span class="n">char</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">char</span> <span class="o">==</span> <span class="s2">&quot; &quot;</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Type_id cannot contain &#39;</span><span class="si">{</span><span class="n">char</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+            <span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">][</span><span class="s1">&#39;type_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;type_</span><span class="si">{</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">][</span><span class="s1">&#39;type_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="c1"># apply the properties to all points that fall within the defined region</span>
         <span class="n">on_boundary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_boundary_points</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -525,7 +530,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">__set_particle_properties</span><span class="p">(</span><span class="n">v_ndx</span><span class="p">,</span> <span class="o">**</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="Domain.calculate_vol"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.calculate_vol">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_vol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the total volume of the domain.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vol</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -546,7 +551,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">vol</span><span class="p">[</span><span class="n">v4</span><span class="p">]</span> <span class="o">+=</span> <span class="n">t_vol</span> <span class="o">/</span> <span class="mi">4</span></div>
 
 <div class="viewcode-block" id="Domain.closest_vertex"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.closest_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">closest_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find the nearest vertex of a given point in the domain.</span>
 
 <span class="sd">        :param point: Target source point</span>
@@ -565,7 +570,7 @@
         <span class="k">return</span> <span class="n">min_vtx</span></div>
 
 <div class="viewcode-block" id="Domain.compile_prep"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.compile_prep">[docs]</a>    <span class="k">def</span> <span class="nf">compile_prep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the domains list of type ids and check for invalid type_ids and rho values</span>
 <span class="sd">        in preperation of compiling the simulation files.</span>
 
@@ -583,7 +588,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">listOfTypeIDs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typeNdxMapping</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="Domain.coordinates"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.coordinates">[docs]</a>    <span class="k">def</span> <span class="nf">coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get coordinates within domain.</span>
 
 <span class="sd">        :returns: Spatial coordinate vertices of points.</span>
@@ -594,7 +599,7 @@
 <div class="viewcode-block" id="Domain.create_2D_domain"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.create_2D_domain">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create_2D_domain</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">numx</span><span class="p">,</span> <span class="n">numy</span><span class="p">,</span> <span class="n">type_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">c</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">apply_action</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a filled 2D domain</span>
 
 <span class="sd">        :param xlim: highest and lowest coordinate in the x dimension</span>
@@ -660,7 +665,7 @@
 <div class="viewcode-block" id="Domain.create_3D_domain"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.create_3D_domain">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create_3D_domain</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span><span class="p">,</span> <span class="n">numx</span><span class="p">,</span> <span class="n">numy</span><span class="p">,</span> <span class="n">numz</span><span class="p">,</span> <span class="n">type_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
                          <span class="n">rho</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">apply_action</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a filled 3D domain</span>
 
 <span class="sd">        :param xlim: highest and lowest coordinate in the x dimension</span>
@@ -732,7 +737,7 @@
         <span class="k">return</span> <span class="n">obj</span></div>
 
 <div class="viewcode-block" id="Domain.distance_between_2_vertices"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.distance_between_2_vertices">[docs]</a>    <span class="k">def</span> <span class="nf">distance_between_2_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get distance between 2 domain vertices.</span>
 
 <span class="sd">        :param start: Starting point</span>
@@ -748,7 +753,7 @@
 
 <div class="viewcode-block" id="Domain.fill_with_particles"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.fill_with_particles">[docs]</a>    <span class="k">def</span> <span class="nf">fill_with_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry_ivar</span><span class="p">,</span> <span class="n">deltax</span><span class="p">,</span> <span class="n">deltay</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">deltaz</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">ymin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ymax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">apply_action</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fill a region defined by a cartesian lattice and geometric shape with particles.</span>
 
 <span class="sd">        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass. \</span>
@@ -802,7 +807,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Domain.find_boundary_points"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.find_boundary_points">[docs]</a>    <span class="k">def</span> <span class="nf">find_boundary_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find all vertices that exist on boundary.</span>
 
 <span class="sd">        :returns: A numpy array indexed by vertices, True for boundary points, else false.</span>
@@ -836,7 +841,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_boundary</span></div>
 
 <div class="viewcode-block" id="Domain.find_h"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.find_h">[docs]</a>    <span class="k">def</span> <span class="nf">find_h</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find h value of system.  This value is based off of \</span>
 <span class="sd">        the particle which has the greatest distance to \</span>
 <span class="sd">        its nearest neighbor.</span>
@@ -856,7 +861,7 @@
         <span class="k">return</span> <span class="n">h</span></div>
 
 <div class="viewcode-block" id="Domain.get_bounding_box"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.get_bounding_box">[docs]</a>    <span class="k">def</span> <span class="nf">get_bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the bounding box of the entire domain.</span>
 
 <span class="sd">        :returns: Limits of the bounding box.</span>
@@ -870,7 +875,7 @@
         <span class="k">return</span> <span class="n">xlim</span><span class="p">,</span> <span class="n">ylim</span><span class="p">,</span> <span class="n">zlim</span></div>
 
 <div class="viewcode-block" id="Domain.get_domain_size"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.get_domain_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_domain_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Estimate of domain size at each vertex as the average of the</span>
 <span class="sd">        diameters of the circumradius of the tetrahedrons that vertex</span>
 <span class="sd">        is a part of.</span>
@@ -910,7 +915,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain_size</span></div>
 
 <div class="viewcode-block" id="Domain.get_num_voxels"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.get_num_voxels">[docs]</a>    <span class="k">def</span> <span class="nf">get_num_voxels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get number of voxels in domain.</span>
 
 <span class="sd">        :returns: Number of voxels in the domain.</span>
@@ -919,7 +924,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="Domain.get_type_def"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.get_type_def">[docs]</a>    <span class="k">def</span> <span class="nf">get_type_def</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the C++ type definition for the given type.</span>
 
 <span class="sd">        :param type_id: The type_id within the domain.</span>
@@ -930,15 +935,15 @@
 
 <span class="sd">        :raises DomainError: If the type is not defined within the domain.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">type_id</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;type_</span><span class="si">{type_id}</span><span class="s2">&quot;</span>
+        <span class="n">type_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;type_</span><span class="si">{</span><span class="n">type_id</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="n">type_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">typeNdxMapping</span><span class="p">:</span>
-            <span class="n">errmsg</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;Type_id </span><span class="si">{type_id}</span><span class="s2"> could not be found. &quot;</span>
+            <span class="n">errmsg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Type_id </span><span class="si">{</span><span class="n">type_id</span><span class="si">}</span><span class="s2"> could not be found. &quot;</span>
             <span class="n">errmsg</span> <span class="o">+=</span> <span class="s2">&quot;Use Domain.set_properties to set the type_id for particles.&quot;</span>
             <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">type_id</span></div>
 
 <div class="viewcode-block" id="Domain.get_vol"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.get_vol">[docs]</a>    <span class="k">def</span> <span class="nf">get_vol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the total volume of the domain.</span>
 
 <span class="sd">        :returns: Total volume of the system.</span>
@@ -950,7 +955,7 @@
 
 <div class="viewcode-block" id="Domain.import_meshio_object"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.import_meshio_object">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">import_meshio_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">mesh_obj</span><span class="p">,</span> <span class="n">subdomain_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">apply_action</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Import a python meshio mesh object.</span>
 
 <span class="sd">        :param mesh_obj: MeshIO object to import</span>
@@ -985,7 +990,7 @@
 
 <div class="viewcode-block" id="Domain.plot_types"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.plot_types">[docs]</a>    <span class="k">def</span> <span class="nf">plot_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                    <span class="n">included_types_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_matplotlib</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_plotly_figure</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Plots the domain using plotly. Can only be viewed in a Jupyter Notebook.</span>
 
 <span class="sd">        :param width: Width in pixels of output plot box or for matplotlib inches of output plot box. \</span>
@@ -1023,7 +1028,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="s2">&quot;The domain does not contain particles.&quot;</span><span class="p">)</span>
 
-        <span class="kn">from</span> <span class="nn">spatialpy.core.result</span> <span class="k">import</span> <span class="n">_plotly_iterate</span> <span class="c1"># pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span> <span class="nn">spatialpy.core.result</span> <span class="kn">import</span> <span class="n">_plotly_iterate</span> <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">use_matplotlib</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">width</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">):</span>
@@ -1125,12 +1130,12 @@
 
         <span class="k">if</span> <span class="n">return_plotly_figure</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">fig</span>
-        <span class="n">init_notebook_mode</span><span class="p">(</span><span class="n">connected</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">init_notebook_mode</span><span class="p">()</span>
         <span class="n">iplot</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
         <span class="k">return</span></div>
 
 <div class="viewcode-block" id="Domain.preview_actions"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.preview_actions">[docs]</a>    <span class="k">def</span> <span class="nf">preview_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Preview effects of actions to the domain.</span>
 
 <span class="sd">        :param start: Starting index for actions (inclusive).</span>
@@ -1148,7 +1153,7 @@
 
 <div class="viewcode-block" id="Domain.read_msh_file"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.read_msh_file">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">read_msh_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">subdomain_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">apply_action</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read a Gmsh style .msh file</span>
 
 <span class="sd">        :param filename: Filename of gmsh file</span>
@@ -1183,7 +1188,7 @@
 
 <div class="viewcode-block" id="Domain.read_stochss_domain"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.read_stochss_domain">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">read_stochss_domain</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">apply_action</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read a StochSS Domain (.domn) file or pull a StochSS Domain from a StochSS Spatial Model (.smdl) file.</span>
 
 <span class="sd">        :param filename: Name of file to read.</span>
@@ -1205,7 +1210,7 @@
         <span class="k">return</span> <span class="n">obj</span></div>
 
 <div class="viewcode-block" id="Domain.read_stochss_subdomain_file"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.read_stochss_subdomain_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_stochss_subdomain_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">type_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read a .txt file that conains the StochSS v1.x spatial subdomain descriptions.</span>
 
 <span class="sd">        :param filename: StochSS v1.x subdomain description filename.</span>
@@ -1221,19 +1226,19 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="p">(</span><span class="n">ndx</span><span class="p">,</span> <span class="n">type_id</span><span class="p">)</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
 
-                    <span class="n">type_id</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;type_{type_id if type_ids is None else type_ids[type_id]}&quot;</span>
+                    <span class="n">type_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;type_</span><span class="si">{</span><span class="n">type_id</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">type_ids</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="kc">None</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">type_ids</span><span class="p">[</span><span class="n">type_id</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">type_id</span><span class="p">:</span>
                         <span class="k">if</span> <span class="p">(</span><span class="n">char</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">punctuation</span> <span class="ow">and</span> <span class="n">char</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">char</span> <span class="o">==</span> <span class="s2">&quot; &quot;</span><span class="p">:</span>
-                            <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Type_id cannot contain &#39;</span><span class="si">{char}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                            <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Type_id cannot contain &#39;</span><span class="si">{</span><span class="n">char</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
 
                     <span class="bp">self</span><span class="o">.</span><span class="n">type_id</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">ndx</span><span class="p">)]</span> <span class="o">=</span> <span class="n">type_id</span>
 
                 <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Could not read in subdomain file, error on line </span><span class="si">{lnum}</span><span class="s2">: </span><span class="si">{line}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span></div>
+                    <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not read in subdomain file, error on line </span><span class="si">{</span><span class="n">lnum</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span></div>
 
 <div class="viewcode-block" id="Domain.read_xml_mesh"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.read_xml_mesh">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">read_xml_mesh</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">subdomain_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">apply_action</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read a FEniCS/dolfin style XML mesh file</span>
 
 <span class="sd">        :param filename: Name of file to read.</span>
@@ -1268,7 +1273,7 @@
 
 <div class="viewcode-block" id="Domain.set_properties"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.set_properties">[docs]</a>    <span class="k">def</span> <span class="nf">set_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry_ivar</span><span class="p">,</span> <span class="n">type_id</span><span class="p">,</span> <span class="n">vol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">rho</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">apply_action</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a type definition to the domain. By default, all regions are set to type 0.</span>
 
 <span class="sd">        :param geometry_ivar: an instance of a :py:class:`spatialpy.core.geometry.Geometry` subclass. \</span>
@@ -1310,7 +1315,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">add_set_action</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">geometry_ivar</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="n">enable</span><span class="p">,</span> <span class="n">apply_action</span><span class="o">=</span><span class="n">apply_action</span><span class="p">,</span> <span class="o">**</span><span class="n">props</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Domain.validate_action"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.domain.Domain.validate_action">[docs]</a>    <span class="k">def</span> <span class="nf">validate_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">coverage</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validate a domain action.</span>
 
 <span class="sd">        :param action: Domain action to be validated.</span>
@@ -1330,12 +1335,12 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">],</span> <span class="p">(</span><span class="n">Geometry</span><span class="p">,</span> <span class="n">CombinatoryGeometry</span><span class="p">,</span> <span class="n">Transformation</span><span class="p">))</span> <span class="ow">or</span> \
                                             <span class="n">g_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;Geometry&quot;</span><span class="p">,</span> <span class="s2">&quot;CombinatoryGeometry&quot;</span><span class="p">,</span> <span class="s2">&quot;Transformation&quot;</span><span class="p">)):</span>
                 <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span>
-                    <span class="n">f</span><span class="s2">&quot;A </span><span class="si">{action[&#39;type&#39;]}</span><span class="s2"> action&#39;s geometry must be of type &#39;Geometry&#39; or &#39;Transformation&#39; not </span><span class="si">{g_type}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;A </span><span class="si">{</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> action&#39;s geometry must be of type &#39;Geometry&#39; or &#39;Transformation&#39; not </span><span class="si">{</span><span class="n">g_type</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">coverage</span> <span class="o">==</span> <span class="s2">&quot;fill&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;fill&quot;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;The action&#39;s type must be &#39;fill&#39; not &#39;</span><span class="si">{action[&#39;type&#39;]}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The action&#39;s type must be &#39;fill&#39; not &#39;</span><span class="si">{</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;lattice&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="s2">&quot;Fill actions must have a lattice.&quot;</span><span class="p">)</span>
@@ -1343,23 +1348,23 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;lattice&#39;</span><span class="p">],</span> <span class="p">(</span><span class="n">Lattice</span><span class="p">,</span> <span class="n">Transformation</span><span class="p">))</span> <span class="ow">or</span> \
                                                     <span class="n">l_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;Lattice&quot;</span><span class="p">,</span> <span class="s2">&quot;Transformation&quot;</span><span class="p">)):</span>
                 <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span>
-                    <span class="n">f</span><span class="s2">&quot;A fill action&#39;s lattice must be of type &#39;Lattice&#39; or &#39;Transformation&#39; not </span><span class="si">{l_type}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;A fill action&#39;s lattice must be of type &#39;Lattice&#39; or &#39;Transformation&#39; not </span><span class="si">{</span><span class="n">l_type</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">coverage</span> <span class="o">==</span> <span class="s2">&quot;set&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;set&quot;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;The action&#39;s type must be &#39;set&#39; not &#39;</span><span class="si">{action[&#39;type&#39;]}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The action&#39;s type must be &#39;set&#39; not &#39;</span><span class="si">{</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="p">{}:</span>
                 <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="s2">&quot;Set actions must have a props.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">coverage</span> <span class="o">==</span> <span class="s2">&quot;remove&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;remove&quot;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;The action&#39;s type must be &#39;remove&#39; not &#39;</span><span class="si">{action[&#39;type&#39;]}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The action&#39;s type must be &#39;remove&#39; not &#39;</span><span class="si">{</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">coverage</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;fill&quot;</span><span class="p">,</span> <span class="s2">&quot;set&quot;</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;An action&#39;s kwargs must be of type dict not {type(action[&#39;props&#39;])}&quot;</span><span class="p">)</span></div></div>
+                <span class="k">raise</span> <span class="n">DomainError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An action&#39;s kwargs must be of type dict not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">action</span><span class="p">[</span><span class="s1">&#39;props&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>
@@ -1379,8 +1384,8 @@
       &copy;Copyright (C) 2019-2022.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>
 

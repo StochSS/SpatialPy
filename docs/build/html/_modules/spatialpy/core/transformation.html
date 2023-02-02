@@ -5,14 +5,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>spatialpy.core.transformation &#8212; SpatialPy 1.1.0 documentation</title>
+    <title>spatialpy.core.transformation &#8212; SpatialPy 1.2.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/spatialpy_alabaster_customizations.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
    
@@ -73,7 +75,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -109,13 +111,13 @@
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
 
-<span class="kn">from</span> <span class="nn">spatialpy.core.geometry</span> <span class="k">import</span> <span class="n">Geometry</span><span class="p">,</span> <span class="n">CombinatoryGeometry</span>
-<span class="kn">from</span> <span class="nn">spatialpy.core.lattice</span> <span class="k">import</span> <span class="n">Lattice</span>
-<span class="kn">from</span> <span class="nn">spatialpy.core.spatialpyerror</span> <span class="k">import</span> <span class="n">TransformationError</span>
+<span class="kn">from</span> <span class="nn">spatialpy.core.geometry</span> <span class="kn">import</span> <span class="n">Geometry</span><span class="p">,</span> <span class="n">CombinatoryGeometry</span>
+<span class="kn">from</span> <span class="nn">spatialpy.core.lattice</span> <span class="kn">import</span> <span class="n">Lattice</span>
+<span class="kn">from</span> <span class="nn">spatialpy.core.spatialpyerror</span> <span class="kn">import</span> <span class="n">TransformationError</span>
 
 
 <div class="viewcode-block" id="Transformation"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.Transformation">[docs]</a><span class="k">class</span> <span class="nc">Transformation</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transformation class provides a methods for applying and reversing</span>
 <span class="sd">        transformations to parts the spatial domain.</span>
 
@@ -134,7 +136,7 @@
 <span class="sd">    :raises TransformationError: if the provided Geometry, Lattice, or</span>
 <span class="sd">        Transformation are invalid.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transformation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip_validate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transformation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip_validate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">geometry</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lattice</span> <span class="o">=</span> <span class="n">lattice</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transformation</span> <span class="o">=</span> <span class="n">transformation</span>
@@ -143,7 +145,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Transformation.apply"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.Transformation.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Wrapper for Lattice.apply that passes in a transformation function used to transform</span>
 <span class="sd">            particles within the region defined by the lattice and geometry.</span>
 
@@ -167,7 +169,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Transformation.inside"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.Transformation.inside">[docs]</a>    <span class="k">def</span> <span class="nf">inside</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">on_boundary</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Wrapper for Geometry.inside.</span>
 
 <span class="sd">        :param point: X, Y, Z coodinates for the particle.</span>
@@ -188,7 +190,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">inside</span><span class="p">(</span><span class="n">r_point</span><span class="p">,</span> <span class="n">on_boundary</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Transformation.reverse_transform"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.Transformation.reverse_transform">[docs]</a>    <span class="k">def</span> <span class="nf">reverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reverses the define transformation for the given point.</span>
 
 <span class="sd">        :param point: X, Y, Z coodinates for the particle.</span>
@@ -202,7 +204,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Transformation.transform"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.Transformation.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the define transformation to the given point.</span>
 
 <span class="sd">        :param point: X, Y, Z coodinates for the particle.</span>
@@ -216,7 +218,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Transformation.validate"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.Transformation.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validate the geometry, lattice, and transformation attributes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -234,7 +236,7 @@
             <span class="k">raise</span> <span class="n">TransformationError</span><span class="p">(</span><span class="s2">&quot;transformation must be of type spatialpy.Transformation.&quot;</span><span class="p">)</span></div></div>
 
 <div class="viewcode-block" id="TranslationTransformation"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.TranslationTransformation">[docs]</a><span class="k">class</span> <span class="nc">TranslationTransformation</span><span class="p">(</span><span class="n">Transformation</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Translation transformation class provides a methods for applying and reversing</span>
 <span class="sd">        translation transformations by an arbitrary vector to parts the spatial</span>
 <span class="sd">        domain.</span>
@@ -258,7 +260,7 @@
 <span class="sd">    :raises TransformationError: if the provided Geometry, Lattice, or</span>
 <span class="sd">        Transformation are invalid.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transformation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transformation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="n">lattice</span><span class="p">,</span> <span class="n">transformation</span><span class="o">=</span><span class="n">transformation</span><span class="p">,</span> <span class="n">skip_validate</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
@@ -293,7 +295,7 @@
         <span class="k">return</span> <span class="n">t_point</span>
     
 <div class="viewcode-block" id="TranslationTransformation.reverse_transform"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.TranslationTransformation.reverse_transform">[docs]</a>    <span class="k">def</span> <span class="nf">reverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reverses the defined rotation transformation for the given point.</span>
 
 <span class="sd">        :param point: X, Y, Z coodinates for the particle.</span>
@@ -310,7 +312,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__execute</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TranslationTransformation.transform"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.TranslationTransformation.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the defined translation transformation to the given point.</span>
 
 <span class="sd">        :param point: X, Y, Z coodinates for the particle.</span>
@@ -327,13 +329,13 @@
         <span class="k">return</span> <span class="n">t_point</span></div>
 
 <div class="viewcode-block" id="TranslationTransformation.validate"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.TranslationTransformation.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validate the rotation transformation attributes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span></div></div>
 
 <div class="viewcode-block" id="RotationTransformation"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.RotationTransformation">[docs]</a><span class="k">class</span> <span class="nc">RotationTransformation</span><span class="p">(</span><span class="n">Transformation</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rotation transformation class provides a methods for applying and reversing</span>
 <span class="sd">        rotation transformations around an arbitrary vector by a given angle to</span>
 <span class="sd">        parts the spatial domain.</span>
@@ -360,7 +362,7 @@
 <span class="sd">    :raises TransformationError: if the provided Geometry, Lattice, or</span>
 <span class="sd">        Transformation are invalid.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transformation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transformation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="n">lattice</span><span class="p">,</span> <span class="n">transformation</span><span class="o">=</span><span class="n">transformation</span><span class="p">,</span> <span class="n">skip_validate</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
@@ -411,7 +413,7 @@
         <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">point</span><span class="p">)</span>
     
 <div class="viewcode-block" id="RotationTransformation.reverse_transform"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.RotationTransformation.reverse_transform">[docs]</a>    <span class="k">def</span> <span class="nf">reverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reverses the defined rotation transformation for the given point.</span>
 
 <span class="sd">        :param point: X, Y, Z coodinates for the particle.</span>
@@ -429,7 +431,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__execute</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">sin_t</span><span class="p">,</span> <span class="n">cos_t</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="RotationTransformation.transform"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.RotationTransformation.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the defined rotation transformation to the given point.</span>
 
 <span class="sd">        :param point: X, Y, Z coodinates for the particle.</span>
@@ -449,7 +451,7 @@
         <span class="k">return</span> <span class="n">t_point</span></div>
 
 <div class="viewcode-block" id="RotationTransformation.validate"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.RotationTransformation.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validate the rotation transformation attributes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
@@ -458,7 +460,7 @@
             <span class="k">raise</span> <span class="n">TransformationError</span><span class="p">(</span><span class="s2">&quot;angle must be of type float.&quot;</span><span class="p">)</span></div></div>
 
 <div class="viewcode-block" id="ReflectionTransformation"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.ReflectionTransformation">[docs]</a><span class="k">class</span> <span class="nc">ReflectionTransformation</span><span class="p">(</span><span class="n">Transformation</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reflection transformation class provides a methods for applying and reversing</span>
 <span class="sd">        reflection transformations around an arbitrary plane to parts the spatial</span>
 <span class="sd">        domain.</span>
@@ -490,7 +492,7 @@
 <span class="sd">    :raises TransformationError: if the provided Geometry, Lattice, or</span>
 <span class="sd">        Transformation are invalid.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point1</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">point2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point1</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">point2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">point3</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transformation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="n">lattice</span><span class="p">,</span> <span class="n">transformation</span><span class="o">=</span><span class="n">transformation</span><span class="p">,</span> <span class="n">skip_validate</span><span class="o">=</span><span class="kc">True</span>
@@ -537,7 +539,7 @@
         <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">p_vector</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span>
 
 <div class="viewcode-block" id="ReflectionTransformation.reverse_transform"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.ReflectionTransformation.reverse_transform">[docs]</a>    <span class="k">def</span> <span class="nf">reverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reverses the defined reflection transformation for the given point.</span>
 
 <span class="sd">        :param point: X, Y, Z coodinates for the particle.</span>
@@ -552,7 +554,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__execute</span><span class="p">(</span><span class="n">point</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ReflectionTransformation.transform"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.ReflectionTransformation.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the defined reflection transformation to the given point.</span>
 
 <span class="sd">        :param point: X, Y, Z coodinates for the particle.</span>
@@ -569,7 +571,7 @@
         <span class="k">return</span> <span class="n">t_point</span></div></div>
 
 <div class="viewcode-block" id="ScalingTransformation"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.ScalingTransformation">[docs]</a><span class="k">class</span> <span class="nc">ScalingTransformation</span><span class="p">(</span><span class="n">Transformation</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Scaling transformation class provides a methods for applying and reversing</span>
 <span class="sd">        scaling transformations around an arbitrary plane to parts the spatial</span>
 <span class="sd">        domain.</span>
@@ -595,7 +597,7 @@
 <span class="sd">    :raises TransformationError: if the provided Geometry, Lattice, or</span>
 <span class="sd">        Transformation are invalid.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transformation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">factor</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transformation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="n">lattice</span><span class="p">,</span> <span class="n">transformation</span><span class="o">=</span><span class="n">transformation</span><span class="p">,</span> <span class="n">skip_validate</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
@@ -621,7 +623,7 @@
         <span class="k">return</span> <span class="n">t_point</span>
 
 <div class="viewcode-block" id="ScalingTransformation.reverse_transform"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.ScalingTransformation.reverse_transform">[docs]</a>    <span class="k">def</span> <span class="nf">reverse_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reverses the defined scaling transformation for the given point.</span>
 
 <span class="sd">        :param point: X, Y, Z coodinates for the particle.</span>
@@ -636,7 +638,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__execute</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ScalingTransformation.transform"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.ScalingTransformation.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the defined scaling transformation to the given point.</span>
 
 <span class="sd">        :param point: X, Y, Z coodinates for the particle.</span>
@@ -653,15 +655,15 @@
         <span class="k">return</span> <span class="n">t_point</span></div>
 
 <div class="viewcode-block" id="ScalingTransformation.validate"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.transformation.ScalingTransformation.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validate the scaling transformation attributes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">factor</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="n">TransformationError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;factor must be of type float not {type(self.factor)}&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">TransformationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;factor must be of type float not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">factor</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">TransformationError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;factor must be positive.&quot;</span><span class="p">)</span></div></div>
+            <span class="k">raise</span> <span class="n">TransformationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;factor must be positive.&quot;</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>
@@ -681,8 +683,8 @@
       &copy;Copyright (C) 2019-2022.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>
 
