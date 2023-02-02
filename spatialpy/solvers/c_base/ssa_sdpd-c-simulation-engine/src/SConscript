@@ -1,14 +1,14 @@
 Import('env')
 libspatialpy_core = env.Object([
-    'count_cores.c',
-    'model.c',
+    'count_cores.cpp',
+    'model.cpp',
     'NRMConstant_v5.cpp',
-    'output.c',
+    'output.cpp',
     'particle.cpp',
-    'pthread_barrier.c',
-    'read_lammps_input_file.c',
+    'pthread_barrier.cpp',
+    'read_lammps_input_file.cpp',
     'simulate.cpp',
     'simulate_rdme.cpp',
-    'simulate_threads.c'
+    'simulate_threads.cpp'
 ])
 Return('libspatialpy_core')
