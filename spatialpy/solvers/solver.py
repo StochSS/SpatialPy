@@ -67,7 +67,7 @@ class Solver:
         self.build_dir = None
         self.propfilename = None
         self.prop_file_name = None
-        self.executable_name = 'ssa_sdpd'
+        self.executable_name = 'ssa_sdpd.exe'
         self.h = None  # basis function width
 
         self.spatialpy_root = os.path.dirname(

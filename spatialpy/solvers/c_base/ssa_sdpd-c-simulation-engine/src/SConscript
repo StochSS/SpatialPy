@@ -6,7 +6,6 @@ libspatialpy_core = env.Object([
     'output.cpp',
     'particle.cpp',
     'pthread_barrier.cpp',
-    'read_lammps_input_file.cpp',
     'simulate.cpp',
     'simulate_rdme.cpp',
     'simulate_threads.cpp'

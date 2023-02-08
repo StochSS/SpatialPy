@@ -31,4 +31,4 @@ core = SConscript(f'{root_dir}/src/SConscript', variant_dir=core_dir, duplicate=
 
 env.StaticLibrary(f'{core_dir}/lib/spatialpy-core', core)
 env.StaticLibrary(f'{core_dir}/lib/ANN', ann)
-env.Program('ssa_sdpd', model, LIBS=['spatialpy-core', 'ANN'])
+env.Program('ssa_sdpd.exe', model, LIBS=['spatialpy-core', 'ANN', 'pthread'])
