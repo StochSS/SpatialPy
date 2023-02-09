@@ -118,6 +118,7 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">getpass</span>
 <span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span>
 
@@ -161,7 +162,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">build_dir</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">propfilename</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prop_file_name</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">executable_name</span> <span class="o">=</span> <span class="s1">&#39;ssa_sdpd&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">executable_name</span> <span class="o">=</span> <span class="s1">&#39;ssa_sdpd.exe&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># basis function width</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">spatialpy_root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span>
@@ -565,51 +566,35 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__create_propensity_file</span><span class="p">(</span><span class="n">stoich_matrix</span><span class="p">,</span> <span class="n">dep_graph</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_file_name</span><span class="p">)</span>
 
         <span class="c1"># Build the solver</span>
-        <span class="k">for</span> <span class="n">make_exe_location</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;make&quot;</span><span class="p">,</span> <span class="s2">&quot;mingw32-make&quot;</span><span class="p">]:</span>
-            <span class="n">make_exe</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;make&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">make_exe</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">break</span>
-        <span class="k">if</span> <span class="n">make_exe</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">SimulationError</span><span class="p">(</span><span class="s2">&quot;Make executable could not be found&quot;</span><span class="p">)</span>
-        <span class="n">makefile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spatialpy_rootdir</span><span class="o">+</span><span class="s1">&#39;/build/Makefile&#39;</span>
-        <span class="n">makefile_ann</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spatialpy_rootdir</span><span class="o">+</span><span class="s1">&#39;/external/ANN/src/Makefile.spatialpy&#39;</span>
-
-        <span class="n">cmd_ann</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">make_exe</span><span class="p">,</span> <span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="s1">&#39;-C&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core_dir</span><span class="p">,</span> <span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="n">makefile_ann</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s1">&#39;ROOTINC=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">spatialpy_rootinc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-        <span class="p">]</span>
-        <span class="n">cmd_core</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">make_exe</span><span class="p">,</span> <span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="s1">&#39;-C&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core_dir</span><span class="p">,</span> <span class="s1">&#39;CORE&#39;</span><span class="p">,</span> <span class="s1">&#39;-f&#39;</span><span class="p">,</span>  <span class="n">makefile</span><span class="p">,</span>
+        <span class="n">makefile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spatialpy_rootdir</span><span class="o">+</span><span class="s1">&#39;/build/SConstruct&#39;</span>
+        <span class="n">make_cmd</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">&quot;-m&quot;</span><span class="p">,</span> <span class="s2">&quot;SCons&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;-C</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">build_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;-f</span><span class="si">{</span><span class="n">makefile</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="sa">f</span><span class="s1">&#39;ROOT=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">spatialpy_rootparam</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
             <span class="sa">f</span><span class="s1">&#39;ROOTINC=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">spatialpy_rootinc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s1">&#39;BUILD=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">core_dir</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-        <span class="p">]</span>
-        <span class="n">cmd_build</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">make_exe</span><span class="p">,</span> <span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="s1">&#39;-C&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_dir</span><span class="p">,</span> <span class="s1">&#39;-I&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">core_dir</span><span class="p">,</span> <span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="n">makefile</span><span class="p">,</span>
-            <span class="s1">&#39;ROOT=&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spatialpy_rootparam</span><span class="p">,</span>
-            <span class="s1">&#39;ROOTINC=&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spatialpy_rootinc</span><span class="p">,</span>
-            <span class="s1">&#39;COREDIR=&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">core_dir</span><span class="p">,</span>
-            <span class="s1">&#39;MODEL=&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_file_name</span><span class="p">,</span> <span class="s1">&#39;BUILD=&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">build_dir</span>
+            <span class="sa">f</span><span class="s1">&#39;COREDIR=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">core_dir</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;MODEL=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_file_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;BUILD=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">build_dir</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="p">]</span>
         <span class="k">if</span> <span class="n">profile</span><span class="p">:</span>
-            <span class="n">cmd_build</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;GPROFFLAG=-pg&#39;</span><span class="p">)</span>
+            <span class="c1"># TODO: add profile/debug targets to SConstruct file</span>
+            <span class="n">make_cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;GPROFFLAG=-pg&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">profile</span> <span class="ow">or</span> <span class="n">debug</span><span class="p">:</span>
-            <span class="n">cmd_build</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;GDB_FLAG=-g&#39;</span><span class="p">)</span>
+            <span class="n">make_cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;GDB_FLAG=-g&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug_level</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot; &amp;&amp; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="o">*</span><span class="n">cmd_ann</span><span class="p">,</span> <span class="o">*</span><span class="n">cmd_core</span><span class="p">,</span> <span class="o">*</span><span class="n">cmd_build</span><span class="p">])</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">make_cmd</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cmd: </span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">cmd_target</span> <span class="ow">in</span> <span class="p">[</span><span class="n">cmd_ann</span><span class="p">,</span> <span class="n">cmd_core</span><span class="p">,</span> <span class="n">cmd_build</span><span class="p">]:</span>
-                <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span><span class="n">cmd_target</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">)</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug_level</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span><span class="n">make_cmd</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug_level</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                 <span class="k">pass</span>
-            <span class="k">raise</span> <span class="n">SimulationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Compilation of solver failed, return_code=</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">return_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SimulationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Compilation of solver failed, return_code=</span><span class="si">{</span><span class="n">err</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">make_cmd</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error, execution of compilation raised an exception: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cmd = </span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">SimulationError</span><span class="p">(</span><span class="s2">&quot;Compilation of solver failed&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
