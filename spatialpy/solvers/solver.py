@@ -23,6 +23,7 @@ import threading
 import time
 import getpass
 import re
+import sys
 
 import numpy
 
@@ -66,7 +67,7 @@ class Solver:
         self.build_dir = None
         self.propfilename = None
         self.prop_file_name = None
-        self.executable_name = 'ssa_sdpd'
+        self.executable_name = 'ssa_sdpd.exe'
         self.h = None  # basis function width
 
         self.spatialpy_root = os.path.dirname(
@@ -470,51 +471,35 @@ class Solver:
         self.__create_propensity_file(stoich_matrix, dep_graph, file_name=self.prop_file_name)
 
         # Build the solver
-        for make_exe_location in ["make", "mingw32-make"]:
-            make_exe = shutil.which("make")
-            if make_exe is not None:
-                break
-        if make_exe is None:
-            raise SimulationError("Make executable could not be found")
-        makefile = self.spatialpy_rootdir+'/build/Makefile'
-        makefile_ann = self.spatialpy_rootdir+'/external/ANN/src/Makefile.spatialpy'
-
-        cmd_ann = [
-            make_exe, '-d', '-C', self.core_dir, '-f', makefile_ann,
-            f'ROOTINC={self.spatialpy_rootinc}',
-        ]
-        cmd_core = [
-            make_exe, '-d', '-C', self.core_dir, 'CORE', '-f',  makefile,
+        makefile = self.spatialpy_rootdir+'/build/SConstruct'
+        make_cmd = [
+            sys.executable, "-m", "SCons", f"-C{self.build_dir}", f"-f{makefile}",
             f'ROOT={self.spatialpy_rootparam}',
             f'ROOTINC={self.spatialpy_rootinc}',
-            f'BUILD={self.core_dir}',
-        ]
-        cmd_build = [
-            make_exe, '-d', '-C', self.build_dir, '-I', self.core_dir, '-f', makefile,
-            'ROOT=' + self.spatialpy_rootparam,
-            'ROOTINC=' + self.spatialpy_rootinc,
-            'COREDIR=' + self.core_dir,
-            'MODEL=' + self.prop_file_name, 'BUILD='+self.build_dir
+            f'COREDIR={self.core_dir}',
+            f'MODEL={self.prop_file_name}',
+            f'BUILD={self.build_dir}',
         ]
         if profile:
-            cmd_build.append('GPROFFLAG=-pg')
+            # TODO: add profile/debug targets to SConstruct file
+            make_cmd.append('GPROFFLAG=-pg')
         if profile or debug:
-            cmd_build.append('GDB_FLAG=-g')
+            make_cmd.append('GDB_FLAG=-g')
         if self.debug_level > 1:
-            cmd = " && ".join([*cmd_ann, *cmd_core, *cmd_build])
+            cmd = " ".join(make_cmd)
             print(f"cmd: {cmd}\n")
         try:
-            for cmd_target in [cmd_ann, cmd_core, cmd_build]:
-                result = subprocess.check_output(cmd_target, stderr=subprocess.STDOUT)
-                if self.debug_level > 1:
-                    print(result.stdout.decode("utf-8"))
+            result = subprocess.check_output(make_cmd, stderr=subprocess.STDOUT)
+            if self.debug_level > 1:
+                print(result)
         except subprocess.CalledProcessError as err:
             try:
                 print(err.stdout.decode("utf-8"))
             except Exception:
                 pass
-            raise SimulationError(f"Compilation of solver failed, return_code={result.return_code}")
+            raise SimulationError(f"Compilation of solver failed, return_code={err.returncode}")
         except OSError as err:
+            cmd = " ".join(make_cmd)
             print(f"Error, execution of compilation raised an exception: {err}")
             print(f"cmd = {cmd}")
             raise SimulationError("Compilation of solver failed") from err
