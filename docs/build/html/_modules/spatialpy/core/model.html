@@ -542,7 +542,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data_function</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">raise</span> <span class="n">ModelError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> does not contain an element named </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Model.add_domain"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.model.Model.add_domain">[docs]</a>    <span class="k">def</span> <span class="nf">add_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.add_domain"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.model.Model.add_domain">[docs]</a>    <span class="k">def</span> <span class="nf">add_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">allow_all_types</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a spatial domain to the model</span>
 
@@ -556,7 +556,7 @@
                 <span class="s2">&quot;Unexpected parameter for add_domain. Parameter must be of type SpatialPy.Domain.&quot;</span>
             <span class="p">)</span>
 
-        <span class="n">domain</span><span class="o">.</span><span class="n">compile_prep</span><span class="p">()</span>
+        <span class="n">domain</span><span class="o">.</span><span class="n">compile_prep</span><span class="p">(</span><span class="n">allow_all_types</span><span class="o">=</span><span class="n">allow_all_types</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="n">domain</span>
         <span class="k">return</span> <span class="n">domain</span></div>
 
@@ -861,7 +861,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">listOfReactions</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_listOfReactions</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Model.get_reaction"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.model.Model.get_reaction">[docs]</a>    <span class="k">def</span> <span class="nf">get_reaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rname</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.get_reaction"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.model.Model.get_reaction">[docs]</a>    <span class="k">def</span> <span class="nf">get_reaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a reaction object by name.</span>
 
@@ -1074,7 +1074,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tspan</span> <span class="o">=</span> <span class="n">TimeSpan</span><span class="p">(</span><span class="n">time_span</span><span class="p">,</span> <span class="n">timestep_size</span><span class="o">=</span><span class="n">timestep_size</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Model.compile_prep"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.model.Model.compile_prep">[docs]</a>    <span class="k">def</span> <span class="nf">compile_prep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.compile_prep"><a class="viewcode-back" href="../../../classes/spatialpy.core.html#spatialpy.core.model.Model.compile_prep">[docs]</a>    <span class="k">def</span> <span class="nf">compile_prep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allow_all_types</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make sure all paramters are evaluated to scalars, update the models diffusion restrictions,</span>
 <span class="sd">        create the models expression utility, and generate the domain list of type ids in preperation</span>
@@ -1092,7 +1092,7 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ModelError</span><span class="p">(</span><span class="s2">&quot;The model&#39;s domain is not set.  Use &#39;add_domain()&#39;.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">compile_prep</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">compile_prep</span><span class="p">(</span><span class="n">allow_all_types</span><span class="o">=</span><span class="n">allow_all_types</span><span class="p">)</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">__update_diffusion_restrictions</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__apply_initial_conditions</span><span class="p">()</span>
