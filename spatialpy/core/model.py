@@ -447,7 +447,7 @@ class Model():
             return self.get_data_function(name)
         raise ModelError(f"{self.name} does not contain an element named {name}.")
 
-    def add_domain(self, domain):
+    def add_domain(self, domain, allow_all_types=False):
         """
         Add a spatial domain to the model
 
@@ -461,7 +461,7 @@ class Model():
                 "Unexpected parameter for add_domain. Parameter must be of type SpatialPy.Domain."
             )
 
-        domain.compile_prep()
+        domain.compile_prep(allow_all_types=allow_all_types)
         self.domain = domain
         return domain
 
@@ -766,7 +766,7 @@ class Model():
         self.listOfReactions.clear()
         self._listOfReactions.clear()
 
-    def get_reaction(self, rname):
+    def get_reaction(self, name):
         """
         Returns a reaction object by name.
 
@@ -979,7 +979,7 @@ class Model():
         else:
             self.tspan = TimeSpan(time_span, timestep_size=timestep_size)
 
-    def compile_prep(self):
+    def compile_prep(self, allow_all_types=False):
         """
         Make sure all paramters are evaluated to scalars, update the models diffusion restrictions,
         create the models expression utility, and generate the domain list of type ids in preperation
@@ -997,7 +997,7 @@ class Model():
 
         if self.domain is None:
             raise ModelError("The model's domain is not set.  Use 'add_domain()'.")
-        self.domain.compile_prep()
+        self.domain.compile_prep(allow_all_types=allow_all_types)
         
         self.__update_diffusion_restrictions()
         self.__apply_initial_conditions()

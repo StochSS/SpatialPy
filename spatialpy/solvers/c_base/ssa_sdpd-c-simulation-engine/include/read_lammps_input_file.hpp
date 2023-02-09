@@ -28,6 +28,6 @@ See the file LICENSE.txt for details.
 
 #include "particle_system.hpp"
 
-void read_lammps_input_file(const char*filename, ParticleSystem*system);
+void read_lammps_input_file(const char*filename, Spatialpy::ParticleSystem*system);
 
 #endif //read_lammps_input_file_h

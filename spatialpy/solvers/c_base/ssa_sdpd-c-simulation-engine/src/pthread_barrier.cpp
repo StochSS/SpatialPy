@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <errno.h>
 
-#include "pthread_barrier.h"
+#include "pthread_barrier.hpp"
 
 #ifdef __APPLE__
 

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>spatialpy.core package &#8212; SpatialPy 1.1.2 documentation</title>
+    <title>spatialpy.core package &#8212; SpatialPy 1.2.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <link rel="stylesheet" type="text/css" href="../_static/css/spatialpy_alabaster_customizations.css" />
@@ -450,7 +450,7 @@ the action is missing props, or type_id in props contains an invalid character o
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.domain.Domain.compile_prep">
-<span class="sig-name descname"><span class="pre">compile_prep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.compile_prep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.domain.Domain.compile_prep" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">compile_prep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allow_all_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.compile_prep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.domain.Domain.compile_prep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate the domains list of type ids and check for invalid type_ids and rho values
 in preperation of compiling the simulation files.</p>
 <dl class="field-list simple">
@@ -1537,7 +1537,7 @@ the spatial positon ‘point’ as an array, and it returns a float value.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.model.Model.add_domain">
-<span class="sig-name descname"><span class="pre">add_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.add_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.model.Model.add_domain" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_all_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.add_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.model.Model.add_domain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a spatial domain to the model</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1631,7 +1631,7 @@ the spatial positon ‘point’ as an array, and it returns a float value.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.model.Model.compile_prep">
-<span class="sig-name descname"><span class="pre">compile_prep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.compile_prep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.model.Model.compile_prep" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">compile_prep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allow_all_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.compile_prep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.model.Model.compile_prep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make sure all paramters are evaluated to scalars, update the models diffusion restrictions,
 create the models expression utility, and generate the domain list of type ids in preperation
 of compiling the simulation files.</p>
@@ -1933,7 +1933,7 @@ of compiling the simulation files.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.model.Model.get_reaction">
-<span class="sig-name descname"><span class="pre">get_reaction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.get_reaction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.model.Model.get_reaction" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_reaction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.get_reaction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.model.Model.get_reaction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a reaction object by name.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -3779,7 +3779,7 @@ the action is missing props, or type_id in props contains an invalid character o
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Domain.compile_prep">
-<span class="sig-name descname"><span class="pre">compile_prep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.compile_prep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Domain.compile_prep" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">compile_prep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allow_all_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/domain.html#Domain.compile_prep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Domain.compile_prep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate the domains list of type ids and check for invalid type_ids and rho values
 in preperation of compiling the simulation files.</p>
 <dl class="field-list simple">
@@ -4489,7 +4489,7 @@ the spatial positon ‘point’ as an array, and it returns a float value.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Model.add_domain">
-<span class="sig-name descname"><span class="pre">add_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.add_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Model.add_domain" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_all_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.add_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Model.add_domain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a spatial domain to the model</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -4583,7 +4583,7 @@ the spatial positon ‘point’ as an array, and it returns a float value.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Model.compile_prep">
-<span class="sig-name descname"><span class="pre">compile_prep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.compile_prep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Model.compile_prep" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">compile_prep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allow_all_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.compile_prep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Model.compile_prep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make sure all paramters are evaluated to scalars, update the models diffusion restrictions,
 create the models expression utility, and generate the domain list of type ids in preperation
 of compiling the simulation files.</p>
@@ -4885,7 +4885,7 @@ of compiling the simulation files.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spatialpy.core.Model.get_reaction">
-<span class="sig-name descname"><span class="pre">get_reaction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.get_reaction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Model.get_reaction" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_reaction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spatialpy/core/model.html#Model.get_reaction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spatialpy.core.Model.get_reaction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a reaction object by name.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -6475,7 +6475,7 @@ Reference: <a class="reference external" href="https://vtk.org/wp-content/upload
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |
       <a href="../_sources/classes/spatialpy.core.rst.txt"

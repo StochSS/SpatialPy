@@ -1,0 +1,34 @@
+import os
+
+model = ARGUMENTS.get('MODEL')
+root_dir = ARGUMENTS.get('ROOT')
+root_include_dir = ARGUMENTS.get('ROOTINC')
+core_dir = ARGUMENTS.get('COREDIR')
+build_dir = ARGUMENTS.get('BUILD')
+
+if core_dir is None:
+    core_dir = build_dir
+
+env = Environment(
+    tools=['default', 'mingw'],
+    CPPPATH=[
+        Dir(f'{root_include_dir}/include'),
+        Dir(f'{root_include_dir}/external/ANN/include'),
+    ],
+    LIBPATH=[
+        Dir(f'{core_dir}/lib'),
+    ],
+    ENV=os.environ,
+    # When MSVC (or any other compilers) are supported, update this to be a compiler-specific flag
+    CXXFLAGS=['-std=c++14'],
+)
+env.VariantDir(core_dir, f'{root_dir}/src', duplicate=False)
+env.VariantDir(f'{core_dir}/external/ANN', f'{root_dir}/external/ANN/src', duplicate=False)
+
+Export('env')
+ann = SConscript(f'{root_dir}/external/ANN/src/SConscript', variant_dir=f'{core_dir}/external/ANN', duplicate=False)
+core = SConscript(f'{root_dir}/src/SConscript', variant_dir=core_dir, duplicate=False)
+
+env.StaticLibrary(f'{core_dir}/lib/spatialpy-core', core)
+env.StaticLibrary(f'{core_dir}/lib/ANN', ann)
+env.Program('ssa_sdpd.exe', model, LIBS=['spatialpy-core', 'ANN', 'pthread'])
