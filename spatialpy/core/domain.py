@@ -388,17 +388,19 @@ class Domain():
 
         # remove the particles that fall within the defined region
         on_boundary = self.find_boundary_points(update=True)
-        for v_ndx, vertex in enumerate(self.vertices):
-            if action['geometry'].inside(vertex, on_boundary[v_ndx]):
-                self.vertices = numpy.delete(self.vertices, v_ndx, 0)
-                self.type_id = numpy.delete(self.type_id, v_ndx, 0)
-                self.vol = numpy.delete(self.vol, v_ndx)
-                self.mass = numpy.delete(self.mass, v_ndx)
-                self.rho = numpy.delete(self.rho, v_ndx)
-                self.nu = numpy.delete(self.nu, v_ndx)
-                self.c = numpy.delete(self.c, v_ndx)
-                self.fixed = numpy.delete(self.fixed, v_ndx)
-                self.on_boundary = numpy.delete(self.on_boundary, v_ndx)
+        geometry = action['geometry']
+        indices = [v_ndx for v_ndx, vertex in enumerate(self.vertices) if geometry.inside(vertex, on_boundary[v_ndx])]
+        indices.reverse()
+        for v_ndx in indices:
+            self.vertices = numpy.delete(self.vertices, v_ndx, 0)
+            self.type_id = numpy.delete(self.type_id, v_ndx, 0)
+            self.vol = numpy.delete(self.vol, v_ndx)
+            self.mass = numpy.delete(self.mass, v_ndx)
+            self.rho = numpy.delete(self.rho, v_ndx)
+            self.nu = numpy.delete(self.nu, v_ndx)
+            self.c = numpy.delete(self.c, v_ndx)
+            self.fixed = numpy.delete(self.fixed, v_ndx)
+            self.on_boundary = numpy.delete(self.on_boundary, v_ndx)
 
     def apply_set_action(self, action):
         """
@@ -474,7 +476,7 @@ class Domain():
                 min_vtx = i
         return min_vtx
 
-    def compile_prep(self):
+    def compile_prep(self, allow_all_types=False):
         """
         Generate the domains list of type ids and check for invalid type_ids and rho values
         in preperation of compiling the simulation files.
@@ -483,8 +485,9 @@ class Domain():
         """
         self.apply_actions()
 
-        if self.type_id.tolist().count("type_UnAssigned") > 0:
-            raise DomainError("Particles must be assigned a type_id.")
+        if not allow_all_types:
+            if self.type_id.tolist().count("type_UnAssigned") > 0:
+                raise DomainError("Particles must be assigned a type_id.")
         if numpy.count_nonzero(self.rho) < len(self.rho):
             raise DomainError("Rho must be a positive value.")
 

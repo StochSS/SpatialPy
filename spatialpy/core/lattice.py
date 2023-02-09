@@ -158,8 +158,9 @@ class CartesianLattice(Lattice):
             count += 1
         return count
 
-    def __generate_z(self, domain, geometry, transform, x, y, count, kwargs):
+    def __generate_z(self, domain, geometry, transform, x, y, count, z_digits, kwargs):
         for z in numpy.arange(self.zmin, self.zmax + self.deltaz, self.deltaz):
+            z = round(z, z_digits)
             count = self.__add_point(domain, geometry, transform, [x, y, z], count, kwargs)
         return count
 
@@ -190,14 +191,31 @@ class CartesianLattice(Lattice):
         if transform is not None and not callable(transform):
             raise LatticeError("transform must be a function.")
 
+        x_digits = max(
+            len(str(self.deltax).split(".")[1]) if "." in str(self.deltax) else 0,
+            len(str(self.xmin).split(".")[1]) if "." in str(self.xmin) else 0,
+            len(str(self.xmax).split(".")[1]) if "." in str(self.xmax) else 0
+        )
+        y_digits = max(
+            len(str(self.deltay).split(".")[1]) if "." in str(self.deltay) else 0,
+            len(str(self.ymin).split(".")[1]) if "." in str(self.ymin) else 0,
+            len(str(self.ymax).split(".")[1]) if "." in str(self.ymax) else 0
+        )
+        z_digits = max(
+            len(str(self.deltaz).split(".")[1]) if "." in str(self.deltaz) else 0,
+            len(str(self.zmin).split(".")[1]) if "." in str(self.zmin) else 0,
+            len(str(self.zmax).split(".")[1]) if "." in str(self.zmax) else 0
+        )
         count = 0
         for x in numpy.arange(self.xmin, self.xmax + self.deltax, self.deltax):
+            x = round(x, x_digits)
             for y in numpy.arange(self.ymin, self.ymax + self.deltay, self.deltay):
+                y = round(y, y_digits)
                 if self.deltaz == 0:
                     z = self.center[2]
                     count = self.__add_point(domain, geometry, transform, [x, y, z], count, kwargs)
                 else:
-                    count = self.__generate_z(domain, geometry, transform, x, y, count, kwargs)
+                    count = self.__generate_z(domain, geometry, transform, x, y, count, z_digits, kwargs)
         self._update_limits(domain)
         if 'vol' not in kwargs:
             offset = len(domain.vertices) - count
@@ -308,38 +326,48 @@ class SphericalLattice(Lattice):
         if transform is not None and not callable(transform):
             raise LatticeError("transform must be a function.")
 
+        digits = max(
+            len(str(self.deltar).split(".")[1]) if "." in str(self.deltar) else 0,
+            len(str(self.radius).split(".")[1]) if "." in str(self.radius) else 0
+        )
         count = 0
         radius = self.radius
         while radius > 0:
             # Calculate the approximate number of particle with the radius
             approx_rc = int(round((4 * radius ** 2) / ((self.deltas / 2) ** 2)))
 
-            # Set constants for the radius
-            p_area = 4 * numpy.pi * radius ** 2 / approx_rc
-            d_a = numpy.sqrt(p_area)
-            m_phi = int(round(numpy.pi * radius / d_a))
-            d_phi = numpy.pi / m_phi
-            d_theta = p_area / d_phi
+            if approx_rc == 0:
+                from spatialpy.core import log # pylint: disable=import-outside-toplevel
+                msg = f"Approximation of particles for the layer at radius {radius} is 0. "
+                msg += "Consider increasing the radius or increasing the radial spacing (deltas)"
+                log.warning(msg)
+            else:
+                # Set constants for the radius
+                p_area = 4 * numpy.pi * radius ** 2 / approx_rc
+                d_a = numpy.sqrt(p_area)
+                m_phi = int(round(numpy.pi * radius / d_a))
+                d_phi = numpy.pi / m_phi
+                d_theta = p_area / d_phi
 
-            for mphi in range(m_phi):
-                phi = numpy.pi * (mphi + 0.5) / m_phi
-                m_theta = int(round(2 * numpy.pi * numpy.sin(phi) / d_phi))
+                for mphi in range(m_phi):
+                    phi = numpy.pi * (mphi + 0.5) / m_phi
+                    m_theta = int(round(2 * numpy.pi * numpy.sin(phi) / d_phi))
 
-                for mtheta in range(m_theta):
-                    theta = 2 * numpy.pi * mtheta / m_theta
-                    x = radius * numpy.cos(theta) * numpy.sin(phi)
-                    y = radius * numpy.sin(theta) * numpy.sin(phi)
-                    z = radius * numpy.cos(phi)
-                    if geometry.inside((x, y, z), False):
-                        if transform is None:
-                            point = [x, y, z]
-                        else:
-                            point = transform([x, y, z])
-                        if not isinstance(point, numpy.ndarray):
-                            point = numpy.array(point)
-                        domain.add_point(point + self.center, **kwargs)
-                        count += 1
-            radius -= self.deltar
+                    for mtheta in range(m_theta):
+                        theta = 2 * numpy.pi * mtheta / m_theta
+                        x = radius * numpy.cos(theta) * numpy.sin(phi)
+                        y = radius * numpy.sin(theta) * numpy.sin(phi)
+                        z = radius * numpy.cos(phi)
+                        if geometry.inside((x, y, z), False):
+                            if transform is None:
+                                point = [x, y, z]
+                            else:
+                                point = transform([x, y, z])
+                            if not isinstance(point, numpy.ndarray):
+                                point = numpy.array(point)
+                            domain.add_point(point + self.center, **kwargs)
+                            count += 1
+            radius = round(radius - self.deltar, digits)
         if radius == 0 and geometry.inside((0, 0, 0), False):
             point = [0, 0, 0] if transform is None else transform([0, 0, 0])
             if not isinstance(point, numpy.ndarray):
@@ -439,6 +467,10 @@ class CylindricalLattice(Lattice):
         if transform is not None and not callable(transform):
             raise LatticeError("transform must be a function.")
 
+        digits = max(
+            len(str(self.deltar).split(".")[1]) if "." in str(self.deltar) else 0,
+            len(str(self.radius).split(".")[1]) if "." in str(self.radius) else 0
+        )
         count = 0
         h_len = self.length / 2
         xmin = -h_len
@@ -448,28 +480,34 @@ class CylindricalLattice(Lattice):
             # Calculate the approximate number of particle with the radius
             approx_rc = int(round((2 * radius * self.length) / ((self.deltas / 2) ** 2)))
 
-            p_area = 2 * numpy.pi * radius * self.length / approx_rc
-            d_a = numpy.sqrt(p_area)
-            m_theta = int(round(2 * numpy.pi * radius / d_a))
-            d_theta = 2 * numpy.pi / m_theta
+            if approx_rc == 0:
+                from spatialpy.core import log # pylint: disable=import-outside-toplevel
+                msg = f"Approximation of particles for the layer at radius {radius} is 0. "
+                msg += "Consider increasing the radius or increasing the radial spacing (deltas)"
+                log.warning(msg)
+            else:
+                p_area = 2 * numpy.pi * radius * self.length / approx_rc
+                d_a = numpy.sqrt(p_area)
+                m_theta = int(round(2 * numpy.pi * radius / d_a))
+                d_theta = 2 * numpy.pi / m_theta
 
-            x = xmin
-            while x <= xmax:
-                for mtheta in range(m_theta):
-                    theta = 2 * numpy.pi * (mtheta + 0.5) / m_theta
-                    y = radius * numpy.cos(theta)
-                    z = radius * numpy.sin(theta)
-                    if geometry.inside((x, y, z), False):
-                        if transform is None:
-                            point = [x, y, z]
-                        else:
-                            point = transform([x, y, z])
-                        if not isinstance(point, numpy.ndarray):
-                            point = numpy.array(point)
-                        domain.add_point(point + self.center, **kwargs)
-                        count += 1
-                x += self.deltas
-            radius -= self.deltar
+                x = xmin
+                while x <= xmax:
+                    for mtheta in range(m_theta):
+                        theta = 2 * numpy.pi * (mtheta + 0.5) / m_theta
+                        y = radius * numpy.cos(theta)
+                        z = radius * numpy.sin(theta)
+                        if geometry.inside((x, y, z), False):
+                            if transform is None:
+                                point = [x, y, z]
+                            else:
+                                point = transform([x, y, z])
+                            if not isinstance(point, numpy.ndarray):
+                                point = numpy.array(point)
+                            domain.add_point(point + self.center, **kwargs)
+                            count += 1
+                    x += self.deltas
+            radius = round(radius - self.deltar, digits)
         if radius == 0:
             x = xmin
             while x <= xmax:
