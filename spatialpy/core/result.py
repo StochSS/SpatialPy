@@ -156,6 +156,19 @@ class Result():
         self.timeout = False
         self.official_vtk = False
         self.result_dir = result_dir
+        self.listOfResultObjects = [self]
+
+    def __len__(self):
+        return len(self.listOfResultObjects)
+
+    def __getitem__(self, index):
+        return self.listOfResultObjects[index]
+
+    def __setitem__(self, index, item):
+        self.listOfResultObjects[index] = item
+
+    def append(self, item):
+        self.listOfResultObjects.append(item)
 
     def __eq__(self, other):
         if isinstance(other, Result) and self.result_dir and other.result_dir:
