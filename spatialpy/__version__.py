@@ -1,6 +1,6 @@
 # SpatialPy is a Python 3 package for simulation of
 # spatial deterministic/stochastic reaction-diffusion-advection problems
-# Copyright (C) 2019 - 2022 SpatialPy developers.
+# Copyright (C) 2019 - 2023 SpatialPy developers.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
@@ -21,7 +21,7 @@
 # @website https://github.com/StochSS/SpatialPy
 # =============================================================================
 
-__version__      = '1.2.0'
+__version__      = '1.2.1'
 __title__        = 'SpatialPy'
 __description__  = 'Python Interface for Spatial Stochastic Biochemical Simulations'
 __url__          = 'https://spatialpy.github.io/SpatialPy/'
@@ -29,4 +29,4 @@ __download_url__ = 'https://github.com/StochSS/SpatialPy/tarball/main/'
 __author__       = 'See AUTHORS'
 __email__        = 'bdrawert@unca.edu'
 __license__      = 'GPL-3.0-only'
-__copyright__    = 'Copyright (C) 2019-2022'
+__copyright__    = 'Copyright (C) 2019-2023'

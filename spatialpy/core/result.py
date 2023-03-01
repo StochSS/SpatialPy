@@ -1,6 +1,6 @@
 # SpatialPy is a Python 3 package for simulation of
 # spatial deterministic/stochastic reaction-diffusion-advection problems
-# Copyright (C) 2019 - 2022 SpatialPy developers.
+# Copyright (C) 2019 - 2023 SpatialPy developers.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
@@ -156,6 +156,19 @@ class Result():
         self.timeout = False
         self.official_vtk = False
         self.result_dir = result_dir
+        self.listOfResultObjects = [self]
+
+    def __len__(self):
+        return len(self.listOfResultObjects)
+
+    def __getitem__(self, index):
+        return self.listOfResultObjects[index]
+
+    def __setitem__(self, index, item):
+        self.listOfResultObjects[index] = item
+
+    def append(self, item):
+        self.listOfResultObjects.append(item)
 
     def __eq__(self, other):
         if isinstance(other, Result) and self.result_dir and other.result_dir:

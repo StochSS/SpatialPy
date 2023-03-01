@@ -1,6 +1,6 @@
 # SpatialPy is a Python 3 package for simulation of
 # spatial deterministic/stochastic reaction-diffusion-advection problems
-# Copyright (C) 2019 - 2022 SpatialPy developers.
+# Copyright (C) 2019 - 2023 SpatialPy developers.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU GENERAL PUBLIC LICENSE Version 3 as
@@ -27,7 +27,7 @@ import sys
 
 import numpy
 
-from spatialpy.core.spatialpyerror import ModelError, SimulationError, SimulationTimeout
+from spatialpy.core.spatialpyerror import ModelError, SimulationError
 
 def _read_from_stdout(stdout ,verbose=True):
     try:
@@ -534,14 +534,11 @@ class Solver:
         :type verbose: bool
 
         :returns: A SpatialPy Result object containing spatial and time series data from simulation.
-        :rtype: spatialpy.Result.Result | list(spatialpy.Result.Result)
+        :rtype: spatialpy.Result.Result 
 
-        :raises SimulationTimeout: Simulation exceeded timeout.
         :raises SimulationError: Simulation execution failed.
         """
         from spatialpy.core.result import Result # pylint: disable=import-outside-toplevel
-        if number_of_trajectories > 1:
-            result_list = []
         # Check if compiled, call compile() if not.
         if not self.is_compiled:
             self.compile(debug=debug, profile=profile)
@@ -587,7 +584,7 @@ class Solver:
                         result.timeout = True
                         # send signal to the process group
                         os.killpg(process.pid, signal.SIGINT)
-                        raise SimulationTimeout("SpatialPy solver timeout exceded.") from err
+
             except OSError as err:
                 print(f"Error, execution of solver raised an exception: {err}")
                 print(f"cmd = {solver_cmd}")
@@ -602,9 +599,9 @@ class Solver:
             result.success = True
             if profile:
                 self.__read_profile_info(result)
-            if number_of_trajectories > 1:
-                result_list.append(result)
-            else:
-                return result
+            if run_ndx == 0:                
+                first_result = result
+            elif number_of_trajectories > 1:
+                first_result.append(result)
 
-        return result_list
+        return first_result
