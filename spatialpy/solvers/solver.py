@@ -534,13 +534,11 @@ class Solver:
         :type verbose: bool
 
         :returns: A SpatialPy Result object containing spatial and time series data from simulation.
-        :rtype: spatialpy.Result.Result | list(spatialpy.Result.Result)
+        :rtype: spatialpy.Result.Result 
 
         :raises SimulationError: Simulation execution failed.
         """
         from spatialpy.core.result import Result # pylint: disable=import-outside-toplevel
-        if number_of_trajectories > 1:
-            result_list = []
         # Check if compiled, call compile() if not.
         if not self.is_compiled:
             self.compile(debug=debug, profile=profile)
@@ -586,6 +584,7 @@ class Solver:
                         result.timeout = True
                         # send signal to the process group
                         os.killpg(process.pid, signal.SIGINT)
+
             except OSError as err:
                 print(f"Error, execution of solver raised an exception: {err}")
                 print(f"cmd = {solver_cmd}")
@@ -600,9 +599,9 @@ class Solver:
             result.success = True
             if profile:
                 self.__read_profile_info(result)
-            if number_of_trajectories > 1:
-                result_list.append(result)
-            else:
-                return result
+            if run_ndx == 0:                
+                first_result = result
+            elif number_of_trajectories > 1:
+                first_result.append(result)
 
-        return result_list
+        return first_result
