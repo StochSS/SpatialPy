@@ -27,7 +27,7 @@ import sys
 
 import numpy
 
-from spatialpy.core.spatialpyerror import ModelError, SimulationError, SimulationTimeout
+from spatialpy.core.spatialpyerror import ModelError, SimulationError
 
 def _read_from_stdout(stdout ,verbose=True):
     try:
@@ -536,7 +536,6 @@ class Solver:
         :returns: A SpatialPy Result object containing spatial and time series data from simulation.
         :rtype: spatialpy.Result.Result | list(spatialpy.Result.Result)
 
-        :raises SimulationTimeout: Simulation exceeded timeout.
         :raises SimulationError: Simulation execution failed.
         """
         from spatialpy.core.result import Result # pylint: disable=import-outside-toplevel
@@ -587,7 +586,6 @@ class Solver:
                         result.timeout = True
                         # send signal to the process group
                         os.killpg(process.pid, signal.SIGINT)
-                        raise SimulationTimeout("SpatialPy solver timeout exceded.") from err
             except OSError as err:
                 print(f"Error, execution of solver raised an exception: {err}")
                 print(f"cmd = {solver_cmd}")
