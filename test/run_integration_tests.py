@@ -30,11 +30,13 @@ if __name__ == '__main__':
 
     import test_model
     import test_solver
+    import test_notebooks
     #import test_mincde
 
     modules = [
         test_model,
         test_solver,
+        test_notebooks
         #test_mincde,
     ]
 
