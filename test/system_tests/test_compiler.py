@@ -17,11 +17,10 @@
 ''' Tests from the compiler. '''
 import os
 import sys
-print(os.getcwd())
-sys.path.insert(1, os.path.abspath(os.getcwd()))
 import unittest
 
-from test.models.birth_death import create_birth_death
+sys.path.insert(1, os.path.abspath(os.getcwd()))
+from test.models.birth_death import create_birth_death # pylint: disable=wrong-import-position
 
 class TestCompiler(unittest.TestCase):
     '''

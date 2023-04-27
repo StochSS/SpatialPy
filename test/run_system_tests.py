@@ -14,6 +14,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+''' Testing suite for system tests. '''
 import os
 import sys
 import unittest
@@ -29,7 +30,7 @@ if __name__ == '__main__':
         print('Running system tests in develop mode. Appending repository directory to system path.')
         sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-    from system_tests import test_compiler
+    from test.system_tests import test_compiler
 
     modules = [
         test_compiler

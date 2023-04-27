@@ -14,8 +14,10 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-import unittest, sys, os
+''' Testing suite for integration tests. '''
+import os
+import sys
+import unittest
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -28,9 +30,9 @@ if __name__ == '__main__':
         print('Running tests in develop mode. Appending repository directory to system path.')
         sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-    from integration_tests import test_model
-    from integration_tests import test_solver
-    #from integration_tests import test_mincde
+    from test.integration_tests import test_model
+    from test.integration_tests import test_solver
+    #from test.integration_tests import test_mincde
 
     modules = [
         test_model,
@@ -42,7 +44,7 @@ if __name__ == '__main__':
         suite = unittest.TestLoader().loadTestsFromModule(module)
         runner = unittest.TextTestRunner(failfast=args.mode == 'develop')
 
-        print("Executing: {}".format(module))
+        print(f"Executing: {module}")
         result = runner.run(suite)
         print('=' * 70)
         if not result.wasSuccessful():
