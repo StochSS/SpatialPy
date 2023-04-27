@@ -14,7 +14,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-''' Testing suite for integration tests. '''
+''' Testing suite for system tests. '''
 import os
 import sys
 import unittest
@@ -22,22 +22,18 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-m', '--mode', default='develop', choices=['develop', 'release'],
-                    help='Run tests in develop mode or release mode.')
+                    help='Run system tests in develop mode or release mode.')
 
 if __name__ == '__main__':
     args = parser.parse_args()
     if args.mode == 'develop':
-        print('Running tests in develop mode. Appending repository directory to system path.')
+        print('Running system tests in develop mode. Appending repository directory to system path.')
         sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-    from test.integration_tests import test_model
-    from test.integration_tests import test_solver
-    #from test.integration_tests import test_mincde
+    from test.system_tests import test_compiler
 
     modules = [
-        test_model,
-        test_solver,
-        #test_mincde,
+        test_compiler
     ]
 
     for module in modules:
