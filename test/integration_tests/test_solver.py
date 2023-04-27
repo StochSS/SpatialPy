@@ -204,7 +204,7 @@ class TestSolverFunctionality(unittest.TestCase):
         Ensure that expression conversions to C++ result in (roughly) equivalent values as Python.
         """
         tmpdir = tempfile.mkdtemp()
-        src_path = os.path.join(os.path.dirname(__file__), "assets", "evaluate.c")
+        src_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "evaluate.c")
         exe_path = os.path.join(tmpdir, "test")
 
         def build(expr_args: "list[str]", expr_str: "str", use_bool=False):
