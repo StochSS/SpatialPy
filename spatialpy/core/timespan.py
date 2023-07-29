@@ -25,10 +25,10 @@ class TimeSpan(Iterator):
     the species populations during the simulation.
 
     :param items: Evenly-spaced list of times at which to sample the species populations during the simulation. 
-            Best to use the form np.linspace(<start time>, <end time>, <number of time-points, inclusive>)
+            Best to use the form np.linspace(0, <end time>, <number of time-points, inclusive>)
     :type items: list, tuple, range, or numpy.ndarray
     
-    :param timestep_size: Size of each timestep in seconds
+    :param timestep_size: Size of each timestep
     :type timestep_size: int | float
 
     :raises TimespanError: items is an invalid type.
